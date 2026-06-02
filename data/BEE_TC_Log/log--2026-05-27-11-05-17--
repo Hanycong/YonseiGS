@@ -1,0 +1,91 @@
+[11:05:21]  Connect to Switch Box..............Failed.
+[11:05:21]  Connect to Rotator.................Failed.
+[11:05:21]  Connect to GS100..................Success.
+[11:05:21]  TM Port 13 bind success.
+[11:05:21]  BCN Port 31 bind success.
+[11:05:21]  RPT Port 25 bind success.
+[11:05:21]  Event Port 27 bind success.
+[11:05:21]  Response Port 23 bind success.
+[11:05:21]  Rotator Read Failed. Please Check Again.
+[11:05:25]  Cannot Read 20 parameters of Table 0.
+[11:05:28]  Cannot Read 13 parameters of Table 1.
+[11:05:32]  Cannot Read 18 parameters of Table 5.
+[11:17:44]  TLE "cubesat" Download Completed.
+[11:17:44]  Invalid type of TLE File. Please check again.
+[11:17:46]  TLE "cubesat" Download Completed.
+[11:17:46]  Invalid type of TLE File. Please check again.
+[11:20:28]  TLE "cubesat" Download Completed.
+[11:21:33]  MIMAN	Error: (e <= -0.001)	
+[11:28:38]  Start Engaging.
+[11:28:38]  Change to AOS.
+[11:28:38]  Azimuth : 21, Elevation : 0
+
+[11:28:38]  Write to rotator failed.
+[11:28:40]  Change to AOS.
+[11:28:40]  Azimuth : 21, Elevation : 0
+
+[11:28:40]  Write to rotator failed.
+[11:28:42]  Change to AOS.
+[11:28:42]  Azimuth : 21, Elevation : 0
+
+[11:28:42]  Write to rotator failed.
+[11:28:44]  Finish Engaging.
+[11:28:44]  Beacon Success : 0, Ping Success : 0
+[11:29:16]  Start Engaging.
+[11:29:16]  Change to AOS.
+[11:29:16]  Azimuth : 21, Elevation : 0
+
+[11:29:16]  Write to rotator failed.
+[11:29:18]  Change to AOS.
+[11:29:18]  Azimuth : 21, Elevation : 0
+
+[11:29:18]  Write to rotator failed.
+[11:29:20]  Change to AOS.
+[11:29:20]  Azimuth : 21, Elevation : 0
+
+[11:29:20]  Write to rotator failed.
+[11:29:22]  Change to AOS.
+[11:29:22]  Azimuth : 21, Elevation : 0
+
+[11:29:22]  Write to rotator failed.
+[11:29:24]  Finish Engaging.
+[11:29:24]  Beacon Success : 0, Ping Success : 0
+[11:29:55]  Rotator : , Read Byte : -1
+[11:29:57]  Rotator : , Read Byte : -1
+[11:29:57]  Rotator : , Read Byte : -1
+[11:29:57]  Rotator : , Read Byte : -1
+[11:29:57]  Rotator : , Read Byte : -1
+[11:30:29]  Rotator Read Failed. Please Check Again.
+[11:30:32]  Rotator Read Failed. Please Check Again.
+[11:37:21]  Start Engaging.
+[11:37:21]  Change to AOS.
+[11:37:21]  Azimuth : 21, Elevation : 0
+
+[11:37:21]  Write to rotator failed.
+[11:37:23]  Start Doppler Correction.
+[11:37:23]  TX : 436495695, RX : 436504304
+[11:37:23]  Change to AOS.
+[11:37:23]  Azimuth : 21, Elevation : 0
+
+[11:37:23]  Write to rotator failed.
+[11:37:24]  TX : 436495692, RX : 436504307
+[11:37:25]  Forked Safe Amplifier Process.(ON, Timer)
+[11:37:25]  TX : 436495690, RX : 436504309
+[11:37:25]  Change to AOS.
+[11:37:25]  Azimuth : 21, Elevation : 0
+
+[11:37:25]  Write to rotator failed.
+[11:37:26]  TX : 436495687, RX : 436504312
+[11:37:27]  TX : 436495685, RX : 436504314
+[11:37:27]  Forked Safe Amplifier Process. (OFF)
+[11:37:27]  Change to AOS.
+[11:37:27]  Azimuth : 21, Elevation : 0
+
+[11:37:27]  Write to rotator failed.
+[11:37:28]  TX : 436495683, RX : 436504316
+[11:37:29]  Change to AOS.
+[11:37:29]  Azimuth : 21, Elevation : 0
+
+[11:37:29]  Write to rotator failed.
+[11:37:31]  Finish Engaging.
+[11:37:31]  Beacon Success : 0, Ping Success : 0

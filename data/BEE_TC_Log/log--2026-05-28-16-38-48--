@@ -1,0 +1,18 @@
+[16:38:51]  Connect to Switch Box..............Failed.
+[16:38:51]  Connect to Rotator.................Failed.
+[16:38:51]  Connect to GS100..................Success.
+[16:38:51]  TM Port 13 bind success.
+[16:38:51]  BCN Port 31 bind success.
+[16:38:51]  RPT Port 25 bind success.
+[16:38:51]  Event Port 27 bind success.
+[16:38:51]  Rotator Read Failed. Please Check Again.
+[16:38:51]  Response Port 23 bind success.
+[16:38:53]  Changing GS HMAC Key for BEE1012...
+[16:38:54]   Satellite Switched to: BEE1012
+[16:38:55]  Cannot Read 20 parameters of Table 0.
+[16:38:56]  Changing GS HMAC Key for BEE1012...
+[16:38:57]   Satellite Switched to: BEE1012
+[16:38:58]  Cannot Read 13 parameters of Table 1.
+[16:38:58]  Changing GS HMAC Key for BEE1012...
+[16:38:59]   Satellite Switched to: BEE1012
+[16:39:01]  Cannot Read 18 parameters of Table 5.

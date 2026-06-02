@@ -1,0 +1,231 @@
+[11:51:44]  Connect to Switch Box..............Failed.
+[11:51:44]  Connect to Rotator.................Failed.
+[11:51:44]  Connect to GS100..................Success.
+[11:51:44]  Rotator Read Failed. Please Check Again.
+[11:51:44]  TM Port 13 bind success.
+[11:51:44]  BCN Port 31 bind success.
+[11:51:44]  RPT Port 25 bind success.
+[11:51:44]  Event Port 27 bind success.
+[11:51:44]  Response Port 23 bind success.
+[11:51:48]  Cannot Read 20 parameters of Table 0.
+[11:51:50]  Cannot Read 13 parameters of Table 1.
+[11:51:54]  Cannot Read 18 parameters of Table 5.
+[11:52:10]  TLE "cubesat" Download Completed.
+[11:52:11]  MIMAN	Error: (e <= -0.001)	
+[12:02:03]  Frequency Calibration Start
+[12:02:03]  Can not Set Rx Frequency. Try this later.
+[12:02:04]  Can not Set Rx Frequency. Try this later.
+[12:02:04]  Can not Set Rx Frequency. Try this later.
+[12:02:04]  Can not Set Rx Frequency. Try this later.
+[12:02:04]  Can not Set Rx Frequency. Try this later.
+[12:02:04]  Can not Set Rx Frequency. Try this later.
+[12:02:05]  Can not Set Rx Frequency. Try this later.
+[12:02:05]  Can not Set Rx Frequency. Try this later.
+[12:02:05]  Can not Set Rx Frequency. Try this later.
+[12:02:05]  Can not Set Rx Frequency. Try this later.
+[12:02:05]  Can not Set Rx Frequency. Try this later.
+[12:02:06]  Can not Set Rx Frequency. Try this later.
+[12:02:06]  Can not Set Rx Frequency. Try this later.
+[12:02:06]  Can not Set Rx Frequency. Try this later.
+[12:02:06]  Can not Set Rx Frequency. Try this later.
+[12:02:06]  Can not Set Rx Frequency. Try this later.
+[12:02:07]  Can not Set Rx Frequency. Try this later.
+[12:02:07]  Can not Set Rx Frequency. Try this later.
+[12:02:07]  Can not Set Rx Frequency. Try this later.
+[12:02:07]  Can not Set Rx Frequency. Try this later.
+[12:02:07]  Can not Set Rx Frequency. Try this later.
+[12:02:08]  Can not Set Rx Frequency. Try this later.
+[12:02:08]  Can not Set Rx Frequency. Try this later.
+[12:02:08]  Can not Set Rx Frequency. Try this later.
+[12:02:08]  Can not Set Rx Frequency. Try this later.
+[12:02:08]  Can not Set Rx Frequency. Try this later.
+[12:02:09]  Can not Set Rx Frequency. Try this later.
+[12:02:09]  Can not Set Rx Frequency. Try this later.
+[12:02:09]  Can not Set Rx Frequency. Try this later.
+[12:02:09]  Can not Set Rx Frequency. Try this later.
+[12:02:09]  Can not Set Rx Frequency. Try this later.
+[12:02:10]  Can not Set Rx Frequency. Try this later.
+[12:02:10]  Can not Set Rx Frequency. Try this later.
+[12:02:10]  Can not Set Rx Frequency. Try this later.
+[12:02:10]  Can not Set Rx Frequency. Try this later.
+[12:02:10]  Can not Set Rx Frequency. Try this later.
+[12:02:11]  Can not Set Rx Frequency. Try this later.
+[12:02:11]  Can not Set Rx Frequency. Try this later.
+[12:02:11]  Can not Set Rx Frequency. Try this later.
+[12:02:11]  Can not Set Rx Frequency. Try this later.
+[12:02:11]  Can not Set Rx Frequency. Try this later.
+[12:02:12]  Can not Set Rx Frequency. Try this later.
+[12:02:12]  Can not Set Rx Frequency. Try this later.
+[12:02:12]  Can not Set Rx Frequency. Try this later.
+[12:02:12]  Can not Set Rx Frequency. Try this later.
+[12:02:12]  Can not Set Rx Frequency. Try this later.
+[12:02:13]  Can not Set Rx Frequency. Try this later.
+[12:02:13]  Can not Set Rx Frequency. Try this later.
+[12:02:13]  Can not Set Rx Frequency. Try this later.
+[12:02:13]  Can not Set Rx Frequency. Try this later.
+[12:02:13]  Can not Set Rx Frequency. Try this later.
+[12:02:14]  Can not Set Rx Frequency. Try this later.
+[12:02:14]  Can not Set Rx Frequency. Try this later.
+[12:02:14]  Can not Set Rx Frequency. Try this later.
+[12:02:14]  Can not Set Rx Frequency. Try this later.
+[12:02:14]  Can not Set Rx Frequency. Try this later.
+[12:02:15]  Can not Set Rx Frequency. Try this later.
+[12:02:15]  Can not Set Rx Frequency. Try this later.
+[12:02:15]  Can not Set Rx Frequency. Try this later.
+[12:02:15]  Can not Set Rx Frequency. Try this later.
+[12:02:15]  Can not Set Rx Frequency. Try this later.
+[12:02:16]  Can not Set Rx Frequency. Try this later.
+[12:02:16]  Can not Set Rx Frequency. Try this later.
+[12:02:16]  Can not Set Rx Frequency. Try this later.
+[12:02:16]  Can not Set Rx Frequency. Try this later.
+[12:02:16]  Can not Set Rx Frequency. Try this later.
+[12:02:17]  Can not Set Rx Frequency. Try this later.
+[12:02:17]  Can not Set Rx Frequency. Try this later.
+[12:02:17]  Can not Set Rx Frequency. Try this later.
+[12:02:17]  Can not Set Rx Frequency. Try this later.
+[12:02:17]  Can not Set Rx Frequency. Try this later.
+[12:02:18]  Can not Set Rx Frequency. Try this later.
+[12:02:18]  Can not Set Rx Frequency. Try this later.
+[12:02:18]  Can not Set Rx Frequency. Try this later.
+[12:02:18]  Can not Set Rx Frequency. Try this later.
+[12:02:18]  Can not Set Rx Frequency. Try this later.
+[12:02:19]  Can not Set Rx Frequency. Try this later.
+[12:02:19]  Can not Set Rx Frequency. Try this later.
+[12:02:19]  Can not Set Rx Frequency. Try this later.
+[12:02:19]  Can not Set Rx Frequency. Try this later.
+[12:02:20]  Frequency Calibration Finished. Freq Rx : 4294967196 | Tx : 0 | RSSI : 110
+[12:02:20]  Frequency Calibration Start
+[12:02:20]  Can not Set Rx Frequency. Try this later.
+[12:02:20]  Can not Set Rx Frequency. Try this later.
+[12:02:20]  Can not Set Rx Frequency. Try this later.
+[12:02:20]  Can not Set Rx Frequency. Try this later.
+[12:02:21]  Can not Set Rx Frequency. Try this later.
+[12:02:21]  Can not Set Rx Frequency. Try this later.
+[12:02:21]  Can not Set Rx Frequency. Try this later.
+[12:02:21]  Can not Set Rx Frequency. Try this later.
+[12:02:21]  Can not Set Rx Frequency. Try this later.
+[12:02:22]  Can not Set Rx Frequency. Try this later.
+[12:02:22]  Can not Set Rx Frequency. Try this later.
+[12:02:22]  Can not Set Rx Frequency. Try this later.
+[12:02:22]  Can not Set Rx Frequency. Try this later.
+[12:02:22]  Can not Set Rx Frequency. Try this later.
+[12:02:23]  Can not Set Rx Frequency. Try this later.
+[12:02:23]  Can not Set Rx Frequency. Try this later.
+[12:02:23]  Can not Set Rx Frequency. Try this later.
+[12:02:23]  Can not Set Rx Frequency. Try this later.
+[12:02:23]  Can not Set Rx Frequency. Try this later.
+[12:02:24]  Can not Set Rx Frequency. Try this later.
+[12:02:24]  Can not Set Rx Frequency. Try this later.
+[12:02:24]  Can not Set Rx Frequency. Try this later.
+[12:02:24]  Can not Set Rx Frequency. Try this later.
+[12:02:24]  Can not Set Rx Frequency. Try this later.
+[12:02:25]  Can not Set Rx Frequency. Try this later.
+[12:02:25]  Can not Set Rx Frequency. Try this later.
+[12:02:25]  Can not Set Rx Frequency. Try this later.
+[12:02:25]  Can not Set Rx Frequency. Try this later.
+[12:02:25]  Can not Set Rx Frequency. Try this later.
+[12:02:26]  Can not Set Rx Frequency. Try this later.
+[12:02:26]  Can not Set Rx Frequency. Try this later.
+[12:02:26]  Can not Set Rx Frequency. Try this later.
+[12:02:26]  Can not Set Rx Frequency. Try this later.
+[12:02:27]  Can not Set Rx Frequency. Try this later.
+[12:02:27]  Can not Set Rx Frequency. Try this later.
+[12:02:27]  Can not Set Rx Frequency. Try this later.
+[12:02:27]  Can not Set Rx Frequency. Try this later.
+[12:02:27]  Can not Set Rx Frequency. Try this later.
+[12:02:28]  Can not Set Rx Frequency. Try this later.
+[12:02:28]  Can not Set Rx Frequency. Try this later.
+[12:02:28]  Can not Set Rx Frequency. Try this later.
+[12:02:28]  Can not Set Rx Frequency. Try this later.
+[12:02:28]  Can not Set Rx Frequency. Try this later.
+[12:02:29]  Can not Set Rx Frequency. Try this later.
+[12:02:29]  Can not Set Rx Frequency. Try this later.
+[12:02:29]  Can not Set Rx Frequency. Try this later.
+[12:02:29]  Can not Set Rx Frequency. Try this later.
+[12:02:29]  Can not Set Rx Frequency. Try this later.
+[12:02:30]  Can not Set Rx Frequency. Try this later.
+[12:02:30]  Can not Set Rx Frequency. Try this later.
+[12:02:30]  Can not Set Rx Frequency. Try this later.
+[12:02:30]  Can not Set Rx Frequency. Try this later.
+[12:02:30]  Can not Set Rx Frequency. Try this later.
+[12:02:31]  Can not Set Rx Frequency. Try this later.
+[12:02:31]  Can not Set Rx Frequency. Try this later.
+[12:02:31]  Can not Set Rx Frequency. Try this later.
+[12:02:31]  Can not Set Rx Frequency. Try this later.
+[12:02:31]  Can not Set Rx Frequency. Try this later.
+[12:02:32]  Can not Set Rx Frequency. Try this later.
+[12:02:32]  Can not Set Rx Frequency. Try this later.
+[12:02:32]  Can not Set Rx Frequency. Try this later.
+[12:02:32]  Can not Set Rx Frequency. Try this later.
+[12:02:32]  Can not Set Rx Frequency. Try this later.
+[12:02:33]  Can not Set Rx Frequency. Try this later.
+[12:02:33]  Can not Set Rx Frequency. Try this later.
+[12:02:33]  Can not Set Rx Frequency. Try this later.
+[12:02:33]  Can not Set Rx Frequency. Try this later.
+[12:02:33]  Can not Set Rx Frequency. Try this later.
+[12:02:34]  Can not Set Rx Frequency. Try this later.
+[12:02:34]  Can not Set Rx Frequency. Try this later.
+[12:02:34]  Can not Set Rx Frequency. Try this later.
+[12:02:34]  Can not Set Rx Frequency. Try this later.
+[12:02:34]  Can not Set Rx Frequency. Try this later.
+[12:02:35]  Can not Set Rx Frequency. Try this later.
+[12:02:35]  Can not Set Rx Frequency. Try this later.
+[12:02:35]  Can not Set Rx Frequency. Try this later.
+[12:02:35]  Can not Set Rx Frequency. Try this later.
+[12:02:35]  Can not Set Rx Frequency. Try this later.
+[12:02:36]  Can not Set Rx Frequency. Try this later.
+[12:02:36]  Can not Set Rx Frequency. Try this later.
+[12:02:36]  Frequency Calibration Finished. Freq Rx : 4294967196 | Tx : 0 | RSSI : 110
+[12:02:36]  Baud rate Calibration Start
+[12:02:36]  Can not Get baud rate. Try this later.
+[12:02:37]  Can not Set baud rate. Try this later.
+[12:02:37]  Can not Set baud rate. Try this later.
+[12:02:37]  Can not Set baud rate. Try this later.
+[12:02:37]  Can not Set baud rate. Try this later.
+[12:02:37]  Can not Set baud rate. Try this later.
+[12:02:37]  Frequency Calibration Finished. Freq Rx : 0 | Tx : 19200
+[13:38:14]  Forked Safe Amplifier Process.(ON, Timer)
+[13:38:17]  Forked Safe Amplifier Process. (OFF)
+[13:43:00]  Generate : 0, 0, 8
+
+[13:43:00]  Generated Command Message.
+[13:43:40]  [Auto]Start AutoPilot.
+[13:43:40]  [Auto]Invalid tracking at start. trk=-2
+[13:43:40]  [Auto]AutoPilot Stopped with Error Code : -2
+[13:47:33]  Forked Safe Amplifier Process. (OFF)
+[13:56:58]  Generate : 0, 0, 8
+
+[13:56:58]  Generated Command Message.
+[13:57:00]  Generate : 0, 0, 8
+
+[13:57:00]  Generated Command Message.
+[13:57:00]  Generate : 0, 0, 8
+
+[13:57:00]  Generated Command Message.
+[13:57:00]  Generate : 0, 0, 8
+
+[13:57:00]  Generated Command Message.
+[13:57:00]  Generate : 0, 0, 8
+
+[13:57:00]  Generated Command Message.
+[13:57:09]  Generate : 17, 0, 8
+
+[13:57:09]  Generated Command Message.
+[13:57:09]  Generate : 17, 0, 8
+
+[13:57:09]  Generated Command Message.
+[13:57:09]  Generate : 17, 0, 8
+
+[13:57:09]  Generated Command Message.
+[13:57:13]  Generate : 17, 5, 8
+
+[13:57:13]  Generated Command Message.
+[13:57:17]  Generate : 17, 15, 8
+
+[13:57:17]  Generated Command Message.
+[14:20:40]  TLE "cubesat" Download Completed.
+[14:20:43]  MIMAN	Error: (e <= -0.001)	
+[14:20:43]  MIMAN2	Error: (e <= -0.001)	
+[14:20:44]  MIMAN3	Error: (e <= -0.001)	
+[14:20:44]  MIMAN4	Error: (e <= -0.001)	
+[14:20:44]  MIMAN5	Error: (e <= -0.001)	

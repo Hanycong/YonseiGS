@@ -1,0 +1,14 @@
+[21:58:55]  Connect to Switch Box..............Failed.
+[21:58:55]  Connect to Rotator.................Failed.
+[21:58:55]  Connect to GS100..................Success.
+[21:58:55]  TM Port 13 bind success.
+[21:58:55]  BCN Port 31 bind success.
+[21:58:55]  RPT Port 25 bind success.
+[21:58:55]  Event Port 27 bind success.
+[21:58:55]  Response Port 23 bind success.
+[21:58:55]  Rotator Read Failed. Please Check Again.
+[21:59:00]  Cannot Read 20 parameters of Table 0.
+[21:59:02]  Cannot Read 13 parameters of Table 1.
+[21:59:06]  Cannot Read 18 parameters of Table 5.
+[21:59:11]  TLE "cubesat" Download Completed.
+[21:59:11]  Invalid type of TLE File. Please check again.

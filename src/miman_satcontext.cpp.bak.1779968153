@@ -1,0 +1,169 @@
+/* ============================================================
+ *  miman_satcontext.cpp
+ * ============================================================ */
+#include "miman_satcontext.h"
+#include "miman_theme.h"      /* SatColor */
+#include <cstring>
+
+extern StateCheckUnit State;
+
+/* miman_orbital.cpp 가 정의한 전역 — 그대로 사용 */
+extern int  GetNowTracking(void);
+extern void SetNowTracking_impl(int idx, const char* file, int line);
+
+int  GetActiveSat()           { return State.ActiveSatIndex; }
+void SetActiveSat(int sat_idx){ State.ActiveSatIndex = sat_idx; SetNowTracking_impl(sat_idx, __FILE__, __LINE__); }
+
+namespace mim {
+
+/* =========================================================
+ *  Active sat
+ * ========================================================= */
+int GetActiveSat(void)
+{
+    int idx = State.ActiveSatIndex;
+    if (idx < 0 || idx >= SAT_MAX_NUM) return 0;
+    return idx;
+}
+
+void SetActiveSat(int sat_idx)
+{
+    if (sat_idx < 0 || sat_idx >= SAT_MAX_NUM) return;
+    if (!State.Satellites[sat_idx])           return;
+
+    State.ActiveSatIndex = sat_idx;
+    /* 기존 추적 시스템과 동기화 */
+    SetNowTracking_impl(sat_idx, __FILE__, __LINE__);
+}
+
+/* =========================================================
+ *  Visible sats
+ * ========================================================= */
+int GetVisibleSatCount(void)
+{
+    int n = State.VisibleSatsCount;
+    if (n < 0) n = 0;
+    if (n > VISIBLE_SAT_MAX) n = VISIBLE_SAT_MAX;
+    return n;
+}
+
+int GetVisibleSatAt(int slot)
+{
+    if (slot < 0 || slot >= VISIBLE_SAT_MAX) return -1;
+    if (slot >= State.VisibleSatsCount)      return -1;
+    return State.VisibleSats[slot];
+}
+
+ImVec4 GetVisibleSatColor(int slot)
+{
+    /* 슬롯 인덱스 기반 (단순 / 예측 가능).
+     * 만약 위성명 기반으로 안정 컬러를 원하면 SatColorByName 사용. */
+    return SatColor(slot);
+}
+
+bool IsSatVisible(int sat_idx)
+{
+    return FindVisibleSlot(sat_idx) >= 0;
+}
+
+int FindVisibleSlot(int sat_idx)
+{
+    int n = GetVisibleSatCount();
+    for (int i = 0; i < n; i++)
+        if (State.VisibleSats[i] == sat_idx) return i;
+    return -1;
+}
+
+int AddVisibleSat(int sat_idx)
+{
+    if (sat_idx < 0 || sat_idx >= SAT_MAX_NUM) return -1;
+    if (!State.Satellites[sat_idx])           return -1;
+
+    /* 이미 있나? */
+    int existing = FindVisibleSlot(sat_idx);
+    if (existing >= 0) return existing;
+
+    /* 빈 슬롯 추가 */
+    int n = State.VisibleSatsCount;
+    if (n >= VISIBLE_SAT_MAX) return -1;
+
+    State.VisibleSats[n]   = sat_idx;
+    State.VisibleSatsCount = n + 1;
+    return n;
+}
+
+int RemoveVisibleSat(int slot)
+{
+    int n = State.VisibleSatsCount;
+    if (slot < 0 || slot >= n) return -1;
+    if (n <= 1)                return -1;     /* 마지막 위성은 제거 불가 */
+
+    int removed = State.VisibleSats[slot];
+
+    /* 슬롯 앞당기기 */
+    for (int i = slot; i < n - 1; i++)
+        State.VisibleSats[i] = State.VisibleSats[i + 1];
+    State.VisibleSats[n - 1] = -1;
+    State.VisibleSatsCount   = n - 1;
+
+    /* 활성 위성이 제거됐다면 인접 슬롯으로 이동 */
+    if (State.ActiveSatIndex == removed) {
+        int new_slot = (slot >= State.VisibleSatsCount)
+                       ? State.VisibleSatsCount - 1 : slot;
+        SetActiveSat(State.VisibleSats[new_slot]);
+    }
+    return removed;
+}
+
+void MoveVisibleSat(int from_slot, int to_slot)
+{
+    int n = State.VisibleSatsCount;
+    if (from_slot < 0 || from_slot >= n) return;
+    if (to_slot   < 0 || to_slot   >= n) return;
+    if (from_slot == to_slot)            return;
+
+    int val = State.VisibleSats[from_slot];
+    if (from_slot < to_slot) {
+        for (int i = from_slot; i < to_slot; i++)
+            State.VisibleSats[i] = State.VisibleSats[i + 1];
+    } else {
+        for (int i = from_slot; i > to_slot; i--)
+            State.VisibleSats[i] = State.VisibleSats[i - 1];
+    }
+    State.VisibleSats[to_slot] = val;
+}
+
+/* =========================================================
+ *  Initialize
+ *  - 현재 NowTracking() 값을 시드로 사용.
+ *  - State.Satellites[] 에서 use=true 인 위성을 탭으로 추가.
+ * ========================================================= */
+void Initialize_SatContext(void)
+{
+    /* reset */
+    for (int i = 0; i < VISIBLE_SAT_MAX; i++)
+        State.VisibleSats[i] = -1;
+    State.VisibleSatsCount = 0;
+
+    /* 1) 현재 추적 중인 위성을 첫 슬롯에 */
+    int seed = GetNowTracking();
+    if (seed >= 0 && seed < SAT_MAX_NUM && State.Satellites[seed]) {
+        AddVisibleSat(seed);
+        SetActiveSat(seed);
+    }
+
+    /* 2) use=true 인 다른 위성도 추가 (최대 8개) */
+    for (int i = 0; i < SAT_MAX_NUM && GetVisibleSatCount() < VISIBLE_SAT_MAX; i++) {
+        if (i == seed) continue;
+        if (!State.Satellites[i]) continue;
+        if (!State.Satellites[i]->use) continue;
+        AddVisibleSat(i);
+    }
+
+    /* 3) 아무 위성도 없으면 0번 슬롯에 -1 (UI는 "Add Satellite"만 표시) */
+    if (GetVisibleSatCount() == 0) {
+        State.VisibleSatsCount = 0;
+    }
+}
+
+} // namespace mim
