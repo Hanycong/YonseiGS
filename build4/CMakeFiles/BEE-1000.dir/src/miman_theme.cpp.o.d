@@ -1,9 +1,7 @@
 CMakeFiles/BEE-1000.dir/src/miman_theme.cpp.o: \
- /home/hyyang/YonseiGS/BEE_GS/src/miman_theme.cpp \
- /usr/include/stdc-predef.h \
- /home/hyyang/YonseiGS/BEE_GS/src/miman_theme.h \
- /home/hyyang/YonseiGS/BEE_GS/lib/imgui/imgui.h \
- /home/hyyang/YonseiGS/BEE_GS/lib/imgui/imconfig.h \
+ /home/jsj/new_gs/src/miman_theme.cpp /usr/include/stdc-predef.h \
+ /home/jsj/new_gs/src/miman_theme.h /home/jsj/new_gs/lib/imgui/imgui.h \
+ /home/jsj/new_gs/lib/imgui/imconfig.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdarg.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h /usr/include/string.h \

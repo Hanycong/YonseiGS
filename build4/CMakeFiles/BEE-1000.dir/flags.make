@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/hyyang/YonseiGS/BEE_GS/config -I/home/hyyang/YonseiGS/BEE_GS/lib -I/home/hyyang/YonseiGS/BEE_GS/lib/libsgp4 -I/home/hyyang/YonseiGS/BEE_GS/lib/imgui -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/build -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libparam_client/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libutil/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libgscsp/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libgscsp/lib/libcsp/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libgscsp/lib/libcsp/src -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/build/lib/libgscsp/lib/libcsp/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libfp_client/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libftp_client/include -I/home/hyyang/YonseiGS/BEE_GS/lib/gscsp/lib/libgosh_client/include -I/home/hyyang/YonseiGS/BEE_GS/src
+CXX_INCLUDES = -I/home/jsj/new_gs/config -I/home/jsj/new_gs/lib -I/home/jsj/new_gs/lib/libsgp4 -I/home/jsj/new_gs/lib/imgui -I/home/jsj/new_gs/lib/gscsp/build -I/home/jsj/new_gs/lib/gscsp/lib/libparam_client/include -I/home/jsj/new_gs/lib/gscsp/lib/libutil/include -I/home/jsj/new_gs/lib/gscsp/lib/libgscsp/include -I/home/jsj/new_gs/lib/gscsp/lib/libgscsp/lib/libcsp/include -I/home/jsj/new_gs/lib/gscsp/lib/libgscsp/lib/libcsp/src -I/home/jsj/new_gs/lib/gscsp/build/lib/libgscsp/lib/libcsp/include -I/home/jsj/new_gs/lib/gscsp/lib/libfp_client/include -I/home/jsj/new_gs/lib/gscsp/lib/libftp_client/include -I/home/jsj/new_gs/lib/gscsp/lib/libgosh_client/include -I/home/jsj/new_gs/src
 
 CXX_FLAGS = 
 
