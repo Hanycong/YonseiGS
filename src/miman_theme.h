@@ -12,43 +12,48 @@
 #pragma once
 #ifndef __MIMAN_THEME_H_
 #define __MIMAN_THEME_H_
-
+ 
 #include <imgui.h>
-
+ 
 namespace mim {
-
+ 
 /* =========================================================
- *  1. 컬러 토큰
- *     (V1.1 목업의 CSS 변수와 1:1 대응)
+ *  1. 컬러 토큰  — Navy Dark (Yonsei Cubesat GS)
+ *     V1.2 목업(네이비) 기준. 토큰 이름/구조는 불변, 값만 교체.
+ *     주석의 #hex 는 대략적인 대응색 (sRGB 8bit).
  * ========================================================= */
-inline const ImVec4 BG_DEEP     = ImVec4(0.110f, 0.251f, 0.286f, 1.00f);
-inline const ImVec4 BG_MAIN     = ImVec4(0.141f, 0.310f, 0.376f, 1.00f);
-inline const ImVec4 BG_PANEL    = ImVec4(0.173f, 0.365f, 0.424f, 1.00f);
-inline const ImVec4 BG_PANEL2   = ImVec4(0.102f, 0.239f, 0.282f, 1.00f);
-inline const ImVec4 BG_SATTAB   = ImVec4(0.078f, 0.176f, 0.204f, 1.00f);
-
-inline const ImVec4 ACCENT      = ImVec4(0.235f, 0.603f, 0.624f, 1.00f);
-inline const ImVec4 ACCENT_2    = ImVec4(0.180f, 0.462f, 0.478f, 1.00f);
-inline const ImVec4 ACCENT_SOFT = ImVec4(0.235f, 0.603f, 0.624f, 0.18f);
-
-inline const ImVec4 BORDER      = ImVec4(0.972f, 0.733f, 0.701f, 0.25f);
-inline const ImVec4 BORDER_HI   = ImVec4(0.972f, 0.733f, 0.701f, 0.45f);
-
-/* 텍스트 — 기존 살구색 유지 + 위계 추가 */
-inline const ImVec4 TEXT        = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
-inline const ImVec4 TEXT_HI     = ImVec4(1.000f, 0.898f, 0.859f, 1.00f);
-inline const ImVec4 TEXT_DIM    = ImVec4(0.722f, 0.565f, 0.541f, 1.00f);
-inline const ImVec4 TEXT_MUTE   = ImVec4(0.486f, 0.408f, 0.388f, 1.00f);
-
-/* 시맨틱 컬러 */
-inline const ImVec4 OK          = ImVec4(0.373f, 0.812f, 0.647f, 1.00f);
-inline const ImVec4 WARN        = ImVec4(0.910f, 0.769f, 0.463f, 1.00f);
-inline const ImVec4 ERR         = ImVec4(0.902f, 0.420f, 0.420f, 1.00f);
-inline const ImVec4 INFO        = ImVec4(0.498f, 0.737f, 1.000f, 1.00f);
-
-inline const ImVec4 DANGER      = ImVec4(0.650f, 0.270f, 0.270f, 1.00f);
-inline const ImVec4 DANGER_HOV  = ImVec4(0.760f, 0.330f, 0.330f, 1.00f);
-
+/* 배경 위계: deep(최심) → main(메인) → panel(패널) → panel2(입력칸) */
+inline const ImVec4 BG_DEEP     = ImVec4(0.039f, 0.055f, 0.102f, 1.00f); /* #0a0e1a */
+inline const ImVec4 BG_MAIN     = ImVec4(0.055f, 0.078f, 0.141f, 1.00f); /* #0e1424 */
+inline const ImVec4 BG_PANEL    = ImVec4(0.075f, 0.102f, 0.180f, 1.00f); /* #131a2e */
+inline const ImVec4 BG_PANEL2   = ImVec4(0.102f, 0.133f, 0.220f, 1.00f); /* #1a2238 */
+inline const ImVec4 BG_SATTAB   = ImVec4(0.031f, 0.043f, 0.082f, 1.00f); /* #080b15 */
+ 
+/* 액센트: 파랑 (버튼/선택행/링크) */
+inline const ImVec4 ACCENT      = ImVec4(0.231f, 0.435f, 0.831f, 1.00f); /* #3b6fd4 */
+inline const ImVec4 ACCENT_2    = ImVec4(0.157f, 0.275f, 0.510f, 1.00f); /* #284682 */
+inline const ImVec4 ACCENT_SOFT = ImVec4(0.231f, 0.435f, 0.831f, 0.18f);
+ 
+/* 보더: 차가운 회청 (살구색 보더 → 회청 보더) */
+inline const ImVec4 BORDER      = ImVec4(0.165f, 0.208f, 0.314f, 0.90f); /* #2a3550 */
+inline const ImVec4 BORDER_HI   = ImVec4(0.255f, 0.314f, 0.439f, 1.00f); /* #415070 */
+ 
+/* 텍스트 — 살구색 → 회백 위계 */
+inline const ImVec4 TEXT        = ImVec4(0.886f, 0.910f, 0.941f, 1.00f); /* #e2e8f0 */
+inline const ImVec4 TEXT_HI     = ImVec4(0.973f, 0.980f, 0.992f, 1.00f); /* #f8fafc */
+inline const ImVec4 TEXT_DIM    = ImVec4(0.541f, 0.580f, 0.659f, 1.00f); /* #8a94a8 */
+inline const ImVec4 TEXT_MUTE   = ImVec4(0.388f, 0.420f, 0.486f, 1.00f); /* #636b7c */
+ 
+/* 시맨틱 컬러 — 녹색 OK 는 목업과 동일 계열 유지, 나머지 미세 조정 */
+inline const ImVec4 OK          = ImVec4(0.243f, 0.812f, 0.557f, 1.00f); /* #3ecf8e */
+inline const ImVec4 WARN        = ImVec4(0.910f, 0.749f, 0.388f, 1.00f); /* #e8bf63 */
+inline const ImVec4 ERR         = ImVec4(0.902f, 0.388f, 0.388f, 1.00f); /* #e66363 */
+inline const ImVec4 INFO        = ImVec4(0.388f, 0.620f, 0.965f, 1.00f); /* #639ef6 */
+ 
+/* 위험 액션 (STOP/Park) — 네이비 위 차분한 적색 */
+inline const ImVec4 DANGER      = ImVec4(0.545f, 0.227f, 0.227f, 1.00f); /* #8b3a3a */
+inline const ImVec4 DANGER_HOV  = ImVec4(0.627f, 0.267f, 0.267f, 1.00f); /* #a04444 */
+ 
 /* =========================================================
  *  2. 위성별 컬러 팔레트
  *     (탭/배지/필터 chip/Beacon line에 일관 적용)
@@ -62,71 +67,71 @@ inline const ImVec4 SAT_COLORS[SAT_PALETTE_COUNT] = {
     {0.957f, 0.612f, 0.510f, 1.0f},  /* 4 coral                   */
     {0.616f, 0.871f, 0.690f, 1.0f},  /* 5 jade                    */
 };
-
+ 
 /* =========================================================
  *  3. 유틸리티 (inline)
  * ========================================================= */
 inline ImU32 U32(const ImVec4& c) {
     return ImGui::ColorConvertFloat4ToU32(c);
 }
-
+ 
 inline ImVec4 Alpha(const ImVec4& c, float a) {
     return ImVec4(c.x, c.y, c.z, a);
 }
-
+ 
 /* 위성 인덱스(0 ~ N) → 팔레트 컬러 (순환) */
 inline ImVec4 SatColor(int slot_idx) {
     if (slot_idx < 0) slot_idx = 0;
     return SAT_COLORS[slot_idx % SAT_PALETTE_COUNT];
 }
-
+ 
 /* 위성명을 hash해서 안정적인 컬러 부여 (탭 순서 바뀌어도 색 유지) */
 ImVec4 SatColorByName(const char* name);
-
+ 
 /* =========================================================
  *  4. 테마 적용
  *     main()에서 ImGui::CreateContext() 직후 한 번 호출.
  *     기존 ImGuiCustomStyle()을 호출해도 충돌 없음 (덮어씀).
  * ========================================================= */
 void ApplyTheme(ImGuiStyle* style = nullptr);
-
+ 
 /* =========================================================
  *  5. 위젯 헬퍼
  * ========================================================= */
-
+ 
 /* 현재 커서 위치에 컬러 점 1개 + 점만큼 가로 공간 차지.
  * 이후 ImGui::SameLine()으로 텍스트 잇기 가능.                */
 void Dot(const ImVec4& color, float radius = 4.5f);
-
+ 
 /* "● GS100" 형식 — 점 + 라벨 한 묶음. SameLine 없이 호출 직후
  * 가로 흐름에 자연스럽게 들어감.                                */
 void StatusPill(const char* label, bool ok);
-
+ 
 /* "● Engage" / "○ Doppler" 형식 — 활성 모드 표시용.
  * on=true 일 때만 OK 컬러, false면 dim.                        */
 void ModeFlag(const char* label, bool on);
-
+ 
 /* 캡슐 모양 배지 (TC 프로파일 표시 등) */
 void Badge(const char* text, const ImVec4& bg,
            const ImVec4& fg = TEXT_HI);
-
+ 
 /* 섹션 헤더 — "── LABEL ──" 형태 (Separator 포함, 위/아래 spacing) */
 void SectionHeader(const char* label);
-
+ 
 /* 단축키 힌트 — "[F2]" 같은 작은 라벨. SameLine 후 호출 권장. */
 void KeyboardHint(const char* keys);
-
+ 
 /* 토글 스위치 (커스텀 DrawList 위젯).
  * - Checkbox 대체 가능.
  * - 변경되면 true 반환 + *v 토글.                              */
 bool Toggle(const char* label, bool* v);
-
+ 
 /* Pill 모양 버튼 — Command Window의 Subsystem 선택용.
  * - selected=true면 active_col 배경 + 어두운 텍스트.
  * - SameLine으로 가로 배치 권장.                               */
 bool PillButton(const char* label, bool selected,
                 const ImVec4& active_col = ACCENT);
-
+ 
 /* 큰 숫자 readout (Battery 8.21V 같은 카드)
  * - label: 상단 작은 라벨
  * - value: 큰 숫자 (예: "8.21 V")
@@ -135,38 +140,38 @@ bool PillButton(const char* label, bool selected,
 void BigReadout(const char* label, const char* value,
                 const char* sub = nullptr,
                 const ImVec4& value_color = TEXT_HI);
-
+ 
 /* 위험 액션용 버튼 (빨강) — Stop Engage / Park 등 */
 bool DangerButton(const char* label, const ImVec2& size = ImVec2(0, 0));
-
+ 
 /* 기본 강조 버튼 (Accent) — Send Now / Engage 시작 등 */
 bool PrimaryButton(const char* label, const ImVec2& size = ImVec2(0, 0));
-
+ 
 /* Ctrl 키를 누른 상태에서만 활성화되는 버튼 (Park 등 위험 액션).
  * - 키 안 눌렀을 땐 dim + 클릭 무시.
  * - hint_below=true면 버튼 아래에 "⚠ Ctrl 누른 상태에서만…" 표시. */
 bool CtrlGuardedButton(const char* label, bool hint_below = true,
                        const ImVec2& size = ImVec2(0, 0));
-
+ 
 /* =========================================================
  *  6. 레이아웃 헬퍼
  * ========================================================= */
-
+ 
 /* 세로 공간 spacer */
 inline void SpacerY(float h = 4.0f) { ImGui::Dummy(ImVec2(0, h)); }
-
+ 
 /* 가로 공간 spacer */
 inline void SpacerX(float w = 6.0f) { ImGui::Dummy(ImVec2(w, 0)); ImGui::SameLine(); }
-
+ 
 /* "label : value" 한 줄 (key/value row).
  * - label은 dim 색, value는 hi 색.
  * - value_col로 컬러 오버라이드 가능 (status 표시 등).          */
 void KVRow(const char* label, const char* value,
            const ImVec4& value_col = TEXT_HI);
-
+ 
 /* printf 스타일 KV row */
 void KVRowf(const char* label, const char* fmt, ...);
-
+ 
 } // namespace mim
-
+ 
 #endif /* __MIMAN_THEME_H_ */

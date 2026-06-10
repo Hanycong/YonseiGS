@@ -139,7 +139,8 @@ int main(int, char**)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     // Setup Dear ImGui style
     ImGuiStyle * style = &ImGui::GetStyle();
-    ImGuiCustomStyle(style);
+    // 2026.06.10 테마 색 변경
+    mim::ApplyTheme(style);
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");

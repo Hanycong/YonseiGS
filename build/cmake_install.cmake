@@ -1,4 +1,4 @@
-# Install script for directory: /home/miman/Desktop/jane/0313/BEE_GS
+# Install script for directory: /home/hyyang/GS_refactoring/YonseiGS
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/miman/Desktop/jane/0313/BEE_GS/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/hyyang/GS_refactoring/YonseiGS/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

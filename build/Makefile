@@ -60,10 +60,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/miman/Desktop/jane/0313/BEE_GS
+CMAKE_SOURCE_DIR = /home/hyyang/GS_refactoring/YonseiGS
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/miman/Desktop/jane/0313/BEE_GS/build
+CMAKE_BINARY_DIR = /home/hyyang/GS_refactoring/YonseiGS/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -90,9 +90,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/miman/Desktop/jane/0313/BEE_GS/build/CMakeFiles /home/miman/Desktop/jane/0313/BEE_GS/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hyyang/GS_refactoring/YonseiGS/build/CMakeFiles /home/hyyang/GS_refactoring/YonseiGS/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/miman/Desktop/jane/0313/BEE_GS/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/hyyang/GS_refactoring/YonseiGS/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -396,6 +396,54 @@ src/miman_s_control.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_s_control.cpp.s
 .PHONY : src/miman_s_control.cpp.s
 
+src/miman_satcontext.o: src/miman_satcontext.cpp.o
+.PHONY : src/miman_satcontext.o
+
+# target to build an object file
+src/miman_satcontext.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_satcontext.cpp.o
+.PHONY : src/miman_satcontext.cpp.o
+
+src/miman_satcontext.i: src/miman_satcontext.cpp.i
+.PHONY : src/miman_satcontext.i
+
+# target to preprocess a source file
+src/miman_satcontext.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_satcontext.cpp.i
+.PHONY : src/miman_satcontext.cpp.i
+
+src/miman_satcontext.s: src/miman_satcontext.cpp.s
+.PHONY : src/miman_satcontext.s
+
+# target to generate assembly for a file
+src/miman_satcontext.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_satcontext.cpp.s
+.PHONY : src/miman_satcontext.cpp.s
+
+src/miman_theme.o: src/miman_theme.cpp.o
+.PHONY : src/miman_theme.o
+
+# target to build an object file
+src/miman_theme.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_theme.cpp.o
+.PHONY : src/miman_theme.cpp.o
+
+src/miman_theme.i: src/miman_theme.cpp.i
+.PHONY : src/miman_theme.i
+
+# target to preprocess a source file
+src/miman_theme.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_theme.cpp.i
+.PHONY : src/miman_theme.cpp.i
+
+src/miman_theme.s: src/miman_theme.cpp.s
+.PHONY : src/miman_theme.s
+
+# target to generate assembly for a file
+src/miman_theme.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/src/miman_theme.cpp.s
+.PHONY : src/miman_theme.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -438,6 +486,12 @@ help:
 	@echo "... src/miman_s_control.o"
 	@echo "... src/miman_s_control.i"
 	@echo "... src/miman_s_control.s"
+	@echo "... src/miman_satcontext.o"
+	@echo "... src/miman_satcontext.i"
+	@echo "... src/miman_satcontext.s"
+	@echo "... src/miman_theme.o"
+	@echo "... src/miman_theme.i"
+	@echo "... src/miman_theme.s"
 .PHONY : help
 
 

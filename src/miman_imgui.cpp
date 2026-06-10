@@ -14516,70 +14516,70 @@ void Console::ChangeWindowSize(float x_pos, float y_pos, float width, float heig
 //     style->Colors[ImGuiCol_WindowBg].w = 0.90f;
 // }
 
-void ImGuiCustomStyle(ImGuiStyle* style)
-{
-    style->WindowPadding = ImVec2(15, 15);
-	style->WindowRounding = 5.0f;
-	style->FramePadding = ImVec2(5, 5);
-	style->FrameRounding = 4.0f;
-	style->ItemSpacing = ImVec2(12, 8);
-	style->ItemInnerSpacing = ImVec2(8, 6);
-	style->IndentSpacing = 25.0f;
-	style->ScrollbarSize = 15.0f;
-	style->ScrollbarRounding = 9.0f;
-	style->GrabMinSize = 5.0f;
-	style->GrabRounding = 3.0f;
+// void ImGuiCustomStyle(ImGuiStyle* style)
+// {
+//     style->WindowPadding = ImVec2(15, 15);
+// 	style->WindowRounding = 5.0f;
+// 	style->FramePadding = ImVec2(5, 5);
+// 	style->FrameRounding = 4.0f;
+// 	style->ItemSpacing = ImVec2(12, 8);
+// 	style->ItemInnerSpacing = ImVec2(8, 6);
+// 	style->IndentSpacing = 25.0f;
+// 	style->ScrollbarSize = 15.0f;
+// 	style->ScrollbarRounding = 9.0f;
+// 	style->GrabMinSize = 5.0f;
+// 	style->GrabRounding = 3.0f;
 
-    //Window Background
-    ImVec4 Colorset_1 = ImVec4(0.141f, 0.364f, 0.376f, 1.00f);
-    //Disabled
-    ImVec4 Colorset_2 = ImVec4(0.24f, 0.23f, 0.29f, 1.00f);
-    //Active Title
-    ImVec4 Colorset_3 = ImVec4(0.235f, 0.603f, 0.623f, 1.00f);
-    //General Title, Button
-    ImVec4 Colorset_4 = ImVec4(0.180f, 0.462f, 0.478f, 1.00f);
-    //ScrollBar
-    ImVec4 Colorset_5 = ImVec4(0.80f, 0.80f, 0.83f, 0.31f);
-    //Active Button
-    ImVec4 Colorset_6 = ImVec4(0.56f, 0.56f, 0.58f, 1.00f);
+//     //Window Background
+//     ImVec4 Colorset_1 = ImVec4(0.141f, 0.364f, 0.376f, 1.00f);
+//     //Disabled
+//     ImVec4 Colorset_2 = ImVec4(0.24f, 0.23f, 0.29f, 1.00f);
+//     //Active Title
+//     ImVec4 Colorset_3 = ImVec4(0.235f, 0.603f, 0.623f, 1.00f);
+//     //General Title, Button
+//     ImVec4 Colorset_4 = ImVec4(0.180f, 0.462f, 0.478f, 1.00f);
+//     //ScrollBar
+//     ImVec4 Colorset_5 = ImVec4(0.80f, 0.80f, 0.83f, 0.31f);
+//     //Active Button
+//     ImVec4 Colorset_6 = ImVec4(0.56f, 0.56f, 0.58f, 1.00f);
  
-	style->Colors[ImGuiCol_Text] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
-	style->Colors[ImGuiCol_TextDisabled] = Colorset_2;
-	style->Colors[ImGuiCol_WindowBg] = Colorset_1;
-	style->Colors[ImGuiCol_PopupBg] = Colorset_1;
-	style->Colors[ImGuiCol_Border] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
-	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.92f, 0.91f, 0.88f, 0.00f);
-	style->Colors[ImGuiCol_FrameBg] = Colorset_4;
-	style->Colors[ImGuiCol_FrameBgHovered] = Colorset_2;
-	style->Colors[ImGuiCol_FrameBgActive] = Colorset_6;
-	style->Colors[ImGuiCol_TitleBg] = Colorset_4;
-	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 0.98f, 0.95f, 0.75f);
-	style->Colors[ImGuiCol_TitleBgActive] = Colorset_3;
-	style->Colors[ImGuiCol_MenuBarBg] = Colorset_4;
-	style->Colors[ImGuiCol_ScrollbarBg] = Colorset_1;
-	style->Colors[ImGuiCol_ScrollbarGrab] = Colorset_5 ;
-	style->Colors[ImGuiCol_ScrollbarGrabHovered] = Colorset_6;
-	style->Colors[ImGuiCol_ScrollbarGrabActive] = Colorset_5;
-	style->Colors[ImGuiCol_CheckMark] = Colorset_5 ;
-	style->Colors[ImGuiCol_SliderGrab] = Colorset_5 ;
-	style->Colors[ImGuiCol_SliderGrabActive] = Colorset_1;
-	style->Colors[ImGuiCol_Button] = Colorset_4;
-	style->Colors[ImGuiCol_ButtonHovered] = Colorset_2;
-	style->Colors[ImGuiCol_ButtonActive] = Colorset_6;
-	style->Colors[ImGuiCol_Header] = Colorset_4;
-	style->Colors[ImGuiCol_HeaderHovered] = Colorset_6;
-	style->Colors[ImGuiCol_HeaderActive] = Colorset_1;
-	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style->Colors[ImGuiCol_ResizeGripHovered] = Colorset_6;
-	style->Colors[ImGuiCol_ResizeGripActive] = Colorset_1;
-	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
-	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
-	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_TextSelectedBg] = Colorset_3;
-    style->Colors[ImGuiCol_Tab] = Colorset_4;
-    style->Colors[ImGuiCol_TabActive] = Colorset_3;
-}
+// 	style->Colors[ImGuiCol_Text] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
+// 	style->Colors[ImGuiCol_TextDisabled] = Colorset_2;
+// 	style->Colors[ImGuiCol_WindowBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_PopupBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_Border] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
+// 	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.92f, 0.91f, 0.88f, 0.00f);
+// 	style->Colors[ImGuiCol_FrameBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_FrameBgHovered] = Colorset_2;
+// 	style->Colors[ImGuiCol_FrameBgActive] = Colorset_6;
+// 	style->Colors[ImGuiCol_TitleBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 0.98f, 0.95f, 0.75f);
+// 	style->Colors[ImGuiCol_TitleBgActive] = Colorset_3;
+// 	style->Colors[ImGuiCol_MenuBarBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_ScrollbarBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_ScrollbarGrab] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_ScrollbarGrabHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_ScrollbarGrabActive] = Colorset_5;
+// 	style->Colors[ImGuiCol_CheckMark] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_SliderGrab] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_SliderGrabActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_Button] = Colorset_4;
+// 	style->Colors[ImGuiCol_ButtonHovered] = Colorset_2;
+// 	style->Colors[ImGuiCol_ButtonActive] = Colorset_6;
+// 	style->Colors[ImGuiCol_Header] = Colorset_4;
+// 	style->Colors[ImGuiCol_HeaderHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_HeaderActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+// 	style->Colors[ImGuiCol_ResizeGripHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_ResizeGripActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
+// 	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
+// 	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
+// 	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
+// 	style->Colors[ImGuiCol_TextSelectedBg] = Colorset_3;
+//     style->Colors[ImGuiCol_Tab] = Colorset_4;
+//     style->Colors[ImGuiCol_TabActive] = Colorset_3;
+// }
 
 
 bool popup_setup(Setup * setup)
@@ -15583,7 +15583,7 @@ void ImGui_SatelliteTabs(float W) {
         ImVec4 col  = GetVisibleSatColor(slot);
 
         ImGui::PushStyleColor(ImGuiCol_Button,
-            active ? BG_DEEP : ImVec4(0.078f, 0.176f, 0.204f, 1.0f));
+            active ? BG_DEEP : BG_PANEL2);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, BG_MAIN);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,  BG_DEEP);
 
@@ -15633,7 +15633,7 @@ void ImGui_SatelliteTabs(float W) {
 }
 
 void ImGui_StatusBar(float W) {
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.086f, 0.220f, 0.259f, 1));
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, BG_MAIN);
     ImGui::BeginChild("##statusbar", ImVec2(W, 30), false,
                       ImGuiWindowFlags_NoScrollbar);
 
