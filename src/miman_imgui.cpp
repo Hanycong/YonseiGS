@@ -40,7 +40,7 @@ ImGuiWindowFlags mim_winflags = ImGuiWindowFlags_NoMove |
                                 ImGuiWindowFlags_NoSavedSettings |
                                 ImGuiWindowFlags_NoCollapse |
                                 ImGuiWindowFlags_NoBringToFrontOnFocus|
-                                ImGuiWindowFlags_HorizontalScrollbar|
+                                // ImGuiWindowFlags_HorizontalScrollbar|
                                 ImGuiWindowFlags_NoTitleBar;
 extern pthread_t p_thread[16];
 extern Ptable_0 param0;
@@ -322,7 +322,6 @@ void ImGui_ModelWindow(float fontscale)
 
 void ImGui_TrackWindow_Body(float fontscale)
 {
-    ImGui::Begin("Track Window", &p_open, mim_winflags);
     ImGui::SetWindowFontScale(fontscale * 0.8);
 
     ImGui::SameLine();
@@ -339,7 +338,7 @@ void ImGui_TrackWindow_Body(float fontscale)
         ImGuiTableFlags_Borders |
         ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Reorderable,
-        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+        ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing() * 8))) // 2026.06.10 hyyang: 8은 하드코딩. 나중에 다중 위성이 queue에 쌓이는 개수만큼 도시하는게 적절
     {
         ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
         ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_NoHide);
@@ -473,8 +472,6 @@ void ImGui_TrackWindow_Body(float fontscale)
         ImGui::EndTable();
 
     }
-
-    ImGui::End();
 }
 
 
@@ -576,7 +573,6 @@ void ImGui_FrequencyWindow_Body(float fontscale)
 {
     {   
     
-    ImGui::Begin("Frequency Window", &p_open, mim_winflags);
     ImGui::SetWindowFontScale(fontscale);
     ImGui::Text("Center Frequency");
     ImGui::InputDouble("##centerfrequency(Hz)", &setup->default_freq, NULL, NULL);
@@ -672,7 +668,6 @@ void ImGui_FrequencyWindow_Body(float fontscale)
     ImGui::EndChild();
 
     ImGui::SetWindowFontScale(1.0);
-    ImGui::End();
     }
 }
 
@@ -15655,16 +15650,20 @@ void ImGui_StatusBar(float W) {
         ImGui::Text("Track:");
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 6);
+        Dot(GetVisibleSatColor(sat));
+        ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, GetVisibleSatColor(sat));
-        ImGui::Text("● %s", State.Satellites[sat]->Name());
+        ImGui::Text("%s", State.Satellites[sat]->Name());
         ImGui::PopStyleColor();
     }
 
     // 활성 모드
-    ImGui::SameLine(W - 380);
+    ImGui::SameLine(W - 520);
     auto mode = [](const char* n, bool on) {
+        Dot(on ? OK : TEXT_DIM);
+        ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, on ? OK : TEXT_DIM);
-        ImGui::Text("%s %s", on ? "●" : "○", n);
+        ImGui::Text("%s", n);
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 10);
     };
@@ -15691,7 +15690,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     // ───── 2. Status bar
     ImGui::SetNextWindowPos(ImVec2(0, MENUPADDING + H * 0.06f));
     ImGui::SetNextWindowSize(ImVec2(W, H * 0.05f));
-    ImGui::Begin("##status_host", NULL, mim_winflags);
+    ImGui::Begin("##status_host", NULL, (mim_winflags & ~ImGuiWindowFlags_HorizontalScrollbar) | ImGuiWindowFlags_NoScrollbar);
     ImGui_StatusBar(W);
     ImGui::End();
 
@@ -15703,7 +15702,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     ImGui::Begin("##workspace_host", NULL, mim_winflags);
 
     if (ImGui::BeginTabBar("##functabs", ImGuiTabBarFlags_None)) {
-        if (ImGui::BeginTabItem("① Pre-Pass")) {
+        if (ImGui::BeginTabItem("1. Pre-Pass")) {
             State.ActiveFuncTab = 0;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
@@ -15720,7 +15719,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("② Pass Operation")) {
+        if (ImGui::BeginTabItem("2. Pass Operation")) {
             State.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
