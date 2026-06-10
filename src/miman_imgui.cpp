@@ -211,115 +211,191 @@ void ImGui_ClearColorBuf(GLFWwindow * window, ImVec4 clear_color)
 }
 
 
+// 같은 파일 하단(L14224)에 정의된 헬퍼 — 앞에서 사용하기 위한 forward decl
+bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int width, int height);
+
 void ImGui_MainMenu()
-{    
-    // FramePadding.y를 일시적으로 키워 BeginMainMenuBar가 계산하는
-    // 바 높이만 늘리고, 안쪽 위젯에는 영향 없도록 즉시 Pop.
-    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 22));
-    bool menu_open = ImGui::BeginMainMenuBar();
-    ImGui::PopStyleVar();
-    if (menu_open)
+{
+
+    // 로고 텍스처 로드
+    static GLuint logo_tex = 0;
+    static bool   logo_loaded = false;
+    if (!logo_loaded) {
+        logo_loaded = true;
+        LoadTextureFromFile("../bin/image/yonsei_logo.png", &logo_tex, 0, 0);
+    }
+
+    float W = ImGui::GetIO().DisplaySize.x;
+    float H = ImGui::GetIO().DisplaySize.y;
+
+    // ───── 헤더 높이 / 콘텐츠 상수 ─────
+    const float header_h  = H * 0.08f;
+    const float strip_h   = header_h * 0.5f;
+    const float pad       = 8.0f;
+    const float gap       = 12.0f;
+    const float logo_size = header_h - 2 * pad;
+
+    // ───── 콘텐츠 폭 측정 → brand_w 결정 (콘텐츠에 딱 맞춤) ─────
+    ImGui::PushFont(mim::font_title);
+    const float title_w = ImGui::CalcTextSize("Yonsei Cubesat GS").x;
+    ImGui::PopFont();
+
+    ImGui::PushFont(mim::font_subtitle);
+    const float subtitle_w = ImGui::CalcTextSize("Yonsei University - Astrodynamics & Control Lab").x;
+    ImGui::PopFont();
+
+    const float group_w   = (title_w > subtitle_w ? title_w : subtitle_w);
+    const float content_w = logo_size + gap + group_w;
+    const float brand_w   = content_w + 2 * pad;          // 좌·우 pad만 추가, 빈 공간 0
+
+    // ───── 최상위 헤더 윈도우 ─────
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(W, header_h));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, BG_MAIN);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGuiWindowFlags hflags =
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoMove   | ImGuiWindowFlags_NoCollapse
+        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+    ImGui::Begin("##header", NULL, hflags);
+
+    // ════════════════════════════════════════════════
+    //  Zone 1 — 로고 + 타이틀 (왼쪽, 전체 높이)
+    // ════════════════════════════════════════════════
+    ImGui::BeginChild("##zone_brand", ImVec2(brand_w, header_h), false, ImGuiWindowFlags_NoScrollbar);
+    {
+        // 로고 위치 — 좌측 정렬 (pad만 띄움)
+        ImGui::SetCursorPos(ImVec2(pad, pad));
+
+        // 로고 placeholder — border + 옅은 fill로 정사각형 가시화 (이미지 import 시 교체)
+        if (logo_tex) 
         {
-            /* ── 지상국 이름 (로고 자리는 추후 이미지로 교체) ── */
-            ImGui::PushStyleColor(ImGuiCol_Text, mim::TEXT_HI);
+            ImGui::Image((ImTextureID)(intptr_t)logo_tex, ImVec2(logo_size, logo_size));
+        } 
+        else 
+        {
+            // 폴백: 파일 못 찾으면 placeholder 사각형 (D4 코드 그대로)
+            ImVec2 logo_tl = ImGui::GetCursorScreenPos();
+            ImVec2 logo_br = ImVec2(logo_tl.x + logo_size, logo_tl.y + logo_size);
+            ImGui::GetWindowDrawList()->AddRectFilled(logo_tl, logo_br, U32(BG_PANEL2), 6.0f);
+            ImGui::GetWindowDrawList()->AddRect      (logo_tl, logo_br, U32(BORDER),   6.0f, 0, 1.5f);
+            ImGui::Dummy(ImVec2(logo_size, logo_size));
+        }
+        ImGui::SameLine(0, gap);
+
+        // 타이틀+부제 그룹 세로 중앙 정렬 (D2 그대로)
+        const float title_h    = mim::font_title    ? mim::font_title->FontSize    : ImGui::GetFontSize();
+        const float subtitle_h = mim::font_subtitle ? mim::font_subtitle->FontSize : ImGui::GetFontSize();
+        const float group_h    = title_h + subtitle_h + ImGui::GetStyle().ItemSpacing.y;
+        ImGui::SetCursorPosY((header_h - group_h) * 0.5f);
+
+        ImGui::BeginGroup();
+            ImGui::PushFont(mim::font_title);
+            ImGui::PushStyleColor(ImGuiCol_Text, TEXT_HI);
             ImGui::TextUnformatted("Yonsei Cubesat GS");
             ImGui::PopStyleColor();
-            ImGui::Spacing();
-            ImGui::SameLine(0, 16);
+            ImGui::PopFont();
 
-            if (ImGui::BeginMenu("File"))
-            {
-                if(ImGui::MenuItem("FDS Manager"))
-                {
-                    State.Display_FDS = true;
-                }
-                if(ImGui::MenuItem("TLE Manager"))
-                {
-                    State.Display_TLE = true;
-                }
-                if(ImGui::MenuItem("S-band Manager"))
-                {
-                    State.Display_Sband = true;
-                }
-                ImGui::EndMenu();
-            }
+            ImGui::PushFont(mim::font_subtitle);
+            ImGui::PushStyleColor(ImGuiCol_Text, TEXT_DIM);
+            ImGui::TextUnformatted("Yonsei University - Astrodynamics & Control Lab");
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+        ImGui::EndGroup();
+    }
+    ImGui::EndChild();
+    ImGui::SameLine(0, 0);
 
-            if (ImGui::BeginMenu("Hardware"))
+    // ════════════════════════════════════════════════
+    //  Zone 2 + Zone 3 — 우측 컬럼 (메뉴 위, 스테이터스 아래)
+    // ════════════════════════════════════════════════
+    ImGui::BeginGroup();
+    {
+        float fp_y = (strip_h - ImGui::GetFontSize()) * 0.5f;
+        if (fp_y < 4.0f) fp_y = 4.0f;
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, fp_y));
+        ImGui::BeginChild("##zone_menu", ImVec2(0, strip_h),
+                        false,
+                        ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
+        ImGui::PopStyleVar();   // ← BeginChild가 strip 높이 확정 후 즉시 Pop
+        {
+            if (ImGui::BeginMenuBar())
             {
-                if(ImGui::MenuItem("GS100 Param 0"))
+                if (ImGui::BeginMenu("File"))
                 {
-                    State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("FDS Manager"))    State.Display_FDS = true;
+                    if(ImGui::MenuItem("TLE Manager"))    State.Display_TLE = true;
+                    if(ImGui::MenuItem("S-band Manager")) State.Display_Sband = true;
+                    ImGui::EndMenu();
                 }
-                if(ImGui::MenuItem("GS100 Param 1"))
+                if (ImGui::BeginMenu("Hardware"))
                 {
-                    State.Display_paramt1 = true;
+                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 1")) State.Display_paramt1 = true;
+                    if(ImGui::MenuItem("GS100 Param 5")) State.Display_paramt5 = true;
+                    ImGui::EndMenu();
                 }
-                if(ImGui::MenuItem("GS100 Param 5"))
+                if (ImGui::BeginMenu("Test"))
                 {
-                    State.Display_paramt5 = true;
-                }
-                ImGui::EndMenu();
-            }
-
-            if (ImGui::BeginMenu("Test"))
-            {
-                if (ImGui::MenuItem("Scan AX100"))
-                {
-                    
-                    pthread_create(&p_thread[4], NULL, csp_ping_scan, NULL); 
-                }
-                if (ImGui::MenuItem("Start Signaltest"))
-                {
-                    pthread_create(&p_thread[10], NULL, &SignalTest, NULL); 
-                }
-                if (ImGui::MenuItem("Stop Signaltest"))
-                {
-                    State.Signaltest = false;
-                    pthread_join(p_thread[10], NULL); 
-                }
-                if(State.Debugmode)
-                {
-                    if (ImGui::MenuItem("Debug Mode Off"))
+                    if (ImGui::MenuItem("Scan AX100"))
+                        pthread_create(&p_thread[4], NULL, csp_ping_scan, NULL);
+                    if (ImGui::MenuItem("Start Signaltest"))
+                        pthread_create(&p_thread[10], NULL, &SignalTest, NULL);
+                    if (ImGui::MenuItem("Stop Signaltest"))
                     {
-                        csp_log_info("Set Debug : False.");
-                        State.Debugmode = false;
-                        csp_debug_set_level(CSP_INFO, false);
-                        // csp_debug_toggle_level(CSP_BUFFER);
-                        csp_debug_set_level(CSP_PACKET, false);
-                        csp_debug_set_level(CSP_PROTOCOL, false);
-                        // csp_debug_toggle_level(CSP_LOCK);
-                        
+                        State.Signaltest = false;
+                        pthread_join(p_thread[10], NULL);
                     }
-                        
-                }
-                else
-                {
-                    if (ImGui::MenuItem("Debug Mode On"))
+                    if (State.Debugmode)
                     {
-                        State.Debugmode = true;
-                        csp_debug_set_level(CSP_INFO, true);
-                        // csp_debug_toggle_level(CSP_BUFFER);
-                        csp_debug_set_level(CSP_PACKET, true);
-                        csp_debug_set_level(CSP_PROTOCOL, true);
-                        // csp_debug_toggle_level(CSP_LOCK);
-                        csp_log_info("Set Debug : True.");
+                        if (ImGui::MenuItem("Debug Mode Off"))
+                        {
+                            csp_log_info("Set Debug : False.");
+                            State.Debugmode = false;
+                            csp_debug_set_level(CSP_INFO, false);
+                            csp_debug_set_level(CSP_PACKET, false);
+                            csp_debug_set_level(CSP_PROTOCOL, false);
+                        }
                     }
-                        
+                    else
+                    {
+                        if (ImGui::MenuItem("Debug Mode On"))
+                        {
+                            State.Debugmode = true;
+                            csp_debug_set_level(CSP_INFO, true);
+                            csp_debug_set_level(CSP_PACKET, true);
+                            csp_debug_set_level(CSP_PROTOCOL, true);
+                            csp_log_info("Set Debug : True.");
+                        }
+                    }
+                    if (ImGui::MenuItem("TLE Update(Auto)")) TLE_Autoupdate_Test();
+                    if (ImGui::MenuItem("Segfault"))
+                    {
+                        int* ptr = nullptr;
+                        *ptr = 42;
+                    }
+                    ImGui::EndMenu();
                 }
-                if (ImGui::MenuItem("TLE Update(Auto)"))
-                {
-                    TLE_Autoupdate_Test();
-                }
-                if (ImGui::MenuItem("Segfault"))
-                {
-                    int* ptr = nullptr;
-                    *ptr = 42;
-                }
-                ImGui::EndMenu();
+                ImGui::EndMenuBar();
             }
-
-            ImGui::EndMainMenuBar();
         }
+        ImGui::EndChild();
+
+        // ── Zone 3 — 스테이터스 ──
+        ImGui::BeginChild("##zone_status", ImVec2(0, strip_h),
+                          false, ImGuiWindowFlags_NoScrollbar);
+        {
+            float zone_w = ImGui::GetContentRegionAvail().x;
+            ImGui_StatusBar_Body(zone_w);
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+
+    ImGui::End();
+    ImGui::PopStyleVar();    // WindowPadding
+    ImGui::PopStyleColor();  // WindowBg
 }
 
 void ImGui_ModelWindow(float fontscale)
@@ -15639,11 +15715,7 @@ void ImGui_SatelliteTabs(float W) {
     ImGui::PopStyleColor();
 }
 
-void ImGui_StatusBar(float W) {
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, BG_MAIN);
-    ImGui::BeginChild("##statusbar", ImVec2(W, 30), false,
-                      ImGuiWindowFlags_NoScrollbar);
-
+void ImGui_StatusBar_Body(float W) {
     auto pill = [](const char* name, bool ok) {
         Dot(ok ? OK : ERR);
         ImGui::SameLine(0, 4);
@@ -15669,7 +15741,6 @@ void ImGui_StatusBar(float W) {
         ImGui::PopStyleColor();
     }
 
-    // 활성 모드
     ImGui::SameLine(W - 520);
     auto mode = [](const char* n, bool on) {
         Dot(on ? OK : TEXT_DIM);
@@ -15683,7 +15754,14 @@ void ImGui_StatusBar(float W) {
     mode("Doppler",   State.Doppler);
     mode("AutoPilot", State.Autopilot);
     mode("AMP",       State.AMPON);
+}
 
+// 기존 함수는 컨테이너(BeginChild)만 담당하고 본체 호출.
+// 다른 패턴 (TrackWindow_Body, FrequencyWindow_Body 등)과 동일.
+void ImGui_StatusBar(float W) {
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, BG_MAIN);
+    ImGui::BeginChild("##statusbar", ImVec2(W, 30), false,ImGuiWindowFlags_NoScrollbar);
+    ImGui_StatusBar_Body(W);
     ImGui::EndChild();
     ImGui::PopStyleColor();
 }
@@ -15692,30 +15770,21 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     float W = ImGui::GetIO().DisplaySize.x;
     float H = ImGui::GetIO().DisplaySize.y;
 
-     // ───── 레이아웃 비율 (한 곳에서 조정) ─────
-    // 메뉴바는 ImGui_MainMenu의 FramePadding.y로 결정되므로
-    // 여기서도 같은 값을 써야 함. 현재는 픽셀 고정 64.
-    const float menu_h    = 64.0f;          // B1: 기존 MENUPADDING 그대로
-    const float sat_h     = H * 0.06f;      // B1: 기존 비율 그대로
-    const float status_h  = H * 0.05f;      // B1: 기존 비율 그대로
-    const float console_h = H * 0.25f;      // B1: 기존 비율 그대로
+    // ───── 레이아웃 비율
+    const float menu_h    = H * 0.08f;   // 0.10 → 0.08 (사용자 피드백: 너무 두꺼움)
+    const float sat_h     = H * 0.07f;
+    const float console_h = H * 0.22f;
+    // status_h 삭제 — 메뉴바에 흡수
 
-        // ───── 1. 위성 탭
+    // ───── 1. 위성 탭
     ImGui::SetNextWindowPos(ImVec2(0, menu_h));
     ImGui::SetNextWindowSize(ImVec2(W, sat_h));
     ImGui::Begin("##sattab_host", NULL, mim_winflags);
     ImGui_SatelliteTabs(W);
     ImGui::End();
 
-    // ───── 2. Status bar
-    ImGui::SetNextWindowPos(ImVec2(0, menu_h + sat_h));
-    ImGui::SetNextWindowSize(ImVec2(W, status_h));
-    ImGui::Begin("##status_host", NULL, (mim_winflags & ~ImGuiWindowFlags_HorizontalScrollbar) | ImGuiWindowFlags_NoScrollbar);
-    ImGui_StatusBar(W);
-    ImGui::End();
-
-    // ───── 3. 기능 탭 + 워크스페이스
-    float top = menu_h + sat_h + status_h;
+    // ───── 2. 기능 탭 + 워크스페이스
+    float top = menu_h + sat_h;
     ImGui::SetNextWindowPos(ImVec2(0, top));
     ImGui::SetNextWindowSize(ImVec2(W, H - top - console_h));
     ImGui::Begin("##workspace_host", NULL, mim_winflags);

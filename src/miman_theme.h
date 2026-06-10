@@ -16,6 +16,12 @@
 #include <imgui.h>
  
 namespace mim {
+
+/* =========================================================
+ *  폰트 핸들 (main.cpp에서 로딩, 사용처에서 PushFont)
+ * ========================================================= */
+extern ImFont* font_title;       // 타이틀용 (DroidSans-Bold)
+extern ImFont* font_subtitle;    // 부제용 (Inconsolata)
  
 /* =========================================================
  *  1. 컬러 토큰  — Navy Dark (Yonsei Cubesat GS)
