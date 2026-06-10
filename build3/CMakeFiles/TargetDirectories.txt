@@ -1,3 +1,0 @@
-/home/jsj/BEE_GS/build3/CMakeFiles/BEE-1000.dir
-/home/jsj/BEE_GS/build3/CMakeFiles/edit_cache.dir
-/home/jsj/BEE_GS/build3/CMakeFiles/rebuild_cache.dir

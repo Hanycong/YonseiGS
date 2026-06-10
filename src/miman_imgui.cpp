@@ -40,7 +40,7 @@ ImGuiWindowFlags mim_winflags = ImGuiWindowFlags_NoMove |
                                 ImGuiWindowFlags_NoSavedSettings |
                                 ImGuiWindowFlags_NoCollapse |
                                 ImGuiWindowFlags_NoBringToFrontOnFocus|
-                                ImGuiWindowFlags_HorizontalScrollbar|
+                                // ImGuiWindowFlags_HorizontalScrollbar|
                                 ImGuiWindowFlags_NoTitleBar;
 extern pthread_t p_thread[16];
 extern Ptable_0 param0;
@@ -211,103 +211,225 @@ void ImGui_ClearColorBuf(GLFWwindow * window, ImVec4 clear_color)
 }
 
 
+// 같은 파일 하단(L14224)에 정의된 헬퍼 — 앞에서 사용하기 위한 forward decl
+bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int width, int height);
+
 void ImGui_MainMenu()
 {
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if(ImGui::MenuItem("FDS Manager"))
-            {
-                State.Display_FDS = true;
-            }
-            if(ImGui::MenuItem("TLE Manager"))
-            {
-                State.Display_TLE = true;
-            }
-            if(ImGui::MenuItem("S-band Manager"))
-            {
-                State.Display_Sband = true;
-            }
-            ImGui::EndMenu();
-        }
 
-        if (ImGui::BeginMenu("Hardware"))
-        {
-            if(ImGui::MenuItem("GS100 Param 0"))
-            {
-                State.Display_paramt0 = true;
-            }
-            if(ImGui::MenuItem("GS100 Param 1"))
-            {
-                State.Display_paramt1 = true;
-            }
-            if(ImGui::MenuItem("GS100 Param 5"))
-            {
-                State.Display_paramt5 = true;
-            }
-            ImGui::EndMenu();
-        }
-
-        if (ImGui::BeginMenu("Test"))
-        {
-            if (ImGui::MenuItem("Scan AX100"))
-            {
-                
-                pthread_create(&p_thread[4], NULL, csp_ping_scan, NULL); 
-            }
-            if (ImGui::MenuItem("Start Signaltest"))
-            {
-                pthread_create(&p_thread[10], NULL, &SignalTest, NULL); 
-            }
-            if (ImGui::MenuItem("Stop Signaltest"))
-            {
-                State.Signaltest = false;
-                pthread_join(p_thread[10], NULL); 
-            }
-            if(State.Debugmode)
-            {
-                if (ImGui::MenuItem("Debug Mode Off"))
-                {
-                    csp_log_info("Set Debug : False.");
-                    State.Debugmode = false;
-                    csp_debug_set_level(CSP_INFO, false);
-                    // csp_debug_toggle_level(CSP_BUFFER);
-                    csp_debug_set_level(CSP_PACKET, false);
-                    csp_debug_set_level(CSP_PROTOCOL, false);
-                    // csp_debug_toggle_level(CSP_LOCK);
-                    
-                }
-                    
-            }
-            else
-            {
-                if (ImGui::MenuItem("Debug Mode On"))
-                {
-                    State.Debugmode = true;
-                    csp_debug_set_level(CSP_INFO, true);
-                    // csp_debug_toggle_level(CSP_BUFFER);
-                    csp_debug_set_level(CSP_PACKET, true);
-                    csp_debug_set_level(CSP_PROTOCOL, true);
-                    // csp_debug_toggle_level(CSP_LOCK);
-                    csp_log_info("Set Debug : True.");
-                }
-                    
-            }
-            if (ImGui::MenuItem("TLE Update(Auto)"))
-            {
-                TLE_Autoupdate_Test();
-            }
-            if (ImGui::MenuItem("Segfault"))
-            {
-                int* ptr = nullptr;
-                *ptr = 42;
-            }
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMainMenuBar();
+    // 로고 텍스처 로드
+    static GLuint logo_tex = 0;
+    static bool   logo_loaded = false;
+    if (!logo_loaded) {
+        logo_loaded = true;
+        LoadTextureFromFile("../bin/image/yonsei_logo.png", &logo_tex, 0, 0);
     }
+
+    float W = ImGui::GetIO().DisplaySize.x;
+    float H = ImGui::GetIO().DisplaySize.y;
+
+    // ───── 헤더 높이 / 콘텐츠 상수 ─────
+    const float header_h  = H * 0.10f;                    // 0.08 → 0.10 (헤더 25% 더 두꺼움)
+    const float strip_h   = header_h * 0.5f;
+    const float pad       = 12.0f;
+    const float gap       = 24.0f;
+    const float logo_size = header_h * 0.85f;              // 비율 기반 (= 116 at H=1370)
+    const float logo_pad  = (header_h - logo_size) * 0.5f; // 자동 계산 (= 10.5)
+    const float zone_pad  = 16.0f;   // Zone 2/3 내부 좌측 마진
+
+
+    // ───── 콘텐츠 폭 측정 → brand_w 결정 (콘텐츠에 딱 맞춤) ─────
+    ImGui::PushFont(mim::font_title);
+    const float title_w = ImGui::CalcTextSize("Yonsei Cubesat GS").x;
+    ImGui::PopFont();
+
+    ImGui::PushFont(mim::font_subtitle);
+    const float subtitle_w = ImGui::CalcTextSize("Yonsei University - Astrodynamics & Control Lab").x;
+    ImGui::PopFont();
+
+    const float group_w   = (title_w > subtitle_w ? title_w : subtitle_w);
+    const float content_w = logo_size + gap + group_w;
+    const float brand_w   = content_w + logo_size * 0.3 + 2 * pad;  // 우측에 로고 폭만큼 마진 추가
+
+    // ───── 최상위 헤더 윈도우 ─────
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImVec2(W, header_h));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, BG_MAIN);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGuiWindowFlags hflags =
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+        | ImGuiWindowFlags_NoMove   | ImGuiWindowFlags_NoCollapse
+        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+        | ImGuiWindowFlags_NoBringToFrontOnFocus;
+    ImGui::Begin("##header", NULL, hflags);
+
+    // ════════════════════════════════════════════════
+    //  Zone 1 — 로고 + 타이틀 (왼쪽, 전체 높이)
+    // ════════════════════════════════════════════════
+    ImGui::BeginChild("##zone_brand", ImVec2(brand_w, header_h), false,
+                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    {
+        // 로고 위치 — 좌측 정렬 (pad만 띄움)
+        ImGui::SetCursorPos(ImVec2(pad, pad));
+
+        // 로고 placeholder — border + 옅은 fill로 정사각형 가시화 (이미지 import 시 교체)
+        if (logo_tex) 
+        {
+            ImGui::Image((ImTextureID)(intptr_t)logo_tex, ImVec2(logo_size, logo_size));
+        } 
+        else 
+        {
+            // 폴백: 파일 못 찾으면 placeholder 사각형 (D4 코드 그대로)
+            ImVec2 logo_tl = ImGui::GetCursorScreenPos();
+            ImVec2 logo_br = ImVec2(logo_tl.x + logo_size, logo_tl.y + logo_size);
+            ImGui::GetWindowDrawList()->AddRectFilled(logo_tl, logo_br, U32(BG_PANEL2), 6.0f);
+            ImGui::GetWindowDrawList()->AddRect      (logo_tl, logo_br, U32(BORDER),   6.0f, 0, 1.5f);
+            ImGui::Dummy(ImVec2(logo_size, logo_size));
+        }
+        ImGui::SameLine(0, gap);
+
+        // 타이틀+부제 그룹 세로 중앙 정렬 (D2 그대로)
+        const float title_h    = mim::font_title    ? mim::font_title->FontSize    : ImGui::GetFontSize();
+        const float subtitle_h = mim::font_subtitle ? mim::font_subtitle->FontSize : ImGui::GetFontSize();
+        const float group_h    = title_h + subtitle_h + ImGui::GetStyle().ItemSpacing.y;
+        ImGui::SetCursorPosY((header_h - group_h) * 0.5f);
+
+        ImGui::BeginGroup();
+            ImGui::PushFont(mim::font_title);
+            ImGui::PushStyleColor(ImGuiCol_Text, TEXT_HI);
+            ImGui::TextUnformatted("Yonsei Cubesat GS");
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+
+            ImGui::PushFont(mim::font_subtitle);
+            ImGui::PushStyleColor(ImGuiCol_Text, TEXT_DIM);
+            ImGui::TextUnformatted("Yonsei University - Astrodynamics & Control Lab");
+            ImGui::PopStyleColor();
+            ImGui::PopFont();
+        ImGui::EndGroup();
+    }
+    ImGui::EndChild();
+    ImGui::SameLine(0, 0);
+
+    // ════════════════════════════════════════════════
+    //  Zone 2 + Zone 3 — 우측 컬럼 (메뉴 위, 스테이터스 아래)
+    // ════════════════════════════════════════════════
+    ImGui::BeginGroup();
+    {
+        float fp_y = (strip_h - ImGui::GetFontSize()) * 0.5f;
+        if (fp_y < 4.0f) fp_y = 4.0f;
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, fp_y));
+        ImGui::BeginChild("##zone_menu", ImVec2(0, strip_h),
+                false,
+                ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar
+                | ImGuiWindowFlags_NoScrollWithMouse);
+        {
+            if (ImGui::BeginMenuBar())
+            {
+                // 좌측 마진 — 구분선과 메뉴 텍스트 사이 공백
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + zone_pad);
+
+                // 메뉴 항목을 strip 세로 중앙에 정렬 (메뉴바 자체는 tall, 항목은 normal 높이)
+                float item_h = ImGui::GetFrameHeight();
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (strip_h - item_h) * 0.5f);
+
+                if (ImGui::BeginMenu("File"))
+                {
+                    if(ImGui::MenuItem("FDS Manager"))    State.Display_FDS = true;
+                    if(ImGui::MenuItem("TLE Manager"))    State.Display_TLE = true;
+                    if(ImGui::MenuItem("S-band Manager")) State.Display_Sband = true;
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Hardware"))
+                {
+                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 1")) State.Display_paramt1 = true;
+                    if(ImGui::MenuItem("GS100 Param 5")) State.Display_paramt5 = true;
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Test"))
+                {
+                    if (ImGui::MenuItem("Scan AX100"))
+                        pthread_create(&p_thread[4], NULL, csp_ping_scan, NULL);
+                    if (ImGui::MenuItem("Start Signaltest"))
+                        pthread_create(&p_thread[10], NULL, &SignalTest, NULL);
+                    if (ImGui::MenuItem("Stop Signaltest"))
+                    {
+                        State.Signaltest = false;
+                        pthread_join(p_thread[10], NULL);
+                    }
+                    if (State.Debugmode)
+                    {
+                        if (ImGui::MenuItem("Debug Mode Off"))
+                        {
+                            csp_log_info("Set Debug : False.");
+                            State.Debugmode = false;
+                            csp_debug_set_level(CSP_INFO, false);
+                            csp_debug_set_level(CSP_PACKET, false);
+                            csp_debug_set_level(CSP_PROTOCOL, false);
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui::MenuItem("Debug Mode On"))
+                        {
+                            State.Debugmode = true;
+                            csp_debug_set_level(CSP_INFO, true);
+                            csp_debug_set_level(CSP_PACKET, true);
+                            csp_debug_set_level(CSP_PROTOCOL, true);
+                            csp_log_info("Set Debug : True.");
+                        }
+                    }
+                    if (ImGui::MenuItem("TLE Update(Auto)")) TLE_Autoupdate_Test();
+                    if (ImGui::MenuItem("Segfault"))
+                    {
+                        int* ptr = nullptr;
+                        *ptr = 42;
+                    }
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+        }
+        ImGui::EndChild();
+        ImGui::PopStyleVar();   // ← BeginChild가 strip 높이 확정 후 즉시 Pop
+
+        // ── Zone 3 — 스테이터스 ──
+        ImGui::BeginChild("##zone_status", ImVec2(0, strip_h), false,
+                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        {
+            // 스테이터스 콘텐츠 정렬
+            float content_h = ImGui::GetTextLineHeight();
+            ImGui::SetCursorPos(ImVec2(zone_pad, (strip_h - content_h) * 0.5f));
+            float zone_w = ImGui::GetContentRegionAvail().x;
+            ImGui_StatusBar_Body(zone_w);
+        }
+        ImGui::EndChild();
+    }
+    ImGui::EndGroup();
+
+    // ── Zone 구분선 (BG_DEEP, 얇은 1px) ──
+    ImVec2 hpos       = ImGui::GetWindowPos();
+    ImDrawList* hdl   = ImGui::GetWindowDrawList();
+    const ImU32 sep_c = U32(BORDER_HI);
+    const float sep_t = 2.0f;
+
+    // 세로선: Zone 1 (brand) ↔ Zone 2/3
+    hdl->AddLine(
+        ImVec2(hpos.x + brand_w, hpos.y),
+        ImVec2(hpos.x + brand_w, hpos.y + header_h),
+        sep_c, sep_t);
+
+    // 가로선: Zone 2 (menu) ↔ Zone 3 (status)
+    hdl->AddLine(
+        ImVec2(hpos.x + brand_w, hpos.y + strip_h),
+        ImVec2(hpos.x + W,       hpos.y + strip_h),
+        sep_c, sep_t);
+
+    ImGui::End();
+    ImGui::PopStyleVar();    // WindowPadding
+    ImGui::PopStyleColor();  // WindowBg
 }
 
 void ImGui_ModelWindow(float fontscale)
@@ -709,6 +831,7 @@ void ImGui_AutoPilotWindow(float fontscale)
 void ImGui_FrequencyWindow_Body(float fontscale)
 {
     {   
+    
     ImGui::SetWindowFontScale(fontscale);
     ImGui::Text("Center Frequency");
     ImGui::InputDouble("##centerfrequency(Hz)", &setup->default_freq, NULL, NULL);
@@ -14647,70 +14770,70 @@ void Console::ChangeWindowSize(float x_pos, float y_pos, float width, float heig
 //     style->Colors[ImGuiCol_WindowBg].w = 0.90f;
 // }
 
-void ImGuiCustomStyle(ImGuiStyle* style)
-{
-    style->WindowPadding = ImVec2(15, 15);
-	style->WindowRounding = 5.0f;
-	style->FramePadding = ImVec2(5, 5);
-	style->FrameRounding = 4.0f;
-	style->ItemSpacing = ImVec2(12, 8);
-	style->ItemInnerSpacing = ImVec2(8, 6);
-	style->IndentSpacing = 25.0f;
-	style->ScrollbarSize = 15.0f;
-	style->ScrollbarRounding = 9.0f;
-	style->GrabMinSize = 5.0f;
-	style->GrabRounding = 3.0f;
+// void ImGuiCustomStyle(ImGuiStyle* style)
+// {
+//     style->WindowPadding = ImVec2(15, 15);
+// 	style->WindowRounding = 5.0f;
+// 	style->FramePadding = ImVec2(5, 5);
+// 	style->FrameRounding = 4.0f;
+// 	style->ItemSpacing = ImVec2(12, 8);
+// 	style->ItemInnerSpacing = ImVec2(8, 6);
+// 	style->IndentSpacing = 25.0f;
+// 	style->ScrollbarSize = 15.0f;
+// 	style->ScrollbarRounding = 9.0f;
+// 	style->GrabMinSize = 5.0f;
+// 	style->GrabRounding = 3.0f;
 
-    //Window Background
-    ImVec4 Colorset_1 = ImVec4(0.141f, 0.364f, 0.376f, 1.00f);
-    //Disabled
-    ImVec4 Colorset_2 = ImVec4(0.24f, 0.23f, 0.29f, 1.00f);
-    //Active Title
-    ImVec4 Colorset_3 = ImVec4(0.235f, 0.603f, 0.623f, 1.00f);
-    //General Title, Button
-    ImVec4 Colorset_4 = ImVec4(0.180f, 0.462f, 0.478f, 1.00f);
-    //ScrollBar
-    ImVec4 Colorset_5 = ImVec4(0.80f, 0.80f, 0.83f, 0.31f);
-    //Active Button
-    ImVec4 Colorset_6 = ImVec4(0.56f, 0.56f, 0.58f, 1.00f);
+//     //Window Background
+//     ImVec4 Colorset_1 = ImVec4(0.141f, 0.364f, 0.376f, 1.00f);
+//     //Disabled
+//     ImVec4 Colorset_2 = ImVec4(0.24f, 0.23f, 0.29f, 1.00f);
+//     //Active Title
+//     ImVec4 Colorset_3 = ImVec4(0.235f, 0.603f, 0.623f, 1.00f);
+//     //General Title, Button
+//     ImVec4 Colorset_4 = ImVec4(0.180f, 0.462f, 0.478f, 1.00f);
+//     //ScrollBar
+//     ImVec4 Colorset_5 = ImVec4(0.80f, 0.80f, 0.83f, 0.31f);
+//     //Active Button
+//     ImVec4 Colorset_6 = ImVec4(0.56f, 0.56f, 0.58f, 1.00f);
  
-	style->Colors[ImGuiCol_Text] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
-	style->Colors[ImGuiCol_TextDisabled] = Colorset_2;
-	style->Colors[ImGuiCol_WindowBg] = Colorset_1;
-	style->Colors[ImGuiCol_PopupBg] = Colorset_1;
-	style->Colors[ImGuiCol_Border] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
-	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.92f, 0.91f, 0.88f, 0.00f);
-	style->Colors[ImGuiCol_FrameBg] = Colorset_4;
-	style->Colors[ImGuiCol_FrameBgHovered] = Colorset_2;
-	style->Colors[ImGuiCol_FrameBgActive] = Colorset_6;
-	style->Colors[ImGuiCol_TitleBg] = Colorset_4;
-	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 0.98f, 0.95f, 0.75f);
-	style->Colors[ImGuiCol_TitleBgActive] = Colorset_3;
-	style->Colors[ImGuiCol_MenuBarBg] = Colorset_4;
-	style->Colors[ImGuiCol_ScrollbarBg] = Colorset_1;
-	style->Colors[ImGuiCol_ScrollbarGrab] = Colorset_5 ;
-	style->Colors[ImGuiCol_ScrollbarGrabHovered] = Colorset_6;
-	style->Colors[ImGuiCol_ScrollbarGrabActive] = Colorset_5;
-	style->Colors[ImGuiCol_CheckMark] = Colorset_5 ;
-	style->Colors[ImGuiCol_SliderGrab] = Colorset_5 ;
-	style->Colors[ImGuiCol_SliderGrabActive] = Colorset_1;
-	style->Colors[ImGuiCol_Button] = Colorset_4;
-	style->Colors[ImGuiCol_ButtonHovered] = Colorset_2;
-	style->Colors[ImGuiCol_ButtonActive] = Colorset_6;
-	style->Colors[ImGuiCol_Header] = Colorset_4;
-	style->Colors[ImGuiCol_HeaderHovered] = Colorset_6;
-	style->Colors[ImGuiCol_HeaderActive] = Colorset_1;
-	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	style->Colors[ImGuiCol_ResizeGripHovered] = Colorset_6;
-	style->Colors[ImGuiCol_ResizeGripActive] = Colorset_1;
-	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
-	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
-	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
-	style->Colors[ImGuiCol_TextSelectedBg] = Colorset_3;
-    style->Colors[ImGuiCol_Tab] = Colorset_4;
-    style->Colors[ImGuiCol_TabActive] = Colorset_3;
-}
+// 	style->Colors[ImGuiCol_Text] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
+// 	style->Colors[ImGuiCol_TextDisabled] = Colorset_2;
+// 	style->Colors[ImGuiCol_WindowBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_PopupBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_Border] = ImVec4(0.972f, 0.733f, 0.701f, 1.00f);
+// 	style->Colors[ImGuiCol_BorderShadow] = ImVec4(0.92f, 0.91f, 0.88f, 0.00f);
+// 	style->Colors[ImGuiCol_FrameBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_FrameBgHovered] = Colorset_2;
+// 	style->Colors[ImGuiCol_FrameBgActive] = Colorset_6;
+// 	style->Colors[ImGuiCol_TitleBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_TitleBgCollapsed] = ImVec4(1.00f, 0.98f, 0.95f, 0.75f);
+// 	style->Colors[ImGuiCol_TitleBgActive] = Colorset_3;
+// 	style->Colors[ImGuiCol_MenuBarBg] = Colorset_4;
+// 	style->Colors[ImGuiCol_ScrollbarBg] = Colorset_1;
+// 	style->Colors[ImGuiCol_ScrollbarGrab] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_ScrollbarGrabHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_ScrollbarGrabActive] = Colorset_5;
+// 	style->Colors[ImGuiCol_CheckMark] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_SliderGrab] = Colorset_5 ;
+// 	style->Colors[ImGuiCol_SliderGrabActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_Button] = Colorset_4;
+// 	style->Colors[ImGuiCol_ButtonHovered] = Colorset_2;
+// 	style->Colors[ImGuiCol_ButtonActive] = Colorset_6;
+// 	style->Colors[ImGuiCol_Header] = Colorset_4;
+// 	style->Colors[ImGuiCol_HeaderHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_HeaderActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_ResizeGrip] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+// 	style->Colors[ImGuiCol_ResizeGripHovered] = Colorset_6;
+// 	style->Colors[ImGuiCol_ResizeGripActive] = Colorset_1;
+// 	style->Colors[ImGuiCol_PlotLines] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
+// 	style->Colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
+// 	style->Colors[ImGuiCol_PlotHistogram] = ImVec4(0.40f, 0.39f, 0.38f, 0.63f);
+// 	style->Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.25f, 1.00f, 0.00f, 1.00f);
+// 	style->Colors[ImGuiCol_TextSelectedBg] = Colorset_3;
+//     style->Colors[ImGuiCol_Tab] = Colorset_4;
+//     style->Colors[ImGuiCol_TabActive] = Colorset_3;
+// }
 
 
 bool popup_setup(Setup * setup)
@@ -15714,7 +15837,7 @@ void ImGui_SatelliteTabs(float W) {
         ImVec4 col  = GetVisibleSatColor(slot);
 
         ImGui::PushStyleColor(ImGuiCol_Button,
-            active ? BG_DEEP : ImVec4(0.078f, 0.176f, 0.204f, 1.0f));
+            active ? BG_DEEP : BG_PANEL2);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, BG_MAIN);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,  BG_DEEP);
 
@@ -15763,11 +15886,7 @@ void ImGui_SatelliteTabs(float W) {
     ImGui::PopStyleColor();
 }
 
-void ImGui_StatusBar(float W) {
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.086f, 0.220f, 0.259f, 1));
-    ImGui::BeginChild("##statusbar", ImVec2(W, 30), false,
-                      ImGuiWindowFlags_NoScrollbar);
-
+void ImGui_StatusBar_Body(float W) {
     auto pill = [](const char* name, bool ok) {
         Dot(ok ? OK : ERR);
         ImGui::SameLine(0, 4);
@@ -15786,16 +15905,19 @@ void ImGui_StatusBar(float W) {
         ImGui::Text("Track:");
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 6);
+        Dot(GetVisibleSatColor(sat));
+        ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, GetVisibleSatColor(sat));
-        ImGui::Text("● %s", State.Satellites[sat]->Name());
+        ImGui::Text("%s", State.Satellites[sat]->Name());
         ImGui::PopStyleColor();
     }
 
-    // 활성 모드
-    ImGui::SameLine(W - 380);
+    ImGui::SameLine(W - 520);
     auto mode = [](const char* n, bool on) {
+        Dot(on ? OK : TEXT_DIM);
+        ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, on ? OK : TEXT_DIM);
-        ImGui::Text("%s %s", on ? "●" : "○", n);
+        ImGui::Text("%s", n);
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 10);
     };
@@ -15803,7 +15925,14 @@ void ImGui_StatusBar(float W) {
     mode("Doppler",   State.Doppler);
     mode("AutoPilot", State.Autopilot);
     mode("AMP",       State.AMPON);
+}
 
+// 기존 함수는 컨테이너(BeginChild)만 담당하고 본체 호출.
+// 다른 패턴 (TrackWindow_Body, FrequencyWindow_Body 등)과 동일.
+void ImGui_StatusBar(float W) {
+    ImGui::PushStyleColor(ImGuiCol_ChildBg, BG_MAIN);
+    ImGui::BeginChild("##statusbar", ImVec2(W, 30), false,ImGuiWindowFlags_NoScrollbar);
+    ImGui_StatusBar_Body(W);
     ImGui::EndChild();
     ImGui::PopStyleColor();
 }
@@ -15812,29 +15941,28 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     float W = ImGui::GetIO().DisplaySize.x;
     float H = ImGui::GetIO().DisplaySize.y;
 
-    // ───── 1. 위성 탭 (최상위)
-    ImGui::SetNextWindowPos(ImVec2(0, MENUPADDING));
-    ImGui::SetNextWindowSize(ImVec2(W, H * 0.06f));
-    ImGui::Begin("##sattab_host", NULL, mim_winflags);
+    // ───── 레이아웃 비율
+    const float menu_h    = H * 0.10f; 
+    const float sat_h     = H * 0.07f;
+    const float console_h = H * 0.22f;
+    // status_h 삭제 — 메뉴바에 흡수
+
+    // ───── 1. 위성 탭
+    ImGui::SetNextWindowPos(ImVec2(0, menu_h));
+    ImGui::SetNextWindowSize(ImVec2(W, sat_h));
+    ImGui::Begin("##sattab_host", NULL,
+             mim_winflags | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui_SatelliteTabs(W);
     ImGui::End();
 
-    // ───── 2. Status bar
-    ImGui::SetNextWindowPos(ImVec2(0, MENUPADDING + H * 0.06f));
-    ImGui::SetNextWindowSize(ImVec2(W, H * 0.05f));
-    ImGui::Begin("##status_host", NULL, mim_winflags);
-    ImGui_StatusBar(W);
-    ImGui::End();
-
-    // ───── 3. 기능 탭 + 워크스페이스
-    float top = MENUPADDING + H * 0.11f;
-    float console_h = H * 0.25f;
+    // ───── 2. 기능 탭 + 워크스페이스
+    float top = menu_h + sat_h;
     ImGui::SetNextWindowPos(ImVec2(0, top));
     ImGui::SetNextWindowSize(ImVec2(W, H - top - console_h));
     ImGui::Begin("##workspace_host", NULL, mim_winflags);
 
     if (ImGui::BeginTabBar("##functabs", ImGuiTabBarFlags_None)) {
-        if (ImGui::BeginTabItem("① Pre-Pass")) {
+        if (ImGui::BeginTabItem("1. Pre-Pass")) {
             State.ActiveFuncTab = 0;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
@@ -15851,7 +15979,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("② Pass Operation")) {
+        if (ImGui::BeginTabItem("2. Pass Operation")) {
             State.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;

@@ -22,7 +22,7 @@
 #define DISPLAY_COL2            960
 #define DISPLAY_COL2_5          680
 #define DISPLAY_COL3            1300
-#define MENUPADDING             40
+#define MENUPADDING             64
 #define DISPLAY_ROW1            355
 #define DISPLAY_ROW2            600
 #define DISPLAY_ROW3            880
@@ -88,6 +88,7 @@ void ImGui_CommandWindow_Body(float fontscale);
 void ImGui_BeaconWindow_Body(float fontscale);
 // 신규
 void ImGui_StatusBar(float ReactiveWidth);
+void ImGui_StatusBar_Body(float ReactiveWidth);
 void ImGui_SatelliteTabs(float ReactiveWidth);
 
 #endif

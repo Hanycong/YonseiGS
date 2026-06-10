@@ -139,12 +139,15 @@ int main(int, char**)
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     // Setup Dear ImGui style
     ImGuiStyle * style = &ImGui::GetStyle();
-    ImGuiCustomStyle(style);
+    // 2026.06.10 테마 색 변경
+    mim::ApplyTheme(style);
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
     // Load Fonts
-    io.Fonts->AddFontFromFileTTF(fontfile, 30.0f);
+    io.Fonts->AddFontFromFileTTF(fontfile, 30.0f);       // [0] 기본 (Inconsolata 30)
+    mim::font_title    = io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans-Bold.ttf", 36.0f);   // [1] 타이틀 bold 큰 글씨
+    mim::font_subtitle = io.Fonts->AddFontFromFileTTF(fontfile, 20.0f);  
     
     ImVec4 clear_color = ImVec4(0.925f, 0.870f, 0.945f, 1.00f);  
     int WinWidth;
@@ -261,7 +264,7 @@ if (should_close) {
             bg->AddRectFilled(
                 ImVec2(0, 0),
                 io.DisplaySize,
-                ImColor(0.141f, 0.364f, 0.376f, 1.00f)  // Colorset_1과 동일
+                mim::U32(mim::BG_DEEP)                  // 테마의 최심 배경 (#0a0e1a)
             );
 
 
