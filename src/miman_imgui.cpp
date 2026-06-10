@@ -229,11 +229,14 @@ void ImGui_MainMenu()
     float H = ImGui::GetIO().DisplaySize.y;
 
     // ───── 헤더 높이 / 콘텐츠 상수 ─────
-    const float header_h  = H * 0.08f;
+    const float header_h  = H * 0.10f;                    // 0.08 → 0.10 (헤더 25% 더 두꺼움)
     const float strip_h   = header_h * 0.5f;
-    const float pad       = 8.0f;
-    const float gap       = 12.0f;
-    const float logo_size = header_h - 2 * pad;
+    const float pad       = 12.0f;
+    const float gap       = 24.0f;
+    const float logo_size = header_h * 0.85f;              // 비율 기반 (= 116 at H=1370)
+    const float logo_pad  = (header_h - logo_size) * 0.5f; // 자동 계산 (= 10.5)
+    const float zone_pad  = 16.0f;   // Zone 2/3 내부 좌측 마진
+
 
     // ───── 콘텐츠 폭 측정 → brand_w 결정 (콘텐츠에 딱 맞춤) ─────
     ImGui::PushFont(mim::font_title);
@@ -246,7 +249,7 @@ void ImGui_MainMenu()
 
     const float group_w   = (title_w > subtitle_w ? title_w : subtitle_w);
     const float content_w = logo_size + gap + group_w;
-    const float brand_w   = content_w + 2 * pad;          // 좌·우 pad만 추가, 빈 공간 0
+    const float brand_w   = content_w + logo_size * 0.3 + 2 * pad;  // 우측에 로고 폭만큼 마진 추가
 
     // ───── 최상위 헤더 윈도우 ─────
     ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -257,13 +260,15 @@ void ImGui_MainMenu()
     ImGuiWindowFlags hflags =
         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
         | ImGuiWindowFlags_NoMove   | ImGuiWindowFlags_NoCollapse
-        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBringToFrontOnFocus;
+        | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+        | ImGuiWindowFlags_NoBringToFrontOnFocus;
     ImGui::Begin("##header", NULL, hflags);
 
     // ════════════════════════════════════════════════
     //  Zone 1 — 로고 + 타이틀 (왼쪽, 전체 높이)
     // ════════════════════════════════════════════════
-    ImGui::BeginChild("##zone_brand", ImVec2(brand_w, header_h), false, ImGuiWindowFlags_NoScrollbar);
+    ImGui::BeginChild("##zone_brand", ImVec2(brand_w, header_h), false,
+                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     {
         // 로고 위치 — 좌측 정렬 (pad만 띄움)
         ImGui::SetCursorPos(ImVec2(pad, pad));
@@ -316,12 +321,19 @@ void ImGui_MainMenu()
         if (fp_y < 4.0f) fp_y = 4.0f;
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8.0f, fp_y));
         ImGui::BeginChild("##zone_menu", ImVec2(0, strip_h),
-                        false,
-                        ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar);
-        ImGui::PopStyleVar();   // ← BeginChild가 strip 높이 확정 후 즉시 Pop
+                false,
+                ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoScrollbar
+                | ImGuiWindowFlags_NoScrollWithMouse);
         {
             if (ImGui::BeginMenuBar())
             {
+                // 좌측 마진 — 구분선과 메뉴 텍스트 사이 공백
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + zone_pad);
+
+                // 메뉴 항목을 strip 세로 중앙에 정렬 (메뉴바 자체는 tall, 항목은 normal 높이)
+                float item_h = ImGui::GetFrameHeight();
+                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (strip_h - item_h) * 0.5f);
+
                 if (ImGui::BeginMenu("File"))
                 {
                     if(ImGui::MenuItem("FDS Manager"))    State.Display_FDS = true;
@@ -381,17 +393,39 @@ void ImGui_MainMenu()
             }
         }
         ImGui::EndChild();
+        ImGui::PopStyleVar();   // ← BeginChild가 strip 높이 확정 후 즉시 Pop
 
         // ── Zone 3 — 스테이터스 ──
-        ImGui::BeginChild("##zone_status", ImVec2(0, strip_h),
-                          false, ImGuiWindowFlags_NoScrollbar);
+        ImGui::BeginChild("##zone_status", ImVec2(0, strip_h), false,
+                  ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         {
+            // 스테이터스 콘텐츠 정렬
+            float content_h = ImGui::GetTextLineHeight();
+            ImGui::SetCursorPos(ImVec2(zone_pad, (strip_h - content_h) * 0.5f));
             float zone_w = ImGui::GetContentRegionAvail().x;
             ImGui_StatusBar_Body(zone_w);
         }
         ImGui::EndChild();
     }
     ImGui::EndGroup();
+
+    // ── Zone 구분선 (BG_DEEP, 얇은 1px) ──
+    ImVec2 hpos       = ImGui::GetWindowPos();
+    ImDrawList* hdl   = ImGui::GetWindowDrawList();
+    const ImU32 sep_c = U32(BORDER_HI);
+    const float sep_t = 2.0f;
+
+    // 세로선: Zone 1 (brand) ↔ Zone 2/3
+    hdl->AddLine(
+        ImVec2(hpos.x + brand_w, hpos.y),
+        ImVec2(hpos.x + brand_w, hpos.y + header_h),
+        sep_c, sep_t);
+
+    // 가로선: Zone 2 (menu) ↔ Zone 3 (status)
+    hdl->AddLine(
+        ImVec2(hpos.x + brand_w, hpos.y + strip_h),
+        ImVec2(hpos.x + W,       hpos.y + strip_h),
+        sep_c, sep_t);
 
     ImGui::End();
     ImGui::PopStyleVar();    // WindowPadding
@@ -15771,7 +15805,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     float H = ImGui::GetIO().DisplaySize.y;
 
     // ───── 레이아웃 비율
-    const float menu_h    = H * 0.08f;   // 0.10 → 0.08 (사용자 피드백: 너무 두꺼움)
+    const float menu_h    = H * 0.10f; 
     const float sat_h     = H * 0.07f;
     const float console_h = H * 0.22f;
     // status_h 삭제 — 메뉴바에 흡수
@@ -15779,7 +15813,8 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     // ───── 1. 위성 탭
     ImGui::SetNextWindowPos(ImVec2(0, menu_h));
     ImGui::SetNextWindowSize(ImVec2(W, sat_h));
-    ImGui::Begin("##sattab_host", NULL, mim_winflags);
+    ImGui::Begin("##sattab_host", NULL,
+             mim_winflags | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui_SatelliteTabs(W);
     ImGui::End();
 
