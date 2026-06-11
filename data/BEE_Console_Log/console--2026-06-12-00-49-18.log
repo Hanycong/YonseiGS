@@ -1,0 +1,14 @@
+2026-06-12 00:49
+[00:49:26]  Connect to Switch Box..............Failed.
+[00:49:26]  Connect to Rotator.................Failed.
+[00:49:26]  Connect to GS100..................Success.
+[00:49:26]  TM Port 13 bind success.
+[00:49:26]  BCN Port 31 bind success.
+[00:49:26]  RPT Port 25 bind success.
+[00:49:26]  Rotator Read Failed. Please Check Again.
+[00:49:26]  Event Port 27 bind success.
+[00:49:26]  Response Port 23 bind success.
+[00:49:29]  TLE "cubesat" Download Completed.
+[00:49:30]  Cannot Read 20 parameters of Table 0.
+[00:49:32]  Cannot Read 13 parameters of Table 1.
+[00:49:36]  Cannot Read 18 parameters of Table 5.

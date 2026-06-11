@@ -389,6 +389,22 @@ void ImGui_MainMenu()
                     }
                     ImGui::EndMenu();
                 }
+                if (ImGui::BeginMenu("Tools"))
+                {
+                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Debug"))
+                {
+                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Help"))
+                {
+                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    ImGui::EndMenu();
+                }
+                
                 ImGui::EndMenuBar();
             }
         }
@@ -15217,7 +15233,7 @@ bool popup_load()
 }
 
 //For Temporary multiple tle operation
-char localtleurl[256] = "/home/miman/Downloads/NORAD_TLE.txt";
+char localtleurl[256] = "/home/hyyang/GS_refactoring/YonseiGS/home/TLE/NORAD_TLE.txt";
 
 bool popup_tle()
 {
@@ -15320,10 +15336,11 @@ bool popup_tle()
                         sprintf(SelectButtonTextBuf, "Select##TLE%d", tlepopupindex);
                         if(ImGui::Button(SelectButtonTextBuf, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
                         {
-                            State.Satellites[tlepopupindex]->use = true;
-                            if(State.Satellites[tlepopupindex]->cal == false)
+                           State.Satellites[tlepopupindex]->use = true;
+                           if(State.Satellites[tlepopupindex]->cal == false)
                                 State.Satellites[tlepopupindex]->Refresh(State.Satellites[tlepopupindex]->tle, State.Satellites[tlepopupindex]->obs, true, true);
-                            SatelliteModelInitialize(tlepopupindex);
+                           SatelliteModelInitialize(tlepopupindex);
+                           mim::Initialize_SatContext();   // ← VisibleSats 재계산
                         }
                     }
                     else
@@ -15334,6 +15351,7 @@ bool popup_tle()
                         {
                             State.Satellites[tlepopupindex]->use = false;
                             SatelliteModelDelete(tlepopupindex);
+                            mim::Initialize_SatContext();   // ← VisibleSats 재계산
                         }
                         ImGui::PopStyleColor();
                     }
@@ -15855,21 +15873,42 @@ void ImGui_SatelliteTabs(float W) {
         dl->AddCircleFilled(ImVec2(p.x + 14, p.y + 14), 5,
                             ImGui::ColorConvertFloat4ToU32(col));
 
-        dl->AddText(NULL, 14, ImVec2(p.x + 28, p.y + 8),
+        // dl->AddText(NULL, 14, ImVec2(p.x + 28, p.y + 8),
+        //             ImGui::ColorConvertFloat4ToU32(active ? TEXT_HI : TEXT),
+        //             State.Satellites[sat]->Name());
+
+        // char status[64];
+        // if (sat == GetNowTracking() && State.Engage) {
+        //     snprintf(status, sizeof(status), "● Tracking");
+        // } else {
+        //     // 다음 AOS까지 시간 계산
+        //     DateTime now = DateTime::Now(false);
+        //     double sec = (State.Satellites[sat]->_nextaos[0] - now).TotalSeconds();
+        //     int hh = (int)(sec/3600), mm = (int)((sec - hh*3600)/60);
+        //     snprintf(status, sizeof(status), "AOS in %02d:%02d", hh, mm);
+        // }
+        // dl->AddText(NULL, 11, ImVec2(p.x + 28, p.y + 26),
+        //             ImGui::ColorConvertFloat4ToU32(TEXT_DIM), status);
+
+        // 위성 이름 — DroidSans-Bold 18pt (네이티브 42pt를 다운스케일이지만 bold 유지)
+        dl->AddText(mim::font_title, 18.0f, ImVec2(p.x + 24, p.y + 6),
                     ImGui::ColorConvertFloat4ToU32(active ? TEXT_HI : TEXT),
                     State.Satellites[sat]->Name());
 
         char status[64];
         if (sat == GetNowTracking() && State.Engage) {
-            snprintf(status, sizeof(status), "● Tracking");
+            snprintf(status, sizeof(status), "TRACKING");
         } else {
-            // 다음 AOS까지 시간 계산
             DateTime now = DateTime::Now(false);
             double sec = (State.Satellites[sat]->_nextaos[0] - now).TotalSeconds();
-            int hh = (int)(sec/3600), mm = (int)((sec - hh*3600)/60);
-            snprintf(status, sizeof(status), "AOS in %02d:%02d", hh, mm);
+            if (sec < 0) sec = 0;                          // CLAUDE.md known defect 가드
+            int hh = (int)(sec / 3600);
+            int mm = (int)((sec - hh * 3600) / 60);
+            int ss = (int)(sec - hh * 3600 - mm * 60);
+            snprintf(status, sizeof(status), "NEXT AOS IN %02d:%02d:%02d", hh, mm, ss);
         }
-        dl->AddText(NULL, 11, ImVec2(p.x + 28, p.y + 26),
+        // 부제 — Inconsolata 11pt (네이티브 20pt 축소)
+        dl->AddText(mim::font_subtitle, 11.0f, ImVec2(p.x + 14, p.y + 30),
                     ImGui::ColorConvertFloat4ToU32(TEXT_DIM), status);
 
         ImGui::PopID();

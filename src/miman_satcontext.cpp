@@ -156,6 +156,7 @@ void Initialize_SatContext(void)
     for (int i = 0; i < SAT_MAX_NUM && GetVisibleSatCount() < VISIBLE_SAT_MAX; i++) {
         if (i == seed) continue;
         if (!State.Satellites[i]) continue;
+        if (!State.Satellites[i]->use) continue;   // ← use 필터 복구
         AddVisibleSat(i);
     }
 

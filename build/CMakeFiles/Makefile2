@@ -57,17 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-<<<<<<< HEAD:build4/CMakeFiles/Makefile2
-CMAKE_SOURCE_DIR = /home/jsj/new_gs
-
-# The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/jsj/new_gs/build4
-=======
 CMAKE_SOURCE_DIR = /home/hyyang/GS_refactoring/YonseiGS
 
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/hyyang/GS_refactoring/YonseiGS/build
->>>>>>> fa7b857719efe7c85dd153bc314ea2d6b08c0555:build/CMakeFiles/Makefile2
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -91,24 +84,14 @@ clean: CMakeFiles/BEE-1000.dir/clean
 CMakeFiles/BEE-1000.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/BEE-1000.dir/build.make CMakeFiles/BEE-1000.dir/build
-<<<<<<< HEAD:build4/CMakeFiles/Makefile2
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jsj/new_gs/build4/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target BEE-1000"
-=======
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/hyyang/GS_refactoring/YonseiGS/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14 "Built target BEE-1000"
->>>>>>> fa7b857719efe7c85dd153bc314ea2d6b08c0555:build/CMakeFiles/Makefile2
 .PHONY : CMakeFiles/BEE-1000.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/BEE-1000.dir/rule: cmake_check_build_system
-<<<<<<< HEAD:build4/CMakeFiles/Makefile2
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jsj/new_gs/build4/CMakeFiles 14
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/BEE-1000.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jsj/new_gs/build4/CMakeFiles 0
-=======
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/hyyang/GS_refactoring/YonseiGS/build/CMakeFiles 14
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/BEE-1000.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/hyyang/GS_refactoring/YonseiGS/build/CMakeFiles 0
->>>>>>> fa7b857719efe7c85dd153bc314ea2d6b08c0555:build/CMakeFiles/Makefile2
 .PHONY : CMakeFiles/BEE-1000.dir/rule
 
 # Convenience name for target.
