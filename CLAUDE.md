@@ -117,6 +117,8 @@ Window sequence: Frequency → Rotator → Track → Beacon → Control → Comm
 `view/frequency_view.cpp` (ImGui + `vm.` only) → `viewmodel/frequency_vm.*`
 (`FrequencyVM`, one instance via `FrequencyViewModel()`) → `model/device/*`
 (`Gs100Radio`, `SwitchBox`, `GsLink`, thin wrappers until miman_radial is split).
+**Rotator is done** the same way: `view/rotator_view.cpp` → `viewmodel/rotator_vm.*`
+(`RotatorVM`) → `model/device/rotator.*` (`Gs232bRotator`, wraps miman_orbital for now).
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)

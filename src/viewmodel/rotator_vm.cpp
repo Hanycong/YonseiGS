@@ -1,33 +1,33 @@
 #include "rotator_vm.h"
 
 #include "miman_config.h"
-#include "miman_orbital.h"
 #include "svc_tracking.h"
+#include "rotator.h"
 
 extern StateCheckUnit State;
-extern struct Antenna Now;
 
 namespace mim {
 namespace vm {
 
-int * RotatorVM::TargetAzimuth()   { return &Now.az_tag; }
-int * RotatorVM::TargetElevation() { return &Now.el_tag; }
+int * RotatorVM::TargetAzimuth()   { return mim::model::Rotator().TargetAzimuth(); }
+int * RotatorVM::TargetElevation() { return mim::model::Rotator().TargetElevation(); }
 
 bool RotatorVM::Engaging() const         { return State.Engage; }
-int  RotatorVM::CurrentAzimuth() const   { return Now.az_now; }
-int  RotatorVM::CurrentElevation() const { return Now.el_now; }
+int  RotatorVM::CurrentAzimuth() const   { return mim::model::Rotator().CurrentAzimuth(); }
+int  RotatorVM::CurrentElevation() const { return mim::model::Rotator().CurrentElevation(); }
 
 void RotatorVM::StartEngage() { mim::svc::StartEngage(); }
 void RotatorVM::StopEngage()  { mim::svc::StopEngage(); }
 
 void RotatorVM::MoveToTarget()
 {
-    RotatorSetTo(Now.az_tag, Now.el_tag);
+    mim::model::Gs232bRotator & rotator = mim::model::Rotator();
+    rotator.MoveTo(*rotator.TargetAzimuth(), *rotator.TargetElevation());
 }
 
 void RotatorVM::MoveToHome()
 {
-    RotatorSetTo(0, 0);
+    mim::model::Rotator().MoveTo(0, 0);
 }
 
 void RotatorVM::RotatorOn()  { mim::svc::RotatorOn(); }
@@ -35,7 +35,7 @@ void RotatorVM::RotatorOff() { mim::svc::RotatorOff(); }
 
 void RotatorVM::FlushIo()
 {
-    RotatorEnter(NULL);
+    mim::model::Rotator().FlushIo();
 }
 
 RotatorVM & RotatorViewModel()
