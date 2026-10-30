@@ -30,5 +30,10 @@ g++ $FLAGS -w -c "$REPO/tools/cmdgen_golden/golden_main.cpp" -o "$OUT/golden_mai
 g++ -O3 -rdynamic -Wl,--allow-multiple-definition "$OUT/golden_main.o" $OBJS $LIBS -o "$OUT/cmdgen_golden"
 
 echo "[golden] run"
+MARKER="$OUT/.start_marker"
+touch "$MARKER"
 ( cd "$REPO/bin" && "$OUT/cmdgen_golden" ) 2> "$OUT/golden.txt" > "$OUT/run.log"
+# Console 객체가 data/BEE_Console_Log 에 남기는 로그는 저장소 밖으로 옮긴다
+mkdir -p "$OUT/applogs"
+find "$REPO/data" -type f -newer "$MARKER" -exec mv {} "$OUT/applogs/" \;
 echo "[golden] $(grep -c 'press=1' "$OUT/golden.txt") commands, $(grep -c ' id=' "$OUT/golden.txt") packets -> $OUT/golden.txt"
