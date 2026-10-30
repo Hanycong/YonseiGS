@@ -20,6 +20,7 @@
 
 #include "miman_theme.h"
 #include "miman_satcontext.h"
+#include "svc_tx.h"
 #include <mutex>
 
 
@@ -351,7 +352,7 @@ void ImGui_MainMenu()
                 if (ImGui::BeginMenu("Test"))
                 {
                     if (ImGui::MenuItem("Scan AX100"))
-                        pthread_create(&p_thread[4], NULL, csp_ping_scan, NULL);
+                        mim::svc::StartPingScan();
                     if (ImGui::MenuItem("Start Signaltest"))
                         pthread_create(&p_thread[10], NULL, &SignalTest, NULL);
                     if (ImGui::MenuItem("Stop Signaltest"))
@@ -4517,7 +4518,7 @@ void ImGui_BeaconWindow_Body(float fontscale)
                     printf("%u\t", ((uint8_t *)shellcmd)[i]);
                 printf("\n");
             }
-            pthread_create(&p_thread[4], NULL, Direct_Shell, (void *)shellcmd); 
+            mim::svc::StartDirectShell((void *)shellcmd); 
         }
         ImGui::EndChild();
         ImGui::SetWindowFontScale(1.0 * fontscale);
@@ -4550,12 +4551,12 @@ static void PingWindow() {
 
     if (ImGui::Button("Send Ping")) {
 
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
         uint8_t *arg = (uint8_t*)malloc(sizeof(uint8_t));
         *arg = node; 
 
-        pthread_create(&p_thread[4], NULL, csp_ping_everynode_console, (void*)arg);
+        mim::svc::StartPingEveryNode((void*)arg);
     }
 }
 
@@ -4918,7 +4919,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             if (State.Scheduled)
             {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 typedef struct
                 {
@@ -4958,13 +4959,13 @@ static void DrawCmdGeneratorBody(bool initial_mode)
                     printf("0x%x ", cmd2[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)schcmd);
+                mim::svc::SendUplink((void*)schcmd);
                 msgid = htons(msgid);
             }
             else
             {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
                 TestPacket->Identifier = HVD_TEST;
@@ -4993,7 +4994,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
                     printf("0x%x ", cmd[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+                mim::svc::SendUplink((void*)TestPacket);
                 msgid = htons(msgid);
             }
         }
@@ -5012,7 +5013,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t));
             TestPacket->Identifier = HVD_TEST;
@@ -5047,7 +5048,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             }
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5065,7 +5066,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t));
             TestPacket->Identifier = HVD_TEST;
@@ -5100,7 +5101,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             }
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5118,7 +5119,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint32_t));
             TestPacket->Identifier = HVD_TEST;
@@ -5148,7 +5149,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
                 printf("0x%x ", cmd2[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5168,7 +5169,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             if (State.Scheduled)
             {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 typedef struct
                 {
@@ -5209,13 +5210,13 @@ static void DrawCmdGeneratorBody(bool initial_mode)
                     printf("0x%x ", cmd2[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)schcmd->TestPacket);
+                mim::svc::SendUplink((void*)schcmd->TestPacket);
                 msgid = htons(msgid);
             }
             else
             {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint64_t));
                 TestPacket->Identifier = HVD_TEST;
@@ -5245,7 +5246,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
                     printf("0x%x ", cmd2[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+                mim::svc::SendUplink((void*)TestPacket);
                 msgid = htons(msgid);
             }
         }
@@ -5261,7 +5262,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         ImGui::InputScalar("arg s8",ImGuiDataType_S8, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign * TestPacket = (packetsign *)malloc(2+2+4+CFE_SB_CMD_HDR_SIZE+sizeof(int8_t)); // 8 is for data
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -5287,7 +5288,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             for(int i=0; i<TestPacket->Length; i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+            mim::svc::SendUplink((void *)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5301,7 +5302,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         ImGui::InputScalar("arg s16",ImGuiDataType_S16, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign * TestPacket = (packetsign *)malloc(2+2+4+CFE_SB_CMD_HDR_SIZE+sizeof(int16_t)); // 8 is for data
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -5327,7 +5328,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             for(int i=0; i<TestPacket->Length; i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+            mim::svc::SendUplink((void *)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5341,7 +5342,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         ImGui::InputScalar("arg s32",ImGuiDataType_S32, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign * TestPacket = (packetsign *)malloc(2+2+4+12); // 8 is for data
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -5367,7 +5368,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             for(int i=0; i<TestPacket->Length; i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+            mim::svc::SendUplink((void *)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5381,7 +5382,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         ImGui::InputScalar("arg s64",ImGuiDataType_S64, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign * TestPacket = (packetsign *)malloc(2+2+4+16); // 8 is for data
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -5407,7 +5408,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             for(int i=0; i<TestPacket->Length; i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+            mim::svc::SendUplink((void *)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5421,7 +5422,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         ImGui::InputScalar("arg float",ImGuiDataType_Float, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign * TestPacket = (packetsign *)malloc(2+2+4+12); // 8 is for data
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -5447,7 +5448,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             for(int i=0; i<TestPacket->Length; i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+            mim::svc::SendUplink((void *)TestPacket);
             msgid = htons(msgid);
         }
         break;
@@ -5484,8 +5485,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             pkt->Length = sizeof(EPS_NoopCmd_t);
             memcpy(pkt->Data, &command->epsnoopcmd, sizeof(EPS_NoopCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5521,8 +5522,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             pkt->Length = sizeof(EPS_ResetCountersCmd_t);
             memcpy(pkt->Data, &command->epsresetcounterscmd, sizeof(EPS_ResetCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5558,8 +5559,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             pkt->Length = sizeof(EPS_GetCountersCmd_t);
             memcpy(pkt->Data, &command->epsgetcounterscmd, sizeof(EPS_GetCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5595,8 +5596,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             pkt->Length = sizeof(EPS_GetAppDataCmd_t);
             memcpy(pkt->Data, &command->epsgetappdatacmd, sizeof(EPS_GetAppDataCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5632,8 +5633,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             pkt->Length = sizeof(EPS_ReportAppDataCmd_t);
             memcpy(pkt->Data, &command->epsreportappdatacmd, sizeof(EPS_ReportAppDataCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5678,8 +5679,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60docksetchannelsinglecmd,
                    sizeof(EPS_P60_Dock_SetChannelSingleCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5720,8 +5721,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockgetchannelsinglecmd,
                    sizeof(EPS_P60_Dock_GetChannelSingleCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5768,8 +5769,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60docksetchannelscmd,
                    sizeof(EPS_P60_Dock_SetChannelsCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5807,8 +5808,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockgetchannelscmd,
                    sizeof(EPS_P60_Dock_GetChannelsCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5853,8 +5854,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdusetchannelsinglecmd,
                    sizeof(EPS_P60_PDU_SetChannelSingleCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5896,8 +5897,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdugetchannelsinglecmd,
                    sizeof(EPS_P60_PDU_GetChannelSingleCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5945,8 +5946,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdusetchannelscmd,
                    sizeof(EPS_P60_PDU_SetChannelsCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -5983,8 +5984,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdugetchannelscmd,
                    sizeof(EPS_P60_PDU_GetChannelsCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6026,8 +6027,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acusetmpptmodecmd,
                    sizeof(EPS_P60_ACU_SetMpptModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6064,8 +6065,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acugetmpptmodecmd,
                    sizeof(EPS_P60_ACU_GetMpptModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6104,8 +6105,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockgettablehkcmd,
                    sizeof(EPS_P60_Dock_GetTableHkCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6142,8 +6143,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockgettableconfcmd,
                    sizeof(EPS_P60_Dock_GetTableConfCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6180,8 +6181,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockgettablecalcmd,
                    sizeof(EPS_P60_Dock_GetTableCalCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6218,8 +6219,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdugettablehkcmd,
                    sizeof(EPS_P60_PDU_GetTableHkCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6256,8 +6257,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdugettableconfcmd,
                    sizeof(EPS_P60_PDU_GetTableConfCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6294,8 +6295,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pdugettablecalcmd,
                    sizeof(EPS_P60_PDU_GetTableCalCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6332,8 +6333,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acugettablehkcmd,
                    sizeof(EPS_P60_ACU_GetTableHkCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6373,8 +6374,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acugettableconfcmd,
                    sizeof(EPS_P60_ACU_GetTableConfCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6414,8 +6415,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acugettablecalcmd,
                    sizeof(EPS_P60_ACU_GetTableCalCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6464,9 +6465,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60dockresetgndwdtcmd,
                    sizeof(EPS_P60_Dock_ResetGndWdtCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6515,9 +6515,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60pduresetgndwdtcmd,
                    sizeof(EPS_P60_PDU_ResetGndWdtCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6566,9 +6565,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60acuresetgndwdtcmd,
                    sizeof(EPS_P60_ACU_ResetGndWdtCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6623,9 +6621,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60getparamcmd,
                    sizeof(EPS_P60_GetParamCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6682,9 +6679,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60getparamarraycmd,
                    sizeof(EPS_P60_GetParamArrayCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6748,9 +6744,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60setparamcmd,
                    sizeof(EPS_P60_SetParamCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6803,9 +6798,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60tablegetcmd,
                    sizeof(EPS_P60_TableGetCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6858,9 +6852,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60tableloadcmd,
                    sizeof(EPS_P60_TableLoadCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6913,9 +6906,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60tablesavecmd,
                    sizeof(EPS_P60_TableSaveCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -6968,9 +6960,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60tablegetstaticcmd,
                    sizeof(EPS_P60_TableGetStaticCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7017,9 +7008,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60tabledumpstaticcmd,
                    sizeof(EPS_P60_TableDumpStaticCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7063,9 +7053,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60getdockinfocmd,
                    sizeof(EPS_P60_GetDockInfoCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7109,9 +7098,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->epsp60resetcmd,
                    sizeof(EPS_P60_ResetCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7156,9 +7144,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsnoopcmd,
                    sizeof(ADCS_NoopCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7198,9 +7185,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsresetcounterscmd,
                    sizeof(ADCS_ResetCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7245,9 +7231,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsresetappcmdcounterscmd,
                    sizeof(ADCS_ResetAppCmdCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7292,9 +7277,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsresetdevicecmdcounterscmd,
                    sizeof(ADCS_ResetDeviceCmdCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7340,9 +7324,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcssetcommunicationmodeascan,
                    sizeof(ADCS_SetCommunicationModeAsCanCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7383,9 +7366,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsgpioenhighcmd,
                    sizeof(ADCS_GpioEnHighCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7426,9 +7408,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsgpioenlowcmd,
                    sizeof(ADCS_GpioEnLowCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7469,9 +7450,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsgioboothighcmd,
                    sizeof(ADCS_GpioBootHighCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7512,9 +7492,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsgiobootlowcmd,
                    sizeof(ADCS_GpioBootLowCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7555,9 +7534,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsexitbootloadercmd,
                    sizeof(ADCS_ExitBootLoaderCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7598,9 +7576,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcsresetcmd,
                    sizeof(ADCS_ResetCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7648,9 +7625,8 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(pkt->Data, &command->adcscurrentunixtimecmd,
                    sizeof(ADCS_CurrentUnixTimeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7705,9 +7681,8 @@ case 59: {
         memcpy(pkt->Data, &command->adcserrorlogsettingcmd,
                sizeof(ADCS_ErrorLogSettingCmd_t));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
     break;
 }
@@ -7751,9 +7726,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcspersistconfigcmd,
                    sizeof(ADCS_PersistConfigCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7805,8 +7779,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcscontrolestimationmodecmd,
                    sizeof(ADCS_ControlEstimationModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7852,8 +7826,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcsdisablemagrwlmntmngcmd,
                    sizeof(ADCS_DisableMagRwlMntMngCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7903,8 +7877,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcsreferenceircvectorcmd,
                    sizeof(ADCS_ReferenceIRCVectorCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -7954,8 +7928,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcsreferencellhtargetcmd,
                    sizeof(ADCS_ReferenceLLHTargetCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8000,8 +7974,8 @@ case 59: {
             memcpy(pkt->Data, &command->adcsorbitmodecmd,
                    sizeof(ADCS_OrbitModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8057,8 +8031,8 @@ case 66: {
         memcpy(pkt->Data, &command->adcsmagdeploycmd,
                sizeof(ADCS_MagDeployCmd_t));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
     break;
 }
@@ -8107,8 +8081,8 @@ case 66: {
             memcpy(pkt->Data, &command->adcsreferencerpyvaluescmd,
                    sizeof(ADCS_ReferenceRPYvaluesCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8157,8 +8131,8 @@ case 66: {
             memcpy(pkt->Data, &command->adcsopenloopcmdmtqcmd,
                    sizeof(ADCS_OpenLoopCmdMTQCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8248,9 +8222,8 @@ case 66: {
             memcpy(pkt->Data, &command->adcspowerstatecmd,
                    sizeof(ADCS_PowerStateCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8300,8 +8273,8 @@ case 66: {
             memcpy(pkt->Data, &command->adcsrunmodecmd,
                    sizeof(ADCS_RunModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8347,8 +8320,8 @@ case 66: {
             memcpy(pkt->Data, &command->adcscontrolmodecmd,
                    sizeof(ADCS_ControlModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -8542,9 +8515,8 @@ case 66: {
                 memcpy(pkt->Data, &command->adcswhlconfigcmd,
                     sizeof(ADCS_WhlConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -8650,9 +8622,8 @@ case 66: {
                     &command->adcssatconfigcmd,
                     sizeof(ADCS_SatConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -8789,9 +8760,8 @@ case 66: {
                     &command->adcscontrollerconfigcmd,
                     sizeof(ADCS_ControllerConfig_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -8888,8 +8858,8 @@ case 66: {
                 memcpy(pkt->Data, &command->adcsmag0mmtcalibconfigcmd,
                     sizeof(ADCS_Mag0MMTCalibConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -8989,9 +8959,8 @@ case 66: {
                     &command->adcsdefaultmodeconfigcmd,
                     sizeof(ADCS_DefaultModeConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9167,9 +9136,8 @@ case 66: {
                     &command->adcsmountingconfigcmd,
                     sizeof(ADCS_MountingConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                                task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9309,9 +9277,8 @@ case 66: {
                     &command->adcsestimatorconfigcmd,
                     sizeof(ADCS_EstimatorConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                                task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9367,8 +9334,8 @@ case 80: {
 
         memcpy(pkt->Data, &command->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     break;
@@ -9457,9 +9424,8 @@ case 80: {
                     &command->adcsnodeselectionconfigcmd,
                     sizeof(ADCS_NodeSelectionConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9553,9 +9519,8 @@ case 80: {
                     &command->adcsmtqconfigcmd,
                     sizeof(ADCS_MTQConfigCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9635,11 +9600,8 @@ case 80: {
                     sizeof(ADCS_MagSensingElmConfigCmd_t));
 
                 // uplink thread 실행
-                pthread_join(p_thread[4], NULL);
-                pthread_create(
-                    &p_thread[4], NULL,
-                    task_uplink_onorbit, (void *)pkt
-                );
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             break;
@@ -9735,9 +9697,8 @@ case 80: {
                 memcpy(pkt->Data, &command->adcsunsolicittlmmsgsetupcmd,
                     sizeof(ADCS_UnsolicitTlmMsgSetupCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -9792,9 +9753,8 @@ case 80: {
                 memcpy(pkt->Data, &command->adcs101cmd,
                     sizeof(ADCS2_Comm01Cmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -9847,9 +9807,8 @@ case 80: {
                 memcpy(pkt->Data, &command->adcsopenlooprwcmd,
                     sizeof(ADCS_OpenLoopRWCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -9893,9 +9852,8 @@ case 80: {
                 pkt->Length     = sizeof(SC_NoopCmd_t);
                 memcpy(pkt->Data, &command->scnoopcmd, sizeof(SC_NoopCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -9938,9 +9896,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scresetcounterscmd,
                     sizeof(SC_ResetCountersCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -9989,9 +9946,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstartatscmd,
                     sizeof(SC_StartAtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10034,9 +9990,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstopatscmd,
                     sizeof(SC_StopAtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10080,9 +10035,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstartrtscmd,
                     sizeof(SC_StartRtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10127,9 +10081,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstoprtscmd,
                     sizeof(SC_StopRtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10175,9 +10128,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scdisablertscmd,
                     sizeof(SC_DisableRtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10222,9 +10174,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scenablertscmd,
                     sizeof(SC_EnableRtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10268,9 +10219,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scswitchatscmd,
                     sizeof(SC_SwitchAtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10316,9 +10266,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scjumpatscmd,
                     sizeof(SC_JumpAtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10366,9 +10315,8 @@ case 80: {
                 memcpy(pkt->Data, &command->sccontinueatsonfailurecmd,
                     sizeof(SC_ContinueAtsOnFailureCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10414,9 +10362,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scappendatscmd,
                     sizeof(SC_AppendAtsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10463,9 +10410,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scmanagetablecmd,
                     sizeof(SC_ManageTableCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10513,9 +10459,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstartrtsgrpcmd,
                     sizeof(SC_StartRtsGrpCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10563,9 +10508,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scstoprtsgrpcmd,
                     sizeof(SC_StopRtsGrpCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10613,9 +10557,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scdisablertsgrpcmd,
                     sizeof(SC_DisableRtsGrpCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10664,9 +10607,8 @@ case 80: {
                 memcpy(pkt->Data, &command->scenablertsgrpcmd,
                     sizeof(SC_EnableRtsGrpCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL,
-                            task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
             break;
         }
@@ -10708,8 +10650,8 @@ case 80: {
                 pkt->Length     = sizeof(TO_LAB_NoopCmd_t);
                 memcpy(pkt->Data, &command->tolabnoopcmd, sizeof(TO_LAB_NoopCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -10761,8 +10703,8 @@ case 154: { // TO_LAB Reset Status
         memcpy(pkt->Data, &command->tolabresetcounterscmd,
                sizeof(TO_LAB_ResetCountersCmd_t));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -10838,8 +10780,8 @@ case 155: { // TO_LAB Add Packet
         memcpy(pkt->Data, &command->tolabaddpacketcmd,
                sizeof(TO_LAB_AddPacketCmd_t));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -10900,8 +10842,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(pkt->Data, &command->tolabsenddatatypescmd,
                     sizeof(TO_LAB_SendDataTypesCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -10962,8 +10904,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(pkt->Data, &command->tolabremovepacketcmd,
                     sizeof(TO_LAB_RemovePacketCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11018,8 +10960,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(pkt->Data, &command->tolabremoveallcmd,
                     sizeof(TO_LAB_RemoveAllCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11072,8 +11014,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(pkt->Data, &command->tolabenableoutputcmd,
                     sizeof(TO_LAB_EnableOutputCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)pkt);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11101,7 +11043,7 @@ case 155: { // TO_LAB Add Packet
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
             TestPacket->Identifier = HVD_TEST;
@@ -11130,7 +11072,7 @@ case 155: { // TO_LAB Add Packet
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             
             msgid = htons(msgid);
     }
@@ -11186,8 +11128,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(TestPacket->Data, &command->uantburnchannelcmd,
                     sizeof(UANT_BurnChannelCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)TestPacket);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11250,8 +11192,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(TestPacket->Data, &command->uantsetsettingscmd,
                     sizeof(UANT_SetSettingsCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)TestPacket);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11315,8 +11257,8 @@ case 155: { // TO_LAB Add Packet
                 memcpy(TestPacket->Data, &command->uantautodeploycmd,
                     sizeof(UANT_AutoDeployCmd_t));
 
-                pthread_join(p_thread[4], NULL);
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
+                mim::svc::WaitTx();
+                mim::svc::SendUplink((void *)TestPacket);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11353,7 +11295,7 @@ case 155: { // TO_LAB Add Packet
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
             TestPacket->Identifier = HVD_TEST;
@@ -11382,7 +11324,7 @@ case 155: { // TO_LAB Add Packet
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             
             msgid = htons(msgid);
     }
@@ -11404,7 +11346,7 @@ case 155: { // TO_LAB Add Packet
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
             TestPacket->Identifier = HVD_TEST;
@@ -11433,7 +11375,7 @@ case 155: { // TO_LAB Add Packet
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             
             msgid = htons(msgid);
     }
@@ -11455,7 +11397,7 @@ case 155: { // TO_LAB Add Packet
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
             TestPacket->Identifier = HVD_TEST;
@@ -11484,7 +11426,7 @@ case 155: { // TO_LAB Add Packet
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             
             msgid = htons(msgid);
     }
@@ -11506,7 +11448,7 @@ case 155: { // TO_LAB Add Packet
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
             TestPacket->Identifier = HVD_TEST;
@@ -11535,7 +11477,7 @@ case 155: { // TO_LAB Add Packet
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
             
             msgid = htons(msgid);
     }
@@ -11581,9 +11523,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucnoopcmd,
                    sizeof(PAYUZUC_NoopCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11635,9 +11576,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucresetcounterscmd,
                    sizeof(PAYUZUC_ResetCountersCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11696,9 +11636,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucpingcmd,
                    sizeof(PAYUZUC_PingCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11758,9 +11697,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucsetmodecmd,
                    sizeof(PAYUZUC_SetModeCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11813,9 +11751,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucmemorystatuscmd,
                    sizeof(PAYUZUC_MemoryStatusCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11874,9 +11811,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucsetexposurecmd,
                    sizeof(PAYUZUC_SetExposureCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -11936,9 +11872,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzuccapturecmd,
                    sizeof(PAYUZUC_CaptureCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12000,9 +11935,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucdownloadcmd,
                    sizeof(PAYUZUC_DownloadCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12063,9 +11997,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucreadregistercmd,
                    sizeof(PAYUZUC_ReadRegisterCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12127,9 +12060,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucwriteregistercmd,
                    sizeof(PAYUZUC_WriteRegisterCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12192,9 +12124,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucdownloadallcmd,
                    sizeof(PAYUZUC_DownloadAllCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12254,9 +12185,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucmosaiccmd,
                    sizeof(PAYUZUC_MosaicCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12318,9 +12248,8 @@ case 155: { // TO_LAB Add Packet
             memcpy(pkt->Data, &command->payuzucdownloadallchildcmd,
                    sizeof(PAYUZUC_DownloadAllCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12373,7 +12302,7 @@ case 155: { // TO_LAB Add Packet
 
             command->todeletecmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(TO_DeleteCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -12388,7 +12317,7 @@ case 155: { // TO_LAB Add Packet
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->todeletecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->todeletecmd, sizeof(TO_DeleteCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -12434,7 +12363,7 @@ case 155: { // TO_LAB Add Packet
 
             command->torenamecmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(TO_RenameCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -12449,7 +12378,7 @@ case 155: { // TO_LAB Add Packet
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->torenamecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->torenamecmd, sizeof(TO_RenameCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -12501,7 +12430,7 @@ case 155: { // TO_LAB Add Packet
 
             command->ftpsendfilecmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
 
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_sendfileCmd_t));
             TestPacket->Identifier = HVD_TEST;
@@ -12520,7 +12449,7 @@ case 155: { // TO_LAB Add Packet
 
             memcpy(TestPacket->Data, &command->ftpsendfilecmd, sizeof(FTP_sendfileCmd_t));
 
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
 
 
         }
@@ -12574,7 +12503,7 @@ case 155: { // TO_LAB Add Packet
             memcpy(command->ftpfilenamecmd.CmdHeader + 4, length, sizeof(uint16_t));
             memcpy(command->ftpfilenamecmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
             command->ftpfilenamecmd.CmdHeader[7] = 0x00;
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_filenameCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -12585,7 +12514,7 @@ case 155: { // TO_LAB Add Packet
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->ftpfilenamecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->ftpfilenamecmd, sizeof(FTP_filenameCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -12618,7 +12547,7 @@ case 205: {
     if (ImGui::Button("Generate CMD"))
     {
         WriteSystemName(msgid);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
         uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(uint32_t)] = {0};
@@ -12672,8 +12601,7 @@ case 205: {
         TestPacket->Length     = sizeof(cmd);   
         memcpy(TestPacket->Data, cmd, sizeof(cmd));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket);
+        mim::svc::SendUplink((void*)TestPacket);
     }
 
     ImGui::Text("Last CMD:");
@@ -12694,7 +12622,7 @@ case 206: {
     if (ImGui::Button("Generate CMD"))
     {
         WriteSystemName(msgid);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
         uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
@@ -12730,8 +12658,7 @@ case 206: {
         TestPacket->Length     = sizeof(cmd);   
         memcpy(TestPacket->Data, cmd, sizeof(cmd));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket);
+        mim::svc::SendUplink((void*)TestPacket);
     }
 
     break;
@@ -12749,7 +12676,7 @@ case 206: {
             if (ImGui::Button("Generate CMD")) {
 
   
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
         uint8_t cmd[15] = {0};
@@ -12789,10 +12716,9 @@ case 206: {
         TestPacket->Length     = sizeof(cmd);   
         memcpy(TestPacket->Data, cmd, sizeof(cmd));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket);
+        mim::svc::SendUplink((void*)TestPacket);
 
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
 
@@ -12832,9 +12758,8 @@ case 206: {
         TestPacket1->Length     = sizeof(cmd2);   
         memcpy(TestPacket1->Data, cmd2, sizeof(cmd2));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket1);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::SendUplink((void*)TestPacket1);
+        mim::svc::WaitTx();
 
 
             }
@@ -12899,14 +12824,13 @@ case 206: {
         TestPacket0->Length     = sizeof(cmd0);   
         memcpy(TestPacket0->Data, cmd0, sizeof(cmd0));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket0);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::SendUplink((void*)TestPacket0);
+        mim::svc::WaitTx();
 
 
             sleep(0.1);
 
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
         uint8_t cmd[15] = {0};
@@ -12946,10 +12870,9 @@ case 206: {
         TestPacket->Length     = sizeof(cmd);   
         memcpy(TestPacket->Data, cmd, sizeof(cmd));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket);
+        mim::svc::SendUplink((void*)TestPacket);
 
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
 
 
 
@@ -12989,9 +12912,8 @@ case 206: {
         TestPacket1->Length     = sizeof(cmd2);   
         memcpy(TestPacket1->Data, cmd2, sizeof(cmd2));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)TestPacket1);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::SendUplink((void*)TestPacket1);
+        mim::svc::WaitTx();
 
 
             }
@@ -13056,8 +12978,8 @@ case 209: { // EPS P31U SET CONFIG2 (CC 54)
         pkt->Length     = sizeof(EPS_P31U_SETCONFIG2);
         memcpy(pkt->Data, &command->epsp31usetconfig2, sizeof(EPS_P31U_SETCONFIG2));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -13121,8 +13043,8 @@ case 210: { // EPS P31U CONFIG2 (CC 55)
         pkt->Length     = sizeof(EPS_P31U_CONFIG2);
         memcpy(pkt->Data, &command->epsp31uconfig2, sizeof(EPS_P31U_CONFIG2));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -13179,8 +13101,8 @@ case 211: { // EPS P31U SET OUT SINGLE (CC 10)
         pkt->Length     = sizeof(EPS_P31U_SET_OUT_SINGLE);
         memcpy(pkt->Data, &command->epsp31usetoutsingle, sizeof(EPS_P31U_SET_OUT_SINGLE));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -13239,8 +13161,8 @@ case 212: { // SP DEPLOY (CC 2)
         pkt->Length     = sizeof(SP_DEPLOY);
         memcpy(pkt->Data, &command->spdeploy, sizeof(SP_DEPLOY));
 
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)pkt);
+        mim::svc::WaitTx();
+        mim::svc::SendUplink((void *)pkt);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -13286,7 +13208,7 @@ case 213: { // FTP_filenameCmd
             memcpy(command->ftpdirlistpktcmd.CmdHeader + 4, length, sizeof(uint16_t));
             memcpy(command->ftpdirlistpktcmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
             command->ftpdirlistpktcmd.CmdHeader[7] = 0x00;
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_dirlistpktCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13297,7 +13219,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->ftpdirlistpktcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->ftpdirlistpktcmd, sizeof(FTP_dirlistpktCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -13334,7 +13256,7 @@ case 213: { // FTP_filenameCmd
 
         if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
                 TestPacket->Identifier = HVD_TEST;
@@ -13363,7 +13285,7 @@ case 213: { // FTP_filenameCmd
                     printf("0x%x ", cmd[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+                mim::svc::SendUplink((void*)TestPacket);
                 
                 msgid = htons(msgid);
             }
@@ -13378,7 +13300,7 @@ case 213: { // FTP_filenameCmd
 
         if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-                pthread_join(p_thread[4], NULL);
+                mim::svc::WaitTx();
 
                 packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
                 TestPacket->Identifier = HVD_TEST;
@@ -13407,7 +13329,7 @@ case 213: { // FTP_filenameCmd
                     printf("0x%x ", cmd[i]);
                 printf("\n");
 
-                pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+                mim::svc::SendUplink((void*)TestPacket);
                 
                 msgid = htons(msgid);
             }
@@ -13453,9 +13375,8 @@ case 213: { // FTP_filenameCmd
             memcpy(pkt->Data, &command->epsp60getdockinfocmd,
                    sizeof(EPS_P60_GetDockInfoCmd_t));
 
-            pthread_join(p_thread[4], NULL);
-            pthread_create(&p_thread[4], NULL,
-                           task_uplink_onorbit, (void *)pkt);
+            mim::svc::WaitTx();
+            mim::svc::SendUplink((void *)pkt);
         }
         break;
     }
@@ -13514,7 +13435,7 @@ case 213: { // FTP_filenameCmd
 
             command->cfeesstartappcmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StartAppCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13529,7 +13450,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->cfeesstartappcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->cfeesstartappcmd, sizeof(CFE_ES_StartAppCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -13566,7 +13487,7 @@ case 213: { // FTP_filenameCmd
 
             command->esstopapp.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13581,7 +13502,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->esstopapp.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->esstopapp, sizeof(CFE_ES_StopAppCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -13625,7 +13546,7 @@ case 213: { // FTP_filenameCmd
 
             command->toloadcmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(ES_LoadCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13640,7 +13561,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->toloadcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->toloadcmd, sizeof(ES_LoadCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -13673,7 +13594,7 @@ case 213: { // FTP_filenameCmd
 
             command->esqueryonecmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13688,7 +13609,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->esqueryonecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->esqueryonecmd, sizeof(CFE_ES_StopAppCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -13721,7 +13642,7 @@ case 213: { // FTP_filenameCmd
 
             command->esqueryallcmd.CmdHeader[7] = 0x00;
 
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
@@ -13736,7 +13657,7 @@ case 213: { // FTP_filenameCmd
             while (len--) checksum ^= *(byteptr++);
             memcpy(command->esqueryallcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
             memcpy(TestPacket->Data, &command->esqueryallcmd, sizeof(CFE_ES_StopAppCmd_t));
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
 
 
@@ -13783,14 +13704,14 @@ void ImGui_ControlWindow_Body(float fontscale)
 
     if (ImGui::Button("Ping(AX100)", ImVec2(eachW, buttonHeight)))
     {
-        pthread_join(p_thread[4], NULL);
-        pthread_create(&p_thread[4], NULL, csp_ping_console, NULL);
+        mim::svc::WaitTx();
+        mim::svc::StartPingConsole();
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Ping(OBC)", ImVec2(eachW, buttonHeight)))
     {
-        pthread_join(p_thread[4], NULL);
+        mim::svc::WaitTx();
         FSWTle* MIM_TLEinfo = (FSWTle*)malloc(sizeof(FSWTle) + MIM_HAND_DATAFDSTART);
         int NowPingInfo = GetNowTracking();
 
@@ -13802,13 +13723,13 @@ void ImGui_ControlWindow_Body(float fontscale)
         {
             FSWTleConverter(State.Fatellites->tle, MIM_TLEinfo);
             packetsign* TestPacket = PingInit(MIM_TLEinfo);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
         else
         {
             FSWTleConverter(State.Satellites[NowPingInfo]->tle, MIM_TLEinfo);
             packetsign* TestPacket = PingInit(MIM_TLEinfo);
-            pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void*)TestPacket);
+            mim::svc::SendUplink((void*)TestPacket);
         }
     }
 
@@ -14062,7 +13983,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         request_->PacketType = MIM_PT_DLREQ;
         request_->Length = sizeof(dlreqdata);
         memcpy(request_->Data, request, sizeof(dlreqdata));
-        pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)request_); 
+        mim::svc::SendUplink((void *)request_); 
     }
     ImGui::EndChild();
 
