@@ -236,8 +236,7 @@ int main(int, char**)
         // 시그널로 인한 종료 요청 들어옴
         printf("[MAIN-DIAG] signal shutdown detected (g_shutdown_requested=1)\n");
 
-        State.GUI = false;       // GUI 루프 정지
-        State.AllThread = false; // while 탈출
+        State.GUI = false;       // GUI 루프 정지 -> 창 닫기와 같은 정리 경로 (StopAllThreads 후 while 탈출)
     }
         if(State.GUI)
         {   
