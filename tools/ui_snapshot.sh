@@ -13,7 +13,7 @@
 #
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
 #   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1a_frequency.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
-#         1d_rotator.png
+#         1d_rotator.png 1e_track_select.png 1f_track_on.png 1g_track_search.png 1h_track_cleared.png
 #         2_pass_operation.png 3_ftp_upload.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
@@ -92,6 +92,27 @@ xdotool mousemove 1741 455 click 1     # Init
 sleep 3
 import -window root "$OUT/1d_rotator.png"
 
+# Pre-Pass / Track 창 (왼쪽 열, 현재는 예시 위성 20개 표):
+# 행 선택(ISS) -> Track 버튼(NOAA-19) -> 검색어 입력 -> 검색어 지우기
+xdotool mousemove 100 328 click 1      # ISS 행 선택
+sleep 2
+import -window root "$OUT/1e_track_select.png"
+xdotool mousemove 497 346 click 1      # NOAA-19 Track
+sleep 2
+import -window root "$OUT/1f_track_on.png"
+xdotool mousemove 290 263 click 1      # 검색창
+sleep 1
+for k in S E N T; do xdotool keydown $k; sleep 0.15; xdotool keyup $k; sleep 0.3; done
+sleep 2
+import -window root "$OUT/1g_track_search.png"
+# 키를 누르고 바로 떼면 느린(소프트웨어 렌더링) 프레임 사이에서 입력이 유실되므로
+# 한 프레임 이상, ImGui 키 반복 지연(0.275s)보다 짧게 누른다
+for _ in $(seq 8); do xdotool keydown BackSpace; sleep 0.15; xdotool keyup BackSpace; sleep 0.3; done
+sleep 1
+xdotool mousemove 540 760 click 1      # 빈 곳 클릭: 검색창 비활성화 (안 하면 다음 탭 클릭이 무시됨)
+sleep 2
+import -window root "$OUT/1h_track_cleared.png"
+
 # 2. Pass Operation 탭
 xdotool mousemove 342 216 click 1
 sleep 4
@@ -119,6 +140,9 @@ if [ -n "$APP_REAL_PID" ]; then
         echo "[snapshot] shutdown: exited after SIGINT" | tee -a "$OUT/run.log"
     fi
 fi
+# 종료 코드 (0 = 정상, 128+N = 시그널 N 으로 죽음. 예: 139 = SIGSEGV)
+wait "$APP_PID" 2>/dev/null
+echo "[snapshot] exit status: $?" | tee -a "$OUT/run.log"
 kill -9 "$APP_PID" $APP_REAL_PID 2>/dev/null
 kill "$XVFB_PID" 2>/dev/null
 wait 2>/dev/null

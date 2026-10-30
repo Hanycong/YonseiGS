@@ -187,6 +187,16 @@ the *separation of concerns*, not the binding mechanism:
   (blocks rendering up to 1 s).
 - ~~Rotator **IO Buffer Free** hangs the UI thread~~ **fixed** with the missing-`return` fix
   (`RotatorEnter()` fell off the end → -O3 jumped back into the body forever).
+- **Shutdown race (SIGINT)**: on Ctrl+C `State.AllThread` is already 0, so `StopAllThreads()`
+  is skipped and the downlink thread (`task_downlink_onorbit`) keeps running; `main` then does
+  `delete setup; setup = NULL;` while that thread reads `setup->default_timeout` → SIGSEGV →
+  libcsp `init_switch()`'s handler (`sig_handler`, also hooks SIGSEGV/SIGFPE/SIGTERM) calls
+  `exit(1)`. About half of the snapshot runs end this way (no "program exiting normally").
+  Was hidden before the missing-`return` fix because shutdown never got this far.
+  `tools/ui_compare.sh` reports the exit status separately for this reason.
+- Track window `SELECTED` shows `?` when nothing is tracked: the `—` (em dash) glyph is not
+  in Inconsolata.ttf. Polar plot reads `dummies[GetNowTracking()]` without an upper bound
+  check (out of bounds if the tracking index is >= 20, e.g. set by AutoPilot).
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
 
