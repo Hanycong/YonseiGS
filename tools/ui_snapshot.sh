@@ -13,7 +13,7 @@
 #
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
 #   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
-#         2_pass_operation.png run.log build.log applogs/
+#         2_pass_operation.png 3_ftp_upload.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
 #
@@ -75,6 +75,11 @@ import -window root "$OUT/1c_pre_pass_stopped.png"
 xdotool mousemove 342 216 click 1
 sleep 4
 import -window root "$OUT/2_pass_operation.png"
+
+# Pass Operation: FTP Upload 버튼 (선택된 파일 없음 -> 워커 시작/에러 경로)
+xdotool mousemove 1215 383 click 1
+sleep 5
+import -window root "$OUT/3_ftp_upload.png"
 
 if kill -0 "$APP_PID" 2>/dev/null; then
     echo "[snapshot] app alive after scenario"

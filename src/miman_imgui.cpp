@@ -23,6 +23,7 @@
 #include "svc_tx.h"
 #include "svc_tracking.h"
 #include "svc_radio.h"
+#include "svc_ftp.h"
 #include <mutex>
 
 
@@ -31,7 +32,6 @@ using namespace mim;
 // Showstate는 main.cpp에 정의된 전역 변수
 extern bool Showstate;
 
-extern bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), void *arg, const char *label);
 
 #define CMD_LABEL_MAX 300
 extern FILE *log_ptr;
@@ -45,7 +45,7 @@ ImGuiWindowFlags mim_winflags = ImGuiWindowFlags_NoMove |
                                 ImGuiWindowFlags_NoBringToFrontOnFocus|
                                 // ImGuiWindowFlags_HorizontalScrollbar|
                                 ImGuiWindowFlags_NoTitleBar;
-extern pthread_t p_thread[16];
+// p_thread[] 는 UI 에서 직접 쓰지 않는다 -> service/svc_*.h 사용
 extern Ptable_0 param0;
 extern Ptable_1 param1;
 extern Ptable_5 param5;
@@ -14009,16 +14009,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::SameLine();
         if (ImGui::Button("Upload", ImVec2(ImGui::GetContentRegionAvail().x , ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                if(State.ftp_version == 1)
-                    console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");
-                    //pthread_create(&p_thread[8], NULL, ftp_uplink_force, &State.ftplistup[NowFTP]);
-                else
-                    ftp_start_worker(&p_thread[8], ftp_uplink_onorbit, &State.ftplistup[NowFTP], "upload");
-            }
+            mim::svc::FtpUpload(&State.ftplistup[NowFTP]);
         }
         ImGui::Text("Local  ");
         ImGui::SameLine();
@@ -14057,16 +14048,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::SameLine();
         if (ImGui::Button("Download", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                if(State.ftp_version == 1)
-                    console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");   
-                    // pthread_create(&p_thread[8], NULL, ftp_downlink_force, &State.ftplistup[NowFTP]);
-                else
-                    ftp_start_worker(&p_thread[8], ftp_downlink_onorbit, &State.ftplistup[NowFTP], "download");
-            }
+            mim::svc::FtpDownload(&State.ftplistup[NowFTP]);
         }
         ImGui::Text("Local  ");
         ImGui::SameLine();
@@ -14092,12 +14074,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Listup", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_list_onorbit, NULL, "list");
-            }
+            mim::svc::FtpList();
         }
         ImGui::Text(State.FTPWindowBuffer);
         ImGui::Text(State.gslistup->fdispbuf);
@@ -14118,12 +14095,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Move", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_move_onorbit, NULL, "move");
-            }
+            mim::svc::FtpMove();
         }
         ImGui::Text(State.FTPWindowBuffer);
         break;
@@ -14138,12 +14110,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_remove_onorbit, NULL, "remove");
-            }
+            mim::svc::FtpRemove();
         }
         ImGui::Text(State.FTPWindowBuffer);
         break;
@@ -14163,12 +14130,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Copy", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_copy_onorbit, NULL, "copy");
-            }
+            mim::svc::FtpCopy();
         }
         ImGui::Text(State.FTPWindowBuffer);
         break;
@@ -14183,12 +14145,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Make Directory", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_mkdir_onorbit, NULL, "mkdir");
-            }
+            mim::svc::FtpMkdir();
         }
         ImGui::Text(State.FTPWindowBuffer);
         break;
@@ -14203,12 +14160,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PopItemWidth();
         if (ImGui::Button("Remove Directory", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.ftp_mode)
-                console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
-            else
-            {
-                ftp_start_worker(&p_thread[8], ftp_rmdir_onorbit, NULL, "rmdir");
-            }
+            mim::svc::FtpRmdir();
         }
         ImGui::Text(State.FTPWindowBuffer);
         break;
