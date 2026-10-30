@@ -38,7 +38,6 @@ char AODbuf[131];
 int AODbufCufsor = 0;
 CmdGenerator_GS * SatCMD[256];
 extern StateCheckUnit State;
-extern pthread_t p_thread[16];
 extern pthread_mutex_t conn_lock;
 
 // HK *NowHK;

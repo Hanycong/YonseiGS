@@ -50,7 +50,6 @@ Ptable_1 param1;
 Ptable_5 param5;
 extern CoordTopocentric TrackingTopo;
 extern StateCheckUnit State;
-extern pthread_t p_thread[16];
 
 
 static int GetResult;

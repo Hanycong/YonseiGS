@@ -104,4 +104,6 @@ wait 2>/dev/null
 # 실행이 만든 로그(data/BEE_*_Log)는 저장소를 더럽히지 않도록 OUT_DIR/applogs 로 이동
 mkdir -p "$OUT/applogs"
 find "$REPO/data" -type f -newer "$MARKER" -exec mv {} "$OUT/applogs/" \;
+# 정상 종료 시 ImGui 가 bin/imgui.ini 를 새로 만든다 (추적 대상 아님)
+[ "$REPO/bin/imgui.ini" -nt "$MARKER" ] && mv "$REPO/bin/imgui.ini" "$OUT/applogs/"
 echo "[snapshot] done -> $OUT"

@@ -72,6 +72,25 @@ Model / Backend (miman_coms, miman_orbital, miman_radial, miman_csp, ...)
 - 동일해 보여도 호출부마다 미세하게 다른 곳(예: Stop Engage가 `State.Doppler`도 끔)은
   각자 별도 함수로 둔다.
 
+## 3-1. 진행 결과 (1차: 0~6단계 완료)
+
+| 지표 | 리팩토링 전 | 후 |
+|---|---|---|
+| `miman_imgui.cpp` 의 `pthread_create/join` (주석 제외) | 358 | **0** |
+| `miman_imgui.cpp` 의 `p_thread` / `ftp_start_worker` extern | 있음 | **없음** (UI 가 슬롯에 접근하면 컴파일 에러) |
+| `main.cpp` 의 스레드 생성/조인 | 21 | **0** (`p_thread` 정의만 남음) |
+| `p_thread[]` 를 직접 만지는 빌드 대상 파일 | main, imgui, autopilot (+extern 4개) | **`service/svc_thread.cpp` 하나** |
+| UI 안의 `fork/execl` (앰프) | 6곳 | **0** (`svc_radio` AmpOn/AmpOff) |
+
+Service 모듈: `svc_thread`, `svc_tx`, `svc_tracking`, `svc_radio`, `svc_ftp`, `svc_station`.
+
+검증 (단계마다, 원본 커밋 `60a2c55` 과 비교):
+- `tools/ui_snapshot.sh` 화면 6장 (Setup, Pre-Pass, Rotator On/OFF, Pass Operation, FTP Upload): 콘솔 위 영역 픽셀 차이 0
+- 콘솔 로그(정렬 비교) / 표준출력 동일, SIGINT 종료 동일, Setup Quit 종료 경로 동일
+
+시나리오에서 누르지 않은 버튼(원본도 TLE 없이 누르면 죽는 Engage/Doppler, 실제 장비가 필요한
+명령 전송 등)은 치환이 1:1 기계적이라는 점(diff 줄 단위 검토)으로 확인했다.
+
 ## 4. 이후 단계 (이번 범위 밖)
 
 - UI 안의 CCSDS 명령 패킷 생성 코드 → `CommandBuilder` (Model)

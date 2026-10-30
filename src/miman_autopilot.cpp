@@ -7,13 +7,15 @@
 #include "miman_model.h"
 #include "miman_ftp.h"
 #include "miman_autopilot.h"
+#include "svc_thread.h"
+#include "svc_tx.h"
 
 extern bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), void *arg, const char *label);
 
 extern StateCheckUnit State;
 extern Setup * setup;
 extern Console console;
-extern pthread_t p_thread[16];
+// p_thread[] 직접 접근 대신 service/svc_thread.h 의 슬롯 이름 사용
 extern int NowTLE;
 extern int NowFTP;
 extern bool sgp4check;
@@ -56,12 +58,12 @@ void * AutoPilot(void *)
     if(AutoRes != -2)
     {
         State.Doppler = false;
-        pthread_join(p_thread[7], NULL);
+        mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
         State.Engage = false;
         State.Doppler = false;
-        pthread_join(p_thread[1], NULL);
+        mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
         RotatorSetTo(0, 0);
@@ -131,11 +133,11 @@ int AutoPilot_task()
         }
 
         State.Engage = true;
-        pthread_create(&p_thread[1], NULL, Sattracker, NULL);
+        mim::svc::StartThread(mim::svc::SLOT_ROTATOR_CONTROL, Sattracker, NULL);
         console.AddLog("[OK]##[Auto]Start Engaging.");
 
         State.Doppler = true;
-        pthread_create(&p_thread[7], NULL, Doppler, NULL);
+        mim::svc::StartThread(mim::svc::SLOT_DOPPLER, Doppler, NULL);
         console.AddLog("[OK]##[Auto]Start Doppler Correction.");
 
         //Task
@@ -233,16 +235,16 @@ int AutoPilot_task()
             else
             {
                 console.AddLog("[OK]##Forked Safe Amplifier Process.(ON, Timer)");
-                pthread_create(&p_thread[6], NULL, AmpTimer, NULL);
+                mim::svc::StartThread(mim::svc::SLOT_AMP_TIMER, AmpTimer, NULL);
             }
         }
         
         /*-----------------Calibration Code-------------------*/
         if (State.DoBaudCalibration) {
-            pthread_create(&p_thread[5],NULL,csp_baud_calibration,NULL);
+            mim::svc::StartThread(mim::svc::SLOT_CALIBRATION, csp_baud_calibration, NULL);
         }
         if (State.DoFreqCalibration) {
-            pthread_create(&p_thread[5],NULL,csp_freq_calibration,NULL);
+            mim::svc::StartThread(mim::svc::SLOT_CALIBRATION, csp_freq_calibration, NULL);
         }
         /*-----------------------------------------------------*/
 
@@ -251,7 +253,7 @@ int AutoPilot_task()
         {
             sleep(State.SpanTime);
             
-            pthread_create(&p_thread[4], NULL, csp_ping_console, NULL);
+            mim::svc::StartPingConsole();
             if(PingCounter >= 5)
             {
                 PingAvailable = true;
@@ -263,7 +265,7 @@ int AutoPilot_task()
                 console.AddLog("[ERROR]##[Auto]Ping Success is too hard. Ping Success : %d", PingCounter);
                 break;
             }
-            pthread_join(p_thread[4], NULL);
+            mim::svc::WaitTx();
         }
 
 
@@ -296,9 +298,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt->Length     = sizeof(cmd4);
     memcpy(pkt->Data, cmd4, sizeof(cmd4));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt);
+    mim::svc::WaitTx();
     free(pkt);
 
     console.AddLog("[Auto]EPS P60 DOCK GET TABLE HK Command Sent (%d/2)", i+1);
@@ -316,9 +317,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt1->Length     = sizeof(cmd5);
     memcpy(pkt1->Data, cmd5, sizeof(cmd5));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt1);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt1);
+    mim::svc::WaitTx();
     free(pkt1);
 
     console.AddLog("[Auto]EPS P60 PDU GET TABLE HK Command Sent (%d/2)", i+1);
@@ -336,9 +336,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt2->Length     = sizeof(cmd6);
     memcpy(pkt2->Data, cmd6, sizeof(cmd6));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt2);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt2);
+    mim::svc::WaitTx();
     free(pkt2);
 
     console.AddLog("[Auto]EPS P60 ACU GET TABLE HK Command Sent (%d/2)", i+1);
@@ -360,9 +359,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         pkt->Length     = sizeof(cmd1);
         memcpy(pkt->Data, cmd1, sizeof(cmd1));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)pkt);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::SendUplink((void*)pkt);
+        mim::svc::WaitTx();
         free(pkt);
 
         console.AddLog("[Auto]AX100 GND WDT CMD sent (%d/2)", i+1);
@@ -385,9 +383,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         pkt->Length     = sizeof(cmd2);
         memcpy(pkt->Data, cmd2, sizeof(cmd2));
 
-        pthread_create(&p_thread[4], NULL,
-                       task_uplink_onorbit, (void*)pkt);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::SendUplink((void*)pkt);
+        mim::svc::WaitTx();
         free(pkt);
 
         console.AddLog("[Auto]EPS P60 DOCK GND WDT CMD sent (%d/2)", i+1);
@@ -410,9 +407,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt3->Length     = sizeof(cmd7);
     memcpy(pkt3->Data, cmd7, sizeof(cmd7));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt3);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt3);
+    mim::svc::WaitTx();
     free(pkt3);
 
     console.AddLog("[Auto]EPS P60 DOCK GET TABLE HK Command Sent (%d/2)", i+1);
@@ -429,9 +425,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt4->Length     = sizeof(cmd8);
     memcpy(pkt4->Data, cmd8, sizeof(cmd8));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt4);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt4);
+    mim::svc::WaitTx();
     free(pkt4);
 
     console.AddLog("[Auto]EPS P60 PDU GET TABLE HK Command Sent (%d/2)", i+1);
@@ -448,9 +443,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     pkt5->Length     = sizeof(cmd9);
     memcpy(pkt5->Data, cmd9, sizeof(cmd9));
 
-    pthread_create(&p_thread[4], NULL,
-                   task_uplink_onorbit, (void*)pkt5);
-    pthread_join(p_thread[4], NULL);
+    mim::svc::SendUplink((void*)pkt5);
+    mim::svc::WaitTx();
     free(pkt5);
 
     console.AddLog("[Auto]EPS P60 ACU GET TABLE HK Command Sent (%d/2)", i+1);
@@ -523,8 +517,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                     TestPacket->PacketType = MIM_PT_SIGNAL;
                     TestPacket->Length = 1;
                     memset(TestPacket->Data, 0, TestPacket->Length);
-                    pthread_create(&p_thread[4], NULL, task_uplink_onorbit, (void *)TestPacket);
-                    pthread_join(p_thread[4], NULL);
+                    mim::svc::SendUplink((void *)TestPacket);
+                    mim::svc::WaitTx();
                 }
 
                 console.AddLog("Try to config total rx bytes.");
@@ -638,7 +632,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                 // pthread_create(&p_thread[8], NULL, ftp_downlink_force, &State.ftplistup[NowFTP]);
             else
             {
-                if (!ftp_start_worker(&p_thread[8], ftp_downlink_onorbit, &State.ftplistup[NowFTP], "download")) {
+                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_downlink_onorbit, &State.ftplistup[NowFTP], "download")) {
                     console.AddLog("[Auto]FTP download launch blocked. Stop automatic FTP retries for this pass.");
                     break;
                 }
@@ -669,7 +663,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                 // pthread_create(&p_thread[8], NULL, ftp_uplink_force, &State.ftplistup[NowFTP]);
             else
             {
-                if (!ftp_start_worker(&p_thread[8], ftp_uplink_onorbit, &State.ftplistup[NowFTP], "upload")) {
+                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_uplink_onorbit, &State.ftplistup[NowFTP], "upload")) {
                     console.AddLog("[Auto]FTP upload launch blocked. Stop automatic FTP retries for this pass.");
                     break;
                 }
@@ -686,19 +680,19 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         }
 
         //Wait Until LOS and return multhreads.
-        pthread_join(p_thread[6], NULL);
-        pthread_join(p_thread[8], NULL);
-        pthread_join(p_thread[4], NULL);
+        mim::svc::JoinThread(mim::svc::SLOT_AMP_TIMER);
+        mim::svc::JoinThread(mim::svc::SLOT_FTP);
+        mim::svc::WaitTx();
 
         while(State.Autopilot && NowOn(SatIndex, NextValuablePath))
             usleep(20000);
         State.Doppler = false;
-        pthread_join(p_thread[7], NULL);
+        mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
         State.Engage = false;
         State.Doppler = false;
-        pthread_join(p_thread[1], NULL);
+        mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
         RotatorSetTo(0, 0);
