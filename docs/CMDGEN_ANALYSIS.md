@@ -142,3 +142,65 @@ Service     svc_tx: SendTelecommand(bytes)         엔벨로프 + TC 로그 + Wa
 2. **D2(Schedule), D3(길이), D4(216 라벨)**: 위성 FSW 쪽 기대값을 아는 사람이 확인해야 하는 항목.
 3. **COSMIC 명령의 위치**: BEE-1000 명령 사전과 분리된 미션 프로필로 둘지 (위성 전환 기능과 연결).
 4. **위험 명령 확인 절차**: 분류만 메타데이터로 넣고 동작은 그대로 둘지 (확인 팝업은 동작 변경).
+
+## 6. 개정 설계: 위성을 추상화한 명령 계층 (사용자 방향 반영)
+
+### 6-1. 목표
+
+이 지상국은 miman 관제용으로 시작해 COSMIC, BEE-1000 기능이 차례로 덧붙은 코드다.
+목표는 **특정 위성에 묶인 코드**가 아니라, **같은 계열 플랫폼(cFS 비행 소프트웨어 + CSP/AX100 링크 +
+GomSpace 계열 부품)의 큐브위성이면 위성 정의만 추가해서 운용할 수 있는 지상국**이다.
+위성 FSW의 앱 구조는 연구실 안에서 정형화되어 있지만 필요에 따라 바뀔 수 있으므로,
+**위성마다 달라지는 것은 코드가 아니라 데이터(미션 정의)** 로 두어야 한다.
+
+### 6-2. 공통(플랫폼)과 위성별(미션)의 경계
+
+| 구분 | 무엇 | 지금 위치 | 목표 위치 |
+|---|---|---|---|
+| 플랫폼 | CCSDS Primary + cFE Secondary 헤더, 체크섬 | 152곳에 복사 | `platform/telecommand/ccsds_cmd` 하나 |
+| 플랫폼 | 명령 정의 형식 (앱, MID, CC, payload 필드 목록, 분류, 위험도) | 없음 (case 코드가 곧 정의) | `platform/telecommand/cmd_schema.h` |
+| 플랫폼 | 필드 목록으로 입력 폼을 그리는 범용 폼 | 없음 (명령마다 손으로 작성) | `view/cmdgen/schema_form` |
+| 플랫폼 | 송신: 엔벨로프 + TC 감사 로그 + TX 큐 | case마다 반복 | `svc_tx::SendTelecommand` |
+| 미션 | MID 표, CC 값, payload 구조, 라벨 | `miman_config.h`, Templabels, case 본문 | `missions/<sat>/commands.*` |
+| 미션 | 분류(필터), 초기운용 목록, ADCS 고정 구성값 | FilterRules, INITIAL_CMD_INDICES, case 안 static | `missions/<sat>/` |
+| 미션 | 링크 주소: OBC 노드·포트, AX100 노드, HMAC 키 | `main.cpp` 설정 + `coms.cpp`의 `csp_connect(…, 3, 13, …)` 하드코딩 | `missions/<sat>/link` |
+| 미션 | 운용 절차(다중 패킷 시퀀스) | case 207/208 (COSMIC) | `missions/<sat>/procedures` |
+
+- **cFE 핵심 앱**(ES, TO_LAB, SC, FM)은 cFS 위성이면 공통이므로 플랫폼 기본 정의로 두고, 위성이 MID만 바꿔 쓴다.
+- **BEE-1000**과 **COSMIC**은 각각 하나의 미션 정의가 된다. 지금 한 목록에 섞인 COSMIC 명령(203, 207–215)은 COSMIC 정의로 분리한다.
+- 텔레메트리(Beacon 창 3,436줄, 비콘/HK 파싱)도 같은 원칙으로 갈 대상이지만 이번 범위가 아니다.
+
+### 6-3. 명령 정의(스키마)의 형태
+
+```
+CommandDef {
+  id            // 지금의 Templabels 인덱스 (콤보 순서 유지용)
+  label         // "EPS_P60_Dock Set Channel Single"
+  app           // "EPS" — 위성 FSW 앱
+  mid, cc       // 0x1875, EPS_P60_DOCK_SET_CHANNEL_SINGLE_CC
+  fields[]      // { name:"channel", type:u8 }, { name:"value", type:u8 }, { name:"timeout", type:u16 } …
+  defaults      // ADCS 72–86 처럼 고정값이 있는 경우
+  category      // 필터 그룹
+  initial_ops   // 초기운용 목록 포함 여부
+  criticality   // query / config / hazardous  (메타데이터만, 동작 변경 없음)
+}
+```
+
+- payload는 **필드 목록 → 리틀엔디안 packed 바이트**로 인코딩한다. 현재 packed 구조체와 같은 바이트가 나와야 하며,
+  필드 오프셋·크기를 `offsetof`/`sizeof`와 대조하는 정적 검사로 확인한다.
+- 처음에는 정의를 **C++ 표**로 둔다(새 의존성 없음, 컴파일 시 검사 가능). 형식이 굳으면 같은 내용을
+  **파일(JSON 등)로 읽는 방식**으로 옮길 수 있게 설계한다. 그러면 FSW 앱이 바뀌어도 재컴파일 없이 정의만 고친다.
+
+### 6-4. 단계 (개정)
+
+| # | 단계 | 바뀌는 것 | 바뀌지 않는 것 | 검증 |
+|---|---|---|---|---|
+| 1 | 하네스 확장: 폼 지문 | 골든 하네스가 명령별 입력 위젯 목록(라벨·타입)도 기록 | 소스 | 기준 파일 |
+| 2 | 명령 카탈로그 | 라벨·필터·초기운용·MID·CC를 `CommandDef` 표(BEE-1000, COSMIC 분리)로. 콤보는 표를 읽음 | 콤보 항목·순서, 패킷 | 골든 + 폼 지문 동일 |
+| 3 | 플랫폼 인코더 | case의 헤더·체크섬 코드를 `ccsds_cmd` 호출로 | 패킷 바이트 | 골든 동일 |
+| 4 | 송신 통일 | 엔벨로프·감사 로그·대기를 `SendTelecommand`로 | 송신 순서·로그 | 골든 + ui_snapshot |
+| 5 | 필드 스키마 + 범용 폼 | 앱 하나씩(SC → TO_LAB → ES → EPS → ADCS …) 손으로 쓴 폼을 스키마 렌더링으로 | 위젯 라벨·타입·순서, 패킷 | 폼 지문 + 골든 동일 |
+| 6 | 링크 주소 미션화 | node 3/port 13 하드코딩 등을 미션 정의에서 읽음 | 실제 값 (BEE-1000 기본값 동일) | ui_snapshot + 로그 |
+| 7 | 미션 선택 (기능 변경) | 위성 탭/HMAC 전환과 연결해 활성 미션의 명령만 표시 | — | 별도 승인 |
+
+1~6은 동작이 바뀌지 않는 리팩토링이고, 7은 화면 동작이 바뀌는 기능 변경이라 따로 승인받는다.
