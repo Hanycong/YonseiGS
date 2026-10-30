@@ -85,6 +85,7 @@ INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/orbit)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/telemetry)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/beacon)
+INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/control)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/viewmodel)
 
 ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/miman_config.cpp ${MIMAN_SRC}/miman_coms.cpp ${MIMAN_SRC}/miman_csp.cpp ${MIMAN_SRC}/miman_ftprdp.cpp ${MIMAN_SRC}/miman_imgui.cpp ${MIMAN_SRC}/miman_orbital.cpp ${MIMAN_SRC}/miman_radial.cpp ${MIMAN_SRC}/miman_model.cpp ${MIMAN_SRC}/miman_s_control.cpp ${MIMAN_SRC}/miman_autopilot.cpp ${MIMAN_SRC}/main.cpp
@@ -92,7 +93,7 @@ ${MIMAN_SRC}/miman_theme.cpp ${MIMAN_SRC}/miman_satcontext.cpp
 ${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp ${MIMAN_SRC}/model/service/svc_tracking.cpp ${MIMAN_SRC}/model/service/svc_radio.cpp ${MIMAN_SRC}/model/service/svc_ftp.cpp ${MIMAN_SRC}/model/service/svc_station.cpp
 ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecommand/raw_commands.cpp
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
-${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp ${MIMAN_SRC}/view/control_view.cpp
+${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp ${MIMAN_SRC}/view/control_view.cpp ${MIMAN_SRC}/view/control/ping_node_popup.cpp ${MIMAN_SRC}/view/control/switch_satellite_popup.cpp ${MIMAN_SRC}/view/control/custom_rparam_popup.cpp
 ${MIMAN_SRC}/view/beacon/beacon_tabs.cpp ${MIMAN_SRC}/view/beacon/beacon_tab.cpp ${MIMAN_SRC}/view/beacon/mission_beacon_tab.cpp ${MIMAN_SRC}/view/beacon/report_tab.cpp ${MIMAN_SRC}/view/beacon/event_tab.cpp ${MIMAN_SRC}/view/beacon/response_tab.cpp ${MIMAN_SRC}/view/beacon/ax100_rparam_tab.cpp
 ${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${MIMAN_SRC}/viewmodel/track_vm.cpp ${MIMAN_SRC}/viewmodel/beacon_vm.cpp ${MIMAN_SRC}/viewmodel/ax100_vm.cpp ${MIMAN_SRC}/viewmodel/shell_vm.cpp
 ${MIMAN_SRC}/model/device/gs100_radio.cpp ${MIMAN_SRC}/model/device/switch_box.cpp ${MIMAN_SRC}/model/device/gs_link.cpp ${MIMAN_SRC}/model/device/rotator.cpp
