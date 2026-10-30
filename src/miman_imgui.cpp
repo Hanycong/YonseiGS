@@ -5021,10 +5021,10 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t));
             TestPacket->Identifier = HVD_TEST;
             TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t);
+            TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t);
             memset(TestPacket->Data, 0, TestPacket->Length);
 
-            uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t)] = {0,};
+            uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t)] = {0,};
             msgid = htons(msgid);
             memcpy(cmd2, &msgid, sizeof(uint16_t));
             memcpy(cmd2 + 6, &fnccode, sizeof(uint8_t));

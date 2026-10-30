@@ -107,13 +107,6 @@ int main(int argc, char ** argv)
     {
         if (strlen(Templabels[i]) == 0)
             continue;
-        // D12: "u16" 은 9바이트 버퍼에 2바이트 인자를 써서 스택을 넘친다 (fortify 가 abort).
-        // 결과가 정의되지 않으므로 비교 대상에서 뺀다. (docs/CMDGEN_ANALYSIS.md §4)
-        if (i == 2)
-        {
-            fprintf(stderr, "cmd=%d press=- label=\"%s\" (skipped: D12 stack overflow)\n", i, Templabels[i]);
-            continue;
-        }
         gen_fnccode = i;
         Frame(false);                       // 폼 static 초기화용 빈 프레임
         for (int p = 1; p <= presses; p++)
