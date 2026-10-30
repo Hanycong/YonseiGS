@@ -113,7 +113,10 @@ per-window splitting safe to verify).
 
 Window sequence: Frequency → Rotator → Track → Beacon → Control → Command
 (largest, last; its command layer is being prepared in `model/telecommand/`).
-Note: no FrequencyVM exists in code yet — only its View was restyled.
+**Frequency is done** and is the reference example to copy for the next windows:
+`view/frequency_view.cpp` (ImGui + `vm.` only) → `viewmodel/frequency_vm.*`
+(`FrequencyVM`, one instance via `FrequencyViewModel()`) → `model/device/*`
+(`Gs100Radio`, `SwitchBox`, `GsLink`, thin wrappers until miman_radial is split).
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
