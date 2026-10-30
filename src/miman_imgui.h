@@ -14,6 +14,7 @@
 
 #include "miman_coms.h"
 #include "miman_config.h"
+#include "frequency_view.h"
 
 //Display Modules
 #define DISPLAY_WINDWIDTH       1920
@@ -50,7 +51,6 @@ void ImGui_MainMenu();
 void ImGui_ModelWindow(float fontscale);
 void ImGui_TrackWindow(float fontscale);
 void ImGui_AutoPilotWindow(float fontscale);
-void ImGui_FrequencyWindow(float fontscale);
 void ImGui_RotatorWindow(float fontscale);
 void ImGui_BeaconWindow(float fontscale);
 void ImGui_ControlWindow(float fontscale);
@@ -81,7 +81,6 @@ void ImGui_MainWorkspace(float ReactiveWidth, float ReactiveHeight);
 
 // 기존 9개 윈도우의 Body 헬퍼 (Begin/End 외부 호출)
 void ImGui_TrackWindow_Body(float fontscale);
-void ImGui_FrequencyWindow_Body(float fontscale);
 void ImGui_RotatorWindow_Body(float fontscale);
 void ImGui_ControlWindow_Body(float fontscale);
 void ImGui_CommandWindow_Body(float fontscale);
