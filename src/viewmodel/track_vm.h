@@ -1,22 +1,18 @@
 // ViewModel - Track 창
 //
 // 화면(view/track_view.cpp)이 매 프레임 읽어 가는 상태와, 버튼이 부르는 동작을 가진다.
-// View 는 이 클래스만 알고 Requested / Satellite_row / GetNowTracking / SetNowTracking 은 모른다.
-// 표의 위성 목록은 아직 실제 패스 계산이 아니라 고정 예시 데이터 20개다 (원래 코드 그대로).
+// View 는 이 클래스만 알고 Requested / Satellite_row / 추적 대상 / 패스 표는 모른다.
+// 표의 위성 목록은 아직 실제 패스 계산이 아니라 고정 예시 데이터 20개다 (model/orbit/pass_table.h).
 #pragma once
 
 #include <stddef.h>
+#include "pass_table.h"
 
 namespace mim {
 namespace vm {
 
 // 표 한 줄 (위성 이름, 다음 AOS/LOS 시각, 최대 앙각)
-struct TrackRow {
-    const char* name;
-    int aos_h, aos_m, aos_s;
-    int los_h, los_m, los_s;
-    float max_el;                       // [deg]
-};
+using TrackRow = mim::model::PassEntry;
 
 class TrackVM
 {
