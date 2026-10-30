@@ -22,6 +22,7 @@
 #include "miman_satcontext.h"
 #include "svc_tx.h"
 #include "svc_tracking.h"
+#include "svc_radio.h"
 #include <mutex>
 
 
@@ -171,35 +172,9 @@ char repeated_label[64];
 
 static int current_sat_mode = 0; // 0: BEE1000, 1: BEE1012, 2: Uelysys
 static int chosen_sat_mode = 0;
-static const char* sat_names[3] = { "BEE1000", "BEE1012", "Uelysys" };
-static const char* hmac_keys[3] = { "BEE1000", "BEE1012", "UELYSYS" };
-static bool is_switching = false; // 상태 체크를 위함
+// sat_names / hmac_keys / is_switching / SwitchSatelliteTask -> service/svc_radio.cpp 로 이동
 
 static bool show_satellite_select = false;
-
-static void* SwitchSatelliteTask(void* arg)
-{
-    extern Setup* setup;
-    int mode = *(int*)arg;
-    uint8_t target_node = setup->gs100_node; // 지상국의 gs100 노드
-
-    char target_key[32] = { 0 };
-
-    console.AddLog("Changing GS HMAC Key for %s...", sat_names[mode]); // 테스트 텍스트, 후에 수정가능
-
-    // RX 업데이트
-    gs_rparam_set_int8(target_node, 1, 0x0010, 0xB00B, 100, 1); //100은 수정 가능, 1은 테이블 번호 (rx table)
-    gs_rparam_set_string(target_node, 1, 0x0020, 0xB00B, 100, target_key, strlen(target_key) + 1);
-
-    // TX 업데이트
-    gs_rparam_set_int8(target_node, 5, 0x0010, 0xB00B, 100, 1);
-    gs_rparam_set_string(target_node, 5, 0x0020, 0xB00B, 100, target_key, strlen(target_key) + 1);
-
-    console.AddLog("[OK]## Satellite Switched to: %s", sat_names[mode]);
-
-    is_switching = false; // 통신이 끝나면 플래그 해제 (다시 버튼 클릭 가능)
-    return NULL;
-}
 
 /***********************************************************************************************************/
 
@@ -355,11 +330,10 @@ void ImGui_MainMenu()
                     if (ImGui::MenuItem("Scan AX100"))
                         mim::svc::StartPingScan();
                     if (ImGui::MenuItem("Start Signaltest"))
-                        pthread_create(&p_thread[10], NULL, &SignalTest, NULL);
+                        mim::svc::StartSignalTest();
                     if (ImGui::MenuItem("Stop Signaltest"))
                     {
-                        State.Signaltest = false;
-                        pthread_join(p_thread[10], NULL);
+                        mim::svc::StopSignalTest();
                     }
                     if (State.Debugmode)
                     {
@@ -4545,11 +4519,10 @@ static void HMACWindow()
 
     for (int i = 0; i < 3; i++)
     {
-        if (ImGui::RadioButton(sat_names[i], &current_sat_mode, i))
+        if (ImGui::RadioButton(mim::svc::SwitchSatelliteName(i), &current_sat_mode, i))
         {
             mode_arg = current_sat_mode;
-            pthread_join(p_thread[14], NULL);
-            pthread_create(&p_thread[14], NULL, SwitchSatelliteTask, (void*)&mode_arg);
+            mim::svc::SwitchSatellite(&mode_arg);
         }
     }
 }
@@ -13744,16 +13717,14 @@ void ImGui_ControlWindow_Body(float fontscale)
                       ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        pthread_join(p_thread[5], NULL);
-        pthread_create(&p_thread[5], NULL, csp_baud_calibration, NULL);
+        mim::svc::StartBaudCalibration();
     }
 
     if (ImGui::Button("Frequency Calibration",
                       ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        pthread_join(p_thread[5], NULL);
-        pthread_create(&p_thread[5], NULL, csp_freq_calibration, NULL);
+        mim::svc::StartFreqCalibration();
     }
 
     ImGui::SameLine();
@@ -13766,14 +13737,7 @@ void ImGui_ControlWindow_Body(float fontscale)
                               ImVec2(ImGui::GetContentRegionAvail().x,
                                      ImGui::GetFontSize() * 1.5f)))
             {
-                pid_t pid_off = fork();
-                if (pid_off == -1)
-                    console.AddLog("[ERROR]##Failed to fork process");
-                else if (pid_off == 0)
-                    execl("../amp/ampoff", "ampoff", NULL);
-                else
-                    console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
-                State.AMPON = false;
+                mim::svc::AmpOff();
             }
         }
         else
@@ -13783,17 +13747,7 @@ void ImGui_ControlWindow_Body(float fontscale)
                               ImVec2(ImGui::GetContentRegionAvail().x,
                                      ImGui::GetFontSize() * 1.5f)))
             {
-                pthread_join(p_thread[6], NULL);
-                pid_t pid_on = fork();
-                if (pid_on == -1)
-                    console.AddLog("[ERROR]##Failed to fork process");
-                else if (pid_on == 0)
-                    execl("../amp/ampcontrol", "ampcontrol", NULL);
-                else
-                {
-                    console.AddLog("[OK]##Forked Safe Amplifier Process.(ON, Timer)");
-                    pthread_create(&p_thread[6], NULL, AmpTimer, NULL);
-                }
+                mim::svc::AmpOn();
             }
         }
     }
@@ -13809,14 +13763,7 @@ void ImGui_ControlWindow_Body(float fontscale)
                           ImVec2(ImGui::GetContentRegionAvail().x,
                                  ImGui::GetFontSize() * 1.5f)))
         {
-            pid_t pid_off = fork();
-            if (pid_off == -1)
-                console.AddLog("[ERROR]##Failed to fork process");
-            else if (pid_off == 0)
-                execl("../amp/ampoff", "ampoff", NULL);
-            else
-                console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
-            State.AMPON = false;
+            mim::svc::AmpOff();
         }
         ImGui::PopStyleColor();
     }
@@ -13997,20 +13944,7 @@ void ImGui_CommandWindow_Body(float fontscale)
             strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", State.AmpTM);
             if (ImGui::Button(AmpTimeBuf, ImVec2(ImGui::GetContentRegionAvail().x , ImGui::GetFontSize() * 1.5)))
             {
-                pid_t pid_off = fork();
-
-                if (pid_off == -1) {
-                    console.AddLog("[ERROR]##Failed to fork process");
-                }
-                else if (pid_off == 0) {
-                    // Child process
-                    execl("../amp/ampoff", "ampoff", NULL);
-                }
-                else
-                {
-                    console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
-                }
-                State.AMPON = false;
+                mim::svc::AmpOff();
             }
         }
             
@@ -14019,22 +13953,7 @@ void ImGui_CommandWindow_Body(float fontscale)
             sprintf(AmpTimeBuf, "AMP ON");
             if (ImGui::Button(AmpTimeBuf, ImVec2(ImGui::GetContentRegionAvail().x , ImGui::GetFontSize() * 1.5)))
             {
-                pthread_join(p_thread[6], NULL);
-                pid_t pid_on = fork();
-
-                if (pid_on == -1) {
-                    console.AddLog("[ERROR]##Failed to fork process");
-                }
-                else if (pid_on == 0) {
-                    // Child process
-                    execl("../amp/ampcontrol", "ampcontrol", NULL);
-                    
-                }
-                else
-                {
-                    console.AddLog("[OK]##Forked Safe Amplifier Process.(ON, Timer)");
-                    pthread_create(&p_thread[6], NULL, AmpTimer, NULL);
-                }
+                mim::svc::AmpOn();
             }
         }
             
@@ -14049,20 +13968,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         if (ImGui::Button(AmpTimeBuf, ImVec2(ImGui::GetContentRegionAvail().x , ImGui::GetFontSize() * 1.5)))
         {
-            pid_t pid_off = fork();
-
-            if (pid_off == -1) {
-                console.AddLog("[ERROR]##Failed to fork process");
-            }
-            else if (pid_off == 0) {
-                // Child process
-                execl("../amp/ampoff", "ampoff", NULL);
-            }
-            else
-            {
-                console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
-            }
-            State.AMPON = false;
+            mim::svc::AmpOff();
         }
         ImGui::PopStyleColor();
     }
@@ -14921,15 +14827,15 @@ bool popup_param_table0()
         ImGui::EndChild();
 
         if (ImGui::Button("Update", ImVec2(ImGui::GetContentRegionAvail().x * 0.25, 40)))
-            pthread_create(&p_thread[0], NULL, &Load_Paramtable0, NULL);
+            mim::svc::LoadParamTable(0);
         ImGui::SameLine();
         if (ImGui::Button("Save", ImVec2(ImGui::GetContentRegionAvail().x * 0.33, 40)))
-            pthread_create(&p_thread[0], NULL, &Save_Paramtable0, NULL);
+            mim::svc::SaveParamTable(0);
         ImGui::SameLine();
         if (ImGui::Button("Save to FRAM", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, 40)))
         {
             int8_t id = 0;
-            pthread_create(&p_thread[0], NULL, &Save2FRAM, &id);
+            mim::svc::SaveParamToFRAM(&id);
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();
             return false;
@@ -15000,15 +14906,15 @@ bool popup_param_table1()
         
 
         if (ImGui::Button("Update", ImVec2(ImGui::GetContentRegionAvail().x * 0.25, 40)))
-            pthread_create(&p_thread[0], NULL, &Load_Paramtable1, NULL);
+            mim::svc::LoadParamTable(1);
         ImGui::SameLine();
         if (ImGui::Button("Save", ImVec2(ImGui::GetContentRegionAvail().x * 0.33, 40)))
-            pthread_create(&p_thread[0], NULL, &Save_Paramtable1, NULL);
+            mim::svc::SaveParamTable(1);
         ImGui::SameLine();
         if (ImGui::Button("Save to FRAM", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, 40)))
         {
             int8_t id = 1;
-            pthread_create(&p_thread[0], NULL, &Save2FRAM, &id);
+            mim::svc::SaveParamToFRAM(&id);
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();
             return false;
@@ -15092,15 +14998,15 @@ bool popup_param_table5()
         ImGui::EndChild();
 
         if (ImGui::Button("Update", ImVec2(ImGui::GetContentRegionAvail().x * 0.25, 40)))
-            pthread_create(&p_thread[0], NULL, &Load_Paramtable5, NULL);
+            mim::svc::LoadParamTable(5);
         ImGui::SameLine();
         if (ImGui::Button("Save", ImVec2(ImGui::GetContentRegionAvail().x * 0.33, 40)))
-            pthread_create(&p_thread[0], NULL, &Save_Paramtable5, NULL);
+            mim::svc::SaveParamTable(5);
         ImGui::SameLine();
         if (ImGui::Button("Save to FRAM", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, 40)))
         {
             int8_t id = 5;
-            pthread_create(&p_thread[0], NULL, &Save2FRAM, &id);
+            mim::svc::SaveParamToFRAM(&id);
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();
             return false;
