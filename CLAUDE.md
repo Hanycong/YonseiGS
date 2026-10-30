@@ -168,5 +168,8 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   fixed, D12 (u16 stack overflow) is fixed. Still open: **D2** — Schedule path
   passes `sch_cmd_t*` as `packetsign*`; **D13** — generic s8..float (case 5–9) swap
   function-code/checksum bytes (6/7) vs every other command; needs FSW confirmation.
+  **D14** — Initial Operations list has 205 ("Beacon Mukbang") commented as UANT burn;
+  real UANT Burn Channel (161) is missing from it.
 - Verify any change touching command generation with `tools/cmdgen_golden.sh <out>`
-  and `diff` the two `golden.txt` files: every telecommand's bytes must be identical.
+  and `diff` both `golden.txt` (telecommand bytes) and `forms.txt` (picker lists per
+  filter/mode + each command's widget list) against the previous commit.

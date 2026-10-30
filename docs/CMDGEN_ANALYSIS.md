@@ -94,6 +94,7 @@ CCSDS 명령 패킷으로 조립하고, 지상국 송신 큐(TX 슬롯)에 넣�
 | D11 | `malloc`한 packetsign을 아무도 `free`하지 않음 | 명령마다 메모리 누수 | task_uplink_onorbit |
 | D12 (수정됨) | case 2("u16")가 9바이트 버퍼(`HDR+sizeof(uint8_t)`)에 2바이트 인자를 복사하고 10바이트로 체크섬 계산, 전송 길이는 9 | 스택 1바이트 넘침. Release(_FORTIFY_SOURCE) 빌드는 버튼 누르면 abort, 아니면 인자 상위 바이트가 잘림 | 골든 하네스 실행 중 fortify abort |
 | D13 | Generic s8/s16/s32/s64/float(case 5–9)만 Function Code를 7번째, 체크섬을 6번째 바이트에 쓴다. 나머지 명령은 모두 6번째=FC, 7번째=체크섬 | FSW가 표준 cFE 배치를 기대하면 이 5개 명령의 CC가 체크섬 값으로 해석됨. 옛 cFE 바이트 배치일 가능성도 있어 FSW 확인 필요 | 골든 출력 비교, case 5–9 코드 |
+| D14 | 초기운용 목록(`INITIAL_CMD_INDICES`)의 `205` 주석은 "UANT burn channel"인데 205는 "Beacon Mukbang". 실제 UANT Burn Channel(161)은 목록에 없음. `200`은 라벨·구현 없음 | Initial Operations 창에서 안테나 버닝 명령을 보낼 수 없음 (의도 확인 필요) | forms.txt picker mode=initial |
 
 ## 5. 분할 설계안
 

@@ -3,9 +3,11 @@
 #
 # 사용법: tools/cmdgen_golden.sh <OUT_DIR>
 #   결과: OUT_DIR/golden.txt  (명령별 3회 "Generate CMD" 결과 packetsign 바이트)
+#         OUT_DIR/forms.txt   (명령 선택 콤보 항목 목록 + 명령별 입력 폼 위젯 목록)
 #
 # 두 커밋의 golden.txt 를 diff 해서 위성으로 나가는 패킷이 바뀌었는지 확인한다.
 #   diff A/golden.txt B/golden.txt
+#   diff A/forms.txt  B/forms.txt
 #
 # 본 프로그램과 같은 Release 플래그로 빌드한 오브젝트를 재사용하고,
 # main.cpp / miman_imgui.cpp / service/svc_tx.cpp 만 하네스로 대체한다.
@@ -32,8 +34,9 @@ g++ -O3 -rdynamic -Wl,--allow-multiple-definition "$OUT/golden_main.o" $OBJS $LI
 echo "[golden] run"
 MARKER="$OUT/.start_marker"
 touch "$MARKER"
-( cd "$REPO/bin" && "$OUT/cmdgen_golden" ) 2> "$OUT/golden.txt" > "$OUT/run.log"
+( cd "$REPO/bin" && "$OUT/cmdgen_golden" "$OUT/forms.txt" ) 2> "$OUT/golden.txt" > "$OUT/run.log"
 # Console 객체가 data/BEE_Console_Log 에 남기는 로그는 저장소 밖으로 옮긴다
 mkdir -p "$OUT/applogs"
 find "$REPO/data" -type f -newer "$MARKER" -exec mv {} "$OUT/applogs/" \;
-echo "[golden] $(grep -c 'press=1' "$OUT/golden.txt") commands, $(grep -c ' id=' "$OUT/golden.txt") packets -> $OUT/golden.txt"
+echo "[golden] $(grep -c ' id=' "$OUT/golden.txt") packets -> $OUT/golden.txt"
+echo "[golden] $(grep -c '^form ' "$OUT/forms.txt") forms, $(grep -c '^picker ' "$OUT/forms.txt") picker lists -> $OUT/forms.txt"
