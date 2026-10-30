@@ -1,45 +1,20 @@
 // View - Beacon 창 "Mission Beacon" 탭
 //
-// beacon_view.cpp 의 ImGui_BeaconWindow_Body 에서 탭 블록을 내용 그대로 옮긴 것.
+// ImGui 호출과 BeaconVM 호출만 있다. 표시 값은 viewmodel/beacon_vm.h 참고.
 #include <inttypes.h>
-#include <mutex>
-#include <gs/param/rparam.h>
 
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_coms.h"
-#include "miman_radial.h"
-#include "miman_csp.h"
-#include "miman_theme.h"
-#include "svc_tx.h"
+#include "imgui.h"
+#include "beacon_vm.h"
 #include "beacon_tabs.h"
 
-using namespace mim;
-
-extern Setup * setup;
-extern StateCheckUnit State;
-extern Ptable_1 param1;
-extern Ptable_5 param5;
-extern Console console;
-extern bool p_open;
-extern ImGuiWindowFlags mim_winflags;
-extern Beacon * beacon;
-extern MissionBeacon * missionbeacon;
-extern GETFILEINFO * getfileinfo;
-extern Event * event;
-extern Ptable_0 rparam0;
-extern Ptable_1 rparam1;
-extern Ptable_5 rparam5;
-extern uint8_t remote_activeconf;
-extern int16_t remote_lastrssi;
-extern int16_t remote_rssibusy;
-extern cmd_packet_t * shellcmd;
-// miman_imgui.cpp 의 같은 이름 static 과 같은 값 (표 머리글 고정 행/열 수)
+// 표 머리글 고정 행/열 수 (miman_imgui.cpp 의 같은 이름 static 과 같은 값)
 static int freeze_cols = 1;
 static int freeze_rows = 1;
 
 void DrawMissionBeaconTab(float fontscale)
 {
+    mim::vm::BeaconVM & vm = mim::vm::BeaconViewModel();
+    MissionBeacon *missionbeacon = vm.LastMissionBeacon();
     if(ImGui::BeginTabItem("Mission Beacon"))
     {
 

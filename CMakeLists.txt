@@ -93,7 +93,7 @@ ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecomman
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
 ${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp
 ${MIMAN_SRC}/view/beacon/beacon_tabs.cpp ${MIMAN_SRC}/view/beacon/beacon_tab.cpp ${MIMAN_SRC}/view/beacon/mission_beacon_tab.cpp ${MIMAN_SRC}/view/beacon/report_tab.cpp ${MIMAN_SRC}/view/beacon/event_tab.cpp ${MIMAN_SRC}/view/beacon/response_tab.cpp ${MIMAN_SRC}/view/beacon/ax100_rparam_tab.cpp
-${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${MIMAN_SRC}/viewmodel/track_vm.cpp
+${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${MIMAN_SRC}/viewmodel/track_vm.cpp ${MIMAN_SRC}/viewmodel/beacon_vm.cpp
 ${MIMAN_SRC}/model/device/gs100_radio.cpp ${MIMAN_SRC}/model/device/switch_box.cpp ${MIMAN_SRC}/model/device/gs_link.cpp ${MIMAN_SRC}/model/device/rotator.cpp
 ${MIMAN_SRC}/model/orbit/track_target.cpp ${MIMAN_SRC}/model/orbit/pass_table.cpp)
 
