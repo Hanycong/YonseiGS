@@ -1,30 +1,13 @@
 // View - Control 창 (Pass Operation 탭 왼쪽 열: 위성 전환, 핑, RParam, 명령 생성기 팝업, 캘리브레이션, AMP)
 //
-// miman_imgui.cpp 에서 내용 그대로 옮긴 것 (MVVM 1단계: View 추출).
-// 다음 단계에서 State. / console / svc 호출 / 명령 큐(SatCMD)를 ControlVM 으로 옮긴다.
-#include <inttypes.h>
-#include <time.h>
-#include <gs/param/rparam.h>
-#include <csp/csp.h>
-
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
-#include "miman_csp.h"
-#include "svc_tx.h"
-#include "svc_radio.h"
-#include "control_view.h"
+// ImGui 호출과 ControlVM 호출만 있다. 팝업 창 열림 여부(show_*)는 화면 상태라 여기 static 으로 둔다.
+#include "imgui.h"
+#include "control_vm.h"
 #include "control_popups.h"
+#include "control_view.h"
 
-extern StateCheckUnit State;
-extern Setup * setup;
-extern Console console;
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
-extern char AmpTimeBuf[32];
-extern int NowCMD;
-extern CmdGenerator_GS * SatCMD[256];
 
 // 명령 생성기 본체 (아직 miman_imgui.cpp 에 있다. Command 단계에서 옮긴다)
 void DrawCmdGeneratorBody(bool initial_mode);
@@ -46,6 +29,7 @@ void ImGui_ControlWindow(float fontscale)
 
 void ImGui_ControlWindow_Body(float fontscale)
 {
+    mim::vm::ControlVM & vm = mim::vm::ControlViewModel();
 
     ImGuiStyle& style = ImGui::GetStyle();
     float buttonHeight = ImGui::GetFontSize() * 1.5f;
@@ -71,33 +55,13 @@ void ImGui_ControlWindow_Body(float fontscale)
 
     if (ImGui::Button("Ping(AX100)", ImVec2(eachW, buttonHeight)))
     {
-        mim::svc::WaitTx();
-        mim::svc::StartPingConsole();
+        vm.PingAx100();
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Ping(OBC)", ImVec2(eachW, buttonHeight)))
     {
-        mim::svc::WaitTx();
-        FSWTle* MIM_TLEinfo = (FSWTle*)malloc(sizeof(FSWTle) + MIM_HAND_DATAFDSTART);
-        int NowPingInfo = GetNowTracking();
-
-        if (NowPingInfo < -1)
-        {
-            console.AddLog("[ERROR]##You Tried Ping without Tracking. Please Check Again.");
-        }
-        else if (NowPingInfo == -1)
-        {
-            FSWTleConverter(State.Fatellites->tle, MIM_TLEinfo);
-            packetsign* TestPacket = PingInit(MIM_TLEinfo);
-            mim::svc::SendUplink((void*)TestPacket);
-        }
-        else
-        {
-            FSWTleConverter(State.Satellites[NowPingInfo]->tle, MIM_TLEinfo);
-            packetsign* TestPacket = PingInit(MIM_TLEinfo);
-            mim::svc::SendUplink((void*)TestPacket);
-        }
+        vm.PingObc();
     }
 
     if (ImGui::Button("Ping each node", ImVec2(eachW, buttonHeight)))
@@ -115,7 +79,7 @@ void ImGui_ControlWindow_Body(float fontscale)
     if (ImGui::Button("Send Telecommand", ImVec2(eachW, buttonHeight)))
     {
         show_tmtcWindow = true;
-        csp_rtable_print();
+        vm.PrintRoutingTable();
     }
 
     ImGui::SameLine();
@@ -134,53 +98,47 @@ void ImGui_ControlWindow_Body(float fontscale)
                       ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        mim::svc::StartBaudCalibration();
+        vm.StartBaudCalibration();
     }
 
     if (ImGui::Button("Frequency Calibration",
                       ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        mim::svc::StartFreqCalibration();
+        vm.StartFreqCalibration();
     }
 
     ImGui::SameLine();
-    if (!State.AMPON)
+    mim::vm::AmpButton amp = vm.Amp();
+    if (!amp.on)
     {
-        if (State.AmpTime > 0)
+        if (amp.timer)
         {
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", State.AmpTM);
-            if (ImGui::Button(AmpTimeBuf,
+            if (ImGui::Button(amp.label,
                               ImVec2(ImGui::GetContentRegionAvail().x,
                                      ImGui::GetFontSize() * 1.5f)))
             {
-                mim::svc::AmpOff();
+                vm.TurnAmpOff();
             }
         }
         else
         {
-            sprintf(AmpTimeBuf, "AMP ON");
-            if (ImGui::Button(AmpTimeBuf,
+            if (ImGui::Button(amp.label,
                               ImVec2(ImGui::GetContentRegionAvail().x,
                                      ImGui::GetFontSize() * 1.5f)))
             {
-                mim::svc::AmpOn();
+                vm.TurnAmpOn();
             }
         }
     }
     else
     {
-        if (State.AmpTime > 0)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S", State.AmpTM);
-        else
-            sprintf(AmpTimeBuf, "AMP OFF");
-
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-        if (ImGui::Button(AmpTimeBuf,
+        if (ImGui::Button(amp.label,
                           ImVec2(ImGui::GetContentRegionAvail().x,
                                  ImGui::GetFontSize() * 1.5f)))
         {
-            mim::svc::AmpOff();
+            vm.TurnAmpOff();
         }
         ImGui::PopStyleColor();
     }
@@ -189,7 +147,7 @@ void ImGui_ControlWindow_Body(float fontscale)
                       ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        State.Display_CMD = true;
+        vm.OpenCommandManager();
     }
 
     ImGui::SameLine();
@@ -197,15 +155,7 @@ void ImGui_ControlWindow_Body(float fontscale)
                       ImVec2(ImGui::GetContentRegionAvail().x,
                              ImGui::GetFontSize() * 1.5f)))
     {
-        NowCMD = 0;
-        for (int i = 0; i < 256; i++)
-        {
-            if (SatCMD[i] != NULL)
-            {
-                delete SatCMD[i];
-                SatCMD[i] = NULL;
-            }
-        }
+        vm.ClearCommandQueue();
     }
 
     ImGuiIO& io = ImGui::GetIO();
