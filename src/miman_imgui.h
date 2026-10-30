@@ -19,6 +19,7 @@
 #include "track_view.h"
 #include "beacon_view.h"
 #include "control_view.h"
+#include "ftp_view.h"
 
 //Display Modules
 #define DISPLAY_WINDWIDTH       1920
@@ -54,7 +55,6 @@ void ImGui_ClearColorBuf(GLFWwindow * window, ImVec4 clear_color);
 void ImGui_MainMenu();
 void ImGui_ModelWindow(float fontscale);
 void ImGui_AutoPilotWindow(float fontscale);
-void ImGui_CommandWindow(float fontscale);
 
 void ImGui_AutoPilotWindow(float fontscale);
 
@@ -80,7 +80,6 @@ void glfw_error_callback(int error, const char* description);
 void ImGui_MainWorkspace(float ReactiveWidth, float ReactiveHeight);
 
 // 기존 9개 윈도우의 Body 헬퍼 (Begin/End 외부 호출)
-void ImGui_CommandWindow_Body(float fontscale);
 // 신규
 void ImGui_StatusBar(float ReactiveWidth);
 void ImGui_StatusBar_Body(float ReactiveWidth);
