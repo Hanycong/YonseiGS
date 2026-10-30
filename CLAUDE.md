@@ -94,6 +94,8 @@ src/
     missions/    per-satellite definitions (bee1000/, cosmic/)
     device/      rotator, GS100 radio, switch box, amplifier (split out of
                  miman_orbital / radial / csp as classes)
+    orbit/       tracking target, pass table / prediction, SGP4 (split out of
+                 miman_orbital; added with the Track window)
     telemetry/   beacon / HK parsing (split out of miman_coms)
 ```
 Large files are split **object-oriented, by purpose**: many short files/classes,
@@ -119,6 +121,11 @@ Window sequence: Frequency → Rotator → Track → Beacon → Control → Comm
 (`Gs100Radio`, `SwitchBox`, `GsLink`, thin wrappers until miman_radial is split).
 **Rotator is done** the same way: `view/rotator_view.cpp` → `viewmodel/rotator_vm.*`
 (`RotatorVM`) → `model/device/rotator.*` (`Gs232bRotator`, wraps miman_orbital for now).
+**Track is done**: `view/track_view.cpp` → `viewmodel/track_vm.*` (`TrackVM`; keeps the
+`Requested` selection and search text) → `model/orbit/track_target.*` (`TrackTarget`, wraps
+Get/SetNowTracking) + `model/orbit/pass_table.*` (`ExamplePassTable`: still the hardcoded
+20-satellite example data, not real SGP4 passes — wiring real passes is a feature change).
+Next: **Beacon**.
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
