@@ -98,7 +98,8 @@ ${MIMAN_SRC}/view/beacon/beacon_tabs.cpp ${MIMAN_SRC}/view/beacon/beacon_tab.cpp
 ${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${MIMAN_SRC}/viewmodel/track_vm.cpp ${MIMAN_SRC}/viewmodel/beacon_vm.cpp ${MIMAN_SRC}/viewmodel/ax100_vm.cpp ${MIMAN_SRC}/viewmodel/shell_vm.cpp ${MIMAN_SRC}/viewmodel/control_vm.cpp
 ${MIMAN_SRC}/model/device/gs100_radio.cpp ${MIMAN_SRC}/model/device/switch_box.cpp ${MIMAN_SRC}/model/device/gs_link.cpp ${MIMAN_SRC}/model/device/rotator.cpp
 ${MIMAN_SRC}/model/orbit/track_target.cpp ${MIMAN_SRC}/model/orbit/pass_table.cpp
-${MIMAN_SRC}/model/device/ax100_radio.cpp ${MIMAN_SRC}/model/telemetry/telemetry_store.cpp ${MIMAN_SRC}/model/telecommand/direct_shell.cpp)
+${MIMAN_SRC}/model/device/ax100_radio.cpp ${MIMAN_SRC}/model/telemetry/telemetry_store.cpp ${MIMAN_SRC}/model/telecommand/direct_shell.cpp
+${MIMAN_SRC}/model/device/csp_remote_param.cpp ${MIMAN_SRC}/model/telecommand/obc_ping.cpp ${MIMAN_SRC}/model/telecommand/command_queue.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)

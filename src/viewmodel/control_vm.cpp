@@ -4,21 +4,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <gs/param/rparam.h>
 #include <csp/csp.h>
 
 #include "miman_config.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
 #include "svc_tx.h"
 #include "svc_radio.h"
+#include "csp_remote_param.h"
+#include "obc_ping.h"
+#include "command_queue.h"
+#include "track_target.h"
 
 extern StateCheckUnit State;
-extern Setup * setup;
 extern Console console;
 extern char AmpTimeBuf[32];
-extern int NowCMD;
-extern CmdGenerator_GS * SatCMD[256];
 
 namespace mim {
 namespace vm {
@@ -34,23 +32,16 @@ void ControlVM::PingAx100()
 void ControlVM::PingObc()
 {
     mim::svc::WaitTx();
-    FSWTle* MIM_TLEinfo = (FSWTle*)malloc(sizeof(FSWTle) + MIM_HAND_DATAFDSTART);
-    int NowPingInfo = GetNowTracking();
+    FSWTle* MIM_TLEinfo = mim::model::NewFswTleBuffer();
+    int NowPingInfo = mim::model::Tracking().Index();
 
     if (NowPingInfo < -1)
     {
         console.AddLog("[ERROR]##You Tried Ping without Tracking. Please Check Again.");
     }
-    else if (NowPingInfo == -1)
-    {
-        FSWTleConverter(State.Fatellites->tle, MIM_TLEinfo);
-        packetsign* TestPacket = PingInit(MIM_TLEinfo);
-        mim::svc::SendUplink((void*)TestPacket);
-    }
     else
     {
-        FSWTleConverter(State.Satellites[NowPingInfo]->tle, MIM_TLEinfo);
-        packetsign* TestPacket = PingInit(MIM_TLEinfo);
+        packetsign* TestPacket = mim::model::BuildObcPing(MIM_TLEinfo, NowPingInfo);
         mim::svc::SendUplink((void*)TestPacket);
     }
 }
@@ -94,15 +85,7 @@ void ControlVM::OpenCommandManager() { State.Display_CMD = true; }
 // "Clear"
 void ControlVM::ClearCommandQueue()
 {
-    NowCMD = 0;
-    for (int i = 0; i < 256; i++)
-    {
-        if (SatCMD[i] != NULL)
-        {
-            delete SatCMD[i];
-            SatCMD[i] = NULL;
-        }
-    }
+    mim::model::Commands().Clear();
 }
 
 uint8_t * ControlVM::PingTargetNode() { return &ping_node_; }
@@ -146,28 +129,28 @@ void CustomRparamVM::Load()
     if (type_index == 0)
     {
         // eps 안불러와지면 0x0BB0 시도!
-        if (gs_rparam_get_uint8(node, table_id, addr, 0xB00B, setup->default_timeout, &value_u8) == GS_OK)
+        if (mim::model::RemoteParam().GetU8(node, table_id, addr, &value_u8))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu8, node, table_id, addr, value_u8);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
     }
     else if (type_index == 1)
     {
-        if (gs_rparam_get_uint16(node, table_id, addr, 0xB00B, setup->default_timeout, &value_u16) == GS_OK)
+        if (mim::model::RemoteParam().GetU16(node, table_id, addr, &value_u16))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu16, node, table_id, addr, value_u16);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
     }
     else if (type_index == 2)
     {
-        if (gs_rparam_get_uint32(node, table_id, addr, 0xB00B, setup->default_timeout, &value_u32) == GS_OK)
+        if (mim::model::RemoteParam().GetU32(node, table_id, addr, &value_u32))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu32, node, table_id, addr, value_u32);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
     }
     else if (type_index == 3)
     {
-        if (gs_rparam_get_int8(node, table_id, addr, 0xB00B, setup->default_timeout, &value_s8) == GS_OK)
+        if (mim::model::RemoteParam().GetS8(node, table_id, addr, &value_s8))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi8, node, table_id, addr, value_s8);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
@@ -175,7 +158,7 @@ void CustomRparamVM::Load()
 
     else if (type_index == 4)
     {
-        if (gs_rparam_get_int16(node, table_id, addr, 0xB00B, setup->default_timeout, &value_s16) == GS_OK)
+        if (mim::model::RemoteParam().GetS16(node, table_id, addr, &value_s16))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi16, node, table_id, addr, value_s16);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
@@ -183,7 +166,7 @@ void CustomRparamVM::Load()
 
     else if (type_index == 5)
     {
-        if (gs_rparam_get_int32(node, table_id, addr, 0xB00B, setup->default_timeout, &value_s32) == GS_OK)
+        if (mim::model::RemoteParam().GetS32(node, table_id, addr, &value_s32))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi32, node, table_id, addr, value_s32);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
@@ -191,7 +174,7 @@ void CustomRparamVM::Load()
 
     else if (type_index == 6)
     {
-        if (gs_rparam_get_float(node, table_id, addr, 0xB00B, setup->default_timeout, &value_float) == GS_OK)
+        if (mim::model::RemoteParam().GetFloat(node, table_id, addr, &value_float))
             console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%f", node, table_id, addr, value_float);
         else
             console.AddLog("[ERROR]##Rparam Load Failed.");
@@ -207,21 +190,21 @@ void CustomRparamVM::Save()
 {
     if (type_index == 0)
     {
-        if (gs_rparam_set_uint8(node, table_id, addr, 0xB00B, setup->default_timeout, value_u8) == GS_OK)
+        if (mim::model::RemoteParam().SetU8(node, table_id, addr, value_u8))
             console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu8, node, table_id, addr, value_u8);
         else
             console.AddLog("[ERROR]##Rparam Save Failed.");
     }
     else if (type_index == 1)
     {
-        if (gs_rparam_set_uint16(node, table_id, addr, 0xB00B, setup->default_timeout, value_u16) == GS_OK)
+        if (mim::model::RemoteParam().SetU16(node, table_id, addr, value_u16))
             console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu16, node, table_id, addr, value_u16);
         else
             console.AddLog("[ERROR]##Rparam Save Failed.");
     }
     else if (type_index == 2)
     {
-        if (gs_rparam_set_uint32(node, table_id, addr, 0xB00B, setup->default_timeout, value_u32) == GS_OK)
+        if (mim::model::RemoteParam().SetU32(node, table_id, addr, value_u32))
             console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu32, node, table_id, addr, value_u32);
         else
             console.AddLog("[ERROR]##Rparam Save Failed.");
