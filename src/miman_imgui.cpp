@@ -21,6 +21,7 @@
 #include "miman_theme.h"
 #include "miman_satcontext.h"
 #include "svc_tx.h"
+#include "svc_tracking.h"
 #include <mutex>
 
 
@@ -797,8 +798,7 @@ void ImGui_AutoPilotWindow(float fontscale)
     {
         if (ImGui::Button("Start AutoPilot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.8f)))
         {
-            State.Autopilot = true;
-            pthread_create(&p_thread[13], NULL, AutoPilot, NULL);
+            mim::svc::StartAutoPilot();
         }
     }
     else
@@ -806,8 +806,7 @@ void ImGui_AutoPilotWindow(float fontscale)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         if (ImGui::Button("Stop AutoPilot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.8f)))
         {
-            State.Autopilot = false;
-            pthread_join(p_thread[13], NULL);
+            mim::svc::StopAutoPilot();
         }
         ImGui::PopStyleColor();
     }
@@ -900,17 +899,7 @@ void ImGui_FrequencyWindow_Body(float fontscale)
 
         if (ImGui::Button("Start Doppler Correction", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            if(State.GS100_Connection)
-            {
-                State.Doppler = true;
-                pthread_create(&p_thread[7], NULL, Doppler, NULL);
-                console.AddLog("[OK]##Start Doppler Correction.");
-            }
-            else
-            {
-                console.AddLog("[ERROR]##GS100 Connection Error - Cannot Start Doppler Correction.");
-            }
-            
+            mim::svc::StartDoppler();
         }
     }
     else
@@ -918,8 +907,7 @@ void ImGui_FrequencyWindow_Body(float fontscale)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         if (ImGui::Button("Stop Doppler Correction", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            State.Doppler = false;
-            pthread_join(p_thread[7], NULL);
+            mim::svc::StopDoppler();
         }
         ImGui::PopStyleColor();
     }
@@ -964,9 +952,7 @@ void ImGui_RotatorWindow_Body(float fontscale)
     {
         if (ImGui::Button("Start Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            State.Engage = true;
-            pthread_create(&p_thread[1], NULL, Sattracker, NULL);
-            console.AddLog("[OK]##Start Engaging.");
+            mim::svc::StartEngage();
         }
     }
     else
@@ -974,13 +960,7 @@ void ImGui_RotatorWindow_Body(float fontscale)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         if (ImGui::Button("Stop Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            State.Engage = false;
-            State.Doppler = false;
-            pthread_join(p_thread[1], NULL);
-            console.AddLog("[OK]##Finish Engaging.");
-            console.AddLog("Beacon Success : %d, Ping Success : %d", BeaconCounter, PingCounter);
-            BeaconCounter = 0;
-            PingCounter = 0;
+            mim::svc::StopEngage();
         }
         ImGui::PopStyleColor();
     }
@@ -1036,15 +1016,12 @@ void ImGui_RotatorWindow_Body(float fontscale)
 
     if(ImGui::Button("Rotator On", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
     {
-        init_rotator();
-        pthread_create(&p_thread[2], NULL, RotatorReadInfo, NULL);
+        mim::svc::RotatorOn();
     }
     ImGui::SameLine();
     if(ImGui::Button("Rotator OFF", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
     {
-        State.RotatorReading = false;
-        pthread_join(p_thread[2], NULL);
-        // fin_rotator();
+        mim::svc::RotatorOff();
     }
     if(ImGui::Button("Rotator IO Buffer Free", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
     {
@@ -15200,7 +15177,7 @@ bool popup_tle()
             
             console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
 
-            pthread_create(&p_thread[15], NULL, &SatelliteInitialize,  &sgp4check);
+            mim::svc::StartSatelliteInitialize(&sgp4check);
             // SatelliteInitialize(NULL);
                 
             
@@ -15300,7 +15277,7 @@ bool popup_tle()
                 
                 console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
 
-                pthread_create(&p_thread[15], NULL, &SatelliteInitialize,  &sgp4check);
+                mim::svc::StartSatelliteInitialize(&sgp4check);
                 // SatelliteInitialize(NULL);
                 
             }
