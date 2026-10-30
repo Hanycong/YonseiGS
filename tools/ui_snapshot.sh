@@ -12,7 +12,8 @@
 #   libcurl4-openssl-dev libassimp-dev libglm-dev libstb-dev
 #
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
-#   결과: OUT_DIR/0_setup.png 1_pre_pass.png 2_pass_operation.png run.log build.log
+#   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
+#         2_pass_operation.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
 #
@@ -59,6 +60,16 @@ import -window root "$OUT/0_setup.png"
 xdotool mousemove 719 1042 click 1
 sleep 6
 import -window root "$OUT/1_pre_pass.png"
+
+# Pre-Pass: Rotator On -> 캡처 -> Rotator OFF -> 캡처
+# (Start Doppler Correction / Start Rotator Engaging 은 누르지 않는다:
+#  TLE 없이 누르면 원본 코드도 세그폴트로 죽는다. CLAUDE.md "Known defects" 참고)
+xdotool mousemove 1437 626 click 1     # Rotator On
+sleep 3
+import -window root "$OUT/1b_pre_pass_started.png"
+xdotool mousemove 1741 626 click 1     # Rotator OFF
+sleep 3
+import -window root "$OUT/1c_pre_pass_stopped.png"
 
 # 2. Pass Operation 탭
 xdotool mousemove 342 216 click 1

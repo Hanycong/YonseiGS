@@ -138,3 +138,28 @@ the *separation of concerns*, not the binding mechanism:
   populate the tabs (sat tab list shows garbage "AOS in -17754..." entries).
 - `StateCheckUnit` has a duplicate `Doppler` member (bool + float) — confirm
   scoping during the eventual StateCheckUnit decomposition.
+- **Missing `return` in ~35 non-void functions**, including thread entry points
+  (`RadInitialize`, `Load_Paramtable0/1/5`, `Sattracker`, ...). With GCC 13 and
+  no build type (`build.sh` default, -O0) the app dies with **SIGILL** right after
+  pressing Start (`RadInitialize` → `Load_Paramtable0`). Release (-O3) happens to
+  survive. `tools/ui_snapshot.sh` therefore builds with `-DCMAKE_BUILD_TYPE=Release`.
+- Without TLE loaded, **Start Doppler Correction** (and Doppler → Start Rotator
+  Engaging) crashes with SIGSEGV in `SetNowTracking_impl` → `Console::AddLog`
+  (Release build, original code). Snapshot scenario avoids these buttons.
+- `Save2FRAM` is started with `&id` of a block-local `int8_t id` that goes out of
+  scope immediately (3 places in param popups) — dangling pointer race.
+- `SwitchSatelliteTask` writes an empty HMAC key: `target_key` is never filled
+  (`hmac_keys[]` is unused).
+- TX slot `p_thread[4]` is shared by uplink/ping/shell; several call sites create
+  without a preceding join, overwriting the previous handle (leaked/unjoined thread).
+- AX100 GNDWDT reset calls `csp_transaction(..., 1000, ...)` on the UI thread
+  (blocks rendering up to 1 s).
+
+## Service layer (refactor in progress)
+
+See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
+- New backend-facing code goes in `src/service/` (`mim::svc` namespace).
+- UI must not call `pthread_create/join` on `p_thread[]` directly — add or use a
+  `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
+- Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit
+  (screens pixel-identical above the console, sorted console log identical).
