@@ -125,7 +125,15 @@ Window sequence: Frequency → Rotator → Track → Beacon → Control → Comm
 `Requested` selection and search text) → `model/orbit/track_target.*` (`TrackTarget`, wraps
 Get/SetNowTracking) + `model/orbit/pass_table.*` (`ExamplePassTable`: still the hardcoded
 20-satellite example data, not real SGP4 passes — wiring real passes is a feature change).
-Next: **Beacon**.
+**Beacon is done**: `view/beacon_view.cpp` (tab bar only) + one file per tab in `view/beacon/`
+(`beacon_tab`, `mission_beacon_tab`, `report_tab`, `event_tab`, `response_tab`, `ax100_rparam_tab`)
+→ `viewmodel/beacon_vm.*` (`BeaconVM`, telemetry display), `viewmodel/ax100_vm.*` (`Ax100VM`,
+AX100 remote params, one method per button, logging here), `viewmodel/shell_vm.*` (`ShellVM`,
+OBC direct shell) → `model/telemetry/telemetry_store.*` (`TelemetryStore`),
+`model/device/ax100_radio.*` (`Ax100Radio`, gs_rparam/CSP calls), `model/telecommand/direct_shell.*`
+(`DirectShell`). `report_tab.cpp` is still ~2,350 lines (one big per-report-type switch) — split
+it by report type when miman_coms' report parser moves into `model/telemetry/`.
+Next: **Control**.
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
