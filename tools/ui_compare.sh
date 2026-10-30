@@ -12,7 +12,7 @@ norm(){ sed -E 's/[0-9]{2}:[0-9]{2}:[0-9]{2}/T/g; s/[0-9]{4}-[0-9]{2}-[0-9]{2}/D
 norm2(){ norm "$@" | sed -E "s/[0-9]{2}:[0-9]{2}/T/g; s/Cannot Read [0-9]+ parameters/Cannot Read N parameters/" | sort -u; }
 echo "== console log diff (정렬+중복 제거: 스레드 출력 순서·반복 횟수는 원래 비결정적)"; diff <(norm2 $A/applogs/console--*.log) <(norm2 $B/applogs/console--*.log) && echo same
 echo "== stdout diff (sorted, thread ids removed)"; diff <(norm $A/run.log | sed -E 's/0x[0-9a-f]+/X/g' | sort) <(norm $B/run.log | sed -E 's/0x[0-9a-f]+/X/g' | sort) | head -20 && echo same
-for f in 0_setup 1_pre_pass 1a_frequency 1b_pre_pass_started 1c_pre_pass_stopped 2_pass_operation 3_ftp_upload; do
+for f in 0_setup 1_pre_pass 1a_frequency 1b_pre_pass_started 1c_pre_pass_stopped 1d_rotator 2_pass_operation 3_ftp_upload; do
   # 하단 콘솔(시간 표시) 영역 제외 비교: 상단 840px 만
   convert $A/$f.png -crop 1920x840+0+0 +repage $A/.c_$f.png
   convert $B/$f.png -crop 1920x840+0+0 +repage $B/.c_$f.png

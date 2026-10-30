@@ -184,6 +184,11 @@ the *separation of concerns*, not the binding mechanism:
   without a preceding join, overwriting the previous handle (leaked/unjoined thread).
 - AX100 GNDWDT reset calls `csp_transaction(..., 1000, ...)` on the UI thread
   (blocks rendering up to 1 s).
+- Rotator **IO Buffer Free** button → `RotatorEnter()` has no `return`; in Release (-O3)
+  GCC compiles the fall-off into a jump back into the function body, so the UI thread
+  loops forever (app hangs). Snapshot scenario avoids this button.
+- Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
+  per press).
 
 ## Service layer (refactor in progress)
 

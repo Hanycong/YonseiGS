@@ -13,6 +13,7 @@
 #
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
 #   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1a_frequency.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
+#         1d_rotator.png
 #         2_pass_operation.png 3_ftp_upload.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
@@ -81,6 +82,16 @@ import -window root "$OUT/1b_pre_pass_started.png"
 xdotool mousemove 1741 626 click 1     # Rotator OFF
 sleep 3
 import -window root "$OUT/1c_pre_pass_stopped.png"
+
+# Pre-Pass / Rotator 창: Set(목표 AZ/EL 로 이동) -> Init(0,0) -> 캡처
+# (장비가 없으므로 쓰기 실패 로그가 남는다. Set/Init 은 원래 UI 스레드에서 1초 sleep)
+# Rotator IO Buffer Free 는 누르지 않는다: Release 빌드에서 UI 스레드가 무한 루프에 빠진다
+# (RotatorEnter 의 return 누락. CLAUDE.md "Known defects" 참고)
+xdotool mousemove 1437 455 click 1     # Set
+sleep 3
+xdotool mousemove 1741 455 click 1     # Init
+sleep 3
+import -window root "$OUT/1d_rotator.png"
 
 # 2. Pass Operation 탭
 xdotool mousemove 342 216 click 1
