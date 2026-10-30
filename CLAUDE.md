@@ -163,3 +163,8 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
 - Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit
   (screens pixel-identical above the console, sorted console log identical).
+- Command generator (`DrawCmdGeneratorBody`) defects D1–D11 are listed in
+  [docs/CMDGEN_ANALYSIS.md](docs/CMDGEN_ANALYSIS.md) §4. Most important: **D1** —
+  62 commands XOR the checksum without clearing byte 7 first, so every 2nd send of
+  the same command carries an invalid checksum; **D2** — Schedule path passes
+  `sch_cmd_t*` as `packetsign*`.
