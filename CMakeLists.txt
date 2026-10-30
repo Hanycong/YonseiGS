@@ -78,9 +78,11 @@ INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libfp_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libftp_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libgosh_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_SRC})
+INCLUDE_DIRECTORIES (${MIMAN_SRC}/service)
 
 ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/miman_config.cpp ${MIMAN_SRC}/miman_coms.cpp ${MIMAN_SRC}/miman_csp.cpp ${MIMAN_SRC}/miman_ftprdp.cpp ${MIMAN_SRC}/miman_imgui.cpp ${MIMAN_SRC}/miman_orbital.cpp ${MIMAN_SRC}/miman_radial.cpp ${MIMAN_SRC}/miman_model.cpp ${MIMAN_SRC}/miman_s_control.cpp ${MIMAN_SRC}/miman_autopilot.cpp ${MIMAN_SRC}/main.cpp
-${MIMAN_SRC}/miman_theme.cpp ${MIMAN_SRC}/miman_satcontext.cpp)
+${MIMAN_SRC}/miman_theme.cpp ${MIMAN_SRC}/miman_satcontext.cpp
+${MIMAN_SRC}/service/svc_thread.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
