@@ -159,14 +159,14 @@ GomSpace 계열 부품)의 큐브위성이면 위성 정의만 추가해서 운�
 
 | 구분 | 무엇 | 지금 위치 | 목표 위치 |
 |---|---|---|---|
-| 플랫폼 | CCSDS Primary + cFE Secondary 헤더, 체크섬 | 152곳에 복사 | `platform/telecommand/ccsds_cmd` 하나 |
-| 플랫폼 | 명령 정의 형식 (앱, MID, CC, payload 필드 목록, 분류, 위험도) | 없음 (case 코드가 곧 정의) | `platform/telecommand/cmd_schema.h` |
+| 플랫폼 | CCSDS Primary + cFE Secondary 헤더, 체크섬 | 152곳에 복사 | `model/telecommand/ccsds_cmd` 하나 |
+| 플랫폼 | 명령 정의 형식 (앱, MID, CC, payload 필드 목록, 분류, 위험도) | 없음 (case 코드가 곧 정의) | `model/telecommand/cmd_schema.h` |
 | 플랫폼 | 필드 목록으로 입력 폼을 그리는 범용 폼 | 없음 (명령마다 손으로 작성) | `view/cmdgen/schema_form` |
 | 플랫폼 | 송신: 엔벨로프 + TC 감사 로그 + TX 큐 | case마다 반복 | `svc_tx::SendTelecommand` |
-| 미션 | MID 표, CC 값, payload 구조, 라벨 | `miman_config.h`, Templabels, case 본문 | `missions/<sat>/commands.*` |
-| 미션 | 분류(필터), 초기운용 목록, ADCS 고정 구성값 | FilterRules, INITIAL_CMD_INDICES, case 안 static | `missions/<sat>/` |
-| 미션 | 링크 주소: OBC 노드·포트, AX100 노드, HMAC 키 | `main.cpp` 설정 + `coms.cpp`의 `csp_connect(…, 3, 13, …)` 하드코딩 | `missions/<sat>/link` |
-| 미션 | 운용 절차(다중 패킷 시퀀스) | case 207/208 (COSMIC) | `missions/<sat>/procedures` |
+| 미션 | MID 표, CC 값, payload 구조, 라벨 | `miman_config.h`, Templabels, case 본문 | `model/missions/<sat>/commands.*` |
+| 미션 | 분류(필터), 초기운용 목록, ADCS 고정 구성값 | FilterRules, INITIAL_CMD_INDICES, case 안 static | `model/missions/<sat>/` |
+| 미션 | 링크 주소: OBC 노드·포트, AX100 노드, HMAC 키 | `main.cpp` 설정 + `coms.cpp`의 `csp_connect(…, 3, 13, …)` 하드코딩 | `model/missions/<sat>/link` |
+| 미션 | 운용 절차(다중 패킷 시퀀스) | case 207/208 (COSMIC) | `model/missions/<sat>/procedures` |
 
 - **cFE 핵심 앱**(ES, TO_LAB, SC, FM)은 cFS 위성이면 공통이므로 플랫폼 기본 정의로 두고, 위성이 MID만 바꿔 쓴다.
 - **BEE-1000**과 **COSMIC**은 각각 하나의 미션 정의가 된다. 지금 한 목록에 섞인 COSMIC 명령(203, 207–215)은 COSMIC 정의로 분리한다.

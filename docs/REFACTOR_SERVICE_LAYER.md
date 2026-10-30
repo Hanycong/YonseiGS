@@ -29,7 +29,7 @@ View (ImGui 호출만)
 ViewModel (창별 상태/조건 판단)        ← 이후 단계 (CLAUDE.md의 창별 MVVM 순서)
    │  호출
    ▼
-Service  (src/service/)               ← 이번 리팩토링
+Service  (src/model/service/)               ← 이번 리팩토링
    │  - 스레드 슬롯 관리 (p_thread[] 를 아는 유일한 계층)
    │  - 시작/정지 시퀀스 (State 플래그 + 스레드)
    ▼

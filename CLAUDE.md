@@ -78,16 +78,43 @@ strictly — they exist to keep the program working at every step.
 7. **If the user can't tell whether behavior changed → the step was too big.**
    Split it smaller.
 
+### Target directory layout (agreed — the refactor is "done" when the code looks like this)
+
+```
+src/
+  app/        main.cpp, theme, layout (MainWorkspace)
+  view/       one file per window/popup — ImGui calls + vm. calls only
+    popups/   setup, tle, param tables, ...
+    cmdgen/   command picker + per-FSW-app forms (forms_eps.cpp, forms_adcs.cpp, ...)
+  viewmodel/  one class per window (RotatorVM, TrackVM, FrequencyVM, BeaconVM,
+              ControlVM, CmdGeneratorVM, ...)
+  model/
+    service/     svc_* — thread lifecycle, start/stop sequences (done)
+    telecommand/ command catalog, CCSDS/cFE encoder, command schema
+    missions/    per-satellite definitions (bee1000/, cosmic/)
+    device/      rotator, GS100 radio, switch box, amplifier (split out of
+                 miman_orbital / radial / csp as classes)
+    telemetry/   beacon / HK parsing (split out of miman_coms)
+```
+Large files are split **object-oriented, by purpose**: many short files/classes,
+each with one responsibility, instead of a few multi-thousand-line files.
+Legacy `src/miman_*.cpp` files move into this tree as they are split.
+
 ### Per-window MVVM migration order (agreed)
 
-Work **one window at a time**, and within each window do steps 1→2 together
-before moving on (so the window is fully working before the next):
-1. Fix/restyle the window's **View** (ImGui calls only).
-2. Wire its **ViewModel/Model** logic so it works.
-(Only after ALL windows are done) 3. Split into MVVM files (view/ viewmodel/ model/).
+Work **one window at a time**. For each window, in one verified sequence of small commits:
+1. Extract its **View** into `view/<window>_view.cpp` (ImGui calls only, no logic change).
+2. Create its **ViewModel** class in `viewmodel/` and move orchestration there.
+3. Move domain/hardware code it needs into `model/` (as classes where it has state).
 
-Window sequence: Frequency (done as sample) → Rotator → Track → Beacon →
-Control → Command (largest, last). Then `StateCheckUnit` decomposition (riskiest, last).
+Files are split **as each window is migrated** (changed 2026-10: previously
+"split only after all windows"; the snapshot + golden harnesses now make
+per-window splitting safe to verify).
+
+Window sequence: Frequency → Rotator → Track → Beacon → Control → Command
+(largest, last; its command layer is being prepared in `model/telecommand/`).
+Note: no FrequencyVM exists in code yet — only its View was restyled.
+Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
 
@@ -158,7 +185,8 @@ the *separation of concerns*, not the binding mechanism:
 ## Service layer (refactor in progress)
 
 See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
-- New backend-facing code goes in `src/service/` (`mim::svc` namespace).
+- Service code lives in `src/model/service/` (`mim::svc` namespace); command catalog
+  in `src/model/telecommand/`, per-satellite data in `src/model/missions/` (`mim::tc`).
 - UI must not call `pthread_create/join` on `p_thread[]` directly — add or use a
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
 - Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit
