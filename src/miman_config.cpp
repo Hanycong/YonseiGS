@@ -45,6 +45,7 @@ void * AmpTimer(void *)
 
 	}
 	State.AMPON = false;
+    return NULL;
 }
 
 void printftp(const char * input, ...)

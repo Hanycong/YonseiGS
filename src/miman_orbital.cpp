@@ -363,6 +363,7 @@ bool SatelliteObject::GeneratePassList(const int time_step)
     }
 
     
+    return true;
 }
 
 double SatelliteObject::FindMaxElevation(Observer obs, SGP4& sgp4, const DateTime& aos, const DateTime& los)
@@ -629,6 +630,7 @@ void * TrackingSatellites(void *)
         }
         usleep(10000);
     }
+    return NULL;
 }
 
 int ReadTLELines_Errorhandling(char * TLEFilename, char * trackingTLEname, bool fds, bool sgp4on)
@@ -783,6 +785,7 @@ void * SatelliteInitialize(void * sgp4on)
     State.Display_TLE = true;
     State.NowTracking = true;
     State.loadindex = 0;
+    return NULL;
 }
 
 
@@ -813,6 +816,7 @@ void * RotatorEnter(void *)
     console.AddLog("[DEBUG]##Rotator : %s, Read Byte : %d", ReadBuf, byte);
     State.RotatorReading = true;
     tcflush(rotator, TCIOFLUSH);
+    return NULL;
 }
 
 void * RotatorReadInfo(void *)
@@ -984,6 +988,7 @@ void * Doppler(void *) {
         
     }
     
+    return NULL;
 };
 
 // void SetNowTracking(int index)
@@ -1129,6 +1134,7 @@ void * Sattracker(void *)
         }
         
     }
+    return NULL;
 }
 
 void FSWTleConverter(Tle& TleInfo, FSWTle * fswtle)

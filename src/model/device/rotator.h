@@ -17,7 +17,6 @@ public:
     void MoveTo(int azimuth_deg, int elevation_deg);
 
     // 시리얼 입출력 버퍼 비우기
-    // (주의: 기존 RotatorEnter 는 return 누락으로 Release 빌드에서 멈춘다. Known defects)
     void FlushIo();
 
     // 목표 각도 [deg] (입력 위젯이 직접 편집할 수 있도록 주소를 돌려준다)

@@ -92,6 +92,7 @@ void * RadInitialize(void * args)
     Load_Paramtable1(NULL);
     Load_Paramtable5(NULL);
     set_guard_spec_micsec(param5.baud, param1.baud, param5.guard, param1.guard, rparam5.guard, rparam1.guard);
+    return NULL;
 }
 
 void RSSI_Monitoring()
@@ -295,6 +296,7 @@ void * Load_Paramtable0(void*)
     RadBufFree();
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Read %d parameters of Table 0.", OKResult);
+    return NULL;
 }
 
 void * Load_Paramtable1(void*)
@@ -388,6 +390,7 @@ void * Load_Paramtable1(void*)
     RadBufFree();
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Read %d parameters of Table 1.", OKResult);
+    return NULL;
 }
 
 void * Load_Paramtable5(void*)
@@ -511,6 +514,7 @@ void * Load_Paramtable5(void*)
     RadBufFree();
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Read %d parameters of Table 5.", OKResult);
+    return NULL;
 }
 
 
@@ -705,6 +709,7 @@ void * Save_Paramtable0(void *)
     
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Set %d parameters of Table 0.", OKResult);
+    return NULL;
 }
 
 void * Save_Paramtable1(void *)
@@ -795,6 +800,7 @@ void * Save_Paramtable1(void *)
     
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Set %d parameters of Table 1.", OKResult);
+    return NULL;
 }
 
 void * Save_Paramtable5(void *)
@@ -917,6 +923,7 @@ void * Save_Paramtable5(void *)
     
     if (OKResult > 0)
         console.AddLog("[ERROR]##Cannot Set %d parameters of Table 5.", OKResult);
+    return NULL;
 }
 
 void * Save2FRAM(void* param_id)
@@ -928,6 +935,7 @@ void * Save2FRAM(void* param_id)
     set_guard_spec_micsec(param5.baud, param1.baud, param5.guard, param1.guard, rparam5.guard, rparam1.guard);
     usleep(500);
     // csp_reboot(setup->gs100_node);
+    return NULL;
 }
 
 void SetRxFreq(uint32_t freq)

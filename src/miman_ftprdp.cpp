@@ -503,6 +503,7 @@ int ftp_list_callback(uint16_t entries, const gs_ftp_list_entry_t * listent, voi
     fprintf(State.gslistup->fd, State.gslistup->flistbuf);
     strcat(State.gslistup->fdispbuf, State.gslistup->flistbuf);
     fclose(State.gslistup->fd);
+    return 0;
 }
 
 void * ftp_downlink_onorbit(void * param){

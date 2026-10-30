@@ -345,6 +345,7 @@ void * TRxController(void *)
         else
             continue;
     }
+    return NULL;
 }
 
 void buf_allclear()
@@ -363,6 +364,7 @@ void * SignalTest(void*)
         if(csp_ping(19, 100, 1, 0))
             continue;
     }
+    return NULL;
 }
 
 void now_rx_bytes_update()
@@ -2401,6 +2403,7 @@ void * task_uplink_onorbit(void * sign_)
     }
     State.downlink_mode = true;
     pthread_mutex_unlock(&conn_lock);
+    return NULL;
 }
 
 int PacketHandler(csp_packet_t *packet, int type, int NowCursor)
@@ -2524,6 +2527,7 @@ int CmdGenerator_GS::Scheduling(uint32_t ExecutionTime, uint32_t ExecutionWindow
     this->CopyCmdHeaderToBuffer(container->cmd);
     this->GenerateCmdHeader(TS_CMD_MID, TS_INSERT_SCHEDULE_ENTRY_CC, sizeof(CFE_MSG_CommandHeader) + CMDlen, (void *)container);
     
+    return 0;
 }
 
 packetsign * CmdGenerator_GS::GenerateCMDPacket(void)
@@ -2642,4 +2646,5 @@ void * Direct_Shell(void * data)
         State.downlink_mode = dlstate;
     }
     pthread_mutex_unlock(&conn_lock);
+    return NULL;
 }

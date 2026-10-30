@@ -869,6 +869,7 @@ int TLE_Autoupdate_Test()
     State.Display_load = false;
     State.Display_TLE = false;
     printf("Finish Autopilot.\n");
+    return 0;
 }
 
 

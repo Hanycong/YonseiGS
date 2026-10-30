@@ -170,11 +170,10 @@ the *separation of concerns*, not the binding mechanism:
   populate the tabs (sat tab list shows garbage "AOS in -17754..." entries).
 - `StateCheckUnit` has a duplicate `Doppler` member (bool + float) — confirm
   scoping during the eventual StateCheckUnit decomposition.
-- **Missing `return` in ~35 non-void functions**, including thread entry points
-  (`RadInitialize`, `Load_Paramtable0/1/5`, `Sattracker`, ...). With GCC 13 and
-  no build type (`build.sh` default, -O0) the app dies with **SIGILL** right after
-  pressing Start (`RadInitialize` → `Load_Paramtable0`). Release (-O3) happens to
-  survive. `tools/ui_snapshot.sh` therefore builds with `-DCMAKE_BUILD_TYPE=Release`.
+- ~~Missing `return` in 35 non-void functions~~ **fixed** (`fix:` commit after Rotator MVVM).
+  Was: -O0 build died with SIGILL after Start; Release looped `Load_Paramtable0` forever
+  (Tables 1/5 never loaded), SIGINT shutdown never finished, popups' `BeginPopupModal`
+  check was optimized away. Now `-Wreturn-type` is clean; keep it that way.
 - Without TLE loaded, **Start Doppler Correction** (and Doppler → Start Rotator
   Engaging) crashes with SIGSEGV in `SetNowTracking_impl` → `Console::AddLog`
   (Release build, original code). Snapshot scenario avoids these buttons.
@@ -186,9 +185,8 @@ the *separation of concerns*, not the binding mechanism:
   without a preceding join, overwriting the previous handle (leaked/unjoined thread).
 - AX100 GNDWDT reset calls `csp_transaction(..., 1000, ...)` on the UI thread
   (blocks rendering up to 1 s).
-- Rotator **IO Buffer Free** button → `RotatorEnter()` has no `return`; in Release (-O3)
-  GCC compiles the fall-off into a jump back into the function body, so the UI thread
-  loops forever (app hangs). Snapshot scenario avoids this button.
+- ~~Rotator **IO Buffer Free** hangs the UI thread~~ **fixed** with the missing-`return` fix
+  (`RotatorEnter()` fell off the end → -O3 jumped back into the body forever).
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
 

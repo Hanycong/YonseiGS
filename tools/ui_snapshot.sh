@@ -18,9 +18,8 @@
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
 #
-# Release(-O3)로 빌드한다: 빌드 타입 없이(-O0) 빌드하면 return 문이 빠진
-# 스레드 함수(RadInitialize -> Load_Paramtable0 등)가 GCC 13에서 SIGILL로 죽는다.
-# (CLAUDE.md "Known defects" 참고)
+# Release(-O3)로 빌드한다: 기준 스냅샷들이 Release 로 만들어졌으므로 비교 조건을 유지한다.
+# (return 누락 수정 전에는 -O0 빌드가 GCC 13에서 SIGILL로 죽었다. 지금은 -O0 도 동작한다)
 
 set -u
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -85,8 +84,8 @@ import -window root "$OUT/1c_pre_pass_stopped.png"
 
 # Pre-Pass / Rotator 창: Set(목표 AZ/EL 로 이동) -> Init(0,0) -> 캡처
 # (장비가 없으므로 쓰기 실패 로그가 남는다. Set/Init 은 원래 UI 스레드에서 1초 sleep)
-# Rotator IO Buffer Free 는 누르지 않는다: Release 빌드에서 UI 스레드가 무한 루프에 빠진다
-# (RotatorEnter 의 return 누락. CLAUDE.md "Known defects" 참고)
+# (Rotator IO Buffer Free 는 시나리오에 넣지 않았다: return 누락 수정 전 기준과 비교할 수 없어서.
+#  수정 후에는 멈추지 않음을 별도로 확인했다)
 xdotool mousemove 1437 455 click 1     # Set
 sleep 3
 xdotool mousemove 1741 455 click 1     # Init

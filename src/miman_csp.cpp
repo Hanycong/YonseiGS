@@ -300,6 +300,7 @@ void * csp_ping_scan(void *) {
         State.downlink_mode = dlstate;
     }
 	pthread_mutex_unlock(&conn_lock);
+    return NULL;
 }
 
 void * csp_baud_calibration(void *) {
@@ -349,6 +350,7 @@ void * csp_baud_calibration(void *) {
 		}
 	}
 	console.AddLog("[OK]##Frequency Calibration Finished. Freq Rx : %u | Tx : %u", baud_cur_rx, baud_cur_tx);
+    return NULL;
 }
 
 void * csp_freq_calibration(void *) {
@@ -407,6 +409,7 @@ void * csp_freq_calibration(void *) {
 	gs_rparam_set_uint32(setup->gs100_node,1,0x0000,0xB00B,100,freq[0]); // Set Rx
 	gs_rparam_set_uint32(setup->gs100_node,5,0x0000,0xB00B,100,freq[1]); // Set Tx
 	console.AddLog("[OK]##Frequency Calibration Finished. Freq Rx : %u | Tx : %u | RSSI : %d",freq[0],freq[1],max_rssi);
+    return NULL;
 }
 
 void * csp_ping_console(void *)
@@ -420,6 +423,7 @@ void * csp_ping_console(void *)
 		
 	else
 		console.AddLog("[ERROR]##Ping Failed.");
+    return NULL;
 }
 
 void * csp_ping_rdp_crc32(void *)
@@ -429,6 +433,7 @@ void * csp_ping_rdp_crc32(void *)
 		console.AddLog("[OK]##Ping Success at node %u, %dms", setup->ax100_node, pingResult);
 	else
 		console.AddLog("[ERROR]##Ping Failed.");
+    return NULL;
 }
 
 

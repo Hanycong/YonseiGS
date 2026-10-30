@@ -14573,6 +14573,7 @@ bool popup_setup(Setup * setup)
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 //Functions
@@ -14666,6 +14667,7 @@ bool popup_param_table0()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 bool popup_param_table1()
@@ -14744,6 +14746,7 @@ bool popup_param_table1()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 bool popup_param_table5()
@@ -14836,6 +14839,7 @@ bool popup_param_table5()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 bool popup_load()
@@ -15018,6 +15022,7 @@ bool popup_tle()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 
@@ -15342,6 +15347,7 @@ bool popup_fds()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 
@@ -15427,6 +15433,7 @@ bool popup_satinfo(int index)
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 bool popup_s_band()
@@ -15456,6 +15463,7 @@ bool popup_s_band()
         ImGui::EndPopup();
         return true;
     }
+    return true;
 }
 
 #include "miman_theme.h"
