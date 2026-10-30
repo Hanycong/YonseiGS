@@ -5920,6 +5920,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60pdugetchannelscmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60pdugetchannelscmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60pdugetchannelscmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_PDU_GetChannelsCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60pdugetchannelscmd;
             uint8_t crc = 0xFF;
@@ -5963,6 +5964,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60acusetmpptmodecmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60acusetmpptmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60acusetmpptmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ACU_SetMpptModeCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60acusetmpptmodecmd;
             uint8_t crc = 0xFF;
@@ -6001,6 +6003,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60acugetmpptmodecmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60acugetmpptmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60acugetmpptmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ACU_GetMpptModeCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60acugetmpptmodecmd;
             uint8_t crc = 0xFF;
@@ -6079,6 +6082,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60dockgettableconfcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60dockgettableconfcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60dockgettableconfcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_Dock_GetTableConfCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60dockgettableconfcmd;
             uint8_t crc = 0xFF;
@@ -6117,6 +6121,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60dockgettablecalcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60dockgettablecalcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60dockgettablecalcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_Dock_GetTableCalCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60dockgettablecalcmd;
             uint8_t crc = 0xFF;
@@ -6155,6 +6160,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60pdugettablehkcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60pdugettablehkcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60pdugettablehkcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_PDU_GetTableHkCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60pdugettablehkcmd;
             uint8_t crc = 0xFF;
@@ -6193,6 +6199,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60pdugettableconfcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60pdugettableconfcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60pdugettableconfcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_PDU_GetTableConfCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60pdugettableconfcmd;
             uint8_t crc = 0xFF;
@@ -6231,6 +6238,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60pdugettablecalcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60pdugettablecalcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60pdugettablecalcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_PDU_GetTableCalCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60pdugettablecalcmd;
             uint8_t crc = 0xFF;
@@ -6269,6 +6277,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60acugettablehkcmd.CmdHeader + 4, len, 2);
             memcpy(command->epsp60acugettablehkcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60acugettablehkcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ACU_GetTableHkCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60acugettablehkcmd;
             uint8_t crc = 0xFF;
@@ -6309,6 +6318,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60acugettableconfcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60acugettableconfcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60acugettableconfcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ACU_GetTableConfCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60acugettableconfcmd;
             uint8_t crc = 0xFF;
@@ -6350,6 +6360,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60acugettablecalcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60acugettablecalcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60acugettablecalcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ACU_GetTableCalCmd_t);
             const uint8_t *p = (const uint8_t *)&command->epsp60acugettablecalcmd;
             uint8_t crc = 0xFF;
@@ -6554,6 +6565,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60getparamcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60getparamcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60getparamcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_GetParamCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60getparamcmd;
@@ -6612,6 +6624,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60getparamarraycmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60getparamarraycmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60getparamarraycmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_GetParamArrayCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60getparamarraycmd;
@@ -6677,6 +6690,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60setparamcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60setparamcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60setparamcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_SetParamCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60setparamcmd;
@@ -6731,6 +6745,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60tablegetcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60tablegetcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60tablegetcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_TableGetCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60tablegetcmd;
@@ -6785,6 +6800,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60tableloadcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60tableloadcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60tableloadcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_TableLoadCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60tableloadcmd;
@@ -6839,6 +6855,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60tablesavecmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60tablesavecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60tablesavecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_TableSaveCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60tablesavecmd;
@@ -6893,6 +6910,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60tablegetstaticcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60tablegetstaticcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60tablegetstaticcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_TableGetStaticCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60tablegetstaticcmd;
@@ -6941,6 +6959,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60tabledumpstaticcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60tabledumpstaticcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60tabledumpstaticcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_TableDumpStaticCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60tabledumpstaticcmd;
@@ -6986,6 +7005,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60getdockinfocmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60getdockinfocmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60getdockinfocmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_GetDockInfoCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60getdockinfocmd;
@@ -7031,6 +7051,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->epsp60resetcmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60resetcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60resetcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_ResetCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60resetcmd;
@@ -7079,6 +7100,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsnoopcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsnoopcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsnoopcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_NoopCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsnoopcmd;
             uint8_t crc = 0xFF;
@@ -7120,6 +7142,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsresetcounterscmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsresetcounterscmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsresetcounterscmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ResetCountersCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsresetcounterscmd;
             uint8_t crc = 0xFF;
@@ -7164,6 +7187,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsresetappcmdcounterscmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsresetappcmdcounterscmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsresetappcmdcounterscmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ResetAppCmdCountersCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsresetappcmdcounterscmd;
@@ -7210,6 +7234,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsresetdevicecmdcounterscmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsresetdevicecmdcounterscmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsresetdevicecmdcounterscmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ResetDeviceCmdCountersCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsresetdevicecmdcounterscmd;
@@ -7257,6 +7282,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcssetcommunicationmodeascan.CmdHeader + 4, len,  2);
             memcpy(command->adcssetcommunicationmodeascan.CmdHeader + 6, &fnccode, 1);
 
+            command->adcssetcommunicationmodeascan.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_SetCommunicationModeAsCanCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcssetcommunicationmodeascan;
@@ -7300,6 +7326,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsgpioenhighcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsgpioenhighcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsgpioenhighcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_GpioEnHighCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsgpioenhighcmd;
             uint8_t crc = 0xFF;
@@ -7342,6 +7369,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsgpioenlowcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsgpioenlowcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsgpioenlowcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_GpioEnLowCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsgpioenlowcmd;
             uint8_t crc = 0xFF;
@@ -7384,6 +7412,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsgioboothighcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsgioboothighcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsgioboothighcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_GpioBootHighCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsgioboothighcmd;
             uint8_t crc = 0xFF;
@@ -7426,6 +7455,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsgiobootlowcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsgiobootlowcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsgiobootlowcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_GpioBootLowCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsgiobootlowcmd;
             uint8_t crc = 0xFF;
@@ -7468,6 +7498,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsexitbootloadercmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsexitbootloadercmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsexitbootloadercmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ExitBootLoaderCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsexitbootloadercmd;
             uint8_t crc = 0xFF;
@@ -7510,6 +7541,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcsresetcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsresetcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsresetcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ResetCmd_t);
             const uint8_t *p = (const uint8_t *)&command->adcsresetcmd;
             uint8_t crc = 0xFF;
@@ -7558,6 +7590,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
             memcpy(command->adcscurrentunixtimecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcscurrentunixtimecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcscurrentunixtimecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_CurrentUnixTimeCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcscurrentunixtimecmd;
@@ -7614,6 +7647,7 @@ case 59: {
         memcpy(command->adcserrorlogsettingcmd.CmdHeader + 4, len,  2);
         memcpy(command->adcserrorlogsettingcmd.CmdHeader + 6, &fnccode, 1);
 
+        command->adcserrorlogsettingcmd.CmdHeader[7] = 0;
         uint16_t total = sizeof(ADCS_ErrorLogSettingCmd_t);
         const uint8_t *p =
             (const uint8_t *)&command->adcserrorlogsettingcmd;
@@ -7659,6 +7693,7 @@ case 59: {
             memcpy(command->adcspersistconfigcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcspersistconfigcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcspersistconfigcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_PersistConfigCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcspersistconfigcmd;
@@ -7713,6 +7748,7 @@ case 59: {
             memcpy(command->adcscontrolestimationmodecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcscontrolestimationmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcscontrolestimationmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ControlEstimationModeCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcscontrolestimationmodecmd;
@@ -7760,6 +7796,7 @@ case 59: {
             memcpy(command->adcsdisablemagrwlmntmngcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsdisablemagrwlmntmngcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsdisablemagrwlmntmngcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_DisableMagRwlMntMngCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsdisablemagrwlmntmngcmd;
@@ -7811,6 +7848,7 @@ case 59: {
             memcpy(command->adcsreferenceircvectorcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsreferenceircvectorcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsreferenceircvectorcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ReferenceIRCVectorCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsreferenceircvectorcmd;
@@ -7862,6 +7900,7 @@ case 59: {
             memcpy(command->adcsreferencellhtargetcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsreferencellhtargetcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsreferencellhtargetcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ReferenceLLHTargetCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsreferencellhtargetcmd;
@@ -7908,6 +7947,7 @@ case 59: {
             memcpy(command->adcsorbitmodecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsorbitmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsorbitmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_OrbitModeCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsorbitmodecmd;
@@ -7965,6 +8005,7 @@ case 66: {
         memcpy(command->adcsmagdeploycmd.CmdHeader + 4, len,  2);
         memcpy(command->adcsmagdeploycmd.CmdHeader + 6, &fnccode, 1);
 
+        command->adcsmagdeploycmd.CmdHeader[7] = 0;
         uint16_t total = sizeof(ADCS_MagDeployCmd_t);
         const uint8_t *p =
             (const uint8_t *)&command->adcsmagdeploycmd;
@@ -8015,6 +8056,7 @@ case 66: {
             memcpy(command->adcsreferencerpyvaluescmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsreferencerpyvaluescmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsreferencerpyvaluescmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ReferenceRPYvaluesCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsreferencerpyvaluescmd;
@@ -8065,6 +8107,7 @@ case 66: {
             memcpy(command->adcsopenloopcmdmtqcmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsopenloopcmdmtqcmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsopenloopcmdmtqcmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_OpenLoopCmdMTQCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsopenloopcmdmtqcmd;
@@ -8156,6 +8199,7 @@ case 66: {
             memcpy(command->adcspowerstatecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcspowerstatecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcspowerstatecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_PowerStateCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcspowerstatecmd;
@@ -8207,6 +8251,7 @@ case 66: {
             memcpy(command->adcsrunmodecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcsrunmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcsrunmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_RunModeCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcsrunmodecmd;
@@ -8254,6 +8299,7 @@ case 66: {
             memcpy(command->adcscontrolmodecmd.CmdHeader + 4, len,  2);
             memcpy(command->adcscontrolmodecmd.CmdHeader + 6, &fnccode, 1);
 
+            command->adcscontrolmodecmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(ADCS_ControlModeCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->adcscontrolmodecmd;
@@ -9688,6 +9734,7 @@ case 80: {
                 memcpy(command->adcs101cmd.CmdHeader + 4, len,  2);
                 memcpy(command->adcs101cmd.CmdHeader + 6, &fnccode, 1);
 
+                command->adcs101cmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(ADCS2_Comm01Cmd_t);
                 const uint8_t *p = (const uint8_t *)&command->adcs101cmd;
                 uint8_t crc = 0xFF;
@@ -9742,6 +9789,7 @@ case 80: {
                 memcpy(command->adcsopenlooprwcmd.CmdHeader + 4, len,  2);
                 memcpy(command->adcsopenlooprwcmd.CmdHeader + 6, &fnccode, 1);
 
+                command->adcsopenlooprwcmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(ADCS_OpenLoopRWCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->adcsopenlooprwcmd;
                 uint8_t crc = 0xFF;
@@ -9788,6 +9836,7 @@ case 80: {
                 memcpy(command->scnoopcmd.CmdHeader + 4, len,  2);
                 memcpy(command->scnoopcmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scnoopcmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_NoopCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scnoopcmd;
                 uint8_t crc = 0xFF;
@@ -9831,6 +9880,7 @@ case 80: {
                 memcpy(command->scresetcounterscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scresetcounterscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scresetcounterscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_ResetCountersCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scresetcounterscmd;
                 uint8_t crc = 0xFF;
@@ -9881,6 +9931,7 @@ case 80: {
                 memcpy(command->scstartatscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scstartatscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scstartatscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_StartAtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scstartatscmd;
                 uint8_t crc = 0xFF;
@@ -9925,6 +9976,7 @@ case 80: {
                 memcpy(command->scstopatscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scstopatscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scstopatscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_StopAtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scstopatscmd;
                 uint8_t crc = 0xFF;
@@ -9970,6 +10022,7 @@ case 80: {
                 memcpy(command->scstartrtscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scstartrtscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scstartrtscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_StartRtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scstartrtscmd;
                 uint8_t crc = 0xFF;
@@ -10154,6 +10207,7 @@ case 80: {
                 memcpy(command->scswitchatscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scswitchatscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scswitchatscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_SwitchAtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scswitchatscmd;
                 uint8_t crc = 0xFF;
@@ -10201,6 +10255,7 @@ case 80: {
                 memcpy(command->scjumpatscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scjumpatscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scjumpatscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_JumpAtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scjumpatscmd;
                 uint8_t crc = 0xFF;
@@ -10248,6 +10303,7 @@ case 80: {
                 memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 4, len,  2);
                 memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 6, &fnccode, 1);
 
+                command->sccontinueatsonfailurecmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_ContinueAtsOnFailureCmd_t);
                 const uint8_t *p =
                     (const uint8_t *)&command->sccontinueatsonfailurecmd;
@@ -10297,6 +10353,7 @@ case 80: {
                 memcpy(command->scappendatscmd.CmdHeader + 4, len,  2);
                 memcpy(command->scappendatscmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scappendatscmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_AppendAtsCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scappendatscmd;
                 uint8_t crc = 0xFF;
@@ -10345,6 +10402,7 @@ case 80: {
                 memcpy(command->scmanagetablecmd.CmdHeader + 4, len,  2);
                 memcpy(command->scmanagetablecmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scmanagetablecmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_ManageTableCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scmanagetablecmd;
                 uint8_t crc = 0xFF;
@@ -10394,6 +10452,7 @@ case 80: {
                 memcpy(command->scstartrtsgrpcmd.CmdHeader + 4, len,  2);
                 memcpy(command->scstartrtsgrpcmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scstartrtsgrpcmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_StartRtsGrpCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scstartrtsgrpcmd;
                 uint8_t crc = 0xFF;
@@ -10443,6 +10502,7 @@ case 80: {
                 memcpy(command->scstoprtsgrpcmd.CmdHeader + 4, len,  2);
                 memcpy(command->scstoprtsgrpcmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scstoprtsgrpcmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_StopRtsGrpCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scstoprtsgrpcmd;
                 uint8_t crc = 0xFF;
@@ -10492,6 +10552,7 @@ case 80: {
                 memcpy(command->scdisablertsgrpcmd.CmdHeader + 4, len,  2);
                 memcpy(command->scdisablertsgrpcmd.CmdHeader + 6, &fnccode, 1);
 
+                command->scdisablertsgrpcmd.CmdHeader[7] = 0;
                 uint16_t total = sizeof(SC_DisableRtsGrpCmd_t);
                 const uint8_t *p = (const uint8_t *)&command->scdisablertsgrpcmd;
                 uint8_t crc = 0xFF;
@@ -13308,6 +13369,7 @@ case 213: { // FTP_filenameCmd
             memcpy(command->epsp60getdockinfocmd.CmdHeader + 4, len,  2);
             memcpy(command->epsp60getdockinfocmd.CmdHeader + 6, &fnccode, 1);
 
+            command->epsp60getdockinfocmd.CmdHeader[7] = 0;
             uint16_t total = sizeof(EPS_P60_GetDockInfoCmd_t);
             const uint8_t *p =
                 (const uint8_t *)&command->epsp60getdockinfocmd;
