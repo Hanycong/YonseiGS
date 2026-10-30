@@ -78,6 +78,7 @@ INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libfp_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libftp_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_LIB}/gscsp/lib/libgosh_client/include)
 INCLUDE_DIRECTORIES (${MIMAN_SRC})
+INCLUDE_DIRECTORIES (${MIMAN_SRC}/app)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/service)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/telecommand)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/device)
@@ -90,8 +91,8 @@ INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/cmdgen)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/popups)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/viewmodel)
 
-ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/miman_config.cpp ${MIMAN_SRC}/miman_coms.cpp ${MIMAN_SRC}/miman_csp.cpp ${MIMAN_SRC}/miman_ftprdp.cpp ${MIMAN_SRC}/miman_imgui.cpp ${MIMAN_SRC}/miman_orbital.cpp ${MIMAN_SRC}/miman_radial.cpp ${MIMAN_SRC}/miman_model.cpp ${MIMAN_SRC}/miman_s_control.cpp ${MIMAN_SRC}/miman_autopilot.cpp ${MIMAN_SRC}/main.cpp
-${MIMAN_SRC}/miman_theme.cpp ${MIMAN_SRC}/miman_satcontext.cpp
+ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/miman_config.cpp ${MIMAN_SRC}/miman_coms.cpp ${MIMAN_SRC}/miman_csp.cpp ${MIMAN_SRC}/miman_ftprdp.cpp ${MIMAN_SRC}/miman_imgui.cpp ${MIMAN_SRC}/miman_orbital.cpp ${MIMAN_SRC}/miman_radial.cpp ${MIMAN_SRC}/miman_model.cpp ${MIMAN_SRC}/miman_s_control.cpp ${MIMAN_SRC}/miman_autopilot.cpp ${MIMAN_SRC}/app/main.cpp
+${MIMAN_SRC}/app/miman_theme.cpp ${MIMAN_SRC}/miman_satcontext.cpp
 ${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp ${MIMAN_SRC}/model/service/svc_tracking.cpp ${MIMAN_SRC}/model/service/svc_radio.cpp ${MIMAN_SRC}/model/service/svc_ftp.cpp ${MIMAN_SRC}/model/service/svc_station.cpp
 ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecommand/raw_commands.cpp
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
