@@ -15,7 +15,8 @@
 #   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1a_frequency.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
 #         1d_rotator.png 1e_track_select.png 1f_track_on.png 1g_track_search.png 1h_track_cleared.png
 #         2_pass_operation.png 3_ftp_upload.png 4a_mission_beacon.png 4b_report.png 4c_event.png
-#         4d_response.png 4e_ax100_rparam.png run.log build.log applogs/
+#         4d_response.png 4e_ax100_rparam.png 5a_switch_satellite.png 5b_ping_each_node.png
+#         5c_custom_rparam.png 5d_send_telecommand.png 5e_initial_ops.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
 #
@@ -155,6 +156,35 @@ sleep 3
 import -window root "$OUT/4e_ax100_rparam.png"
 xdotool mousemove 1325 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Beacon 탭으로 복귀
 sleep 2
+
+# Pass Operation / Control 창(왼쪽 열): 팝업 창 5개를 차례로 연다 (닫지 않으므로 나중 것이 위에 겹친다)
+# Ping/Calibration/AMP/Clear 는 누르지 않는다 (CSP 전송, 장시간 스레드, 외부 스크립트, 상태 삭제)
+# "Send Telecommand" / "Initial Ops" 줄은 영역 높이에 잘려 위쪽 일부(y=423)만 보인다 (원래 배치)
+xdotool mousemove 178 288; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Switch Satellite
+sleep 1
+xdotool mousemove 1000 1060
+sleep 3
+import -window root "$OUT/5a_switch_satellite.png"
+xdotool mousemove 178 390; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Ping each node
+sleep 1
+xdotool mousemove 1000 1060
+sleep 3
+import -window root "$OUT/5b_ping_each_node.png"
+xdotool mousemove 470 390; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Custom RParam Get
+sleep 1
+xdotool mousemove 1000 1060
+sleep 3
+import -window root "$OUT/5c_custom_rparam.png"
+xdotool mousemove 178 423; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Send Telecommand
+sleep 1
+xdotool mousemove 1000 1060
+sleep 3
+import -window root "$OUT/5d_send_telecommand.png"
+xdotool mousemove 470 423; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Initial Ops
+sleep 1
+xdotool mousemove 1000 1060
+sleep 3
+import -window root "$OUT/5e_initial_ops.png"
 
 if kill -0 "$APP_PID" 2>/dev/null; then
     echo "[snapshot] app alive after scenario"
