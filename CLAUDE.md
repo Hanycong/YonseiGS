@@ -189,7 +189,8 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   in `src/model/telecommand/`, per-satellite data in `src/model/missions/` (`mim::tc`).
 - UI must not call `pthread_create/join` on `p_thread[]` directly — add or use a
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
-- Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit
+- Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit and
+  compare with `tools/ui_compare.sh <before> <after>`
   (screens pixel-identical above the console, sorted console log identical).
 - Command generator (`DrawCmdGeneratorBody`) defects D1–D11 are listed in
   [docs/CMDGEN_ANALYSIS.md](docs/CMDGEN_ANALYSIS.md) §4. D1 (checksum on re-send) is

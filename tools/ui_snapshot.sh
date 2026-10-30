@@ -12,7 +12,7 @@
 #   libcurl4-openssl-dev libassimp-dev libglm-dev libstb-dev
 #
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
-#   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
+#   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1a_frequency.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
 #         2_pass_operation.png 3_ftp_upload.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
@@ -60,6 +60,17 @@ import -window root "$OUT/0_setup.png"
 xdotool mousemove 719 1042 click 1
 sleep 6
 import -window root "$OUT/1_pre_pass.png"
+
+# Pre-Pass / Frequency 창: Set(중심 주파수) -> Set to RX -> Set to TX -> Apply(지연 설정) -> 캡처
+xdotool mousemove 1161 287 click 1     # Set (Center Frequency)
+sleep 3
+xdotool mousemove 805 402 click 1      # Set to RX
+sleep 2
+xdotool mousemove 1109 402 click 1     # Set to TX
+sleep 2
+xdotool mousemove 955 594 click 1      # Apply (Default/Guard/Queue Delay)
+sleep 2
+import -window root "$OUT/1a_frequency.png"
 
 # Pre-Pass: Rotator On -> 캡처 -> Rotator OFF -> 캡처
 # (Start Doppler Correction / Start Rotator Engaging 은 누르지 않는다:
