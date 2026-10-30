@@ -20,6 +20,7 @@
 #include "beacon_view.h"
 #include "control_view.h"
 #include "ftp_view.h"
+#include "cmdgen_view.h"
 
 //Display Modules
 #define DISPLAY_WINDWIDTH       1920

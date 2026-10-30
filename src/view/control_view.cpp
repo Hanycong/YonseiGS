@@ -4,13 +4,11 @@
 #include "imgui.h"
 #include "control_vm.h"
 #include "control_popups.h"
+#include "cmdgen_view.h"
 #include "control_view.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
-
-// 명령 생성기 본체 (아직 miman_imgui.cpp 에 있다. Command 단계에서 옮긴다)
-void DrawCmdGeneratorBody(bool initial_mode);
 
 static bool show_rparamWindow         = false;      // rparam 가져오기 custom
 static bool show_pingWindow           = false;      // ping 난사
