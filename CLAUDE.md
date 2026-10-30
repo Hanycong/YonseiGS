@@ -164,7 +164,9 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
 - Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit
   (screens pixel-identical above the console, sorted console log identical).
 - Command generator (`DrawCmdGeneratorBody`) defects D1–D11 are listed in
-  [docs/CMDGEN_ANALYSIS.md](docs/CMDGEN_ANALYSIS.md) §4. Most important: **D1** —
-  62 commands XOR the checksum without clearing byte 7 first, so every 2nd send of
-  the same command carries an invalid checksum; **D2** — Schedule path passes
-  `sch_cmd_t*` as `packetsign*`.
+  [docs/CMDGEN_ANALYSIS.md](docs/CMDGEN_ANALYSIS.md) §4. D1 (checksum on re-send) is
+  fixed. Still open: **D2** — Schedule path passes `sch_cmd_t*` as `packetsign*`;
+  **D12** — generic "u16" command overflows a 9-byte stack buffer (fortify abort in
+  Release).
+- Verify any change touching command generation with `tools/cmdgen_golden.sh <out>`
+  and `diff` the two `golden.txt` files: every telecommand's bytes must be identical.

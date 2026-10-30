@@ -81,7 +81,7 @@ CCSDS 명령 패킷으로 조립하고, 지상국 송신 큐(TX 슬롯)에 넣�
 
 | ID | 내용 | 영향 | 근거 |
 |---|---|---|---|
-| D1 | 변형 B 62개 명령은 체크섬 바이트를 비우지 않고 XOR한다. 전역 구조체에 이전 체크섬이 남아 있어서 **같은 명령을 다시 보내면 체크섬이 틀린다** (1·3·5번째만 유효) | 위성이 명령을 거부할 수 있음 (cFE 표준 검증 기준) | ADCS NoOp 시뮬레이션: 0x43 → 0x00 → 0x43 … |
+| D1 (수정됨) | 변형 B 62개 명령은 체크섬 바이트를 비우지 않고 XOR한다. 전역 구조체에 이전 체크섬이 남아 있어서 **같은 명령을 다시 보내면 체크섬이 틀린다** (1·3·5번째만 유효) | 위성이 명령을 거부할 수 있음 (cFE 표준 검증 기준) | ADCS NoOp 시뮬레이션: 0x43 → 0x00 → 0x43 … |
 | D2 | Schedule 체크 시(case 0, 4) `sch_cmd_t*`를 `packetsign*`로 넘긴다. 송신 태스크가 entnum/exenum을 Identifier/PacketType/Length로 읽음 | 예약 명령 경로가 동작하지 않거나 잘못된 길이로 버퍼 요청 | case 0 L4912 |
 | D3 | case 203(COSMIC FTP Send File) 길이 필드가 0x4D(77) 고정, 실제 `sizeof-7`=80 | 타깃이 길이 검증하면 거부 | sizeof 측정 |
 | D4 | case 216 라벨은 "ES NoOp"인데 구현은 EPS Get Dock Info(case 45 복사, 같은 구조체 공유) | 운용자가 다른 명령을 보냄 | 구조체 `epsp60getdockinfocmd` 공유 |
@@ -92,6 +92,7 @@ CCSDS 명령 패킷으로 조립하고, 지상국 송신 큐(TX 슬롯)에 넣�
 | D9 | "Write Raw Data" 체크박스(`raw_data`)를 읽는 코드가 없음 | 효과 없는 UI | 전역 검색 |
 | D10 | 207/208이 UI 스레드에서 `sleep(1)`·`WaitTx()`로 대기, `sleep(0.1)`은 정수 0초 | 화면 멈춤, 의도한 간격 아님 | case 207/208 |
 | D11 | `malloc`한 packetsign을 아무도 `free`하지 않음 | 명령마다 메모리 누수 | task_uplink_onorbit |
+| D12 | case 2("u16")가 9바이트 버퍼(`HDR+sizeof(uint8_t)`)에 2바이트 인자를 복사하고 10바이트로 체크섬 계산, 전송 길이는 9 | 스택 1바이트 넘침. Release(_FORTIFY_SOURCE) 빌드는 버튼 누르면 abort, 아니면 인자 상위 바이트가 잘림 | 골든 하네스 실행 중 fortify abort |
 
 ## 5. 분할 설계안
 
