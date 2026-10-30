@@ -13,6 +13,9 @@
 //  - 폼 지문(forms.txt): 명령마다 그려지는 위젯(종류, 라벨, 타입, 표시 문자열)을 순서대로 기록하고,
 //    명령 선택 콤보의 항목 목록을 (전체/초기운용) x (서브시스템 필터) 조합별로 기록한다.
 //    위젯 함수들도 이 파일에서 재정의하므로 실제로 그려지지는 않는다.
+//  - 카탈로그 검사(catalog.txt): platform/telecommand 명령 카탈로그를 생성기의 기존 표
+//    (Templabels, FilterRules, INITIAL_CMD_INDICES)와 대조하고, 카탈로그의 MID/CC 가
+//    실제로 만들어진 패킷 헤더와 같은지 확인한다. 불일치가 있으면 종료 코드 1.
 //
 // 빌드/실행: tools/cmdgen_golden.sh <OUT_DIR>
 
@@ -21,6 +24,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "command_catalog.h"
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
 FILE *log_ptr;
@@ -127,6 +132,7 @@ bool Selectable(const char* label, bool, ImGuiSelectableFlags, const ImVec2&)
 
 // ---- svc_tx 가짜 구현: 송신 대신 기록 ----
 static std::vector<std::string> g_sent;
+static std::vector<std::vector<uint8_t>> g_sent_bytes;
 
 static std::string Hex(const uint8_t * p, size_t n)
 {
@@ -149,6 +155,7 @@ int SendUplink(void * packet)
     char head[64];
     snprintf(head, sizeof(head), "id=%u type=%u len=%u data=", ps->Identifier, ps->PacketType, ps->Length);
     g_sent.push_back(std::string(head) + Hex(ps->Data, ps->Length));
+    g_sent_bytes.push_back(std::vector<uint8_t>(ps->Data, ps->Data + ps->Length));
     return 0;
 }
 int StartPingScan() { return 0; }
@@ -196,6 +203,103 @@ static void DumpPicker(FILE * out)
     g_force_combo = true; g_pick_sub = "All"; Frame(false); g_pick_sub = ""; g_force_combo = false;
 }
 
+// 카탈로그 <-> 기존 표 대조. 불일치 수를 돌려준다.
+static int CheckCatalog(FILE * out, const std::map<int, std::vector<uint8_t>> & first_packet)
+{
+    using namespace mim::tc;
+    int bad = 0;
+    auto fail = [&](const char * what, int id, const std::string & detail) {
+        fprintf(out, "MISMATCH %s id=%d %s\n", what, id, detail.c_str());
+        bad++;
+    };
+
+    // 0. 카탈로그 내용 덤프 (검토용)
+    static const char * kinds[] = { "Single", "RawTyped", "Sequence" };
+    static const char * crits[] = { "Unclassified", "Query", "Config", "Hazardous" };
+    for (int k = 0; k < CommandCount(); k++)
+    {
+        const CommandDef & c = CommandAt(k);
+        fprintf(out, "cmd id=%d mission=%s app=%s category=%s mid=0x%04x cc=%u kind=%s crit=%s impl=%d label=\"%s\"\n",
+                c.id, c.mission, c.app, c.category ? c.category : "-", c.mid, c.cc,
+                kinds[(int)c.kind], crits[(int)c.criticality], c.implemented, c.label);
+    }
+
+    // 1. 라벨: 기존 Templabels 와 같은 번호에 같은 문자열
+    for (int i = 0; i < CMD_LABEL_MAX; i++)
+    {
+        const CommandDef * c = FindCommand(i);
+        bool legacy = strlen(Templabels[i]) > 0;
+        if (legacy != (c != nullptr))
+            fail("exists", i, legacy ? Templabels[i] : c->label);
+        else if (c && strcmp(c->label, Templabels[i]) != 0)
+            fail("label", i, std::string(c->label) + " != " + Templabels[i]);
+    }
+
+    // 2. 필터: 기존 FilterRules 범위 소속 == 카탈로그 category
+    static const char* index_names[] = {
+        "All", "Test&Debug", "EPS", "ADCS", "UANT", "SP", "PAYUZUC", "Cosmic UEL Pi",
+        "cFE", "SC APP", "FTP", "UTRX GNDWDT",
+        "LGPM", "LTRX", "STX", "PAYUEL_ROMA", "PAYUEL_LGBAT"
+    };
+    int ncat = (int)(sizeof(index_names) / sizeof(index_names[0]));
+    if (CategoryCount() != ncat)
+        fail("category-count", -1, std::to_string(CategoryCount()));
+    for (int k = 0; k < ncat && k < CategoryCount(); k++)
+        if (strcmp(CategoryName(k), index_names[k]) != 0)
+            fail("category-name", k, CategoryName(k));
+    for (int k = 0; k < CommandCount(); k++)
+    {
+        const CommandDef & c = CommandAt(k);
+        for (int sub = 1; sub < ncat; sub++)
+        {
+            bool legacy = false;
+            for (const auto & rule : FilterRules)
+                if (rule.sub_index == sub && c.id >= rule.start && c.id <= rule.end)
+                    legacy = true;
+            if (legacy != InCategory(c, sub))
+                fail("category", c.id, index_names[sub]);
+        }
+    }
+
+    // 3. 초기 운용 목록: 순서까지 같아야 함
+    const int * ops = InitialOpsCommands();
+    for (int k = 0; ; k++)
+    {
+        if (ops[k] != INITIAL_CMD_INDICES[k])
+        {
+            fail("initial-ops", k, std::to_string(ops[k]) + " != " + std::to_string(INITIAL_CMD_INDICES[k]));
+            break;
+        }
+        if (ops[k] < 0)
+            break;
+    }
+
+    // 4. MID/CC: Single 명령의 첫 패킷 헤더(바이트 0-1 MID 빅엔디안, 바이트 6 CC)와 비교
+    for (int k = 0; k < CommandCount(); k++)
+    {
+        const CommandDef & c = CommandAt(k);
+        if (c.kind != CmdKind::Single || !c.implemented)
+            continue;
+        auto it = first_packet.find(c.id);
+        if (it == first_packet.end() || it->second.size() < 8)
+        {
+            fail("no-packet", c.id, c.label);
+            continue;
+        }
+        const std::vector<uint8_t> & b = it->second;
+        uint16_t mid = (uint16_t)((b[0] << 8) | b[1]);
+        if (mid != c.mid || b[6] != c.cc)
+        {
+            char d[96];
+            snprintf(d, sizeof(d), "catalog mid=0x%04x cc=%u, packet mid=0x%04x cc=%u", c.mid, c.cc, mid, b[6]);
+            fail("mid/cc", c.id, d);
+        }
+    }
+
+    fprintf(out, "result mismatches=%d\n", bad);
+    return bad;
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -212,6 +316,8 @@ int main(int argc, char ** argv)
     io.Fonts->GetTexDataAsRGBA32(&px, &w, &h);
 
     FILE * forms = fopen(argc > 1 ? argv[1] : "/dev/null", "w");
+    FILE * catalog = fopen(argc > 2 ? argv[2] : "/dev/null", "w");
+    std::map<int, std::vector<uint8_t>> first_packet;
     DumpPicker(forms);
 
     // 콘솔/표준출력 잡음을 막기 위해 패킷 기록만 stderr 로 쓴다
@@ -234,15 +340,20 @@ int main(int argc, char ** argv)
         for (int p = 1; p <= presses; p++)
         {
             g_sent.clear();
+            g_sent_bytes.clear();
             g_press = true;
             Frame(false);
             g_press = false;
             if (g_sent.empty())
                 fprintf(stderr, "cmd=%d press=%d label=\"%s\" (no packet)\n", i, p, Templabels[i]);
+            if (p == 1 && !g_sent_bytes.empty())
+                first_packet[i] = g_sent_bytes[0];
             for (size_t k = 0; k < g_sent.size(); k++)
                 fprintf(stderr, "cmd=%d press=%d pkt=%zu label=\"%s\" %s\n", i, p, k, Templabels[i], g_sent[k].c_str());
         }
     }
     fclose(forms);
-    return 0;
+    int bad = CheckCatalog(catalog, first_packet);
+    fclose(catalog);
+    return bad ? 1 : 0;
 }
