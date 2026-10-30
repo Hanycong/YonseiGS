@@ -7,7 +7,7 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 - **What**: Satellite ground station GUI for BEE-1000 CubeSat (Yonsei University)
 - **Language**: C/C++17, single Linux executable `bin/BEE-1000`
 - **Stack**: GLFW + Dear ImGui + OpenGL (GUI), pthread (16 threads), CSP protocol (radio), libsgp4 (orbital), libssh (S-band remote), CURL (TLE fetch)
-- **Entry point**: [src/main.cpp](src/main.cpp) — single 577-line `main()` runs everything
+- **Entry point**: [src/app/main.cpp](src/app/main.cpp) — single 577-line `main()` runs everything
 - **Build**: CMake → see [docs/BUILD_WSL.md](docs/BUILD_WSL.md)
 
 ## Critical context (read before editing)
@@ -45,7 +45,7 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 ## Conventions
 
 - **Do not amend `miman_config.h` lightly** — full rebuild. Add new files under `src/` and include them only where needed.
-- **Don't add new pthread slots without updating the comment block at [src/main.cpp:43-59](src/main.cpp#L43)**. The 16-slot array uses fixed indices.
+- **Don't add new pthread slots without updating the comment block at the top of [src/app/main.cpp](src/app/main.cpp)**. The 16-slot array uses fixed indices.
 - **Cleanup**: `temp.cpp` and `tmtctest.cpp` exist in `src/` but are NOT in CMakeLists — they are scratch files.
 
 ## When working on this project
@@ -141,7 +141,37 @@ Note: the middle Pass Operation column (`ImGui_CommandWindow_Body`) is actually 
 manager** (file list / upload / download), not telecommands. The telecommand generator
 (`DrawCmdGeneratorBody`, ~8,900 lines) is the popup opened by Control's "Send Telecommand" /
 "Initial Ops" — it is still in miman_imgui.cpp (non-static now) and is the last window.
-Next: **FTP (middle column)**, then the command generator.
+**FTP is done**: `view/ftp_view.cpp` (functions keep the old `ImGui_CommandWindow*` names) →
+`viewmodel/ftp_vm.*` (`FtpVM`; AMP button shares `ControlVM::Amp()`) →
+`model/telecommand/ftp_client.*` (`FtpClient`), `model/telecommand/downlink_request.*`.
+**Command generator (partly done)**: `view/cmdgen/cmdgen_view.cpp` (category + command combos,
+ImGui + `vm.` only) → `viewmodel/cmdgen_vm.*` (`CmdGeneratorVM`, catalog-driven picker).
+Per-command input forms are split by (mission, FSW app) into `view/cmdgen/raw/forms_raw.cpp`,
+`view/cmdgen/bee1000/forms_<app>.cpp`, `view/cmdgen/cosmic/forms_<app>.cpp` (verbatim cases,
+dispatched by `cmdgen_forms.h`). **Popups** are extracted verbatim to `view/popups/*.cpp`
+(still use globals via `popups_common.h`). **app/** holds `main.cpp`, theme, `main_menu.cpp`,
+`workspace.cpp`. `miman_imgui.cpp` is down to ~1,100 lines (globals, Console impl,
+AutoPilot window, legacy labels).
+
+### Remaining refactor plan (in order; each step verified like the ones above)
+1. **Command forms → ViewModel/Model** (command layer steps 3–5 in docs/CMDGEN_ANALYSIS.md):
+   forms still build packets inline (`command->...`, checksum, `svc::SendUplink`). Move each
+   "Generate CMD" body into a model encoder per app (`model/telecommand/<mission>/<app>_commands`)
+   + one `SendTelecommand()` path, then schema-driven generic forms. Verify every step with
+   `tools/cmdgen_golden.sh` (golden.txt must stay byte-identical; D13 stays as-is until FSW confirms).
+2. **Popup ViewModels** (setup, param tables, TLE, FDS, satinfo, S-band) — shrink `popups_common.h`.
+3. **miman_imgui.cpp leftovers**: Console → `view/console_view` + a logger model; AutoPilot window;
+   delete legacy `Templabels`/`Initialize_CMDLabels`/`CMDDataGenerator` (step 2c, needs golden
+   harness `FilterRules` check moved to the catalog test first).
+4. **Backend split into model/**: miman_coms (beacon/report parser → `model/telemetry/`, split
+   `view/beacon/report_tab.cpp` by report type at the same time), miman_orbital (SGP4/Doppler →
+   `model/orbit/`, rotator I/O → `model/device/rotator`), miman_radial/csp (→ `model/device/`).
+5. **StateCheckUnit decomposition** (riskiest, last): move flags into the owning model/service classes.
+
+Verifying on a machine without sudo (WSL): download `xvfb xdotool imagemagick-6.q16` and their libs
+with `apt-get download`, `dpkg -x` them into a local prefix, run Xvfb with `-nolisten unix -listen tcp`
+(WSLg's /tmp/.X11-unix is not writable) and an LD_PRELOAD shim that rewrites Xvfb's hardcoded
+`/usr/bin/xkbcomp` path; use `DISPLAY=127.0.0.1:N`.
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
