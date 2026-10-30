@@ -14,7 +14,8 @@
 # 사용법: tools/ui_snapshot.sh <OUT_DIR>
 #   결과: OUT_DIR/0_setup.png 1_pre_pass.png 1a_frequency.png 1b_pre_pass_started.png 1c_pre_pass_stopped.png
 #         1d_rotator.png 1e_track_select.png 1f_track_on.png 1g_track_search.png 1h_track_cleared.png
-#         2_pass_operation.png 3_ftp_upload.png run.log build.log applogs/
+#         2_pass_operation.png 3_ftp_upload.png 4a_mission_beacon.png 4b_report.png 4c_event.png
+#         4d_response.png 4e_ax100_rparam.png run.log build.log applogs/
 #
 # 화면 좌표는 1920x1080 고정 창 기준이다 (main.cpp glfwCreateWindow).
 #
@@ -94,10 +95,12 @@ import -window root "$OUT/1d_rotator.png"
 
 # Pre-Pass / Track 창 (왼쪽 열, 현재는 예시 위성 20개 표):
 # 행 선택(ISS) -> Track 버튼(NOAA-19) -> 검색어 입력 -> 검색어 지우기
-xdotool mousemove 100 328 click 1      # ISS 행 선택
+# (행 Selectable 과 Track 버튼이 겹쳐 있어, 누름/뗌이 한 프레임에 들어가면 어느 쪽이 클릭을 받는지 실행마다
+#  달라진다. 키 입력처럼 한 프레임 이상 눌렀다 뗀다)
+xdotool mousemove 100 328; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # ISS 행 선택
 sleep 2
 import -window root "$OUT/1e_track_select.png"
-xdotool mousemove 497 346 click 1      # NOAA-19 Track
+xdotool mousemove 497 346; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # NOAA-19 Track
 sleep 2
 import -window root "$OUT/1f_track_on.png"
 xdotool mousemove 290 263 click 1      # 검색창
@@ -122,6 +125,36 @@ import -window root "$OUT/2_pass_operation.png"
 xdotool mousemove 1215 383 click 1
 sleep 5
 import -window root "$OUT/3_ftp_upload.png"
+
+# Pass Operation / Beacon 창(오른쪽 열)의 탭 6개: Beacon 은 2_pass_operation 에 이미 찍힘
+# (잘린 탭 이름 위에 커서가 있으면 툴팁이 떠서, 클릭 후 커서를 콘솔 영역으로 옮긴다)
+xdotool mousemove 1435 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Mission Beacon
+sleep 1
+xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
+sleep 3
+import -window root "$OUT/4a_mission_beacon.png"
+xdotool mousemove 1540 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Report
+sleep 1
+xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
+sleep 3
+import -window root "$OUT/4b_report.png"
+xdotool mousemove 1617 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Event
+sleep 1
+xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
+sleep 3
+import -window root "$OUT/4c_event.png"
+xdotool mousemove 1706 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Response
+sleep 1
+xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
+sleep 3
+import -window root "$OUT/4d_response.png"
+xdotool mousemove 1825 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # AX100 RPARAM
+sleep 1
+xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
+sleep 3
+import -window root "$OUT/4e_ax100_rparam.png"
+xdotool mousemove 1325 268; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Beacon 탭으로 복귀
+sleep 2
 
 if kill -0 "$APP_PID" 2>/dev/null; then
     echo "[snapshot] app alive after scenario"

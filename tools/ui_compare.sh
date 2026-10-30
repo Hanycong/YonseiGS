@@ -18,7 +18,7 @@ SHUT='program exiting normally|Finish BEE-1000 GS\.|ampoff|\[snapshot\] exit sta
 norm_out(){ norm "$1" | sed -E 's/0x[0-9a-f]+/X/g' | grep -Ev "$SHUT" | sort; }
 echo "== stdout diff (sorted, thread ids removed, shutdown tail excluded)"; diff <(norm_out $A/run.log) <(norm_out $B/run.log) | head -20 && echo same
 echo "== shutdown: A=[$(grep -Eo 'exit status: [0-9]+' $A/run.log)] B=[$(grep -Eo 'exit status: [0-9]+' $B/run.log)] (0 이어야 함. 1 = libcsp sig_handler 가 잡은 SIGSEGV 등)"
-for f in 0_setup 1_pre_pass 1a_frequency 1b_pre_pass_started 1c_pre_pass_stopped 1d_rotator 1e_track_select 1f_track_on 1g_track_search 1h_track_cleared 2_pass_operation 3_ftp_upload; do
+for f in 0_setup 1_pre_pass 1a_frequency 1b_pre_pass_started 1c_pre_pass_stopped 1d_rotator 1e_track_select 1f_track_on 1g_track_search 1h_track_cleared 2_pass_operation 3_ftp_upload 4a_mission_beacon 4b_report 4c_event 4d_response 4e_ax100_rparam; do
   # 하단 콘솔(시간 표시) 영역 제외 비교: 상단 840px 만
   convert $A/$f.png -crop 1920x840+0+0 +repage $A/.c_$f.png
   convert $B/$f.png -crop 1920x840+0+0 +repage $B/.c_$f.png
