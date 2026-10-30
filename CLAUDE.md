@@ -165,8 +165,8 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   (screens pixel-identical above the console, sorted console log identical).
 - Command generator (`DrawCmdGeneratorBody`) defects D1–D11 are listed in
   [docs/CMDGEN_ANALYSIS.md](docs/CMDGEN_ANALYSIS.md) §4. D1 (checksum on re-send) is
-  fixed. Still open: **D2** — Schedule path passes `sch_cmd_t*` as `packetsign*`;
-  **D12** — generic "u16" command overflows a 9-byte stack buffer (fortify abort in
-  Release).
+  fixed, D12 (u16 stack overflow) is fixed. Still open: **D2** — Schedule path
+  passes `sch_cmd_t*` as `packetsign*`; **D13** — generic s8..float (case 5–9) swap
+  function-code/checksum bytes (6/7) vs every other command; needs FSW confirmation.
 - Verify any change touching command generation with `tools/cmdgen_golden.sh <out>`
   and `diff` the two `golden.txt` files: every telecommand's bytes must be identical.
