@@ -1,14 +1,10 @@
 // View - Rotator 창 (Pre-Pass 탭 오른쪽 열)
 //
-// miman_imgui.cpp 에서 내용 그대로 옮긴 것 (MVVM 1단계: View 추출).
-// 다음 단계에서 State. / Now / 장비 호출을 RotatorVM 으로 옮긴다.
-#include "miman_config.h"
-#include "miman_orbital.h"
-#include "svc_tracking.h"
+// ImGui 호출과 RotatorVM 호출만 있다. 상태와 동작은 viewmodel/rotator_vm.h 참고.
+#include "imgui.h"
+#include "rotator_vm.h"
 #include "rotator_view.h"
 
-extern StateCheckUnit State;
-extern struct Antenna Now;
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
 
@@ -18,11 +14,13 @@ static int freeze_rows = 1;
 
 void ImGui_RotatorWindow_Body(float fontscale)
 {
-    if(State.Engage == false)
+    mim::vm::RotatorVM & vm = mim::vm::RotatorViewModel();
+
+    if(vm.Engaging() == false)
     {
         if (ImGui::Button("Start Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            mim::svc::StartEngage();
+            vm.StartEngage();
         }
     }
     else
@@ -30,7 +28,7 @@ void ImGui_RotatorWindow_Body(float fontscale)
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         if (ImGui::Button("Stop Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            mim::svc::StopEngage();
+            vm.StopEngage();
         }
         ImGui::PopStyleColor();
     }
@@ -40,22 +38,22 @@ void ImGui_RotatorWindow_Body(float fontscale)
     ImGui::Text("AZ : ");
     ImGui::SameLine();
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::InputInt("##tg_az", &Now.az_tag);
+    ImGui::InputInt("##tg_az", vm.TargetAzimuth());
     ImGui::PopItemWidth();
     ImGui::Text("EL : ");
     ImGui::SameLine();
     ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::InputInt("##tg_el", &Now.el_tag);
+    ImGui::InputInt("##tg_el", vm.TargetElevation());
     ImGui::PopItemWidth();
     if (ImGui::Button("Set", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
     {
-        RotatorSetTo(Now.az_tag, Now.el_tag);
+        vm.MoveToTarget();
         //memset(&ControlBuf,0,sizeof(ControlBuf));
     }
     ImGui::SameLine();
     if (ImGui::Button("Init", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
     {
-        RotatorSetTo(0, 0);
+        vm.MoveToHome();
     }
 
     if (ImGui::BeginTable("##Rotspectable", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 3.8)))
@@ -70,9 +68,9 @@ void ImGui_RotatorWindow_Body(float fontscale)
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("UHF");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%d °", Now.az_now);
+        ImGui::Text("%d °", vm.CurrentAzimuth());
         ImGui::TableSetColumnIndex(2);
-        ImGui::Text("%d °", Now.el_now);
+        ImGui::Text("%d °", vm.CurrentElevation());
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::Text("S-band");
@@ -86,16 +84,16 @@ void ImGui_RotatorWindow_Body(float fontscale)
 
     if(ImGui::Button("Rotator On", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
     {
-        mim::svc::RotatorOn();
+        vm.RotatorOn();
     }
     ImGui::SameLine();
     if(ImGui::Button("Rotator OFF", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
     {
-        mim::svc::RotatorOff();
+        vm.RotatorOff();
     }
     if(ImGui::Button("Rotator IO Buffer Free", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
     {
-        RotatorEnter(NULL);
+        vm.FlushIo();
     }
 }
 
