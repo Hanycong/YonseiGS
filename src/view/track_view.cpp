@@ -1,59 +1,29 @@
 // View - Track 창 (Pre-Pass 탭 왼쪽 열: 위성 패스 표 + 극좌표 표시)
 //
-// miman_imgui.cpp 에서 내용 그대로 옮긴 것 (MVVM 1단계: View 추출).
-// 다음 단계에서 Requested / Satellite_row / GetNowTracking / SetNowTracking / 예시 데이터를 TrackVM 으로 옮긴다.
-#include "miman_config.h"
-#include "miman_orbital.h"
+// ImGui 호출과 TrackVM 호출만 있다. 상태와 동작은 viewmodel/track_vm.h 참고.
+#include <stdarg.h>
+#include <stdio.h>
+#include <math.h>
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "track_vm.h"
 #include "track_view.h"
 
-extern int Requested;
-extern int Satellite_row;
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
 
 void ImGui_TrackWindow_Body(float fontscale)
 {
+    mim::vm::TrackVM & vm = mim::vm::TrackViewModel();
+
     float scale = fontscale * 1.2f;
     ImGui::SetWindowFontScale(scale);
-    Satellite_row = 0;
+    vm.BeginFrame();
 
     float totalW = ImGui::GetContentRegionAvail().x;
     float totalH = ImGui::GetContentRegionAvail().y;
     float topH   = totalH * 0.50f;
     float botH   = totalH - topH - ImGui::GetStyle().ItemSpacing.y;
-
-    // ════════════════════════════════════════════
-    // 임시 예시 데이터 20개
-    // ════════════════════════════════════════════
-    struct DummySat {
-        const char* name;
-        int aos_h, aos_m, aos_s;
-        int los_h, los_m, los_s;
-        float max_el;
-    };
-    static const DummySat dummies[] = {
-        {"BEE-1000",  3,38,42,  3,52,10,  64.f},
-        {"ISS",       4,12, 8,  4,23,45,  38.f},
-        {"NOAA-19",   5, 1,33,  5,14,20,  21.f},
-        {"MIMAN",     6,44,50,  6,55, 5,  12.f},
-        {"KOMPSAT-3", 7,10,15,  7,22,30,  45.f},
-        {"AQUA",      8, 5,22,  8,18,44,  33.f},
-        {"TERRA",     9,30, 0,  9,41,12,  27.f},
-        {"SUOMI-NPP",10,15,33, 10,28,55,  52.f},
-        {"METOP-B",  11, 2,41, 11,14, 8,  19.f},
-        {"FENGYUN-3",12,48,10, 13, 1,22,  41.f},
-        {"GOES-16",  13,20,55, 13,33,10,  36.f},
-        {"SENTINEL-1",14, 5, 3, 14,17,40,  58.f},
-        {"SENTINEL-2",15,33,18, 15,45,55,  22.f},
-        {"LANDSAT-8", 16,10,44, 16,23,20,  47.f},
-        {"RADARSAT-2",17,22, 5, 17,34,50,  30.f},
-        {"SPOT-7",    18, 8,30, 18,21,15,  25.f},
-        {"PLEIADES-1",19,45,12, 19,58, 0,  39.f},
-        {"WORLDVIEW-3",20,30,22, 20,42,55, 61.f},
-        {"GEOEYE-1",  21,15,40, 21,28,10,  18.f},
-        {"IKONOS",    22, 5,55, 22,18,30,  43.f},
-    };
-    static const int dummyCount = 20;
 
     // ════════════════════════════════════════════
     // TOP PANEL – 검색창 + 테이블
@@ -63,10 +33,9 @@ void ImGui_TrackWindow_Body(float fontscale)
     ImGui::SetWindowFontScale(scale);
 
     // ── 검색창 + TLE 버튼 ──
-    static char searchBuf[128] = "";
     float btnW = ImGui::CalcTextSize("TLE").x + ImGui::GetStyle().FramePadding.x * 4;
     ImGui::SetNextItemWidth(totalW - btnW - ImGui::GetStyle().ItemSpacing.x * 2);
-    ImGui::InputTextWithHint("##search", "Search satellites...", searchBuf, sizeof(searchBuf));
+    ImGui::InputTextWithHint("##search", "Search satellites...", vm.SearchBuffer(), vm.SearchBufferSize());
     ImGui::SameLine();
     if (ImGui::Button("TLE", ImVec2(btnW, 0)))
     {
@@ -123,15 +92,14 @@ void ImGui_TrackWindow_Body(float fontscale)
         }
 
         // ── 예시 데이터 20개 출력 ──
-        for (int i = 0; i < dummyCount; i++)
+        for (int i = 0; i < vm.RowCount(); i++)
         {
-            const DummySat& d = dummies[i];
+            const mim::vm::TrackRow& d = vm.Row(i);
 
             // 검색 필터
-            if (strlen(searchBuf) != 0 &&
-                std::string(d.name).find(searchBuf) == std::string::npos) continue;
+            if (vm.HiddenBySearch(i)) continue;
 
-            bool isSelected = (Requested == i);
+            bool isSelected = vm.IsSelected(i);
 
             ImGui::TableNextRow();
 
@@ -146,7 +114,7 @@ void ImGui_TrackWindow_Body(float fontscale)
                 ImGuiSelectableFlags_AllowItemOverlap,
                 ImVec2(0, ImGui::GetFontSize() * 1.3f)))
             {
-                Requested = i;
+                vm.Select(i);
             }
 
             ImGui::TableNextColumn();
@@ -160,7 +128,7 @@ void ImGui_TrackWindow_Body(float fontscale)
 
             // ── Track 버튼 ──
             ImGui::TableNextColumn();
-            bool isTracking = (GetNowTracking() == i);
+            bool isTracking = vm.IsTracking(i);
             if (isTracking)
             {
                 ImGui::PushStyleColor(ImGuiCol_Button,        ImVec4(0.1f,0.55f,0.25f,1.f));
@@ -177,7 +145,7 @@ void ImGui_TrackWindow_Body(float fontscale)
                 sprintf(trkLabel, "Track##trk%d", i);
                 if (ImGui::Button(trkLabel, ImVec2(ImGui::GetContentRegionAvail().x,
                                                    ImGui::GetFontSize() * 1.3f)))
-                    SetNowTracking(i);
+                    vm.Track(i);
             }
         }
 
@@ -193,13 +161,11 @@ void ImGui_TrackWindow_Body(float fontscale)
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     ImGui::SetWindowFontScale(scale);
 
-    // 선택된 위성 이름 - Track 버튼 기준 (GetNowTracking)
-    const char* selName = nullptr;
-    if (GetNowTracking() >= 0 && GetNowTracking() < dummyCount)
-        selName = dummies[GetNowTracking()].name;
+    // 선택된 위성 이름 - Track 버튼 기준 (추적 대상)
+    const char* selName = vm.TrackedName();
 
-    float dummyAz = (GetNowTracking() >= 0) ? (float)(GetNowTracking() * 18 % 360) : 0.f;
-    float dummyEl = (GetNowTracking() >= 0) ? dummies[GetNowTracking()].max_el * 0.7f : 0.f;
+    float dummyAz = vm.TrackedAzimuth();
+    float dummyEl = vm.TrackedElevation();
 
     // ── 구분선 + SELECTED ──
     ImGui::Separator();
@@ -260,7 +226,7 @@ void ImGui_TrackWindow_Body(float fontscale)
     draw->AddText(ImVec2(ctr.x - lo - fh, ctr.y - fh*0.5f), IM_COL32(0,0,0,200), "W");
 
     // 위성 점
-    if (GetNowTracking() >= 0) {
+    if (vm.HasTrackTarget()) {
         float azRad = dummyAz * 3.14159f / 180.f;
         float sr    = R * (1.f - ImClamp(dummyEl, 0.f, 90.f) / 90.f);
         float sx    = ctr.x + sr * sinf(azRad);
