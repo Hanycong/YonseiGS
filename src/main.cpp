@@ -23,6 +23,7 @@
 #include "miman_s_control.h"
 #include "miman_autopilot.h"
 #include "miman_ftp.h"
+#include "svc_station.h"
 
 #undef CSP_USE_RDP
 
@@ -364,68 +365,7 @@ if (should_close) {
 
             if(State.InitializeRequired)
             {
-                //Switch Box
-                if(init_switch(setup->Switch_devname, setup->Switch_baud) < 0)
-                {
-                    console.AddLog("[ERROR]##Connect to Switch Box..............Failed.");
-                    State.SwitchConnection = false;
-                }
-                else
-                {
-                    console.AddLog("[OK]##Connect to Switch Box.............Success.");
-                    State.SwitchConnection = true;
-                }
-
-
-                //Rotator
-                if(init_rotator() < 0)
-                {
-                    console.AddLog("[ERROR]##Connect to Rotator.................Failed.");
-                }
-                else
-                {
-                    State.RotatorConnection = true;
-                    State.RotatorInitialize = true;
-                    console.AddLog("[OK]##Connect to Rotator................Success.");
-                }
-                if(init_transceiver() < 0)
-                {
-                    console.AddLog("[ERROR]##Connect to GS100...................Failed.");
-                    State.GS100_Connection = false;
-                }
-                else
-                {
-                    // pthread_join(p_thread[11], NULL);
-                    // pthread_join(p_thread[12], NULL);
-                    // pthread_join(p_thread[13], NULL);
-                    console.AddLog("[OK]##Connect to GS100..................Success.");
-                    State.GS100_Connection = true;
-                    
-                    pthread_create(&p_thread[12], NULL, RadInitialize, (void *)setup);
-                    State.TRx_mode = true;
-                    State.downlink_mode = true;
-                    pthread_create(&p_thread[11], NULL, TRxController, NULL); 
-
-
-                    signal(SIGINT, shutdown_handler);
-                    
-                }
-                if(State.SbandUse)
-                {
-                    if(init_sband(setup) < 0)
-                    {
-                        console.AddLog("[ERROR]##Connect to S-band GS...............Failed.");
-                    }
-                    else
-                    {
-                        console.AddLog("[OK]##Connect to S-band GS...............Success.");
-                    }
-                }
-                State.InitializeRequired = false;
-                pthread_create(&p_thread[3], NULL, TrackingSatellites, NULL);
-                pthread_create(&p_thread[2], NULL, RotatorReadInfo, NULL);
-                
-                
+                mim::svc::InitializeHardware(shutdown_handler);
             }
 
             if(State.ModelRefreshRequired)
@@ -507,40 +447,11 @@ if (should_close) {
         }
         
 
-        fin_rotator();
-        fin_transceiver();
+        mim::svc::FinishHardware();
 
         if (State.AllThread) // "Start" at popup
         {
-
-            printf("[MAIN-DIAG] entering shutdown sequence\n");
-    printf("[MAIN-DIAG] TRx=%d downlink=%d uplink=%d ftp=%d\n",
-            State.TRx_mode,
-            State.downlink_mode,
-            State.uplink_mode,
-            State.ftp_mode);
-            printf("Ending procedure...\n");
-            State.TRx_mode = false;
-            State.downlink_mode = false;
-            State.uplink_mode = false;
-            State.ftp_mode = false;
-            State.Engage = false;
-            State.Doppler = false;
-            State.GS100_Connection =false;
-            State.NowTracking = false;
-            State.TrackThread = false;
-            State.RotatorReading = false;
-            
-            State.InitializeRequired = true;
-            State.Autopilot = false;
-            printf("Joined thread : \n");
-            for(int i = 0; i < 16; i++)
-            {
-                pthread_join(p_thread[i], NULL);
-                printf("%d\t", i);
-            }
-            printf("\n");
-            
+            mim::svc::StopAllThreads();
         }
 
         if(State.Autopilot)

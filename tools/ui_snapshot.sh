@@ -86,9 +86,19 @@ if kill -0 "$APP_PID" 2>/dev/null; then
 else
     echo "[snapshot] APP EXITED during scenario"
 fi
-kill "$APP_PID" 2>/dev/null
-sleep 1
-kill -9 "$APP_PID" 2>/dev/null
+
+# 종료 시퀀스 확인: Ctrl+C 와 같은 SIGINT (GS100 연결 성공 시 shutdown_handler 등록됨)
+APP_REAL_PID=$(pgrep -f "^$OUT/build/BEE-1000" | head -1)
+if [ -n "$APP_REAL_PID" ]; then
+    kill -INT "$APP_REAL_PID"
+    for _ in $(seq 60); do kill -0 "$APP_REAL_PID" 2>/dev/null || break; sleep 1; done
+    if kill -0 "$APP_REAL_PID" 2>/dev/null; then
+        echo "[snapshot] shutdown: still running 60s after SIGINT" | tee -a "$OUT/run.log"
+    else
+        echo "[snapshot] shutdown: exited after SIGINT" | tee -a "$OUT/run.log"
+    fi
+fi
+kill -9 "$APP_PID" $APP_REAL_PID 2>/dev/null
 kill "$XVFB_PID" 2>/dev/null
 wait 2>/dev/null
 # 실행이 만든 로그(data/BEE_*_Log)는 저장소를 더럽히지 않도록 OUT_DIR/applogs 로 이동
