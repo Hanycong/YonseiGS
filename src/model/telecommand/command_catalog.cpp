@@ -7,7 +7,7 @@
 namespace mim {
 namespace tc {
 
-// 미션별 명령 정의 (src/missions/*, platform/telecommand/raw_commands.cpp)
+// 미션별 명령 정의 (src/model/missions/*, model/telecommand/raw_commands.cpp)
 extern const MissionCommands kRawCommands;
 extern const MissionCommands kBee1000Commands;
 extern const MissionCommands kCosmicCommands;

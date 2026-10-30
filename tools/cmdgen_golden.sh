@@ -11,7 +11,7 @@
 #   diff A/forms.txt  B/forms.txt
 #
 # 본 프로그램과 같은 Release 플래그로 빌드한 오브젝트를 재사용하고,
-# main.cpp / miman_imgui.cpp / service/svc_tx.cpp 만 하네스로 대체한다.
+# main.cpp / miman_imgui.cpp / model/service/svc_tx.cpp 만 하네스로 대체한다.
 
 set -eu
 REPO="$(cd "$(dirname "$0")/.." && pwd)"

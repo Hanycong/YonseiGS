@@ -15,7 +15,7 @@ extern bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), 
 extern StateCheckUnit State;
 extern Setup * setup;
 extern Console console;
-// p_thread[] 직접 접근 대신 service/svc_thread.h 의 슬롯 이름 사용
+// p_thread[] 직접 접근 대신 model/service/svc_thread.h 의 슬롯 이름 사용
 extern int NowTLE;
 extern int NowFTP;
 extern bool sgp4check;

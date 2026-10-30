@@ -46,7 +46,7 @@ ImGuiWindowFlags mim_winflags = ImGuiWindowFlags_NoMove |
                                 ImGuiWindowFlags_NoBringToFrontOnFocus|
                                 // ImGuiWindowFlags_HorizontalScrollbar|
                                 ImGuiWindowFlags_NoTitleBar;
-// p_thread[] 는 UI 에서 직접 쓰지 않는다 -> service/svc_*.h 사용
+// p_thread[] 는 UI 에서 직접 쓰지 않는다 -> model/service/svc_*.h 사용
 extern Ptable_0 param0;
 extern Ptable_1 param1;
 extern Ptable_5 param5;
@@ -173,7 +173,7 @@ char repeated_label[64];
 
 static int current_sat_mode = 0; // 0: BEE1000, 1: BEE1012, 2: Uelysys
 static int chosen_sat_mode = 0;
-// sat_names / hmac_keys / is_switching / SwitchSatelliteTask -> service/svc_radio.cpp 로 이동
+// sat_names / hmac_keys / is_switching / SwitchSatelliteTask -> model/service/svc_radio.cpp 로 이동
 
 static bool show_satellite_select = false;
 
@@ -4770,7 +4770,7 @@ static void DrawCmdGeneratorBody(bool initial_mode)
 {
 
     // 명령 선택 목록(라벨, 필터, 초기 운용 세트)은 명령 카탈로그에서 읽는다
-    // (platform/telecommand/command_catalog.h, missions/*)
+    // (model/telecommand/command_catalog.h, model/missions/*)
     static int selected_index = 0;
 
     ImGui::SetNextItemWidth(100.0f);

@@ -13,7 +13,7 @@
 //  - 폼 지문(forms.txt): 명령마다 그려지는 위젯(종류, 라벨, 타입, 표시 문자열)을 순서대로 기록하고,
 //    명령 선택 콤보의 항목 목록을 (전체/초기운용) x (서브시스템 필터) 조합별로 기록한다.
 //    위젯 함수들도 이 파일에서 재정의하므로 실제로 그려지지는 않는다.
-//  - 카탈로그 검사(catalog.txt): platform/telecommand 명령 카탈로그를 생성기의 기존 표
+//  - 카탈로그 검사(catalog.txt): model/telecommand 명령 카탈로그를 생성기의 기존 표
 //    (Templabels, FilterRules, INITIAL_CMD_INDICES)와 대조하고, 카탈로그의 MID/CC 가
 //    실제로 만들어진 패킷 헤더와 같은지 확인한다. 불일치가 있으면 종료 코드 1.
 //
