@@ -87,6 +87,7 @@ INCLUDE_DIRECTORIES (${MIMAN_SRC}/view)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/beacon)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/control)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/cmdgen)
+INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/popups)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/viewmodel)
 
 ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/miman_config.cpp ${MIMAN_SRC}/miman_coms.cpp ${MIMAN_SRC}/miman_csp.cpp ${MIMAN_SRC}/miman_ftprdp.cpp ${MIMAN_SRC}/miman_imgui.cpp ${MIMAN_SRC}/miman_orbital.cpp ${MIMAN_SRC}/miman_radial.cpp ${MIMAN_SRC}/miman_model.cpp ${MIMAN_SRC}/miman_s_control.cpp ${MIMAN_SRC}/miman_autopilot.cpp ${MIMAN_SRC}/main.cpp
@@ -95,6 +96,7 @@ ${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp 
 ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecommand/raw_commands.cpp
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
 ${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp ${MIMAN_SRC}/view/control_view.cpp ${MIMAN_SRC}/view/ftp_view.cpp
+${MIMAN_SRC}/view/popups/setup_popup.cpp ${MIMAN_SRC}/view/popups/param_table0_popup.cpp ${MIMAN_SRC}/view/popups/param_table1_popup.cpp ${MIMAN_SRC}/view/popups/param_table5_popup.cpp ${MIMAN_SRC}/view/popups/load_popup.cpp ${MIMAN_SRC}/view/popups/tle_popup.cpp ${MIMAN_SRC}/view/popups/fds_popup.cpp ${MIMAN_SRC}/view/popups/satinfo_popup.cpp ${MIMAN_SRC}/view/popups/s_band_popup.cpp
 ${MIMAN_SRC}/view/cmdgen/cmdgen_view.cpp
 ${MIMAN_SRC}/view/cmdgen/raw/forms_raw.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_eps.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_adcs.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_sc.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_to_lab.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_uant.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_sp.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_payuzuc.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_fm.cpp ${MIMAN_SRC}/view/cmdgen/cosmic/forms_ftp.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_unknown.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_utrx.cpp ${MIMAN_SRC}/view/cmdgen/cosmic/forms_to_lab.cpp ${MIMAN_SRC}/view/cmdgen/cosmic/forms_eps.cpp ${MIMAN_SRC}/view/cmdgen/cosmic/forms_sp.cpp ${MIMAN_SRC}/view/cmdgen/cosmic/forms_uel_pi.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/forms_es.cpp ${MIMAN_SRC}/view/control/ping_node_popup.cpp ${MIMAN_SRC}/view/control/switch_satellite_popup.cpp ${MIMAN_SRC}/view/control/custom_rparam_popup.cpp
 ${MIMAN_SRC}/view/beacon/beacon_tabs.cpp ${MIMAN_SRC}/view/beacon/beacon_tab.cpp ${MIMAN_SRC}/view/beacon/mission_beacon_tab.cpp ${MIMAN_SRC}/view/beacon/report_tab.cpp ${MIMAN_SRC}/view/beacon/event_tab.cpp ${MIMAN_SRC}/view/beacon/response_tab.cpp ${MIMAN_SRC}/view/beacon/ax100_rparam_tab.cpp
