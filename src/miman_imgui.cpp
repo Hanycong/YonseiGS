@@ -24,6 +24,7 @@
 #include "svc_tracking.h"
 #include "svc_radio.h"
 #include "svc_ftp.h"
+#include "command_catalog.h"
 #include <mutex>
 
 
@@ -4768,20 +4769,17 @@ static const SubsystemRange FilterRules[] = {
 static void DrawCmdGeneratorBody(bool initial_mode)
 {
 
+    // 명령 선택 목록(라벨, 필터, 초기 운용 세트)은 명령 카탈로그에서 읽는다
+    // (platform/telecommand/command_catalog.h, missions/*)
     static int selected_index = 0;
-    const char* index_names[] = {
-        "All", "Test&Debug", "EPS", "ADCS", "UANT", "SP", "PAYUZUC", "Cosmic UEL Pi",
-        "cFE", "SC APP", "FTP", "UTRX GNDWDT",
-        "LGPM", "LTRX", "STX", "PAYUEL_ROMA", "PAYUEL_LGBAT"
-    };
 
     ImGui::SetNextItemWidth(100.0f);
-    if (ImGui::BeginCombo("##Subsystem", index_names[selected_index]))
+    if (ImGui::BeginCombo("##Subsystem", mim::tc::CategoryName(selected_index)))
     {
-        for (int n = 0; n < IM_ARRAYSIZE(index_names); n++)
+        for (int n = 0; n < mim::tc::CategoryCount(); n++)
         {
             bool is_selected = (selected_index == n);
-            if (ImGui::Selectable(index_names[n], is_selected))
+            if (ImGui::Selectable(mim::tc::CategoryName(n), is_selected))
                 selected_index = n;
 
             if (is_selected)
@@ -4792,32 +4790,24 @@ static void DrawCmdGeneratorBody(bool initial_mode)
 
     ImGui::SameLine();
 
-    auto IsVisible = [&](int cmd_i) {
-        if (selected_index == 0) return true; // "All" selected
-        for (const auto& rule : FilterRules) {
-            if (rule.sub_index == selected_index && cmd_i >= rule.start && cmd_i <= rule.end)
-                return true;
-        }
-        return false;
-        };
-    const char* current_label =
-        (gen_fnccode >= 0 && gen_fnccode < CMD_LABEL_MAX && strlen(Templabels[gen_fnccode]) > 0)
-        ? Templabels[gen_fnccode]
-        : "Select CMD type";
+    const mim::tc::CommandDef* current = mim::tc::FindCommand(gen_fnccode);
+    const char* current_label = current ? current->label : "Select CMD type";
 
     if (ImGui::BeginCombo("##Select CMD type", current_label))
     {
         if (initial_mode)
         {
 
-            for (int k = 0; INITIAL_CMD_INDICES[k] >= 0; ++k)
+            const int* initial_ops = mim::tc::InitialOpsCommands();
+            for (int k = 0; initial_ops[k] >= 0; ++k)
             {
-                int i = INITIAL_CMD_INDICES[k];
-                if (strlen(Templabels[i]) == 0 || !IsVisible(i))
+                const mim::tc::CommandDef* cmd = mim::tc::FindCommand(initial_ops[k]);
+                if (cmd == nullptr || !mim::tc::InCategory(*cmd, selected_index))
                     continue;
 
+                int i = cmd->id;
                 bool SelectedGen = (gen_fnccode == i);
-                if (ImGui::Selectable(Templabels[i], SelectedGen))
+                if (ImGui::Selectable(cmd->label, SelectedGen))
                     gen_fnccode = i;
 
                 if (SelectedGen)
@@ -4826,13 +4816,15 @@ static void DrawCmdGeneratorBody(bool initial_mode)
         }
         else
         {
-            for (int i = 0; i < CMD_LABEL_MAX; i++)
+            for (int k = 0; k < mim::tc::CommandCount(); k++)
             {
-                if (strlen(Templabels[i]) == 0 || !IsVisible(i))
+                const mim::tc::CommandDef* cmd = &mim::tc::CommandAt(k);
+                if (!mim::tc::InCategory(*cmd, selected_index))
                     continue;
 
+                int i = cmd->id;
                 bool SelectedGen = (gen_fnccode == i);
-                if (ImGui::Selectable(Templabels[i], SelectedGen))
+                if (ImGui::Selectable(cmd->label, SelectedGen))
                 {
                     if (gen_fnccode != i)
                         gen_fnccode = i;
