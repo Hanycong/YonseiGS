@@ -1,6 +1,6 @@
 // ViewModel - OBC 직접 쉘 명령 (Beacon 창 "AX100 RPARAM" 탭 아래쪽)
 //
-// 쉘 명령 종류(State.Shelltype)와 명령 버퍼(shellcmd)를 가지고, Send 로 TX 슬롯에서 보낸다.
+// 쉘 명령 종류(State.Shelltype, 화면 상태)를 가지고, 명령 버퍼와 전송은 model/telecommand/direct_shell.
 #pragma once
 
 #include "miman_config.h"     // cmd_packet_t

@@ -1,26 +1,25 @@
 #include "shell_vm.h"
 
 #include <stdio.h>
-#include <string.h>
 
-#include "svc_tx.h"
+#include "direct_shell.h"
 
 extern StateCheckUnit State;
-extern cmd_packet_t * shellcmd;
 
 namespace mim {
 namespace vm {
 
-int * ShellVM::Type()             { return &State.Shelltype; }
-cmd_packet_t * ShellVM::Command() { return shellcmd; }
+using mim::model::Shell;
 
-// "(RadioButton 다음 매 프레임)"
+int * ShellVM::Type()             { return &State.Shelltype; }
+cmd_packet_t * ShellVM::Command() { return Shell().Command(); }
+
+// (RadioButton 다음 매 프레임)
 void ShellVM::SyncTypeChange()
 {
-    if(State.Shelltype != (int)shellcmd->type)
+    if(State.Shelltype != (int)Shell().Type())
     {
-        shellcmd->type = (uint8_t)State.Shelltype;
-        memset(&shellcmd->required, 0, sizeof(shellcmd->required));
+        Shell().ChangeType((uint8_t)State.Shelltype);
     }
 }
 
@@ -31,10 +30,10 @@ void ShellVM::Send()
     {
         printf("Input Shell Data : ");
         for(int i = 0; i < sizeof(cmd_packet_t); i++)
-            printf("%u\t", ((uint8_t *)shellcmd)[i]);
+            printf("%u\t", ((uint8_t *)Shell().Command())[i]);
         printf("\n");
     }
-    mim::svc::StartDirectShell((void *)shellcmd); 
+    Shell().Send();
 }
 
 ShellVM & ShellViewModel()

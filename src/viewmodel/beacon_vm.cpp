@@ -1,31 +1,21 @@
 #include "beacon_vm.h"
 
-#include <mutex>
-
-extern Beacon * beacon;
-extern MissionBeacon * missionbeacon;
-extern GETFILEINFO * getfileinfo;
-extern Event * event;
+#include "telemetry_store.h"
+#include "ax100_radio.h"
 
 namespace mim {
 namespace vm {
 
-Beacon *        BeaconVM::LastBeacon() const        { return beacon; }
-MissionBeacon * BeaconVM::LastMissionBeacon() const { return missionbeacon; }
-Event *         BeaconVM::LastEvent() const         { return event; }
-GETFILEINFO *   BeaconVM::LastFileInfo() const      { return getfileinfo; }
+using mim::model::Telemetry;
 
-ReportView_t BeaconVM::ReportSnapshot() const
-{
-    ReportView_t view;
-    {
-        std::lock_guard<std::mutex> lk(g_report_view_mtx);
-        view = g_report_view;
-    }
-    return view;
-}
+Beacon *        BeaconVM::LastBeacon() const        { return Telemetry().LastBeacon(); }
+MissionBeacon * BeaconVM::LastMissionBeacon() const { return Telemetry().LastMissionBeacon(); }
+Event *         BeaconVM::LastEvent() const         { return Telemetry().LastEvent(); }
+GETFILEINFO *   BeaconVM::LastFileInfo() const      { return Telemetry().LastFileInfo(); }
 
-uint32_t BeaconVM::TotalRxBytes() const { return get_rx_bytes(); }
+ReportView_t BeaconVM::ReportSnapshot() const { return Telemetry().ReportSnapshot(); }
+
+uint32_t BeaconVM::TotalRxBytes() const { return mim::model::Ax100().TotalRxBytes(); }
 
 BeaconVM & BeaconViewModel()
 {

@@ -1,8 +1,8 @@
 // ViewModel - AX100 원격 파라미터 (Beacon 창 "AX100 RPARAM" 탭 위쪽)
 //
 // 지상국에서 CSP 로 위성 AX100(UHF 송수신기)의 원격 파라미터(rparam)를 읽고 쓴다.
-// 버튼 하나 = 함수 하나. 각 함수는 원래 버튼 블록의 본문 그대로다 (호출 스레드 = UI 스레드에서
-// CSP 응답을 기다린다. 원래 동작 그대로)
+// 버튼 하나 = 함수 하나. 원격 호출은 model/device/ax100_radio (Ax100Radio), 로그는 여기서 남긴다.
+// (UI 스레드에서 CSP 응답을 기다린다. 원래 동작 그대로)
 #pragma once
 
 #include <stddef.h>
