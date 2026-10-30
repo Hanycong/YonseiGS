@@ -133,7 +133,15 @@ OBC direct shell) → `model/telemetry/telemetry_store.*` (`TelemetryStore`),
 `model/device/ax100_radio.*` (`Ax100Radio`, gs_rparam/CSP calls), `model/telecommand/direct_shell.*`
 (`DirectShell`). `report_tab.cpp` is still ~2,350 lines (one big per-report-type switch) — split
 it by report type when miman_coms' report parser moves into `model/telemetry/`.
-Next: **Control**.
+**Control is done**: `view/control_view.cpp` + popups in `view/control/` (`ping_node_popup`,
+`switch_satellite_popup`, `custom_rparam_popup`) → `viewmodel/control_vm.*` (`ControlVM`,
+`CustomRparamVM`) → `model/device/csp_remote_param.*` (`CspRemoteParam`),
+`model/telecommand/obc_ping.*`, `model/telecommand/command_queue.*` (`CommandQueue`).
+Note: the middle Pass Operation column (`ImGui_CommandWindow_Body`) is actually the **FTP
+manager** (file list / upload / download), not telecommands. The telecommand generator
+(`DrawCmdGeneratorBody`, ~8,900 lines) is the popup opened by Control's "Send Telecommand" /
+"Initial Ops" — it is still in miman_imgui.cpp (non-static now) and is the last window.
+Next: **FTP (middle column)**, then the command generator.
 Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
