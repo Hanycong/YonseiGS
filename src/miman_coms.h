@@ -811,7 +811,7 @@ typedef struct {
 
 
 
-static bool ParseReportWire540(const uint8_t *buf, size_t len, Report &out);
+// ParseReportWire540 -> model/telemetry/report_parser.h
 void * TRxController(void *);
 void * SignalTest(void*);
 void now_rx_bytes_update();
