@@ -112,7 +112,6 @@ int main(int, char**)
 
     Initialize_ConfigSettings();
     Initialize_TLESettings();
-    Initialize_CMDLabels();
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
         return -1;

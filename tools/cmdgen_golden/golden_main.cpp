@@ -21,6 +21,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../../src/miman_imgui.cpp"
+#include "legacy_tables.h"
 
 #include <string>
 #include <vector>

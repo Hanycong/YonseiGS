@@ -65,7 +65,6 @@ bool popup_setup(Setup * setup);
 bool popup_param_table0();
 bool popup_param_table1();
 bool popup_param_table5();
-void Initialize_CMDLabels();
 int CMDDataGenerator(uint32_t msgid, uint16_t fnccode,void *Requested, size_t RequestedSize);
 bool popup_cmd();
 bool popup_load();
