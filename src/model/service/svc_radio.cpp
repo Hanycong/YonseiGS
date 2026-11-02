@@ -94,7 +94,7 @@ int StartSignalTest()
 
 void StopSignalTest()
 {
-    State.Signaltest = false;
+    LinkFlags.Signaltest = false;
     JoinThread(SLOT_SIGNALTEST);
 }
 
@@ -133,7 +133,7 @@ void AmpOff()
     {
         console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
     }
-    State.AMPON = false;
+    LinkFlags.AMPON = false;
 }
 
 const char * SwitchSatelliteName(int mode)

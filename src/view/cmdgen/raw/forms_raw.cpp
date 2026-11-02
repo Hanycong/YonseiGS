@@ -56,16 +56,16 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
         ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
 
-        ImGui::Checkbox("Schedule", &State.Scheduled);
-        if (State.Scheduled)
+        ImGui::Checkbox("Schedule", &LinkFlags.Scheduled);
+        if (LinkFlags.Scheduled)
         {
-            ImGui::InputScalar("sch_u8ent", ImGuiDataType_U8, &State.entrynum);
-            ImGui::InputScalar("sch_u32ent", ImGuiDataType_U32, &State.u32val);
+            ImGui::InputScalar("sch_u8ent", ImGuiDataType_U8, &LinkFlags.entrynum);
+            ImGui::InputScalar("sch_u32ent", ImGuiDataType_U32, &LinkFlags.u32val);
         }
 
         if (ImGui::Button("Generate CMD"))
         {
-            if (State.Scheduled)
+            if (LinkFlags.Scheduled)
             {
                 mim::tc::SendScheduledNoArg(msgid, fnccode);
             }
@@ -189,7 +189,7 @@ bool DrawRawForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD"))
         {
-            if (State.Scheduled)
+            if (LinkFlags.Scheduled)
             {
                 mim::tc::SendScheduledU64(msgid, fnccode, arg);
             }

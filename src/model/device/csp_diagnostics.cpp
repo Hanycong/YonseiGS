@@ -32,22 +32,22 @@ void * csp_ping_scan(void *) {
 	bool scanmode = false;
 	uint32_t start, time = 0;
 	// uint8_t node = *((uint8_t *) nodedata);
-	bool dlstate = State.downlink_mode;
+	bool dlstate = LinkFlags.downlink_mode;
 	if((dlstate))
-        State.downlink_mode = false;
-	while(!State.uplink_mode)
+        LinkFlags.downlink_mode = false;
+	while(!LinkFlags.uplink_mode)
         continue;
-	State.uplink_mode = true;
+	LinkFlags.uplink_mode = true;
 	for(uint8_t i = 0; i < 32; i++)
 	{
 		int pingResult = csp_ping(i, 2000, size, CSP_O_NONE);
 		if(pingResult >= 0)
 			console.AddLog("Scanned AX100. Node : %"PRIu8", %"PRIu32"ms.\n", i, pingResult);
 	}
-	State.uplink_mode = false;
+	LinkFlags.uplink_mode = false;
 	if(dlstate)
     {
-        State.downlink_mode = dlstate;
+        LinkFlags.downlink_mode = dlstate;
     }
 	pthread_mutex_unlock(&conn_lock);
     return NULL;

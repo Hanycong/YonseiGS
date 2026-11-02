@@ -58,7 +58,7 @@ void * Doppler(void *) {
     double sol = 299792458;  // [m/s]
     double vel;
     double updated_freq;
-    while(State.Doppler)
+    while(LinkFlags.Doppler)
     {
         while(!RotatorFlags.RotatorReadReady)
             continue;
@@ -66,20 +66,20 @@ void * Doppler(void *) {
         // printf("%d\n", index);
         if (!RotatorFlags.Engage) {
             console.AddLog("[ERROR]##You tried doppler correction with no engaging");
-            State.Doppler = false;
+            LinkFlags.Doppler = false;
             break;
         }
         if(index < -1)
         {
             console.AddLog("[ERROR]##Please load TLE or FDS. Stop Doppler Correction.");
-            State.Doppler = false;
+            LinkFlags.Doppler = false;
             break;
         }
         else if (index == -1)
         {
             if(State.Fatellites == NULL)
             {
-                State.Doppler = false;
+                LinkFlags.Doppler = false;
                 break;
             }
             vel= 1 - (State.Fatellites->topo.range_rate * 1000)/sol;
@@ -104,7 +104,7 @@ void * Doppler(void *) {
         {
             if(State.Satellites[index] == NULL)
             {
-                State.Doppler = false;
+                LinkFlags.Doppler = false;
                 break;
             }
             vel= 1 - (State.Satellites[index]->topo.range_rate * 1000)/sol;

@@ -24,7 +24,7 @@ float    FrequencyVM::TxFrequencyMHz() const { return ((float)mim::model::Gs100(
 uint32_t FrequencyVM::RxBaud() const         { return mim::model::Gs100().RxBaud(); }
 uint32_t FrequencyVM::TxBaud() const         { return mim::model::Gs100().TxBaud(); }
 int16_t  FrequencyVM::LastRssi() const       { return mim::model::Gs100().LastRssi(); }
-bool     FrequencyVM::DopplerRunning() const { return State.Doppler; }
+bool     FrequencyVM::DopplerRunning() const { return LinkFlags.Doppler; }
 
 void FrequencyVM::ApplyCenterFrequency()
 {

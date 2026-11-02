@@ -57,12 +57,12 @@ void * AutoPilot(void *)
         console.AddLog("[ERROR]##[Auto]AutoPilot Stopped with Error Code : %d", AutoRes);
     if(AutoRes != -2)
     {
-        State.Doppler = false;
+        LinkFlags.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
         RotatorFlags.Engage = false;
-        State.Doppler = false;
+        LinkFlags.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
@@ -136,7 +136,7 @@ int AutoPilot_task()
         mim::svc::StartThread(mim::svc::SLOT_ROTATOR_CONTROL, Sattracker, NULL);
         console.AddLog("[OK]##[Auto]Start Engaging.");
 
-        State.Doppler = true;
+        LinkFlags.Doppler = true;
         mim::svc::StartThread(mim::svc::SLOT_DOPPLER, Doppler, NULL);
         console.AddLog("[OK]##[Auto]Start Doppler Correction.");
 
@@ -211,13 +211,13 @@ int AutoPilot_task()
             //     if (!State.Autopilot) break;
             //     usleep(50000); // 50 ms
             //     }
-            if(State.AmpTime > 0)
+            if(LinkFlags.AmpTime > 0)
             {
                 console.AddLog("[ERRPR]##Cannot Turn on AMP Now. Wati until the timer goes on.");
                 console.AddLog("[ERROR]##If you don't want it, restart the software.");
                 console.AddLog("[ERROR]##Remind the AMP would be turned off after the timer goes on");
                 console.AddLog("[ERROR]##even if you restart the software.");
-            while (State.AmpTime > 0 && AutoPilotCfg.Autopilot)
+            while (LinkFlags.AmpTime > 0 && AutoPilotCfg.Autopilot)
             {
                 usleep(20000); // 20 ms
             }
@@ -686,12 +686,12 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 
         while(AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath))
             usleep(20000);
-        State.Doppler = false;
+        LinkFlags.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
         RotatorFlags.Engage = false;
-        State.Doppler = false;
+        LinkFlags.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
@@ -740,7 +740,7 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         {
             console.AddLog("[OK]##Forked Safe Amplifier Process. (OFF)");
         }
-        State.AMPON = false;
+        LinkFlags.AMPON = false;
 
 
 

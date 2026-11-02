@@ -25,12 +25,12 @@ void InitializeHardware(void (*sigint_handler)(int))
     if(init_switch(setup->Switch_devname, setup->Switch_baud) < 0)
     {
         console.AddLog("[ERROR]##Connect to Switch Box..............Failed.");
-        State.SwitchConnection = false;
+        LinkFlags.SwitchConnection = false;
     }
     else
     {
         console.AddLog("[OK]##Connect to Switch Box.............Success.");
-        State.SwitchConnection = true;
+        LinkFlags.SwitchConnection = true;
     }
 
 
@@ -48,7 +48,7 @@ void InitializeHardware(void (*sigint_handler)(int))
     if(init_transceiver() < 0)
     {
         console.AddLog("[ERROR]##Connect to GS100...................Failed.");
-        State.GS100_Connection = false;
+        LinkFlags.GS100_Connection = false;
     }
     else
     {
@@ -56,11 +56,11 @@ void InitializeHardware(void (*sigint_handler)(int))
         // pthread_join(p_thread[12], NULL);
         // pthread_join(p_thread[13], NULL);
         console.AddLog("[OK]##Connect to GS100..................Success.");
-        State.GS100_Connection = true;
+        LinkFlags.GS100_Connection = true;
 
         StartThread(SLOT_RADIO_INIT, RadInitialize, (void *)setup);
-        State.TRx_mode = true;
-        State.downlink_mode = true;
+        LinkFlags.TRx_mode = true;
+        LinkFlags.downlink_mode = true;
         StartThread(SLOT_TRX_CONTROLLER, TRxController, NULL);
 
 
@@ -93,18 +93,18 @@ void StopAllThreads()
 {
     printf("[MAIN-DIAG] entering shutdown sequence\n");
     printf("[MAIN-DIAG] TRx=%d downlink=%d uplink=%d ftp=%d\n",
-            State.TRx_mode,
-            State.downlink_mode,
-            State.uplink_mode,
+            LinkFlags.TRx_mode,
+            LinkFlags.downlink_mode,
+            LinkFlags.uplink_mode,
             FtpShared.ftp_mode);
     printf("Ending procedure...\n");
-    State.TRx_mode = false;
-    State.downlink_mode = false;
-    State.uplink_mode = false;
+    LinkFlags.TRx_mode = false;
+    LinkFlags.downlink_mode = false;
+    LinkFlags.uplink_mode = false;
     FtpShared.ftp_mode = false;
     RotatorFlags.Engage = false;
-    State.Doppler = false;
-    State.GS100_Connection =false;
+    LinkFlags.Doppler = false;
+    LinkFlags.GS100_Connection =false;
     State.NowTracking = false;
     State.TrackThread = false;
     RotatorFlags.RotatorReading = false;

@@ -125,9 +125,9 @@ void ImGui_StatusBar_Body(float W) {
         ImGui::TextUnformatted(name);
         ImGui::SameLine(0, 14);
     };
-    pill("GS100",   State.GS100_Connection);
+    pill("GS100",   LinkFlags.GS100_Connection);
     pill("Rotator", RotatorFlags.RotatorConnection);
-    pill("Switch",  State.SwitchConnection);
+    pill("Switch",  LinkFlags.SwitchConnection);
     pill("S-band",  State.SbandUse);
 
     ImGui::SameLine(0, 20);
@@ -154,9 +154,9 @@ void ImGui_StatusBar_Body(float W) {
         ImGui::SameLine(0, 10);
     };
     mode("Engage",    RotatorFlags.Engage);
-    mode("Doppler",   State.Doppler);
+    mode("Doppler",   LinkFlags.Doppler);
     mode("AutoPilot", AutoPilotCfg.Autopilot);
-    mode("AMP",       State.AMPON);
+    mode("AMP",       LinkFlags.AMPON);
 }
 
 void ImGui_StatusBar(float W) {

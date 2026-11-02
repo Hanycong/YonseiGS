@@ -11,15 +11,15 @@ namespace vm {
 
 using mim::model::Shell;
 
-int * ShellVM::Type()             { return &State.Shelltype; }
+int * ShellVM::Type()             { return &LinkFlags.Shelltype; }
 cmd_packet_t * ShellVM::Command() { return Shell().Command(); }
 
 // (RadioButton 다음 매 프레임)
 void ShellVM::SyncTypeChange()
 {
-    if(State.Shelltype != (int)Shell().Type())
+    if(LinkFlags.Shelltype != (int)Shell().Type())
     {
-        Shell().ChangeType((uint8_t)State.Shelltype);
+        Shell().ChangeType((uint8_t)LinkFlags.Shelltype);
     }
 }
 

@@ -55,20 +55,20 @@ void ControlVM::StartFreqCalibration() { mim::svc::StartFreqCalibration(); }
 AmpButton ControlVM::Amp()
 {
     AmpButton amp;
-    amp.on = State.AMPON;
+    amp.on = LinkFlags.AMPON;
     if (!amp.on)
     {
-        amp.timer = State.AmpTime > 0;
+        amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", State.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", LinkFlags.AmpTM);
         else
             sprintf(AmpTimeBuf, "AMP ON");
     }
     else
     {
-        amp.timer = State.AmpTime > 0;
+        amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S", State.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S", LinkFlags.AmpTM);
         else
             sprintf(AmpTimeBuf, "AMP OFF");
     }

@@ -424,36 +424,20 @@ typedef enum __attribute__ ((packed)) {
 // State Monitoring
 struct StateCheckUnit{
     bool InitializeRequired = false;
-    bool RadioInitialize = false;
-    bool SwitchConnection = false;
-    bool GS100_Connection = false;
     bool GUI = true;
     bool SbandUse = false;
-    bool TRx_mode = false;
-    bool downlink_mode = false;
-    bool uplink_mode = false;
-    bool Doppler = false;
-    bool Signaltest = false;
     bool Debugmode = false;
     bool NowTracking = true;
     bool TrackThread = true;
     bool AllThread = true;
     bool Sleep = false;
     bool ModelRefreshRequired = false;
-    bool AMPON = false;
-    time_t AmpTime;
-    struct tm * AmpTM;
 
-    bool Scheduled = false;
-    uint8_t entrynum;
-    uint32_t u32val;
 
     int loadindex;
     int tleallindex;
 
 
-    int Paramtype = 0;
-    int Shelltype = TYPE_SYSCMD;
 
     
 
@@ -5443,4 +5427,5 @@ typedef struct __attribute__ ((packed)) {
 #include "ftp_state.h"
 #include "autopilot_state.h"
 #include "rotator_state.h"
+#include "link_state.h"
 #endif

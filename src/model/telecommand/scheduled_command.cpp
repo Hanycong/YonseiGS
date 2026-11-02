@@ -50,8 +50,8 @@ void SendScheduledNoArg(uint16_t msgid, uint8_t fnccode)
                 cmd2[7] = checksum;
 
                 memcpy(schcmd->TestPacket->Data, cmd2, sizeof(cmd2));
-                schcmd->entnum = State.entrynum;
-                schcmd->exenum = State.u32val;
+                schcmd->entnum = LinkFlags.entrynum;
+                schcmd->exenum = LinkFlags.u32val;
 
                 for (int i = 0; i < schcmd->TestPacket->Length; i++)
                     printf("0x%x ", cmd2[i]);
@@ -98,8 +98,8 @@ void SendScheduledU64(uint16_t msgid, uint8_t fnccode, uint64_t arg)
                 cmd2[7] = checksum;
 
                 memcpy(schcmd->TestPacket->Data, cmd2, sizeof(cmd2));
-                schcmd->entnum = State.entrynum;
-                schcmd->exenum = State.u32val;
+                schcmd->entnum = LinkFlags.entrynum;
+                schcmd->exenum = LinkFlags.u32val;
 
                 for (int i = 0; i < schcmd->TestPacket->Length; i++)
                     printf("0x%x ", cmd2[i]);

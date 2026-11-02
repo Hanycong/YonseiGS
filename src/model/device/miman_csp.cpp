@@ -169,7 +169,7 @@ int init_transceiver()
 	// csp_debug_toggle_level(CSP_INFO);
 	// csp_debug_toggle_level(CSP_PROTOCOL);
 	// csp_debug_toggle_level(CSP_LOCK);
-	State.GS100_Connection = true;
+	LinkFlags.GS100_Connection = true;
 	csp_buffer_init(400, 2048);
 	csp_init((uint8_t)setup->kiss_node);
 	csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_kiss, CSP_NODE_MAC);

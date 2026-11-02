@@ -28,7 +28,7 @@ void todaystr(char * str, int length)
 
 void * AmpTimer(void *)
 {
-	State.AMPON = true;
+	LinkFlags.AMPON = true;
     time_t targetTime = time(NULL) + 14 * 60; // Add 14 minutes in seconds
 	time_t currentTime;
 	while(!State.InitializeRequired)
@@ -36,15 +36,15 @@ void * AmpTimer(void *)
 		currentTime = time(NULL);
 		if(currentTime > targetTime)
 		{
-			State.AMPON = false;
+			LinkFlags.AMPON = false;
 			break;
 		}
 			
-		State.AmpTime = targetTime - currentTime;
-		State.AmpTM = gmtime(&State.AmpTime);
+		LinkFlags.AmpTime = targetTime - currentTime;
+		LinkFlags.AmpTM = gmtime(&LinkFlags.AmpTime);
 
 	}
-	State.AMPON = false;
+	LinkFlags.AMPON = false;
     return NULL;
 }
 

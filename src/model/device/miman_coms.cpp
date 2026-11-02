@@ -84,14 +84,14 @@ static bool    g_report_have_last_time = false;
 void * TRxController(void *)
 {
     csp_socket_t * DLsocket = DL_sock_initialize();
-    while(State.TRx_mode)
+    while(LinkFlags.TRx_mode)
     {
-        if(State.downlink_mode)
+        if(LinkFlags.downlink_mode)
         {
             printf("Create downlink onorbit...\n");
             pthread_create(&LinkTrhead, NULL, task_downlink_onorbit, DLsocket);
             pthread_join(LinkTrhead, NULL);
-            State.uplink_mode = true;
+            LinkFlags.uplink_mode = true;
         }
         else
             continue;
@@ -109,8 +109,8 @@ void buf_allclear()
 
 void * SignalTest(void*)
 {
-    State.Signaltest = true;
-    while(State.Signaltest)
+    LinkFlags.Signaltest = true;
+    while(LinkFlags.Signaltest)
     {
         if(csp_ping(19, 100, 1, 0))
             continue;
@@ -279,7 +279,7 @@ void * task_downlink_onorbit(void * socketinfo)
 
     float seconds = 0.0f;
 
-    while (State.downlink_mode) {
+    while (LinkFlags.downlink_mode) {
 
         conn = csp_accept(sock, setup->default_timeout);
         if (conn == NULL) {
@@ -894,7 +894,7 @@ void * task_downlink_onorbit(void * socketinfo)
 void * task_uplink_onorbit(void * sign_)
 {
 
-    State.uplink_mode = true;
+    LinkFlags.uplink_mode = true;
     //State.downlink_mode = false;
     pthread_mutex_lock(&conn_lock);
     //while(!State.RotatorReadReady)
@@ -905,10 +905,10 @@ void * task_uplink_onorbit(void * sign_)
     //This funcion must be on p_thread[4]
     if((dlstate))
     {
-        State.downlink_mode = false;
+        LinkFlags.downlink_mode = false;
     }
         
-    while(!State.uplink_mode)
+    while(!LinkFlags.uplink_mode)
         continue;
     uint32_t start, time = 0;
     start = csp_get_ms();
@@ -952,14 +952,14 @@ void * task_uplink_onorbit(void * sign_)
         case MIM_PT_PING : {
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
             
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -979,7 +979,7 @@ void * task_uplink_onorbit(void * sign_)
                 }
                 break;
             }
-            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && State.uplink_mode)
+            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && LinkFlags.uplink_mode)
             {
                 packetsign * confirm = PacketDecoder(confirm_);
                 if(State.Debugmode)
@@ -1027,14 +1027,14 @@ void * task_uplink_onorbit(void * sign_)
                 printf("\n");
             }
             
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -1055,14 +1055,14 @@ void * task_uplink_onorbit(void * sign_)
         }
         case MIM_PT_DLREQ : {
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -1083,7 +1083,7 @@ void * task_uplink_onorbit(void * sign_)
                 break;
             }
             console.AddLog("Request FTP filelist.");
-            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && State.uplink_mode)
+            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && LinkFlags.uplink_mode)
             {
                 filelist * confirm = (filelist *)malloc(confirm_->length);
                 packetsign* confirmlist =  PacketDecoder(confirm_);
@@ -1133,14 +1133,14 @@ void * task_uplink_onorbit(void * sign_)
         }
         case MIM_PT_CMD : { //according to Ptype
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -1184,9 +1184,9 @@ void * task_uplink_onorbit(void * sign_)
         }
         case MIM_PT_TMTC_TEST : { // == 10. Add for TMTC Test
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
-                if(State.Scheduled)
+                if(LinkFlags.Scheduled)
                 {
                     if ((txconn = csp_connect(CSP_PRIO_HIGH, 3, 13, MIM_DEFAULT_TIMEOUT, 0)) == NULL) {
                     /*!!!!!!!!!!!Revise setup->obc_node!!!!!!!!!!*/ //-> Change to 28.
@@ -1208,7 +1208,7 @@ void * task_uplink_onorbit(void * sign_)
                 }
 
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 console.AddLog("[OK]CMD Packet Header: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
                     packet->data[0],packet->data[1],packet->data[2],packet->data[3],packet->data[4],packet->data[5],packet->data[6],packet->data[7]);
@@ -1261,14 +1261,14 @@ void * task_uplink_onorbit(void * sign_)
         }
         case MIM_PT_STCMD : {
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -1288,9 +1288,9 @@ void * task_uplink_onorbit(void * sign_)
                 }
                 break;
             }
-            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && State.uplink_mode)
+            if((confirm_ = csp_read(txconn, rx_delay_ms(Plen, setup->ax100_node))) != NULL && LinkFlags.uplink_mode)
             {
-                if(State.uplink_mode)
+                if(LinkFlags.uplink_mode)
                 {
                     packetsign* confirmlist =  PacketDecoder(confirm_);
                     uint8_t * retcode = (uint8_t *)&confirmlist->Data[0];
@@ -1315,14 +1315,14 @@ void * task_uplink_onorbit(void * sign_)
         case MIM_PT_NCCMD : {
             csp_packet_t * confirm_ = (csp_packet_t *)csp_buffer_get(MIM_LEN_PACKET);
             packetsign* confirmlist =  PacketDecoder(confirm_);
-            while(State.uplink_mode)
+            while(LinkFlags.uplink_mode)
             {
                 if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, TX_PORT, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
                     continue;
                 else
                     break;
             }
-            while (State.uplink_mode && txconn != NULL)
+            while (LinkFlags.uplink_mode && txconn != NULL)
             {
                 if(csp_send(txconn, packet, setup->default_timeout))
                 {
@@ -1344,7 +1344,7 @@ void * task_uplink_onorbit(void * sign_)
             }
             if((confirm_ = csp_read(txconn,rx_delay_ms(Plen, setup->ax100_node))) != NULL)
             {
-                if(State.uplink_mode)
+                if(LinkFlags.uplink_mode)
                 {
                     console.AddLog("[OK]##Get Command Reply. No Checksum.");
                     if(confirmlist!=NULL)
@@ -1384,12 +1384,12 @@ void * task_uplink_onorbit(void * sign_)
     time = csp_get_ms() - start;
     console.AddLog("[DEBUG]##Communication Time : %u", time);
 
-    State.uplink_mode = false;
+    LinkFlags.uplink_mode = false;
     if(dlstate)
     {
-        State.downlink_mode = dlstate;
+        LinkFlags.downlink_mode = dlstate;
     }
-    State.downlink_mode = true;
+    LinkFlags.downlink_mode = true;
     pthread_mutex_unlock(&conn_lock);
     return NULL;
 }
@@ -1417,10 +1417,10 @@ void * Direct_Shell(void * data)
     //This funcion must be on p_thread[4]
     if((dlstate))
     {
-        State.downlink_mode = false;
+        LinkFlags.downlink_mode = false;
     }
         
-    while(!State.uplink_mode)
+    while(!LinkFlags.uplink_mode)
         continue;
 
     cmd_packet_t * ResultCMD = (cmd_packet_t *)data;
@@ -1444,14 +1444,14 @@ void * Direct_Shell(void * data)
     }
 
 
-    while(State.uplink_mode)
+    while(LinkFlags.uplink_mode)
     {
         if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, 27, MIM_DEFAULT_TIMEOUT, 0)) == NULL)
             continue;
         else
             break;
     }
-    while (State.uplink_mode && txconn != NULL)
+    while (LinkFlags.uplink_mode && txconn != NULL)
     {
         if(csp_send(txconn, packet, setup->default_timeout *2))
         {
@@ -1470,9 +1470,9 @@ void * Direct_Shell(void * data)
             confirm = NULL;
         }
     }
-    if((confirm = csp_read(txconn, 2 *rx_delay_ms(sizeof(MIM_LEN_PACKET), setup->ax100_node))) != NULL && State.uplink_mode)
+    if((confirm = csp_read(txconn, 2 *rx_delay_ms(sizeof(MIM_LEN_PACKET), setup->ax100_node))) != NULL && LinkFlags.uplink_mode)
     {
-        if(State.uplink_mode)
+        if(LinkFlags.uplink_mode)
         {
             memcpy(ResultReply, confirm->data, confirm->length);
             console.AddLog("[OK]## Received Shell Reply. Type : %"PRIu8", Result : %"PRIu8", Retcode : %d", ResultReply->type, ResultReply->result, ResultReply->retcode);
@@ -1500,10 +1500,10 @@ void * Direct_Shell(void * data)
     time = csp_get_ms() - start;
     console.AddLog("[DEBUG]##Communication Time : %u", time);
 
-    State.uplink_mode = false;
+    LinkFlags.uplink_mode = false;
     if(dlstate)
     {
-        State.downlink_mode = dlstate;
+        LinkFlags.downlink_mode = dlstate;
     }
     pthread_mutex_unlock(&conn_lock);
     return NULL;

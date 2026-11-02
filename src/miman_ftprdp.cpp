@@ -510,11 +510,11 @@ void * ftp_downlink_onorbit(void * param){
 #define CSP_USE_RDP
     // ftp_avail();
     ftp_worker_begin();
-    bool dlstate = State.downlink_mode;
+    bool dlstate = LinkFlags.downlink_mode;
     //This funcion must be on p_thread[4]
     if((dlstate))
-        State.downlink_mode = false;
-    while(!State.uplink_mode)
+        LinkFlags.downlink_mode = false;
+    while(!LinkFlags.uplink_mode)
         continue;
     while(!RotatorFlags.RotatorReadReady)
         continue;
@@ -524,7 +524,7 @@ void * ftp_downlink_onorbit(void * param){
     ftpinfo * FTP = (ftpinfo *) param;
     // gs_ftp_info_callback_t = ftp_callback;
     printftp("Start FTP Downlink.");
-    State.downlink_mode = false;
+    LinkFlags.downlink_mode = false;
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
     ftp_config.host = setup->obc_node;
@@ -550,7 +550,7 @@ void * ftp_downlink_onorbit(void * param){
     ftp_worker_finish(status);
     if(dlstate)
     {
-        State.downlink_mode = dlstate;
+        LinkFlags.downlink_mode = dlstate;
     }
 #undef CSP_USE_RDP
 	return NULL;
@@ -560,18 +560,18 @@ void * ftp_uplink_onorbit(void * param){
 #define CSP_USE_RDP
     // ftp_avail();
     ftp_worker_begin();
-    bool dlstate = State.downlink_mode;
+    bool dlstate = LinkFlags.downlink_mode;
     //This funcion must be on p_thread[4]
     if((dlstate))
-        State.downlink_mode = false;
-    while(!State.uplink_mode)
+        LinkFlags.downlink_mode = false;
+    while(!LinkFlags.uplink_mode)
         continue;
     while(!RotatorFlags.RotatorReadReady)
         continue;
     //host : OBC adress
     //Port : 15
     ftpinfo * FTP = (ftpinfo *) param;
-    State.downlink_mode = false;
+    LinkFlags.downlink_mode = false;
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
     ftp_config.host = setup->obc_node;
@@ -600,7 +600,7 @@ void * ftp_uplink_onorbit(void * param){
     ftp_worker_finish(status);
     if(dlstate)
     {
-        State.downlink_mode = dlstate;
+        LinkFlags.downlink_mode = dlstate;
     }
 #undef CSP_USE_RDP
 	return NULL;

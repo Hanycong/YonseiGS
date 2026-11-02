@@ -23,7 +23,7 @@ void StartEngage()
 void StopEngage()
 {
     RotatorFlags.Engage = false;
-    State.Doppler = false;
+    LinkFlags.Doppler = false;
     JoinThread(SLOT_ROTATOR_CONTROL);
     console.AddLog("[OK]##Finish Engaging.");
     console.AddLog("Beacon Success : %d, Ping Success : %d", BeaconCounter, PingCounter);
@@ -46,9 +46,9 @@ void RotatorOff()
 
 void StartDoppler()
 {
-    if(State.GS100_Connection)
+    if(LinkFlags.GS100_Connection)
     {
-        State.Doppler = true;
+        LinkFlags.Doppler = true;
         StartThread(SLOT_DOPPLER, Doppler, NULL);
         console.AddLog("[OK]##Start Doppler Correction.");
     }
@@ -60,7 +60,7 @@ void StartDoppler()
 
 void StopDoppler()
 {
-    State.Doppler = false;
+    LinkFlags.Doppler = false;
     JoinThread(SLOT_DOPPLER);
 }
 
