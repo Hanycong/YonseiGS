@@ -276,6 +276,8 @@ the *separation of concerns*, not the binding mechanism:
   SIGSEGV/SIGFPE/SIGTERM into a silent `exit(1)` — check the exit status, not just the log.
 - ~~Track window `SELECTED` shows `?`~~ (now "Tracking -", ASCII). Polar plot reads `dummies[GetNowTracking()]` without an upper bound
   check (out of bounds if the tracking index is >= 20, e.g. set by AutoPilot).
+- `Console::Draw` (view/console_view.cpp): when `ImGui::Begin` returns false (window collapsed)
+  it returns without `PopStyleColor(3)` — style stack leak. Fix: pop before that return.
 - S-band Manager popup shows garbage text (e.g. a window ID path) in its output box before any
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
