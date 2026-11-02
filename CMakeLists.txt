@@ -116,7 +116,7 @@ ${MIMAN_SRC}/model/service/console_log.cpp ${MIMAN_SRC}/view/console_view.cpp ${
 ${MIMAN_SRC}/model/telemetry/report_parser.cpp ${MIMAN_SRC}/model/telemetry/telemetry_logger.cpp
 ${MIMAN_SRC}/model/telecommand/cmd_generator_gs.cpp ${MIMAN_SRC}/model/telecommand/packet_codec.cpp
 ${MIMAN_SRC}/view/beacon/report/report_eps.cpp ${MIMAN_SRC}/view/beacon/report/report_adcs.cpp ${MIMAN_SRC}/view/beacon/report/report_uant.cpp
-${MIMAN_SRC}/model/orbit/satellite_object.cpp ${MIMAN_SRC}/model/orbit/tle_loader.cpp ${MIMAN_SRC}/model/orbit/doppler.cpp ${MIMAN_SRC}/model/device/rotator_io.cpp ${MIMAN_SRC}/model/device/gs100_param_tables.cpp)
+${MIMAN_SRC}/model/orbit/satellite_object.cpp ${MIMAN_SRC}/model/orbit/tle_loader.cpp ${MIMAN_SRC}/model/orbit/doppler.cpp ${MIMAN_SRC}/model/device/rotator_io.cpp ${MIMAN_SRC}/model/device/gs100_param_tables.cpp ${MIMAN_SRC}/model/device/csp_diagnostics.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
