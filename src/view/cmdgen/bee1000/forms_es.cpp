@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -73,12 +75,9 @@ bool DrawBee1000EsForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
-
 
             memset(command->cfeesstartappcmd.Application, 0, sizeof(command->cfeesstartappcmd.Application));
             strncpy(command->cfeesstartappcmd.Application, app_buf, sizeof(command->cfeesstartappcmd.Application) - 1);
-
 
             memset(command->cfeesstartappcmd.AppEntryPoint, 0, sizeof(command->cfeesstartappcmd.AppEntryPoint));
             strncpy(command->cfeesstartappcmd.AppEntryPoint, entry_buf, sizeof(command->cfeesstartappcmd.AppEntryPoint) - 1);
@@ -86,32 +85,8 @@ bool DrawBee1000EsForms(uint16_t fnccode)
             memset(command->cfeesstartappcmd.AppFileName, 0, sizeof(command->cfeesstartappcmd.AppFileName));
             strncpy(command->cfeesstartappcmd.AppFileName, filename_buf, sizeof(command->cfeesstartappcmd.AppFileName) - 1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(CFE_ES_StartAppCmd_t) - 7)};
-            memcpy(command->cfeesstartappcmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->cfeesstartappcmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->cfeesstartappcmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->cfeesstartappcmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->cfeesstartappcmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StartAppCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(CFE_ES_StartAppCmd_t);
-            uint16_t len = sizeof(CFE_ES_StartAppCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->cfeesstartappcmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->cfeesstartappcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->cfeesstartappcmd, sizeof(CFE_ES_StartAppCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->cfeesstartappcmd, sizeof(CFE_ES_StartAppCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->cfeesstartappcmd, sizeof(CFE_ES_StartAppCmd_t));
         }
 
 
@@ -134,36 +109,11 @@ bool DrawBee1000EsForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->esstopapp.Application, 0, sizeof(command->esstopapp.Application));
             strncpy(command->esstopapp.Application, app_buf, sizeof(command->esstopapp.Application) - 1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(CFE_ES_StopAppCmd_t) - 7)};
-            memcpy(command->esstopapp.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->esstopapp.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->esstopapp.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->esstopapp.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->esstopapp.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(CFE_ES_StopAppCmd_t);
-            uint16_t len = sizeof(CFE_ES_StopAppCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->esstopapp);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->esstopapp.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->esstopapp, sizeof(CFE_ES_StopAppCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->esstopapp, sizeof(CFE_ES_StopAppCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->esstopapp, sizeof(CFE_ES_StopAppCmd_t));
         }
 
 
@@ -190,39 +140,14 @@ bool DrawBee1000EsForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->toloadcmd.app, 0, sizeof(command->toloadcmd.app));
             strncpy(command->toloadcmd.app, app_buf, sizeof(command->toloadcmd.app) - 1);
 
             memset(command->toloadcmd.filename, 0, sizeof(command->toloadcmd.filename));
             strncpy(command->toloadcmd.filename, path_buf, sizeof(command->toloadcmd.filename) - 1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(ES_LoadCmd_t) - 7)};
-            memcpy(command->toloadcmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->toloadcmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->toloadcmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->toloadcmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->toloadcmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(ES_LoadCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(ES_LoadCmd_t);
-            uint16_t len = sizeof(ES_LoadCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->toloadcmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->toloadcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->toloadcmd, sizeof(ES_LoadCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->toloadcmd, sizeof(ES_LoadCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->toloadcmd, sizeof(ES_LoadCmd_t));
         }
 
 
@@ -240,37 +165,11 @@ bool DrawBee1000EsForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->esqueryonecmd.Application, 0, sizeof(command->esqueryonecmd.Application));
             strncpy(command->esqueryonecmd.Application, app_buf, sizeof(command->esqueryonecmd.Application) - 1);
 
-
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(CFE_ES_StopAppCmd_t) - 7)};
-            memcpy(command->esqueryonecmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->esqueryonecmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->esqueryonecmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->esqueryonecmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->esqueryonecmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(CFE_ES_StopAppCmd_t);
-            uint16_t len = sizeof(CFE_ES_StopAppCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->esqueryonecmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->esqueryonecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->esqueryonecmd, sizeof(CFE_ES_StopAppCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->esqueryonecmd, sizeof(CFE_ES_StopAppCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->esqueryonecmd, sizeof(CFE_ES_StopAppCmd_t));
         }
 
 
@@ -288,37 +187,11 @@ bool DrawBee1000EsForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->esqueryallcmd.FileName, 0, sizeof(command->esqueryallcmd.FileName));
             strncpy(command->esqueryallcmd.FileName, app_buf, sizeof(command->esqueryallcmd.FileName) - 1);
 
-
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(CFE_ES_StopAppCmd_t) - 7)};
-            memcpy(command->esqueryallcmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->esqueryallcmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->esqueryallcmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->esqueryallcmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->esqueryallcmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(CFE_ES_StopAppCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(CFE_ES_StopAppCmd_t);
-            uint16_t len = sizeof(CFE_ES_StopAppCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->esqueryallcmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->esqueryallcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->esqueryallcmd, sizeof(CFE_ES_StopAppCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->esqueryallcmd, sizeof(CFE_ES_StopAppCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->esqueryallcmd, sizeof(CFE_ES_StopAppCmd_t));
         }
 
 
