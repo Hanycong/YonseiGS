@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -68,42 +70,13 @@ bool DrawCosmicFtpForms(uint16_t fnccode)
         ImGui::InputScalar("padding[2] u8", ImGuiDataType_U8, &command->ftpsendfilecmd.padding[2]);
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
 
             memset(command->ftpsendfilecmd.name, 0, sizeof(command->ftpsendfilecmd.name));
             strncpy(reinterpret_cast<char*>(command->ftpsendfilecmd.name), name_buf, sizeof(command->ftpsendfilecmd.name)-1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t length[2]   = {0x00, 0x4D};
-
-            memcpy(command->ftpsendfilecmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->ftpsendfilecmd.CmdHeader + 2, sequence,  sizeof(uint16_t));
-            memcpy(command->ftpsendfilecmd.CmdHeader + 4, length,    sizeof(uint16_t));
-            memcpy(command->ftpsendfilecmd.CmdHeader + 6, &fnccode,  sizeof(uint8_t));
-
-            command->ftpsendfilecmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_sendfileCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length     = sizeof(FTP_sendfileCmd_t);
-
-
-
-            
-            uint16_t len = sizeof(FTP_sendfileCmd_t);
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->ftpsendfilecmd);
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-
-            memcpy(command->ftpsendfilecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-
-            memcpy(TestPacket->Data, &command->ftpsendfilecmd, sizeof(FTP_sendfileCmd_t));
-
-            mim::svc::SendUplink((void*)TestPacket);
-
+            // 길이 바이트는 원래 코드의 상수 그대로 (sizeof - 7 이 아님)
+            mim::tc::EncodeCfeCommand(&command->ftpsendfilecmd, sizeof(FTP_sendfileCmd_t), msgid, fnccode, 0x4D);
+            mim::tc::SendTelecommand(&command->ftpsendfilecmd, sizeof(FTP_sendfileCmd_t));
 
         }
 
