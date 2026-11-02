@@ -144,35 +144,50 @@ manager** (file list / upload / download), not telecommands. The telecommand gen
 **FTP is done**: `view/ftp_view.cpp` (functions keep the old `ImGui_CommandWindow*` names) →
 `viewmodel/ftp_vm.*` (`FtpVM`; AMP button shares `ControlVM::Amp()`) →
 `model/telecommand/ftp_client.*` (`FtpClient`), `model/telecommand/downlink_request.*`.
-**Command generator (partly done)**: `view/cmdgen/cmdgen_view.cpp` (category + command combos,
+**Command generator**: `view/cmdgen/cmdgen_view.cpp` (category + command combos,
 ImGui + `vm.` only) → `viewmodel/cmdgen_vm.*` (`CmdGeneratorVM`, catalog-driven picker).
 Per-command input forms are split by (mission, FSW app) into `view/cmdgen/raw/forms_raw.cpp`,
 `view/cmdgen/bee1000/forms_<app>.cpp`, `view/cmdgen/cosmic/forms_<app>.cpp` (verbatim cases,
 dispatched by `cmdgen_forms.h`). **Popups** are extracted verbatim to `view/popups/*.cpp`
-(still use globals via `popups_common.h`). **app/** holds `main.cpp`, theme, `main_menu.cpp`,
-`workspace.cpp`. `miman_imgui.cpp` is down to ~1,100 lines (globals, Console impl,
-AutoPilot window, legacy labels).
+(now with ViewModels, see step 2 below). **app/** holds `main.cpp`, theme, `main_menu.cpp`,
+`workspace.cpp`.
 
-### Remaining refactor plan (in order; each step verified like the ones above)
-1. **Command forms → ViewModel/Model** (command layer steps 3–5 in docs/CMDGEN_ANALYSIS.md):
-   forms still build packets inline (`command->...`, checksum, `svc::SendUplink`). Move each
-   "Generate CMD" body into a model encoder per app (`model/telecommand/<mission>/<app>_commands`)
-   + one `SendTelecommand()` path, then schema-driven generic forms. Verify every step with
-   `tools/cmdgen_golden.sh` (golden.txt must stay byte-identical; D13 stays as-is until FSW confirms).
-2. **Popup ViewModels** (setup, param tables, TLE, FDS, satinfo, S-band) — shrink `popups_common.h`.
-3. **miman_imgui.cpp leftovers**: Console → `view/console_view` + a logger model; AutoPilot window;
-   delete legacy `Templabels`/`Initialize_CMDLabels`/`CMDDataGenerator` (step 2c, needs golden
-   harness `FilterRules` check moved to the catalog test first).
-4. **Backend split into model/**: miman_coms (beacon/report parser → `model/telemetry/`, split
-   `view/beacon/report_tab.cpp` by report type at the same time), miman_orbital (SGP4/Doppler →
-   `model/orbit/`, rotator I/O → `model/device/rotator`), miman_radial/csp (→ `model/device/`).
-5. **StateCheckUnit decomposition** (riskiest, last): move flags into the owning model/service classes.
+### Planned refactor steps 1–5 — done (2026-11-02, each commit verified with golden + snapshot)
+1. **Command forms → encoder / single send path — done.** Every form's header/checksum/envelope copy was
+   replaced by `mim::tc::EncodeCfeCommand` (`model/telecommand/ccsds_cmd`, plus `EncodeCfeCommandFcAt7` for the
+   D13 Generic s8–float layout) and `mim::tc::SendTelecommand` (`model/telecommand/telecommand_sender`).
+   COSMIC multi-packet procedures 207/208 moved verbatim to `model/missions/cosmic/cosmic_procedures`,
+   Raw Schedule path (D2) to `model/telecommand/scheduled_command`. `view/` has no `SendUplink` call.
+   **Not done (deferred):** forms still fill `command->...` payload fields inline (no per-app
+   `<app>_commands` encoder functions yet) and there is no schema-driven generic form. Both are large
+   and should be planned separately (forms.txt fingerprint + golden.txt are the safety net).
+2. **Popup ViewModels — done.** `SetupVM`, `Gs100ParamVM`, `TleVM` (+ Load progress), `FdsVM`, `SatInfoVM`,
+   `SbandVM`. `view/popups/` has no `State.` / `console.` / `setup->`; `popups_common.h` keeps only
+   `mim_winflags` and the table freeze constants.
+3. **miman_imgui.cpp leftovers — done.** Console → `model/service/console_log.cpp` (log storage/file) +
+   `view/console_view.cpp` (Draw); AutoPilot window → `view/autopilot_view.cpp` + `AutoPilotVM`
+   (window is still not called from main.cpp, as before); legacy `Templabels`/`Initialize_CMDLabels`/
+   `FilterRules`/`INITIAL_CMD_INDICES` deleted from src, frozen copy in `tools/cmdgen_golden/legacy_tables.h`
+   for the catalog check. `miman_imgui.cpp` is ~430 lines (globals + GL helpers).
+4. **Backend split into model/ — done.** `model/telemetry/report_parser` + `telemetry_logger` (*Saver);
+   `model/telecommand/cmd_generator_gs` + `packet_codec`; `view/beacon/report/report_{eps,adcs,uant}.cpp`
+   (Report tab split by report type); `model/orbit/satellite_object`, `tle_loader`, `doppler`;
+   `model/device/rotator_io`, `gs100_param_tables`, `csp_diagnostics`. What remains of the legacy files
+   was `git mv`-ed: `model/device/miman_{coms,csp,radial}.*`, `model/orbit/miman_orbital.*`
+   (link tasks, transceiver init, globals, tracking target).
+5. **StateCheckUnit decomposition — done.** Members moved (same declarations/defaults, references
+   rewritten mechanically) into `AppUi` (app/ui_state.h), `SatTabs` (app/sat_tabs.h), `FtpShared`
+   (model/service/ftp_state.h), `AutoPilotCfg` (model/service/autopilot_state.h), `RotatorFlags`
+   (model/device/rotator_state.h), `LinkFlags` (model/device/link_state.h), `OrbitData`
+   (model/orbit/orbit_state.h). These headers are included at the end of miman_config.h. `State` keeps
+   only app lifecycle flags (InitializeRequired, GUI, SbandUse, Debugmode, AllThread, Sleep).
+   Still plain globals without locks (same as before) — turning them into classes with accessors /
+   locking is a behavior-affecting follow-up, not done.
 
 Verifying on a machine without sudo (WSL): download `xvfb xdotool imagemagick-6.q16` and their libs
 with `apt-get download`, `dpkg -x` them into a local prefix, run Xvfb with `-nolisten unix -listen tcp`
 (WSLg's /tmp/.X11-unix is not writable) and an LD_PRELOAD shim that rewrites Xvfb's hardcoded
 `/usr/bin/xkbcomp` path; use `DISPLAY=127.0.0.1:N`.
-Then `StateCheckUnit` decomposition and Model classes (riskiest, last).
 
 ### MVVM shape for ImGui (important)
 
