@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -111,37 +113,16 @@ bool DrawRawForms(uint16_t fnccode)
             else
             {
                 WriteSystemName(msgid);
-                mim::svc::WaitTx();
-
-                packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
-                TestPacket->Identifier = HVD_TEST;
-                TestPacket->PacketType = MIM_PT_TMTC_TEST;
-                TestPacket->Length = 8;
-                memset(TestPacket->Data, 0, TestPacket->Length);
 
                 uint8_t cmd[8] = {0,};
-                msgid = htons(msgid);
-                memcpy(cmd, &msgid, sizeof(uint16_t));
-                memcpy(cmd + 6, &fnccode, sizeof(uint8_t));
-                cmd[2] = 0xc0;
-                cmd[3] = 0x00;
-                cmd[4] = 0x00;
-                cmd[5] = 0x01;
 
-                uint16_t len = 8;
-                const uint8_t* byteptr = cmd;
-                uint8_t checksum = 0xFF;
-                while (len--)
-                    checksum ^= *(byteptr++);
-                cmd[7] = checksum;
+                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
-                memcpy(TestPacket->Data, cmd, sizeof(cmd));
-                for (int i = 0; i < TestPacket->Length; i++)
+                for (int i = 0; i < sizeof(cmd); i++)
                     printf("0x%x ", cmd[i]);
                 printf("\n");
 
-                mim::svc::SendUplink((void*)TestPacket);
-                msgid = htons(msgid);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd));
             }
         }
         break;
@@ -159,33 +140,13 @@ bool DrawRawForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t);
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint8_t)] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 6, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(uint8_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x02;
 
-            uint16_t len = 9;
-            const uint8_t* byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd2[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd2, sizeof(cmd2), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd2, sizeof(cmd2));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd2); i++)
             {
                 if (i < 8)
                     printf("0x%x ", cmd2[i]);
@@ -194,8 +155,7 @@ bool DrawRawForms(uint16_t fnccode)
             }
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -212,33 +172,13 @@ bool DrawRawForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t);
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint16_t)] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 6, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(uint16_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x03;
 
-            uint16_t len = 10;
-            const uint8_t* byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd2[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd2, sizeof(cmd2), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd2, sizeof(cmd2));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd2); i++)
             {
                 if (i < 8)
                     printf("0x%x ", cmd2[i]);
@@ -247,8 +187,7 @@ bool DrawRawForms(uint16_t fnccode)
             }
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -265,38 +204,17 @@ bool DrawRawForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD"))
         {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint32_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint32_t);
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint32_t)] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 6, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(uint32_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x05;
 
-            uint16_t len = 12;
-            const uint8_t* byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd2[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd2, sizeof(cmd2), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd2, sizeof(cmd2));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd2); i++)
                 printf("0x%x ", cmd2[i]);
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -362,38 +280,17 @@ bool DrawRawForms(uint16_t fnccode)
             else
             {
                 WriteSystemName(msgid);
-                mim::svc::WaitTx();
-
-                packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + CFE_SB_CMD_HDR_SIZE + sizeof(uint64_t));
-                TestPacket->Identifier = HVD_TEST;
-                TestPacket->PacketType = MIM_PT_TMTC_TEST;
-                TestPacket->Length = CFE_SB_CMD_HDR_SIZE + sizeof(uint64_t);
-                memset(TestPacket->Data, 0, TestPacket->Length);
 
                 uint8_t cmd2[CFE_SB_CMD_HDR_SIZE + sizeof(uint64_t)] = {0,};
-                msgid = htons(msgid);
-                memcpy(cmd2, &msgid, sizeof(uint16_t));
-                memcpy(cmd2 + 6, &fnccode, sizeof(uint8_t));
                 memcpy(cmd2 + 8, &arg, sizeof(uint64_t));
-                cmd2[2] = 0xc0;
-                cmd2[3] = 0x00;
-                cmd2[4] = 0x00;
-                cmd2[5] = 0x09;
 
-                uint16_t len = CFE_SB_CMD_HDR_SIZE + sizeof(uint64_t);
-                const uint8_t* byteptr = cmd2;
-                uint8_t checksum = 0xFF;
-                while (len--)
-                    checksum ^= *(byteptr++);
-                cmd2[7] = checksum;
+                mim::tc::EncodeCfeCommand(cmd2, sizeof(cmd2), msgid, fnccode);
 
-                memcpy(TestPacket->Data, cmd2, sizeof(cmd2));
-                for (int i = 0; i < TestPacket->Length; i++)
+                for (int i = 0; i < sizeof(cmd2); i++)
                     printf("0x%x ", cmd2[i]);
                 printf("\n");
 
-                mim::svc::SendUplink((void*)TestPacket);
-                msgid = htons(msgid);
+                mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
             }
         }
         break;
@@ -408,34 +305,13 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("arg s8",ImGuiDataType_S8, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-            packetsign * TestPacket = (packetsign *)malloc(2+2+4+CFE_SB_CMD_HDR_SIZE+sizeof(int8_t)); // 8 is for data
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE+sizeof(int8_t);
-            memset(TestPacket->Data,0,TestPacket->Length);
             uint8_t cmd2[CFE_SB_CMD_HDR_SIZE+sizeof(int8_t)] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 7, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(int8_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x02;
-            uint16_t len = CFE_SB_CMD_HDR_SIZE+sizeof(int8_t);
-            const uint8_t *byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--) {
-                checksum ^= *(byteptr++);
-            }
-            cmd2[6]=checksum; // checksum
-            memcpy(TestPacket->Data,cmd2,sizeof(cmd2));
-            for(int i=0; i<TestPacket->Length; i++) {
+            mim::tc::EncodeCfeCommandFcAt7(cmd2, sizeof(cmd2), msgid, fnccode);
+            for(int i=0; i<sizeof(cmd2); i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            mim::svc::SendUplink((void *)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -448,34 +324,13 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("arg s16",ImGuiDataType_S16, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-            packetsign * TestPacket = (packetsign *)malloc(2+2+4+CFE_SB_CMD_HDR_SIZE+sizeof(int16_t)); // 8 is for data
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = CFE_SB_CMD_HDR_SIZE+sizeof(int16_t);
-            memset(TestPacket->Data,0,TestPacket->Length);
             uint8_t cmd2[CFE_SB_CMD_HDR_SIZE+sizeof(int16_t)] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 7, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(int16_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x03;
-            uint16_t len = 10;
-            const uint8_t *byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--) {
-                checksum ^= *(byteptr++);
-            }
-            cmd2[6]=checksum; // checksum
-            memcpy(TestPacket->Data,cmd2,sizeof(cmd2));
-            for(int i=0; i<TestPacket->Length; i++) {
+            mim::tc::EncodeCfeCommandFcAt7(cmd2, sizeof(cmd2), msgid, fnccode);
+            for(int i=0; i<sizeof(cmd2); i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            mim::svc::SendUplink((void *)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -488,34 +343,13 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("arg s32",ImGuiDataType_S32, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-            packetsign * TestPacket = (packetsign *)malloc(2+2+4+12); // 8 is for data
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 12;
-            memset(TestPacket->Data,0,TestPacket->Length);
             uint8_t cmd2[12] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 7, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(int32_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x05;
-            uint16_t len = 12;
-            const uint8_t *byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--) {
-                checksum ^= *(byteptr++);
-            }
-            cmd2[6]=checksum; // checksum
-            memcpy(TestPacket->Data,cmd2,sizeof(cmd2));
-            for(int i=0; i<TestPacket->Length; i++) {
+            mim::tc::EncodeCfeCommandFcAt7(cmd2, sizeof(cmd2), msgid, fnccode);
+            for(int i=0; i<sizeof(cmd2); i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            mim::svc::SendUplink((void *)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -528,34 +362,13 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("arg s64",ImGuiDataType_S64, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-            packetsign * TestPacket = (packetsign *)malloc(2+2+4+16); // 8 is for data
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 16;
-            memset(TestPacket->Data,0,TestPacket->Length);
             uint8_t cmd2[16] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 7, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(int64_t));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x09;
-            uint16_t len = 16;
-            const uint8_t *byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--) {
-                checksum ^= *(byteptr++);
-            }
-            cmd2[6]=checksum; // checksum
-            memcpy(TestPacket->Data,cmd2,sizeof(cmd2));
-            for(int i=0; i<TestPacket->Length; i++) {
+            mim::tc::EncodeCfeCommandFcAt7(cmd2, sizeof(cmd2), msgid, fnccode);
+            for(int i=0; i<sizeof(cmd2); i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            mim::svc::SendUplink((void *)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
@@ -568,34 +381,13 @@ bool DrawRawForms(uint16_t fnccode)
         ImGui::InputScalar("arg float",ImGuiDataType_Float, &arg);
         if(ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-            packetsign * TestPacket = (packetsign *)malloc(2+2+4+12); // 8 is for data
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 12;
-            memset(TestPacket->Data,0,TestPacket->Length);
             uint8_t cmd2[12] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd2, &msgid, sizeof(uint16_t));
-            memcpy(cmd2 + 7, &fnccode, sizeof(uint8_t));
             memcpy(cmd2 + 8, &arg, sizeof(float));
-            cmd2[2] = 0xc0;
-            cmd2[3] = 0x00;
-            cmd2[4] = 0x00;
-            cmd2[5] = 0x05;
-            uint16_t len = 12;
-            const uint8_t *byteptr = cmd2;
-            uint8_t checksum = 0xFF;
-            while (len--) {
-                checksum ^= *(byteptr++);
-            }
-            cmd2[6]=checksum; // checksum
-            memcpy(TestPacket->Data,cmd2,sizeof(cmd2));
-            for(int i=0; i<TestPacket->Length; i++) {
+            mim::tc::EncodeCfeCommandFcAt7(cmd2, sizeof(cmd2), msgid, fnccode);
+            for(int i=0; i<sizeof(cmd2); i++) {
                 printf("0x%x ",cmd2[i]);
             } printf("\n");
-            mim::svc::SendUplink((void *)TestPacket);
-            msgid = htons(msgid);
+            mim::tc::SendTelecommand(cmd2, sizeof(cmd2));
         }
         break;
     }
