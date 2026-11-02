@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -55,35 +57,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_NoopCmd_t) - 7)
-                };
-
-                memcpy(command->scnoopcmd.CmdHeader,     &mid, 2);
-                memcpy(command->scnoopcmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scnoopcmd.CmdHeader + 4, len,  2);
-                memcpy(command->scnoopcmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scnoopcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_NoopCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scnoopcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scnoopcmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_NoopCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_NoopCmd_t);
-                memcpy(pkt->Data, &command->scnoopcmd, sizeof(SC_NoopCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scnoopcmd, sizeof(SC_NoopCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scnoopcmd, sizeof(SC_NoopCmd_t));
             }
             break;
         }
@@ -99,36 +74,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_ResetCountersCmd_t) - 7)
-                };
-
-                memcpy(command->scresetcounterscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scresetcounterscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scresetcounterscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scresetcounterscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scresetcounterscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_ResetCountersCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scresetcounterscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scresetcounterscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_ResetCountersCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_ResetCountersCmd_t);
-                memcpy(pkt->Data, &command->scresetcounterscmd,
-                    sizeof(SC_ResetCountersCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scresetcounterscmd, sizeof(SC_ResetCountersCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scresetcounterscmd, sizeof(SC_ResetCountersCmd_t));
             }
             break;
         }
@@ -150,36 +97,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_StartAtsCmd_t) - 7)
-                };
-
-                memcpy(command->scstartatscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstartatscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstartatscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstartatscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scstartatscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_StartAtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstartatscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstartatscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StartAtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StartAtsCmd_t);
-                memcpy(pkt->Data, &command->scstartatscmd,
-                    sizeof(SC_StartAtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstartatscmd, sizeof(SC_StartAtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstartatscmd, sizeof(SC_StartAtsCmd_t));
             }
             break;
         }
@@ -195,36 +114,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_StopAtsCmd_t) - 7)
-                };
-
-                memcpy(command->scstopatscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstopatscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstopatscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstopatscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scstopatscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_StopAtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstopatscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstopatscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StopAtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StopAtsCmd_t);
-                memcpy(pkt->Data, &command->scstopatscmd,
-                    sizeof(SC_StopAtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstopatscmd, sizeof(SC_StopAtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstopatscmd, sizeof(SC_StopAtsCmd_t));
             }
             break;
         }
@@ -244,33 +135,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SC_StartRtsCmd_t) - 7)};
-
-                memcpy(command->scstartrtscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstartrtscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstartrtscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstartrtscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scstartrtscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_StartRtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstartrtscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstartrtscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StartRtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StartRtsCmd_t);
-                memcpy(pkt->Data, &command->scstartrtscmd,
-                    sizeof(SC_StartRtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstartrtscmd, sizeof(SC_StartRtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstartrtscmd, sizeof(SC_StartRtsCmd_t));
             }
             break;
         }
@@ -290,33 +156,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SC_StopRtsCmd_t) - 7)};
-
-                memcpy(command->scstoprtscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstoprtscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstoprtscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstoprtscmd.CmdHeader + 6, &fnccode, 1);
-        command->scstoprtscmd.CmdHeader[7] = 0x00;
-
-                uint16_t total = sizeof(SC_StopRtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstoprtscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstoprtscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StopRtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StopRtsCmd_t);
-                memcpy(pkt->Data, &command->scstoprtscmd,
-                    sizeof(SC_StopRtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstoprtscmd, sizeof(SC_StopRtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstoprtscmd, sizeof(SC_StopRtsCmd_t));
             }
             break;
         }
@@ -337,33 +178,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SC_DisableRtsCmd_t) - 7)};
-
-                memcpy(command->scdisablertscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scdisablertscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scdisablertscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scdisablertscmd.CmdHeader + 6, &fnccode, 1);
-        command->scdisablertscmd.CmdHeader[7] = 0x00;
-
-                uint16_t total = sizeof(SC_DisableRtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scdisablertscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scdisablertscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_DisableRtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_DisableRtsCmd_t);
-                memcpy(pkt->Data, &command->scdisablertscmd,
-                    sizeof(SC_DisableRtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scdisablertscmd, sizeof(SC_DisableRtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scdisablertscmd, sizeof(SC_DisableRtsCmd_t));
             }
             break;
         }
@@ -383,33 +199,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SC_EnableRtsCmd_t) - 7)};
-
-                memcpy(command->scenablertscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scenablertscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scenablertscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scenablertscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scenablertscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_EnableRtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scenablertscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scenablertscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_EnableRtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_EnableRtsCmd_t);
-                memcpy(pkt->Data, &command->scenablertscmd,
-                    sizeof(SC_EnableRtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scenablertscmd, sizeof(SC_EnableRtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scenablertscmd, sizeof(SC_EnableRtsCmd_t));
             }
             break;
         }
@@ -426,36 +217,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_SwitchAtsCmd_t) - 7)
-                };
-
-                memcpy(command->scswitchatscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scswitchatscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scswitchatscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scswitchatscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scswitchatscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_SwitchAtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scswitchatscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scswitchatscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_SwitchAtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_SwitchAtsCmd_t);
-                memcpy(pkt->Data, &command->scswitchatscmd,
-                    sizeof(SC_SwitchAtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scswitchatscmd, sizeof(SC_SwitchAtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scswitchatscmd, sizeof(SC_SwitchAtsCmd_t));
             }
             break;
         }
@@ -474,36 +237,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_JumpAtsCmd_t) - 7)
-                };
-
-                memcpy(command->scjumpatscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scjumpatscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scjumpatscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scjumpatscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scjumpatscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_JumpAtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scjumpatscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scjumpatscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_JumpAtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_JumpAtsCmd_t);
-                memcpy(pkt->Data, &command->scjumpatscmd,
-                    sizeof(SC_JumpAtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scjumpatscmd, sizeof(SC_JumpAtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scjumpatscmd, sizeof(SC_JumpAtsCmd_t));
             }
             break;
         }
@@ -524,36 +259,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00,
-                    (uint8_t)(sizeof(SC_ContinueAtsOnFailureCmd_t) - 7)};
-
-                memcpy(command->sccontinueatsonfailurecmd.CmdHeader,     &mid, 2);
-                memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 2, seq,  2);
-                memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 4, len,  2);
-                memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 6, &fnccode, 1);
-
-                command->sccontinueatsonfailurecmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_ContinueAtsOnFailureCmd_t);
-                const uint8_t *p =
-                    (const uint8_t *)&command->sccontinueatsonfailurecmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->sccontinueatsonfailurecmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 +
-                                        sizeof(SC_ContinueAtsOnFailureCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_ContinueAtsOnFailureCmd_t);
-                memcpy(pkt->Data, &command->sccontinueatsonfailurecmd,
-                    sizeof(SC_ContinueAtsOnFailureCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->sccontinueatsonfailurecmd, sizeof(SC_ContinueAtsOnFailureCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->sccontinueatsonfailurecmd, sizeof(SC_ContinueAtsOnFailureCmd_t));
             }
             break;
         }
@@ -575,33 +282,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid   = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SC_AppendAtsCmd_t) - 7)};
-
-                memcpy(command->scappendatscmd.CmdHeader,     &mid, 2);
-                memcpy(command->scappendatscmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scappendatscmd.CmdHeader + 4, len,  2);
-                memcpy(command->scappendatscmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scappendatscmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_AppendAtsCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scappendatscmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scappendatscmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_AppendAtsCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_AppendAtsCmd_t);
-                memcpy(pkt->Data, &command->scappendatscmd,
-                    sizeof(SC_AppendAtsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scappendatscmd, sizeof(SC_AppendAtsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scappendatscmd, sizeof(SC_AppendAtsCmd_t));
             }
             break;
         }
@@ -621,36 +303,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_ManageTableCmd_t) - 7)
-                };
-
-                memcpy(command->scmanagetablecmd.CmdHeader,     &mid, 2);
-                memcpy(command->scmanagetablecmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scmanagetablecmd.CmdHeader + 4, len,  2);
-                memcpy(command->scmanagetablecmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scmanagetablecmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_ManageTableCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scmanagetablecmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scmanagetablecmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_ManageTableCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_ManageTableCmd_t);
-                memcpy(pkt->Data, &command->scmanagetablecmd,
-                    sizeof(SC_ManageTableCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scmanagetablecmd, sizeof(SC_ManageTableCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scmanagetablecmd, sizeof(SC_ManageTableCmd_t));
             }
             break;
         }
@@ -671,36 +325,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_StartRtsGrpCmd_t) - 7)
-                };
-
-                memcpy(command->scstartrtsgrpcmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstartrtsgrpcmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstartrtsgrpcmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstartrtsgrpcmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scstartrtsgrpcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_StartRtsGrpCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstartrtsgrpcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstartrtsgrpcmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StartRtsGrpCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StartRtsGrpCmd_t);
-                memcpy(pkt->Data, &command->scstartrtsgrpcmd,
-                    sizeof(SC_StartRtsGrpCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstartrtsgrpcmd, sizeof(SC_StartRtsGrpCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstartrtsgrpcmd, sizeof(SC_StartRtsGrpCmd_t));
             }
             break;
         }
@@ -721,36 +347,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_StopRtsGrpCmd_t) - 7)
-                };
-
-                memcpy(command->scstoprtsgrpcmd.CmdHeader,     &mid, 2);
-                memcpy(command->scstoprtsgrpcmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scstoprtsgrpcmd.CmdHeader + 4, len,  2);
-                memcpy(command->scstoprtsgrpcmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scstoprtsgrpcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_StopRtsGrpCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scstoprtsgrpcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scstoprtsgrpcmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_StopRtsGrpCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_StopRtsGrpCmd_t);
-                memcpy(pkt->Data, &command->scstoprtsgrpcmd,
-                    sizeof(SC_StopRtsGrpCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scstoprtsgrpcmd, sizeof(SC_StopRtsGrpCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scstoprtsgrpcmd, sizeof(SC_StopRtsGrpCmd_t));
             }
             break;
         }
@@ -771,36 +369,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_DisableRtsGrpCmd_t) - 7)
-                };
-
-                memcpy(command->scdisablertsgrpcmd.CmdHeader,     &mid, 2);
-                memcpy(command->scdisablertsgrpcmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scdisablertsgrpcmd.CmdHeader + 4, len,  2);
-                memcpy(command->scdisablertsgrpcmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scdisablertsgrpcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_DisableRtsGrpCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scdisablertsgrpcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scdisablertsgrpcmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_DisableRtsGrpCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_DisableRtsGrpCmd_t);
-                memcpy(pkt->Data, &command->scdisablertsgrpcmd,
-                    sizeof(SC_DisableRtsGrpCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scdisablertsgrpcmd, sizeof(SC_DisableRtsGrpCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scdisablertsgrpcmd, sizeof(SC_DisableRtsGrpCmd_t));
             }
             break;
         }
@@ -821,36 +391,8 @@ bool DrawBee1000ScForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(SC_EnableRtsGrpCmd_t) - 7)
-                };
-
-                memcpy(command->scenablertsgrpcmd.CmdHeader,     &mid, 2);
-                memcpy(command->scenablertsgrpcmd.CmdHeader + 2, seq,  2);
-                memcpy(command->scenablertsgrpcmd.CmdHeader + 4, len,  2);
-                memcpy(command->scenablertsgrpcmd.CmdHeader + 6, &fnccode, 1);
-
-                command->scenablertsgrpcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(SC_EnableRtsGrpCmd_t);
-                const uint8_t *p = (const uint8_t *)&command->scenablertsgrpcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-
-                memcpy(command->scenablertsgrpcmd.CmdHeader + 7, &crc, 1);
-
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(SC_EnableRtsGrpCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(SC_EnableRtsGrpCmd_t);
-                memcpy(pkt->Data, &command->scenablertsgrpcmd,
-                    sizeof(SC_EnableRtsGrpCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand(&command->scenablertsgrpcmd, sizeof(SC_EnableRtsGrpCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->scenablertsgrpcmd, sizeof(SC_EnableRtsGrpCmd_t));
             }
             break;
         }
