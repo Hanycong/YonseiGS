@@ -32,11 +32,14 @@
 
 
 #include "popups_common.h"
+#include "gs100_param_vm.h"
 
 using namespace mim;
 
 bool popup_param_table5()
 {
+    mim::vm::Gs100ParamVM & vm = mim::vm::Gs100ParamViewModel();
+    Ptable_5 & tbl = vm.Table5();
     ImGui::OpenPopup("GS100 Parameter Table 5");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(720, 540), ImGuiCond_Appearing);
@@ -46,71 +49,70 @@ bool popup_param_table5()
         ImGui::PushItemWidth(300);
         ImGui::Text("Tx Frequency       : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##freq", ImGuiDataType_U32, &param5.freq, NULL, NULL, "%u");
+        ImGui::InputScalar("##freq", ImGuiDataType_U32, &tbl.freq, NULL, NULL, "%u");
         ImGui::Text("BaudRate           : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##baud", ImGuiDataType_U32, &param5.baud, NULL, NULL, "%u");
+        ImGui::InputScalar("##baud", ImGuiDataType_U32, &tbl.baud, NULL, NULL, "%u");
         ImGui::Text("modindex           : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##modeindex", ImGuiDataType_Float, &param5.modindex, NULL, NULL, "%f");
+        ImGui::InputScalar("##modeindex", ImGuiDataType_Float, &tbl.modindex, NULL, NULL, "%f");
         ImGui::Text("Guard              : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##guard", ImGuiDataType_U16, &param5.guard, NULL, NULL, "%u");
+        ImGui::InputScalar("##guard", ImGuiDataType_U16, &tbl.guard, NULL, NULL, "%u");
         ImGui::Text("pllrang            : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##pllrang", ImGuiDataType_U8, &param5.pllrang, NULL, NULL, "%u");
+        ImGui::InputScalar("##pllrang", ImGuiDataType_U8, &tbl.pllrang, NULL, NULL, "%u");
         ImGui::Text("mode               : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##mode", ImGuiDataType_U8, &param5.mode, NULL, NULL, "%u");
+        ImGui::InputScalar("##mode", ImGuiDataType_U8, &tbl.mode, NULL, NULL, "%u");
         ImGui::Text("csp_hmac           : ");
         ImGui::SameLine();
-        ImGui::Checkbox("##csp_hmac", &param5.csp_hmac);
+        ImGui::Checkbox("##csp_hmac", &tbl.csp_hmac);
         ImGui::Text("csp_rs             : ");
         ImGui::SameLine();
-        ImGui::Checkbox("##csp_rs", &param5.csp_rs);
+        ImGui::Checkbox("##csp_rs", &tbl.csp_rs);
         ImGui::Text("csp_crc            : ");
         ImGui::SameLine();
-        ImGui::Checkbox("##csp_crc", &param5.csp_crc);
+        ImGui::Checkbox("##csp_crc", &tbl.csp_crc);
         ImGui::Text("csp_rand           : ");
         ImGui::SameLine();
-        ImGui::Checkbox("##csp_rand", &param5.csp_rand);
+        ImGui::Checkbox("##csp_rand", &tbl.csp_rand);
         ImGui::Text("AX25 Call          : ");
         ImGui::SameLine();
-        ImGui::InputText("##ax25_call", param5.ax25_call, sizeof(param5.ax25_call));
+        ImGui::InputText("##ax25_call", tbl.ax25_call, sizeof(tbl.ax25_call));
         ImGui::Text("preamblen          : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##preamblen", ImGuiDataType_U8, &param5.preamblen, NULL, NULL, "%u");
+        ImGui::InputScalar("##preamblen", ImGuiDataType_U8, &tbl.preamblen, NULL, NULL, "%u");
         ImGui::Text("preambflags        : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##preambflags", ImGuiDataType_U8, &param5.preambflags, NULL, NULL, "%u");
+        ImGui::InputScalar("##preambflags", ImGuiDataType_U8, &tbl.preambflags, NULL, NULL, "%u");
         ImGui::Text("intfrmlen          : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##intfrmlen", ImGuiDataType_U8, &param5.intfrmlen, NULL, NULL, "%u");
+        ImGui::InputScalar("##intfrmlen", ImGuiDataType_U8, &tbl.intfrmlen, NULL, NULL, "%u");
         ImGui::Text("intfrmflags        : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##intfrmflags", ImGuiDataType_U8, &param5.intfrmflags, NULL, NULL, "%u");
+        ImGui::InputScalar("##intfrmflags", ImGuiDataType_U8, &tbl.intfrmflags, NULL, NULL, "%u");
         ImGui::Text("RSSI busy          : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##rssibusy", ImGuiDataType_S16, &param5.rssibusy, NULL, NULL, "%d");
+        ImGui::InputScalar("##rssibusy", ImGuiDataType_S16, &tbl.rssibusy, NULL, NULL, "%d");
         ImGui::Text("kup delay          : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##kup_delay", ImGuiDataType_U8, &param5.kup_delay, NULL, NULL, "%u");
+        ImGui::InputScalar("##kup_delay", ImGuiDataType_U8, &tbl.kup_delay, NULL, NULL, "%u");
         ImGui::Text("PA Level           : ");
         ImGui::SameLine();
-        ImGui::InputScalar("##pa_level", ImGuiDataType_S16, &param5.pa_level, NULL, NULL, "%d");
+        ImGui::InputScalar("##pa_level", ImGuiDataType_S16, &tbl.pa_level, NULL, NULL, "%d");
         ImGui::PopItemWidth();
         ImGui::EndChild();
 
         if (ImGui::Button("Update", ImVec2(ImGui::GetContentRegionAvail().x * 0.25, 40)))
-            mim::svc::LoadParamTable(5);
+            vm.Load(5);
         ImGui::SameLine();
         if (ImGui::Button("Save", ImVec2(ImGui::GetContentRegionAvail().x * 0.33, 40)))
-            mim::svc::SaveParamTable(5);
+            vm.Save(5);
         ImGui::SameLine();
         if (ImGui::Button("Save to FRAM", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, 40)))
         {
-            int8_t id = 5;
-            mim::svc::SaveParamToFRAM(&id);
+            vm.SaveToFram(5);
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();
             return false;
