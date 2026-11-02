@@ -41,8 +41,8 @@ void InitializeHardware(void (*sigint_handler)(int))
     }
     else
     {
-        State.RotatorConnection = true;
-        State.RotatorInitialize = true;
+        RotatorFlags.RotatorConnection = true;
+        RotatorFlags.RotatorInitialize = true;
         console.AddLog("[OK]##Connect to Rotator................Success.");
     }
     if(init_transceiver() < 0)
@@ -102,12 +102,12 @@ void StopAllThreads()
     State.downlink_mode = false;
     State.uplink_mode = false;
     FtpShared.ftp_mode = false;
-    State.Engage = false;
+    RotatorFlags.Engage = false;
     State.Doppler = false;
     State.GS100_Connection =false;
     State.NowTracking = false;
     State.TrackThread = false;
-    State.RotatorReading = false;
+    RotatorFlags.RotatorReading = false;
 
     State.InitializeRequired = true;
     AutoPilotCfg.Autopilot = false;

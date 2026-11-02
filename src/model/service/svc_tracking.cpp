@@ -15,14 +15,14 @@ namespace svc {
 
 void StartEngage()
 {
-    State.Engage = true;
+    RotatorFlags.Engage = true;
     StartThread(SLOT_ROTATOR_CONTROL, Sattracker, NULL);
     console.AddLog("[OK]##Start Engaging.");
 }
 
 void StopEngage()
 {
-    State.Engage = false;
+    RotatorFlags.Engage = false;
     State.Doppler = false;
     JoinThread(SLOT_ROTATOR_CONTROL);
     console.AddLog("[OK]##Finish Engaging.");
@@ -39,7 +39,7 @@ void RotatorOn()
 
 void RotatorOff()
 {
-    State.RotatorReading = false;
+    RotatorFlags.RotatorReading = false;
     JoinThread(SLOT_ROTATOR_READ);
     // fin_rotator();
 }

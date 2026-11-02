@@ -89,7 +89,7 @@ void ImGui_SatelliteTabs(float W) {
                     State.Satellites[sat]->Name());
 
         char status[64];
-        if (sat == GetNowTracking() && State.Engage) {
+        if (sat == GetNowTracking() && RotatorFlags.Engage) {
             snprintf(status, sizeof(status), "TRACKING");
         } else {
             DateTime now = DateTime::Now(false);
@@ -126,7 +126,7 @@ void ImGui_StatusBar_Body(float W) {
         ImGui::SameLine(0, 14);
     };
     pill("GS100",   State.GS100_Connection);
-    pill("Rotator", State.RotatorConnection);
+    pill("Rotator", RotatorFlags.RotatorConnection);
     pill("Switch",  State.SwitchConnection);
     pill("S-band",  State.SbandUse);
 
@@ -153,7 +153,7 @@ void ImGui_StatusBar_Body(float W) {
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 10);
     };
-    mode("Engage",    State.Engage);
+    mode("Engage",    RotatorFlags.Engage);
     mode("Doppler",   State.Doppler);
     mode("AutoPilot", AutoPilotCfg.Autopilot);
     mode("AMP",       State.AMPON);

@@ -60,11 +60,11 @@ void * Doppler(void *) {
     double updated_freq;
     while(State.Doppler)
     {
-        while(!State.RotatorReadReady)
+        while(!RotatorFlags.RotatorReadReady)
             continue;
         index = GetNowTracking();
         // printf("%d\n", index);
-        if (!State.Engage) {
+        if (!RotatorFlags.Engage) {
             console.AddLog("[ERROR]##You tried doppler correction with no engaging");
             State.Doppler = false;
             break;

@@ -61,7 +61,7 @@ void * AutoPilot(void *)
         mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
-        State.Engage = false;
+        RotatorFlags.Engage = false;
         State.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");
@@ -132,7 +132,7 @@ int AutoPilot_task()
             return 0;
         }
 
-        State.Engage = true;
+        RotatorFlags.Engage = true;
         mim::svc::StartThread(mim::svc::SLOT_ROTATOR_CONTROL, Sattracker, NULL);
         console.AddLog("[OK]##[Auto]Start Engaging.");
 
@@ -690,7 +690,7 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
         console.AddLog("[OK]##[Auto]Stop Doppler Correction.");
 
-        State.Engage = false;
+        RotatorFlags.Engage = false;
         State.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_ROTATOR_CONTROL);
         console.AddLog("[OK]##[Auto]Finish Engaging.");

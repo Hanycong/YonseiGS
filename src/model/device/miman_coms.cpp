@@ -1409,7 +1409,7 @@ void * task_uplink_onorbit(void * sign_)
 void * Direct_Shell(void * data)
 {
     pthread_mutex_lock(&conn_lock);
-    while(!State.RotatorReadReady)
+    while(!RotatorFlags.RotatorReadReady)
         continue;
     bool dlstate = true;
 

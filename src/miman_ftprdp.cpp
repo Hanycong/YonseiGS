@@ -516,7 +516,7 @@ void * ftp_downlink_onorbit(void * param){
         State.downlink_mode = false;
     while(!State.uplink_mode)
         continue;
-    while(!State.RotatorReadReady)
+    while(!RotatorFlags.RotatorReadReady)
         continue;
     
     //host : OBC adress
@@ -566,7 +566,7 @@ void * ftp_uplink_onorbit(void * param){
         State.downlink_mode = false;
     while(!State.uplink_mode)
         continue;
-    while(!State.RotatorReadReady)
+    while(!RotatorFlags.RotatorReadReady)
         continue;
     //host : OBC adress
     //Port : 15

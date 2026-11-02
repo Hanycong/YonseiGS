@@ -119,7 +119,7 @@ void fin_rotator()
 
 void RotatorSetTo(int azimuth, int elevation)
 {   
-    State.RotatorReadReady = false;
+    RotatorFlags.RotatorReadReady = false;
     sprintf(ControlBuf, "W%03d %03d\r\n", azimuth, elevation);
     tcflush(rotator, TCIOFLUSH);
     int res = write(rotator, ControlBuf, 10);
@@ -131,7 +131,7 @@ void RotatorSetTo(int azimuth, int elevation)
         console.AddLog("[ERROR]##Write to rotator failed.");
     
     sleep(1);
-    State.RotatorReadReady = true;
+    RotatorFlags.RotatorReadReady = true;
 }
 
 void * RotatorEnter(void *)
@@ -142,36 +142,36 @@ void * RotatorEnter(void *)
     memset(ReadBuf, 0, strlen(ReadBuf));
     byte = read(rotator, ReadBuf, sizeof(ReadBuf));
     console.AddLog("[DEBUG]##Rotator : %s, Read Byte : %d", ReadBuf, byte);
-    State.RotatorReading = true;
+    RotatorFlags.RotatorReading = true;
     tcflush(rotator, TCIOFLUSH);
     return NULL;
 }
 
 void * RotatorReadInfo(void *)
 {
-    State.RotatorReading = true;
+    RotatorFlags.RotatorReading = true;
     int byte = 0;
     int read_count = 0;
-    while(State.RotatorReading)
+    while(RotatorFlags.RotatorReading)
     {
         tcflush(rotator, TCIOFLUSH);
         memset(ReadBuf, 0, strlen(ReadBuf));
 
         if(write(rotator, "C2\r\n", 4) > 0)
         {
-            State.RotatorReadReady = true;
+            RotatorFlags.RotatorReadReady = true;
         }
         else
         {
             console.AddLog("[ERROR]##Rotator Read Failed. Please Check Again.");
-            State.RotatorReading = false;
+            RotatorFlags.RotatorReading = false;
             break;
         }
 
-        State.RotatorReading = true;
+        RotatorFlags.RotatorReading = true;
         
         sleep(1);
-        while(State.RotatorReading && State.RotatorReadReady)
+        while(RotatorFlags.RotatorReading && RotatorFlags.RotatorReadReady)
         {
             byte = read(rotator, &ReadBuf[read_count], 1);
             if (byte < 1 && read_count > 3 && ReadBuf[read_count - 1] == '\n')
@@ -221,7 +221,7 @@ void * RotatorReadInfo(void *)
                 }
                 read_count = 0;
                 sleep(1);
-                State.RotatorReadReady = false;
+                RotatorFlags.RotatorReadReady = false;
             }
             else if (byte > 0)
             {
@@ -237,16 +237,16 @@ void * RotatorReadInfo(void *)
     tcflush(rotator,TCIOFLUSH);
     }
     
-    if(State.RotatorReading)
-        State.RotatorReading = false;
+    if(RotatorFlags.RotatorReading)
+        RotatorFlags.RotatorReading = false;
     return NULL;
 }
 
 void * Sattracker(void *)
 {
-    State.Engage = true;
+    RotatorFlags.Engage = true;
 
-    while(State.Engage)
+    while(RotatorFlags.Engage)
     {
         if(NowSat == -1)
         {

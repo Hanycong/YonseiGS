@@ -12,7 +12,7 @@ namespace vm {
 int * RotatorVM::TargetAzimuth()   { return mim::model::Rotator().TargetAzimuth(); }
 int * RotatorVM::TargetElevation() { return mim::model::Rotator().TargetElevation(); }
 
-bool RotatorVM::Engaging() const         { return State.Engage; }
+bool RotatorVM::Engaging() const         { return RotatorFlags.Engage; }
 int  RotatorVM::CurrentAzimuth() const   { return mim::model::Rotator().CurrentAzimuth(); }
 int  RotatorVM::CurrentElevation() const { return mim::model::Rotator().CurrentElevation(); }
 

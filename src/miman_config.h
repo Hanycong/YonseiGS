@@ -425,10 +425,6 @@ typedef enum __attribute__ ((packed)) {
 struct StateCheckUnit{
     bool InitializeRequired = false;
     bool RadioInitialize = false;
-    bool RotatorConnection = false;
-    bool RotatorInitialize = false;
-    bool RotatorReading = false;
-    bool RotatorReadReady = false;
     bool SwitchConnection = false;
     bool GS100_Connection = false;
     bool GUI = true;
@@ -436,7 +432,6 @@ struct StateCheckUnit{
     bool TRx_mode = false;
     bool downlink_mode = false;
     bool uplink_mode = false;
-    bool Engage = false;
     bool Doppler = false;
     bool Signaltest = false;
     bool Debugmode = false;
@@ -5447,4 +5442,5 @@ typedef struct __attribute__ ((packed)) {
 #include "sat_tabs.h"
 #include "ftp_state.h"
 #include "autopilot_state.h"
+#include "rotator_state.h"
 #endif
