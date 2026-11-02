@@ -213,17 +213,20 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             SatTabs.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
+            // 세 열 모두 같은 작은 글꼴(Inconsolata 20)로 그린다. 기본 글꼴(30)은 이 탭에서 너무 크다
+            ImGui::PushFont(mim::font_subtitle);
             ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
-                ImGui_ControlWindow_Body(Rh * 0.7f);
+                ImGui_ControlWindow_Body(1.0f);
             ImGui::EndChild();
             ImGui::SameLine();
             ImGui::BeginChild("##col2", ImVec2(colW, colH), true);
-                ImGui_CommandWindow_Body(Rh * 0.5f);
+                ImGui_CommandWindow_Body(1.0f);
             ImGui::EndChild();
             ImGui::SameLine();
             ImGui::BeginChild("##col3", ImVec2(colW, colH), true);
-                ImGui_BeaconWindow_Body(Rh * 0.65f);
+                ImGui_BeaconWindow_Body(1.0f);
             ImGui::EndChild();
+            ImGui::PopFont();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

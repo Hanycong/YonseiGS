@@ -123,7 +123,7 @@ sleep 4
 import -window root "$OUT/2_pass_operation.png"
 
 # Pass Operation: FTP Upload 버튼 (선택된 파일 없음 -> 워커 시작/에러 경로)
-xdotool mousemove 1215 383 click 1
+xdotool mousemove 1185 640 click 1
 sleep 5
 import -window root "$OUT/3_ftp_upload.png"
 
@@ -159,28 +159,27 @@ sleep 2
 
 # Pass Operation / Control 창(왼쪽 열): 팝업 창 5개를 차례로 연다 (닫지 않으므로 나중 것이 위에 겹친다)
 # Ping/Calibration/AMP/Clear 는 누르지 않는다 (CSP 전송, 장시간 스레드, 외부 스크립트, 상태 삭제)
-# "Send Telecommand" / "Initial Ops" 줄은 영역 높이에 잘려 위쪽 일부(y=423)만 보인다 (원래 배치)
-xdotool mousemove 178 288; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Switch Satellite
+xdotool mousemove 323 311; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Switch Satellite
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5a_switch_satellite.png"
-xdotool mousemove 178 390; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Ping each node
+xdotool mousemove 171 439; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Ping each node
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5b_ping_each_node.png"
-xdotool mousemove 470 390; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Custom RParam Get
+xdotool mousemove 475 439; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Custom RParam Get
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5c_custom_rparam.png"
-xdotool mousemove 178 423; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Send Telecommand
+xdotool mousemove 171 522; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Send Telecommand
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5d_send_telecommand.png"
-xdotool mousemove 470 423; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Initial Ops
+xdotool mousemove 475 522; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Initial Ops
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3

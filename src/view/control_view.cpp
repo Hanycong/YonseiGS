@@ -25,137 +25,86 @@ void ImGui_ControlWindow(float fontscale)
     ImGui::End();
 }
 
+// 섹션 머리글: 흐린 글씨 + 구분선
+static void SectionHeader(const char * title)
+{
+    ImGui::Spacing();
+    ImGui::TextDisabled("%s", title);
+    ImGui::Separator();
+}
+
+// 2열 버튼 격자: col 0 은 줄 시작(왼쪽 절반), col 1 은 같은 줄 남은 칸
+static bool GridButton(const char * label, int col)
+{
+    float w;
+    if (col == 0)
+        w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+    else
+    {
+        ImGui::SameLine();
+        w = ImGui::GetContentRegionAvail().x;
+    }
+    return ImGui::Button(label, ImVec2(w, ImGui::GetFrameHeight() * 1.3f));
+}
+
+static bool WideButton(const char * label)
+{
+    return ImGui::Button(label, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() * 1.3f));
+}
+
 void ImGui_ControlWindow_Body(float fontscale)
 {
     mim::vm::ControlVM & vm = mim::vm::ControlViewModel();
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    float buttonHeight = ImGui::GetFontSize() * 1.5f;
-
-    float rows = 3.0f;
-    float pingRegionHeight =
-        buttonHeight * rows
-        + style.FramePadding.y * 2.5f
-        + style.ItemSpacing.y * (rows + 2);
-
-    ImGui::BeginChild("PingRegion",
-                      ImVec2(ImGui::GetContentRegionAvail().x, pingRegionHeight),
-                      true,
-                      mim_winflags | ImGuiWindowFlags_NoScrollbar);
-
-    float regionW = ImGui::GetContentRegionAvail().x;
-    float eachW   = (regionW - style.ItemSpacing.x) * 0.5f; 
-
-    if (ImGui::Button("Switch Satellite", ImVec2(eachW, buttonHeight)))
-    {
+    SectionHeader("SATELLITE");
+    if (WideButton("Switch Satellite"))
         show_satellite_select = true;
-    }
 
-    if (ImGui::Button("Ping(AX100)", ImVec2(eachW, buttonHeight)))
-    {
+    SectionHeader("LINK TEST");
+    if (GridButton("Ping(AX100)", 0))
         vm.PingAx100();
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Ping(OBC)", ImVec2(eachW, buttonHeight)))
-    {
+    if (GridButton("Ping(OBC)", 1))
         vm.PingObc();
-    }
-
-    if (ImGui::Button("Ping each node", ImVec2(eachW, buttonHeight)))
-    {
+    if (GridButton("Ping each node", 0))
         show_pingWindow = true;
-    }
-
-
-    ImGui::SameLine();
-    if (ImGui::Button("Custom RParam Get", ImVec2(eachW, buttonHeight)))
-    {
+    if (GridButton("Custom RParam Get", 1))
         show_rparamWindow = true;
-    }
 
-    if (ImGui::Button("Send Telecommand", ImVec2(eachW, buttonHeight)))
+    SectionHeader("COMMAND");
+    if (GridButton("Send Telecommand", 0))
     {
         show_tmtcWindow = true;
         vm.PrintRoutingTable();
     }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Initial Ops", ImVec2(eachW, buttonHeight)))
-    {
+    if (GridButton("Initial Ops", 1))
         show_initialControlWindow = true;
-    }
-
-    ImGui::EndChild();
-
-    ImGui::SetWindowFontScale(1.0f);
-
-
-
-    if (ImGui::Button("Baud Rate Calibration",
-                      ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
-                             ImGui::GetFontSize() * 1.5f)))
-    {
-        vm.StartBaudCalibration();
-    }
-
-    if (ImGui::Button("Frequency Calibration",
-                      ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
-                             ImGui::GetFontSize() * 1.5f)))
-    {
-        vm.StartFreqCalibration();
-    }
-
-    ImGui::SameLine();
-    mim::vm::AmpButton amp = vm.Amp();
-    if (!amp.on)
-    {
-        if (amp.timer)
-        {
-            if (ImGui::Button(amp.label,
-                              ImVec2(ImGui::GetContentRegionAvail().x,
-                                     ImGui::GetFontSize() * 1.5f)))
-            {
-                vm.TurnAmpOff();
-            }
-        }
-        else
-        {
-            if (ImGui::Button(amp.label,
-                              ImVec2(ImGui::GetContentRegionAvail().x,
-                                     ImGui::GetFontSize() * 1.5f)))
-            {
-                vm.TurnAmpOn();
-            }
-        }
-    }
-    else
-    {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-        if (ImGui::Button(amp.label,
-                          ImVec2(ImGui::GetContentRegionAvail().x,
-                                 ImGui::GetFontSize() * 1.5f)))
-        {
-            vm.TurnAmpOff();
-        }
-        ImGui::PopStyleColor();
-    }
-
-    if (ImGui::Button("CMD Manager",
-                      ImVec2(ImGui::GetContentRegionAvail().x * 0.33f,
-                             ImGui::GetFontSize() * 1.5f)))
-    {
+    if (GridButton("CMD Manager", 0))
         vm.OpenCommandManager();
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button("Clear",
-                      ImVec2(ImGui::GetContentRegionAvail().x,
-                             ImGui::GetFontSize() * 1.5f)))
-    {
+    if (GridButton("Clear CMD Queue", 1))
         vm.ClearCommandQueue();
-    }
 
+    SectionHeader("CALIBRATION");
+    if (GridButton("Baud Rate", 0))
+        vm.StartBaudCalibration();
+    if (GridButton("Frequency", 1))
+        vm.StartFreqCalibration();
+
+    SectionHeader("AMPLIFIER");
+    mim::vm::AmpButton amp = vm.Amp();
+    if (amp.on)
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
+    if (WideButton(amp.label))
+    {
+        if (amp.on || amp.timer)
+            vm.TurnAmpOff();
+        else
+            vm.TurnAmpOn();
+    }
+    if (amp.on)
+        ImGui::PopStyleColor();
+
+    // 팝업 창은 Pass Operation 열의 작은 글꼴이 아니라 기본 글꼴로 그린다
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 popup_size(600.0f, 380.0f);
     ImVec2 popup_pos((io.DisplaySize.x - popup_size.x) * 0.5f,
@@ -205,5 +154,5 @@ void ImGui_ControlWindow_Body(float fontscale)
         HMACWindow();
         ImGui::End();
     }
+    ImGui::PopFont();
 }
-
