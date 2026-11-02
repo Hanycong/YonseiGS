@@ -1092,7 +1092,7 @@ void * task_uplink_onorbit(void * sign_)
                 {
                     for(int i = 0; i < 64; i++)
                     {
-                        memset(&State.ftplistup[i], 0, sizeof(ftpinfo));
+                        memset(&FtpShared.ftplistup[i], 0, sizeof(ftpinfo));
                     }
                     console.AddLog("[OK]##Received File list.");
                     for(int i = 0; i < 64; i++)

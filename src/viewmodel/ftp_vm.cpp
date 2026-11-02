@@ -53,18 +53,18 @@ void FtpVM::ClampChunkSize()
         *Ftp().ChunkSize() = 1;
 }
 
-int * FtpVM::Task() { return &State.ftp_task; }
+int * FtpVM::Task() { return &FtpShared.ftp_task; }
 
 void FtpVM::RequireV2()
 {
     if(*Ftp().Version() != 2)
-        State.ftp_task = FTP_UPLOAD_REQUEST;
+        FtpShared.ftp_task = FTP_UPLOAD_REQUEST;
 }
 
 void FtpVM::ResetTask()
 {
     *Ftp().Version() = 2;
-    State.ftp_task = FTP_UPLOAD_REQUEST;
+    FtpShared.ftp_task = FTP_UPLOAD_REQUEST;
 }
 
 int       FtpVM::FileSlotCount() const  { return Ftp().FileSlotCount(); }

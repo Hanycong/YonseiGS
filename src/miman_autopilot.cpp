@@ -616,7 +616,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         //Temporary condition : max_el > 30.0deg
         while(State.Autopilot && State.DoFTPDL && NowOn(SatIndex, NextValuablePath))
         {
-            if(State.ftp_mode)
+            if(FtpShared.ftp_mode)
                 {usleep(10000); 
                     continue;
                 }
@@ -626,13 +626,13 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                 console.AddLog("[Auto]Stop FTP Download after LOS.");
                 break;
             }
-            if(State.ftp_version == 1)
+            if(FtpShared.ftp_version == 1)
 
                 console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");   
                 // pthread_create(&p_thread[8], NULL, ftp_downlink_force, &State.ftplistup[NowFTP]);
             else
             {
-                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_downlink_onorbit, &State.ftplistup[NowFTP], "download")) {
+                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_downlink_onorbit, &FtpShared.ftplistup[NowFTP], "download")) {
                     console.AddLog("[Auto]FTP download launch blocked. Stop automatic FTP retries for this pass.");
                     break;
                 }
@@ -650,7 +650,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         //Temporary condition : max_el > 30.0deg
         while(State.Autopilot && State.DoFTPUL && NowOn(SatIndex, NextValuablePath))
         {
-            if(State.ftp_mode)
+            if(FtpShared.ftp_mode)
                 continue;
             sleep(State.SpanTime);
             if(!NowOn(SatIndex, NextValuablePath))
@@ -658,12 +658,12 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                 console.AddLog("[Auto]Stop FTP Upload after LOS.");
                 break;
             }
-            if(State.ftp_version == 1)
+            if(FtpShared.ftp_version == 1)
                 console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");   
                 // pthread_create(&p_thread[8], NULL, ftp_uplink_force, &State.ftplistup[NowFTP]);
             else
             {
-                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_uplink_onorbit, &State.ftplistup[NowFTP], "upload")) {
+                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_uplink_onorbit, &FtpShared.ftplistup[NowFTP], "upload")) {
                     console.AddLog("[Auto]FTP upload launch blocked. Stop automatic FTP retries for this pass.");
                     break;
                 }

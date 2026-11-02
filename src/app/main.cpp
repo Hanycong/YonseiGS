@@ -162,7 +162,7 @@ int main(int, char**)
     mim::Initialize_SatContext();
 
     for(int index = 0; index < 2; index++)
-        State.ChunkState = new chunkstate_t;
+        FtpShared.ChunkState = new chunkstate_t;
     
     // Shader * ShaderPolarmap2D_bg = new Shader("./src/shader/3DRGB.vs", "./src/shader/3DRGB.fs", NULL);
     // Shader * ShaderPolarmap2D_el0 = new Shader("./src/shader/3DRGB.vs", "./src/shader/3DRGB.fs", NULL);
@@ -202,18 +202,18 @@ int main(int, char**)
     State.GUI = true;
     bool GUIneedshutdown = true;
 
-    State.gslistup = new gsftp_listup_t;
-    State.gsmove = new gsftp_move_t;
-    State.gscopy = new gsftp_copy_t;
-    State.gsremove = new gsftp_remove_t;
-    State.gsmkdir = new gsftp_mkdir_t;
-    State.gsrmdir = new gsftp_rmdir_t;
-    memset(State.gslistup, 0, sizeof(gsftp_listup_t));
-    memset(State.gsmove, 0, sizeof(gsftp_move_t));
-    memset(State.gscopy, 0, sizeof(gsftp_copy_t));
-    memset(State.gsremove, 0, sizeof(gsftp_remove_t));
-    memset(State.gsmkdir, 0, sizeof(gsftp_mkdir_t));
-    memset(State.gsrmdir, 0, sizeof(gsftp_rmdir_t));
+    FtpShared.gslistup = new gsftp_listup_t;
+    FtpShared.gsmove = new gsftp_move_t;
+    FtpShared.gscopy = new gsftp_copy_t;
+    FtpShared.gsremove = new gsftp_remove_t;
+    FtpShared.gsmkdir = new gsftp_mkdir_t;
+    FtpShared.gsrmdir = new gsftp_rmdir_t;
+    memset(FtpShared.gslistup, 0, sizeof(gsftp_listup_t));
+    memset(FtpShared.gsmove, 0, sizeof(gsftp_move_t));
+    memset(FtpShared.gscopy, 0, sizeof(gsftp_copy_t));
+    memset(FtpShared.gsremove, 0, sizeof(gsftp_remove_t));
+    memset(FtpShared.gsmkdir, 0, sizeof(gsftp_mkdir_t));
+    memset(FtpShared.gsrmdir, 0, sizeof(gsftp_rmdir_t));
 
     command = new Command;
     memset(command, 0, sizeof(Command));

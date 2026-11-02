@@ -96,12 +96,12 @@ void StopAllThreads()
             State.TRx_mode,
             State.downlink_mode,
             State.uplink_mode,
-            State.ftp_mode);
+            FtpShared.ftp_mode);
     printf("Ending procedure...\n");
     State.TRx_mode = false;
     State.downlink_mode = false;
     State.uplink_mode = false;
-    State.ftp_mode = false;
+    FtpShared.ftp_mode = false;
     State.Engage = false;
     State.Doppler = false;
     State.GS100_Connection =false;

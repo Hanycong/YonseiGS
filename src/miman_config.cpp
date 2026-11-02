@@ -52,10 +52,10 @@ void printftp(const char * input, ...)
 {
 	va_list args;
 	va_start(args, input);
-    memset(State.FTPWindowBuffer, 0, sizeof(State.FTPWindowBuffer));
-    vsprintf(State.FTPWindowBuffer, input, args);
-    console.AddLog("[FTP]##%s", State.FTPWindowBuffer);
-    csp_log_protocol("FTP: %s (info)", State.FTPWindowBuffer);
+    memset(FtpShared.FTPWindowBuffer, 0, sizeof(FtpShared.FTPWindowBuffer));
+    vsprintf(FtpShared.FTPWindowBuffer, input, args);
+    console.AddLog("[FTP]##%s", FtpShared.FTPWindowBuffer);
+    csp_log_protocol("FTP: %s (info)", FtpShared.FTPWindowBuffer);
 	va_end(args);
 }
 

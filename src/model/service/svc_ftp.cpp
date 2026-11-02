@@ -15,7 +15,7 @@ namespace svc {
 // FTP 가 이미 돌고 있으면 에러 로그를 남기고 false
 static bool FtpIdle()
 {
-    if(State.ftp_mode)
+    if(FtpShared.ftp_mode)
     {
         console.AddLog("[ERROR]##Still Uplink Thread is Running. Please Retry Later.");
         return false;
@@ -32,7 +32,7 @@ void FtpUpload(void * info)
 {
     if(!FtpIdle())
         return;
-    if(State.ftp_version == 1)
+    if(FtpShared.ftp_version == 1)
         console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");
         //pthread_create(&p_thread[8], NULL, ftp_uplink_force, &State.ftplistup[NowFTP]);
     else
@@ -43,7 +43,7 @@ void FtpDownload(void * info)
 {
     if(!FtpIdle())
         return;
-    if(State.ftp_version == 1)
+    if(FtpShared.ftp_version == 1)
         console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");
         // pthread_create(&p_thread[8], NULL, ftp_downlink_force, &State.ftplistup[NowFTP]);
     else

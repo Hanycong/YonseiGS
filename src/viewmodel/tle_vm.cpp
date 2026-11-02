@@ -19,7 +19,7 @@ namespace vm {
 
 int * TleVM::SelectedList() { return &NowTLE; }
 const char * TleVM::SelectedListLabel() const { return State.tleinfolistup[NowTLE]->label; }
-int TleVM::ListCapacity() const { return IM_ARRAYSIZE(State.ftplistup); }
+int TleVM::ListCapacity() const { return IM_ARRAYSIZE(FtpShared.ftplistup); }
 const char * TleVM::ListLabel(int i) const
 {
     if (!State.tleinfolistup[i])

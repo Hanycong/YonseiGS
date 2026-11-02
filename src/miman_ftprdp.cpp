@@ -402,7 +402,7 @@ static void ftp_worker_begin(void)
 {
     pthread_mutex_lock(&ftp_launch_lock);
     ftp_launch_pending = false;
-    State.ftp_mode = true;
+    FtpShared.ftp_mode = true;
     pthread_mutex_unlock(&ftp_launch_lock);
 }
 
@@ -411,7 +411,7 @@ static void ftp_worker_finish(int status)
     pthread_mutex_lock(&ftp_launch_lock);
     ftp_last_status = status;
     ftp_launch_pending = false;
-    State.ftp_mode = false;
+    FtpShared.ftp_mode = false;
     if (status != 0) {
         ftp_block_until = time(NULL) + ftp_failure_cooldown_sec;
     } else {
@@ -425,7 +425,7 @@ bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), void *a
     time_t now = time(NULL);
 
     pthread_mutex_lock(&ftp_launch_lock);
-    if (State.ftp_mode || ftp_launch_pending) {
+    if (FtpShared.ftp_mode || ftp_launch_pending) {
         pthread_mutex_unlock(&ftp_launch_lock);
         console.AddLog("[ERROR]##FTP %s blocked: another FTP worker is active.", label);
         return false;
@@ -492,17 +492,17 @@ int ftp_list_callback(uint16_t entries, const gs_ftp_list_entry_t * listent, voi
     time_t tmtime = time(0);
     struct tm * local = localtime(&tmtime);
     sprintf(pathbuf, "./data/listup/Listup--%04d-%02d-%02d-%02d-", local->tm_year+1900, local->tm_mon+1, local->tm_mday,local->tm_hour);
-    strcat(pathbuf, State.gslistup->fpathbuf);
-    State.gslistup->fd = fopen(pathbuf, "wb");
+    strcat(pathbuf, FtpShared.gslistup->fpathbuf);
+    FtpShared.gslistup->fd = fopen(pathbuf, "wb");
 
-    memset(State.gslistup->flistbuf, 0, sizeof(State.gslistup->flistbuf));
+    memset(FtpShared.gslistup->flistbuf, 0, sizeof(FtpShared.gslistup->flistbuf));
     if(listent->type == GS_FTP_LIST_FILE)
-        sprintf(State.gslistup->flistbuf, "Type : %s\tSize : %u\tName : %s\n", "F", listent->size, listent->path);
+        sprintf(FtpShared.gslistup->flistbuf, "Type : %s\tSize : %u\tName : %s\n", "F", listent->size, listent->path);
     else
-        sprintf(State.gslistup->flistbuf, "Type : %s\tSize : %u\tName : %s\n", "D", listent->size, listent->path);
-    fprintf(State.gslistup->fd, State.gslistup->flistbuf);
-    strcat(State.gslistup->fdispbuf, State.gslistup->flistbuf);
-    fclose(State.gslistup->fd);
+        sprintf(FtpShared.gslistup->flistbuf, "Type : %s\tSize : %u\tName : %s\n", "D", listent->size, listent->path);
+    fprintf(FtpShared.gslistup->fd, FtpShared.gslistup->flistbuf);
+    strcat(FtpShared.gslistup->fdispbuf, FtpShared.gslistup->flistbuf);
+    fclose(FtpShared.gslistup->fd);
     return 0;
 }
 
@@ -531,7 +531,7 @@ void * ftp_downlink_onorbit(void * param){
     ftp_config.port = FTPRDP_PORT;
     // ftp_config.timeout = 30000; //default timeout value
     ftp_config.timeout = 30000;
-    ftp_config.chunk_size = ftp_chunk_size_clamped(State.chunk_sz);
+    ftp_config.chunk_size = ftp_chunk_size_clamped(FtpShared.chunk_sz);
     console.AddLog("[FTP]##Download config: host=%u port=%u ftp_timeout=%u ms chunk=%u",
                    ftp_config.host, ftp_config.port, ftp_config.timeout, ftp_config.chunk_size);
     pthread_mutex_lock(&conn_lock);
@@ -578,7 +578,7 @@ void * ftp_uplink_onorbit(void * param){
     ftp_config.port = FTPRDP_PORT;
     // ftp_config.timeout = 30000; //default timeout value
     ftp_config.timeout = ftp_transfer_timeout_ms;
-    ftp_config.chunk_size = ftp_chunk_size_clamped(State.chunk_sz);
+    ftp_config.chunk_size = ftp_chunk_size_clamped(FtpShared.chunk_sz);
     int status = 0;
     console.AddLog("[FTP]##Upload config: host=%u port=%u ftp_timeout=%u ms chunk=%u",
                    ftp_config.host, ftp_config.port, ftp_config.timeout, ftp_config.chunk_size);
@@ -616,7 +616,7 @@ void * ftp_list_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_list(&ftp_config, State.gslistup->fpathbuf, ftp_list_callback, NULL);
+    int status = (int)gs_ftp_list(&ftp_config, FtpShared.gslistup->fpathbuf, ftp_list_callback, NULL);
     pthread_mutex_unlock(&conn_lock);
     
     if (status != 0) {
@@ -640,7 +640,7 @@ void * ftp_move_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_move(&ftp_config, State.gsmove->from, State.gsmove->to);
+    int status = (int)gs_ftp_move(&ftp_config, FtpShared.gsmove->from, FtpShared.gsmove->to);
     pthread_mutex_unlock(&conn_lock);
 
     if (status != 0) {
@@ -663,7 +663,7 @@ void * ftp_remove_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_remove(&ftp_config, State.gsremove->path);
+    int status = (int)gs_ftp_remove(&ftp_config, FtpShared.gsremove->path);
     pthread_mutex_unlock(&conn_lock);
 
     if (status != 0) {
@@ -686,7 +686,7 @@ void * ftp_copy_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_copy(&ftp_config, State.gscopy->from, State.gscopy->to);
+    int status = (int)gs_ftp_copy(&ftp_config, FtpShared.gscopy->from, FtpShared.gscopy->to);
     pthread_mutex_unlock(&conn_lock);
 
     if (status != 0) {
@@ -710,7 +710,7 @@ void * ftp_mkdir_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_mkdir(&ftp_config, State.gsmkdir->path, mode);
+    int status = (int)gs_ftp_mkdir(&ftp_config, FtpShared.gsmkdir->path, mode);
     pthread_mutex_unlock(&conn_lock);
 
     if (status != 0) {
@@ -733,7 +733,7 @@ void * ftp_rmdir_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_rmdir(&ftp_config, State.gsrmdir->path);
+    int status = (int)gs_ftp_rmdir(&ftp_config, FtpShared.gsrmdir->path);
     pthread_mutex_unlock(&conn_lock);
 
     if (status != 0) {

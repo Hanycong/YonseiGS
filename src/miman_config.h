@@ -436,7 +436,6 @@ struct StateCheckUnit{
     bool TRx_mode = false;
     bool downlink_mode = false;
     bool uplink_mode = false;
-    bool ftp_mode = false;
     bool Engage = false;
     bool Doppler = false;
     bool Signaltest = false;
@@ -470,27 +469,15 @@ struct StateCheckUnit{
     bool DoBaudCalibration = false;
     bool DoFreqCalibration = false;
 
-    uint32_t chunk_sz = 200;
-    int ftp_version = 2;
-    int ftp_task = FTP_UPLOAD_REQUEST;
-    char FTPWindowBuffer[64];
 
     int Paramtype = 0;
     int Shelltype = TYPE_SYSCMD;
 
-    chunkstate_t * ChunkState;
-    gsftp_listup_t * gslistup;
-    gsftp_move_t * gsmove;
-    gsftp_copy_t * gscopy;
-    gsftp_remove_t * gsremove;
-    gsftp_mkdir_t * gsmkdir;
-    gsftp_rmdir_t * gsrmdir;
     
 
     SatelliteObject * Satellites[32768];
     SatelliteObject * Fatellites;
     TLEinfo * tleinfolistup[64];
-    ftpinfo ftplistup[64];
 
      // ===== ADDED for satellite tabs =====
 };
@@ -5471,4 +5458,5 @@ typedef struct __attribute__ ((packed)) {
 
 #include "ui_state.h"
 #include "sat_tabs.h"
+#include "ftp_state.h"
 #endif
