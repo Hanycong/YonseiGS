@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -56,37 +58,12 @@ bool DrawBee1000FmForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
 
             memset(command->todeletecmd.filename, 0, sizeof(command->todeletecmd.filename));
             strncpy(command->todeletecmd.filename, filename_buf, sizeof(command->todeletecmd.filename) - 1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(TO_DeleteCmd_t) - 7)};
-            memcpy(command->todeletecmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->todeletecmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->todeletecmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->todeletecmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->todeletecmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(TO_DeleteCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(TO_DeleteCmd_t);
-            uint16_t len = sizeof(TO_DeleteCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->todeletecmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->todeletecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->todeletecmd, sizeof(TO_DeleteCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->todeletecmd, sizeof(TO_DeleteCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->todeletecmd, sizeof(TO_DeleteCmd_t));
         }
 
 
@@ -115,39 +92,14 @@ bool DrawBee1000FmForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->torenamecmd.source, 0, sizeof(command->torenamecmd.source));
             strncpy(command->torenamecmd.source, source_buf, sizeof(command->torenamecmd.source) - 1);
 
             memset(command->torenamecmd.target, 0, sizeof(command->torenamecmd.target));
             strncpy(command->torenamecmd.target, target_buf, sizeof(command->torenamecmd.target) - 1);
 
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(TO_RenameCmd_t) - 7)};
-            memcpy(command->torenamecmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->torenamecmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->torenamecmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->torenamecmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-
-
-            command->torenamecmd.CmdHeader[7] = 0x00;
-
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(TO_RenameCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-
-            TestPacket->Length = sizeof(TO_RenameCmd_t);
-            uint16_t len = sizeof(TO_RenameCmd_t);
-
-
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->torenamecmd);
-
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->torenamecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->torenamecmd, sizeof(TO_RenameCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->torenamecmd, sizeof(TO_RenameCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->torenamecmd, sizeof(TO_RenameCmd_t));
         }
 
 
@@ -173,28 +125,11 @@ bool DrawBee1000FmForms(uint16_t fnccode)
 
 
         if (ImGui::Button("Generate CMD")) {
-            uint16_t msgid_be = htons(msgid);
             memset(command->ftpfilenamecmd.path, 0, sizeof(command->ftpfilenamecmd.path));
             strncpy(command->ftpfilenamecmd.path, path_buf, sizeof(command->ftpfilenamecmd.path) - 1);
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t length[2] = {0x00, 0x45};
-            memcpy(command->ftpfilenamecmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->ftpfilenamecmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->ftpfilenamecmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->ftpfilenamecmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-            command->ftpfilenamecmd.CmdHeader[7] = 0x00;
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_filenameCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = sizeof(FTP_filenameCmd_t);
-            uint16_t len = sizeof(FTP_filenameCmd_t);
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->ftpfilenamecmd);
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->ftpfilenamecmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->ftpfilenamecmd, sizeof(FTP_filenameCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            // 길이 바이트는 원래 코드의 상수 그대로 (sizeof - 7 이 아님)
+            mim::tc::EncodeCfeCommand(&command->ftpfilenamecmd, sizeof(FTP_filenameCmd_t), msgid, fnccode, 0x45);
+            mim::tc::SendTelecommand(&command->ftpfilenamecmd, sizeof(FTP_filenameCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -230,29 +165,11 @@ case 213: { // FTP_filenameCmd
 
         if (ImGui::Button("Generate CMD")) {
 
-            uint16_t msgid_be = htons(msgid);
             memset(command->ftpdirlistpktcmd.path, 0, sizeof(command->ftpdirlistpktcmd.path));
             strncpy(command->ftpdirlistpktcmd.path, path_buf, sizeof(command->ftpdirlistpktcmd.path) - 1);
             
-            uint8_t sequence[2] = {0xC0, 0x00};
-            uint8_t length[2] = {0x00, (uint8_t)(sizeof(FTP_dirlistpktCmd_t) - 7)};
-            memcpy(command->ftpdirlistpktcmd.CmdHeader + 0, &msgid_be, sizeof(uint16_t));
-            memcpy(command->ftpdirlistpktcmd.CmdHeader + 2, sequence, sizeof(uint16_t));
-            memcpy(command->ftpdirlistpktcmd.CmdHeader + 4, length, sizeof(uint16_t));
-            memcpy(command->ftpdirlistpktcmd.CmdHeader + 6, &fnccode, sizeof(uint8_t));
-            command->ftpdirlistpktcmd.CmdHeader[7] = 0x00;
-            mim::svc::WaitTx();
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + sizeof(FTP_dirlistpktCmd_t));
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = sizeof(FTP_dirlistpktCmd_t);
-            uint16_t len = sizeof(FTP_dirlistpktCmd_t);
-            const uint8_t* byteptr = reinterpret_cast<const uint8_t*>(&command->ftpdirlistpktcmd);
-            uint8_t checksum = 0xFF;
-            while (len--) checksum ^= *(byteptr++);
-            memcpy(command->ftpdirlistpktcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-            memcpy(TestPacket->Data, &command->ftpdirlistpktcmd, sizeof(FTP_dirlistpktCmd_t));
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::EncodeCfeCommand(&command->ftpdirlistpktcmd, sizeof(FTP_dirlistpktCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->ftpdirlistpktcmd, sizeof(FTP_dirlistpktCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
