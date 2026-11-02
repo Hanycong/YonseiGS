@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -71,31 +73,8 @@ case 209: { // EPS P31U SET CONFIG2 (CC 54)
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {0x00, (uint8_t)(sizeof(EPS_P31U_SETCONFIG2) - 7)};
-
-        memcpy(command->epsp31usetconfig2.CmdHeader,     &mid, 2);
-        memcpy(command->epsp31usetconfig2.CmdHeader + 2, seq,  2);
-        memcpy(command->epsp31usetconfig2.CmdHeader + 4, len,  2);
-        memcpy(command->epsp31usetconfig2.CmdHeader + 6, &fnccode, 1);
-
-        command->epsp31usetconfig2.CmdHeader[7] = 0;
-        uint16_t total = sizeof(EPS_P31U_SETCONFIG2);
-        const uint8_t *p = (const uint8_t *)&command->epsp31usetconfig2;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
-        command->epsp31usetconfig2.CmdHeader[7] = crc;
-
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(EPS_P31U_SETCONFIG2));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(EPS_P31U_SETCONFIG2);
-        memcpy(pkt->Data, &command->epsp31usetconfig2, sizeof(EPS_P31U_SETCONFIG2));
-
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::EncodeCfeCommand(&command->epsp31usetconfig2, sizeof(EPS_P31U_SETCONFIG2), msgid, fnccode);
+        mim::tc::SendTelecommand(&command->epsp31usetconfig2, sizeof(EPS_P31U_SETCONFIG2));
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -136,31 +115,8 @@ case 210: { // EPS P31U CONFIG2 (CC 55)
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {0x00, (uint8_t)(sizeof(EPS_P31U_CONFIG2) - 7)};
-
-        memcpy(command->epsp31uconfig2.CmdHeader,     &mid, 2);
-        memcpy(command->epsp31uconfig2.CmdHeader + 2, seq,  2);
-        memcpy(command->epsp31uconfig2.CmdHeader + 4, len,  2);
-        memcpy(command->epsp31uconfig2.CmdHeader + 6, &fnccode, 1);
-
-        command->epsp31uconfig2.CmdHeader[7] = 0;
-        uint16_t total = sizeof(EPS_P31U_CONFIG2);
-        const uint8_t *p = (const uint8_t *)&command->epsp31uconfig2;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
-        command->epsp31uconfig2.CmdHeader[7] = crc;
-
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(EPS_P31U_CONFIG2));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(EPS_P31U_CONFIG2);
-        memcpy(pkt->Data, &command->epsp31uconfig2, sizeof(EPS_P31U_CONFIG2));
-
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::EncodeCfeCommand(&command->epsp31uconfig2, sizeof(EPS_P31U_CONFIG2), msgid, fnccode);
+        mim::tc::SendTelecommand(&command->epsp31uconfig2, sizeof(EPS_P31U_CONFIG2));
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -194,31 +150,8 @@ case 211: { // EPS P31U SET OUT SINGLE (CC 10)
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {0x00, (uint8_t)(sizeof(EPS_P31U_SET_OUT_SINGLE) - 7)};
-
-        memcpy(command->epsp31usetoutsingle.CmdHeader,     &mid, 2);
-        memcpy(command->epsp31usetoutsingle.CmdHeader + 2, seq,  2);
-        memcpy(command->epsp31usetoutsingle.CmdHeader + 4, len,  2);
-        memcpy(command->epsp31usetoutsingle.CmdHeader + 6, &fnccode, 1);
-
-        command->epsp31usetoutsingle.CmdHeader[7] = 0;
-        uint16_t total = sizeof(EPS_P31U_SET_OUT_SINGLE);
-        const uint8_t *p = (const uint8_t *)&command->epsp31usetoutsingle;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
-        command->epsp31usetoutsingle.CmdHeader[7] = crc;
-
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(EPS_P31U_SET_OUT_SINGLE));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(EPS_P31U_SET_OUT_SINGLE);
-        memcpy(pkt->Data, &command->epsp31usetoutsingle, sizeof(EPS_P31U_SET_OUT_SINGLE));
-
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::EncodeCfeCommand(&command->epsp31usetoutsingle, sizeof(EPS_P31U_SET_OUT_SINGLE), msgid, fnccode);
+        mim::tc::SendTelecommand(&command->epsp31usetoutsingle, sizeof(EPS_P31U_SET_OUT_SINGLE));
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
