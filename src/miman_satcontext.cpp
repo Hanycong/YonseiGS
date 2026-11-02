@@ -29,7 +29,7 @@ int GetActiveSat(void)
 void SetActiveSat(int sat_idx)
 {
     if (sat_idx < 0 || sat_idx >= SAT_MAX_NUM) return;
-    if (!State.Satellites[sat_idx])           return;
+    if (!OrbitData.Satellites[sat_idx])           return;
 
     SatTabs.ActiveSatIndex = sat_idx;
     /* 기존 추적 시스템과 동기화 */
@@ -77,7 +77,7 @@ int FindVisibleSlot(int sat_idx)
 int AddVisibleSat(int sat_idx)
 {
     if (sat_idx < 0 || sat_idx >= SAT_MAX_NUM) return -1;
-    if (!State.Satellites[sat_idx])           return -1;
+    if (!OrbitData.Satellites[sat_idx])           return -1;
 
     /* 이미 있나? */
     int existing = FindVisibleSlot(sat_idx);
@@ -147,7 +147,7 @@ void Initialize_SatContext(void)
 
     /* 1) 현재 추적 중인 위성을 첫 슬롯에 */
     int seed = GetNowTracking();
-    if (seed >= 0 && seed < SAT_MAX_NUM && State.Satellites[seed]) {
+    if (seed >= 0 && seed < SAT_MAX_NUM && OrbitData.Satellites[seed]) {
         AddVisibleSat(seed);
         SetActiveSat(seed);
     }
@@ -155,8 +155,8 @@ void Initialize_SatContext(void)
     /* 2) use=true 인 다른 위성도 추가 (최대 8개) */
     for (int i = 0; i < SAT_MAX_NUM && GetVisibleSatCount() < VISIBLE_SAT_MAX; i++) {
         if (i == seed) continue;
-        if (!State.Satellites[i]) continue;
-        if (!State.Satellites[i]->use) continue;   // ← use 필터 복구
+        if (!OrbitData.Satellites[i]) continue;
+        if (!OrbitData.Satellites[i]->use) continue;   // ← use 필터 복구
         AddVisibleSat(i);
     }
 

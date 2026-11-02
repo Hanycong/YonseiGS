@@ -250,30 +250,30 @@ void * Sattracker(void *)
     {
         if(NowSat == -1)
         {
-            if(State.Fatellites == NULL)
+            if(OrbitData.Fatellites == NULL)
                 continue;
-            if(State.Fatellites->Elevation() < 0)
+            if(OrbitData.Fatellites->Elevation() < 0)
             {
                 console.AddLog("[DEBUG]##Change to AOS.");
-                Now.az_tag = State.Fatellites->AOS_Azimuth();
-                Now.el_tag = State.Fatellites->AOS_Elevation();
+                Now.az_tag = OrbitData.Fatellites->AOS_Azimuth();
+                Now.el_tag = OrbitData.Fatellites->AOS_Elevation();
             }
             else
             {
-                Now.az_tag = State.Fatellites->Azimuth_1secfuture();
-                Now.el_tag = State.Fatellites->Elevation_1secfuture();
+                Now.az_tag = OrbitData.Fatellites->Azimuth_1secfuture();
+                Now.el_tag = OrbitData.Fatellites->Elevation_1secfuture();
             }
             if(Now.el_now > 80)
             {
                 Now.el_tag = 80;
-                State.Fatellites->futuretime = 6.0f;
+                OrbitData.Fatellites->futuretime = 6.0f;
             }
             else
-                State.Fatellites->futuretime = 3.0f;
+                OrbitData.Fatellites->futuretime = 3.0f;
             
-            if(State.Fatellites->CrossPath)
+            if(OrbitData.Fatellites->CrossPath)
             {
-                switch(State.Fatellites->CrossPath)
+                switch(OrbitData.Fatellites->CrossPath)
                 {
                     case(1): {
                         
@@ -301,34 +301,34 @@ void * Sattracker(void *)
         }
         else
         {
-            if(State.Satellites[NowSat] == NULL)
+            if(OrbitData.Satellites[NowSat] == NULL)
             {
                 // console.AddLog("[ERROR]##Cannot Detect Tracking State.Satellites.");
                 continue;
             }
         
-            if(State.Satellites[NowSat]->Elevation() < 0)
+            if(OrbitData.Satellites[NowSat]->Elevation() < 0)
             {
                 console.AddLog("[DEBUG]##Change to AOS.");
-                Now.az_tag = State.Satellites[NowSat]->AOS_Azimuth();
-                Now.el_tag = State.Satellites[NowSat]->AOS_Elevation();
+                Now.az_tag = OrbitData.Satellites[NowSat]->AOS_Azimuth();
+                Now.el_tag = OrbitData.Satellites[NowSat]->AOS_Elevation();
             }
             else
             {
-                Now.az_tag = State.Satellites[NowSat]->Azimuth_1secfuture();
-                Now.el_tag = State.Satellites[NowSat]->Elevation_1secfuture();
+                Now.az_tag = OrbitData.Satellites[NowSat]->Azimuth_1secfuture();
+                Now.el_tag = OrbitData.Satellites[NowSat]->Elevation_1secfuture();
             }
             if(Now.el_now > 80)
             {
                 Now.el_tag = 80;
-                State.Satellites[NowSat]->futuretime = 6.0f;
+                OrbitData.Satellites[NowSat]->futuretime = 6.0f;
             }
             else
-                State.Satellites[NowSat]->futuretime = 3.0f;
+                OrbitData.Satellites[NowSat]->futuretime = 3.0f;
             
-            if(State.Satellites[NowSat]->CrossPath)
+            if(OrbitData.Satellites[NowSat]->CrossPath)
             {
-                switch(State.Satellites[NowSat]->CrossPath)
+                switch(OrbitData.Satellites[NowSat]->CrossPath)
                 {
                     case(1): {
                         if(Now.az_tag < 90)

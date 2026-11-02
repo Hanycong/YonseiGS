@@ -13,9 +13,9 @@ namespace vm {
 const char * SatInfoVM::Title(int index)
 {
     if(index == -1)
-        sprintf(title_, "Details : %s", State.Fatellites->Name());
+        sprintf(title_, "Details : %s", OrbitData.Fatellites->Name());
     else
-        sprintf(title_, "Details : %s", State.Satellites[index]->Name());
+        sprintf(title_, "Details : %s", OrbitData.Satellites[index]->Name());
     return title_;
 }
 
@@ -35,15 +35,15 @@ bool SatInfoVM::Pass(int index, int i, PassRow * row) const
     SatelliteObject * sat;
     if(index == -1)
     {
-        if(State.Fatellites->_max_elevation[i] <= 0.0f || State.Satellites[i]->_max_elevation[i] > 90.0f)
+        if(OrbitData.Fatellites->_max_elevation[i] <= 0.0f || OrbitData.Satellites[i]->_max_elevation[i] > 90.0f)
             return false;
-        sat = State.Fatellites;
+        sat = OrbitData.Fatellites;
     }
     else
     {
-        if(State.Satellites[index]->_max_elevation[i] <= 0.0f || State.Satellites[index]->_max_elevation[i] > 90.0f)
+        if(OrbitData.Satellites[index]->_max_elevation[i] <= 0.0f || OrbitData.Satellites[index]->_max_elevation[i] > 90.0f)
             return false;
-        sat = State.Satellites[index];
+        sat = OrbitData.Satellites[index];
     }
     row->aos = ToLocal(sat->_nextaos[i]);
     row->los = ToLocal(sat->_nextlos[i]);

@@ -105,8 +105,8 @@ void StopAllThreads()
     RotatorFlags.Engage = false;
     LinkFlags.Doppler = false;
     LinkFlags.GS100_Connection =false;
-    State.NowTracking = false;
-    State.TrackThread = false;
+    OrbitData.NowTracking = false;
+    OrbitData.TrackThread = false;
     RotatorFlags.RotatorReading = false;
 
     State.InitializeRequired = true;

@@ -77,12 +77,12 @@ void * Doppler(void *) {
         }
         else if (index == -1)
         {
-            if(State.Fatellites == NULL)
+            if(OrbitData.Fatellites == NULL)
             {
                 LinkFlags.Doppler = false;
                 break;
             }
-            vel= 1 - (State.Fatellites->topo.range_rate * 1000)/sol;
+            vel= 1 - (OrbitData.Fatellites->topo.range_rate * 1000)/sol;
             updated_freq = vel * (setup->default_freq);
             
             rxfreq = uint32_t(static_cast<unsigned int>(updated_freq));
@@ -102,12 +102,12 @@ void * Doppler(void *) {
         }
         else
         {
-            if(State.Satellites[index] == NULL)
+            if(OrbitData.Satellites[index] == NULL)
             {
                 LinkFlags.Doppler = false;
                 break;
             }
-            vel= 1 - (State.Satellites[index]->topo.range_rate * 1000)/sol;
+            vel= 1 - (OrbitData.Satellites[index]->topo.range_rate * 1000)/sol;
             updated_freq = vel * (setup->default_freq);
             
             rxfreq = uint32_t(static_cast<unsigned int>(updated_freq));

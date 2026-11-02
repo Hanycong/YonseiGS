@@ -73,7 +73,7 @@ void SatelliteModelInitialize(int index)
 {
     if(index == -1)
     {
-        if(strlen(State.Fatellites->Name()) != 0 && State.NowTracking)
+        if(strlen(OrbitData.Fatellites->Name()) != 0 && OrbitData.NowTracking)
         {
             // Fatellites2D = new Rectangle(false);
             // ShaderFatellites2D = new Shader("./src/shader/3DTexture.vs", "./src/shader/3DTexture.fs", NULL);
@@ -86,7 +86,7 @@ void SatelliteModelInitialize(int index)
     }
     else
     {
-        if(strlen(State.Satellites[index]->Name()) != 0 && State.NowTracking)
+        if(strlen(OrbitData.Satellites[index]->Name()) != 0 && OrbitData.NowTracking)
         {
             // Satellites2D[index] = new Rectangle(false);
             // ShaderSatellites2D[index] = new Shader("./src/shader/3DTexture.vs", "./src/shader/3DTexture.fs", NULL);
@@ -102,7 +102,7 @@ void SatelliteModelInitialize(int index)
 
 void SatelliteModelDelete(int index)
 {
-    if(State.Satellites[index] != NULL)
+    if(OrbitData.Satellites[index] != NULL)
     {
         delete Satellites2D[index];
         Satellites2D[index] = NULL;
@@ -117,7 +117,7 @@ void SatelliteModelDelete(int index)
         delete ShaderSatpoint[index];
         ShaderSatpoint[index] = NULL;
     }
-    if(State.Fatellites != NULL)
+    if(OrbitData.Fatellites != NULL)
     {
         delete Fatellites2D;
         Fatellites2D = NULL;
@@ -138,19 +138,19 @@ void SatelliteModelDelete(int index)
 
 void SatDisplayer(GLint * SatTexture)
 {
-    if(State.NowTracking)
+    if(OrbitData.NowTracking)
     {
-        for(int index = 0; index < sizeof(State.Satellites) / sizeof(SatelliteObject *); index++)
+        for(int index = 0; index < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); index++)
         {
-            if(State.Satellites[index] == NULL)
+            if(OrbitData.Satellites[index] == NULL)
                 break;
-            if(State.Satellites[index]->use == false)
+            if(OrbitData.Satellites[index]->use == false)
                 continue;
 
             ShaderSatRange2D[index]->use();
             // SatRange2D[index]->Setradius(0.5f);
-            SatRange2D[index]->Setradius((float)SetLatitudeScale(State.Satellites[index]) / (M_PI / 2));
-            SatRange2D[index]->Mercator((float)State.Satellites[index]->geo.latitude, (float)State.Satellites[index]->geo.longitude);
+            SatRange2D[index]->Setradius((float)SetLatitudeScale(OrbitData.Satellites[index]) / (M_PI / 2));
+            SatRange2D[index]->Mercator((float)OrbitData.Satellites[index]->geo.latitude, (float)OrbitData.Satellites[index]->geo.longitude);
             SatRange2D[index]->Setcolor(1.0f, 1.0f, 1.0f);
             SatRange2D[index]->Update();
             ShaderSatRange2D[index]->setFloat("alpha", 0.25f);
@@ -160,19 +160,19 @@ void SatDisplayer(GLint * SatTexture)
             ShaderSatRange2D[index]->setFloat("alpha", 1.0f);
             SatRange2D[index]->drawLoop(ShaderSatRange2D[index]);
             
-            Satellites2D[index]->XYTranslate(State.Satellites[index]->DisplayPoint_Longitude(), State.Satellites[index]->DisplayPoint_Latitude());
+            Satellites2D[index]->XYTranslate(OrbitData.Satellites[index]->DisplayPoint_Longitude(), OrbitData.Satellites[index]->DisplayPoint_Latitude());
             ShaderSatellites2D[index]->use();
             glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, *SatTexture);
             ShaderSatellites2D[index]->setInt("texture1", 2);
             Satellites2D[index]->Draw(ShaderSatellites2D[index]);
         }
-        if(State.Fatellites != NULL && State.Fatellites->use == true)
+        if(OrbitData.Fatellites != NULL && OrbitData.Fatellites->use == true)
         {
             ShaderFatRange2D->use();
             // FatRange2D]->Setradius(0.5f);
-            FatRange2D->Setradius((float)SetLatitudeScale(State.Fatellites) / (M_PI / 2));
-            FatRange2D->Mercator((float)State.Fatellites->geo.latitude, (float)State.Fatellites->geo.longitude);
+            FatRange2D->Setradius((float)SetLatitudeScale(OrbitData.Fatellites) / (M_PI / 2));
+            FatRange2D->Mercator((float)OrbitData.Fatellites->geo.latitude, (float)OrbitData.Fatellites->geo.longitude);
             FatRange2D->Setcolor(1.0f, 1.0f, 1.0f);
             FatRange2D->Update();
             ShaderFatRange2D->setFloat("alpha", 0.25f);
@@ -182,7 +182,7 @@ void SatDisplayer(GLint * SatTexture)
             ShaderFatRange2D->setFloat("alpha", 1.0f);
             FatRange2D->drawLoop(ShaderFatRange2D);
             
-            Fatellites2D->XYTranslate(State.Fatellites->DisplayPoint_Longitude(), State.Fatellites->DisplayPoint_Latitude());
+            Fatellites2D->XYTranslate(OrbitData.Fatellites->DisplayPoint_Longitude(), OrbitData.Fatellites->DisplayPoint_Latitude());
             ShaderFatellites2D->use();
             glActiveTexture(GL_TEXTURE0 + 2);
             glBindTexture(GL_TEXTURE_2D, *SatTexture);
@@ -196,29 +196,29 @@ void SatDisplayer(GLint * SatTexture)
 
 void SatpointDisplayer()
 {
-    if(State.NowTracking)
+    if(OrbitData.NowTracking)
     {
-        for(int i = 0; i < sizeof(State.Satellites) / sizeof(SatelliteObject *); i++)
+        for(int i = 0; i < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); i++)
         {
-            if(State.Satellites[i] == NULL)
+            if(OrbitData.Satellites[i] == NULL)
                 break;
-            if(State.Satellites[i]->use == false)
+            if(OrbitData.Satellites[i]->use == false)
                 continue;
-            if(State.Satellites[i]->topo.elevation < 0.0f)
+            if(OrbitData.Satellites[i]->topo.elevation < 0.0f)
                 continue;
             Satpoint[i]->Setradius(0.02f);
             Satpoint[i]->Setcolor(1.000f, 1.000f, 0.000f);
-            Satpoint[i]->translate(0.9f * (float)(sin(State.Satellites[i]->topo.azimuth) * (M_PI / 2 - State.Satellites[i]->topo.elevation) / (M_PI / 2)), 0.9f * (float)(cos(State.Satellites[i]->topo.azimuth) * (M_PI / 2 - State.Satellites[i]->topo.elevation) / (M_PI / 2)), 0);
+            Satpoint[i]->translate(0.9f * (float)(sin(OrbitData.Satellites[i]->topo.azimuth) * (M_PI / 2 - OrbitData.Satellites[i]->topo.elevation) / (M_PI / 2)), 0.9f * (float)(cos(OrbitData.Satellites[i]->topo.azimuth) * (M_PI / 2 - OrbitData.Satellites[i]->topo.elevation) / (M_PI / 2)), 0);
             Satpoint[i]->Update();
             ShaderSatpoint[i]->use();
             ShaderSatpoint[i]->setFloat("alpha", 1.0f);
             Satpoint[i]->drawLoop(ShaderSatpoint[i]);
         }
-        if(State.Fatellites != NULL && State.Fatellites->use != false && State.Fatellites->topo.elevation >= 0.0f)
+        if(OrbitData.Fatellites != NULL && OrbitData.Fatellites->use != false && OrbitData.Fatellites->topo.elevation >= 0.0f)
         {
             Fatpoint->Setradius(0.02f);
             Fatpoint->Setcolor(1.000f, 1.000f, 0.000f);
-            Fatpoint->translate(0.9f * (float)(sin(State.Fatellites->topo.azimuth) * (M_PI / 2 - State.Fatellites->topo.elevation) / (M_PI / 2)), 0.9f * (float)(cos(State.Fatellites->topo.azimuth) * (M_PI / 2 - State.Fatellites->topo.elevation) / (M_PI / 2)), 0);
+            Fatpoint->translate(0.9f * (float)(sin(OrbitData.Fatellites->topo.azimuth) * (M_PI / 2 - OrbitData.Fatellites->topo.elevation) / (M_PI / 2)), 0.9f * (float)(cos(OrbitData.Fatellites->topo.azimuth) * (M_PI / 2 - OrbitData.Fatellites->topo.elevation) / (M_PI / 2)), 0);
             Fatpoint->Update();
             ShaderFatpoint->use();
             ShaderFatpoint->setFloat("alpha", 1.0f);
@@ -244,15 +244,15 @@ void PathGenerator(int Selected)
 
     if (Selected == -1)
     {
-        if (State.Fatellites == NULL)
+        if (OrbitData.Fatellites == NULL)
         {
             console.AddLog("[ERROR]##[Path]No FDS satellite available for path generation.");
             return;
         }
 
-        State.Fatellites->GeneratePath();
+        OrbitData.Fatellites->GeneratePath();
 
-        if (State.NowTracking && Selected > -2)
+        if (OrbitData.NowTracking && Selected > -2)
         {
             if (Footprint == NULL)
             {
@@ -265,15 +265,15 @@ void PathGenerator(int Selected)
     }
     else
     {
-        if (State.Satellites[Selected] == NULL)
+        if (OrbitData.Satellites[Selected] == NULL)
         {
             console.AddLog("[ERROR]##[Path]Selected satellite is null. idx=%d", Selected);
             return;
         }
 
-        State.Satellites[Selected]->GeneratePath();
+        OrbitData.Satellites[Selected]->GeneratePath();
 
-        if (State.NowTracking && Selected > -2)
+        if (OrbitData.NowTracking && Selected > -2)
         {
             if (Footprint == NULL)
             {
@@ -284,14 +284,14 @@ void PathGenerator(int Selected)
             int k = 0;
             for (int i = 0; i < 1024; i++)
             {
-                Footprint->spline_vertices[k] = 0.9f * (float)(sin(State.Satellites[Selected]->path_az[i]) * (M_PI / 2 - State.Satellites[Selected]->path_el[i]) / (M_PI / 2));
-                Footprint->spline_vertices[k + 1] = 0.9f * (float)(cos(State.Satellites[Selected]->path_az[i]) * (M_PI / 2 - State.Satellites[Selected]->path_el[i]) / (M_PI / 2));
+                Footprint->spline_vertices[k] = 0.9f * (float)(sin(OrbitData.Satellites[Selected]->path_az[i]) * (M_PI / 2 - OrbitData.Satellites[Selected]->path_el[i]) / (M_PI / 2));
+                Footprint->spline_vertices[k + 1] = 0.9f * (float)(cos(OrbitData.Satellites[Selected]->path_az[i]) * (M_PI / 2 - OrbitData.Satellites[Selected]->path_el[i]) / (M_PI / 2));
                 Footprint->spline_vertices[k + 2] = 0;
 
                 if (i >= 1)
                 {
-                    if (abs(State.Satellites[Selected]->path_az[i] - State.Satellites[Selected]->path_az[i - 1]) > 2.0f / RAD_TO_DEG ||
-                        abs(State.Satellites[Selected]->path_el[i] - State.Satellites[Selected]->path_el[i - 1]) > 2.0f / RAD_TO_DEG)
+                    if (abs(OrbitData.Satellites[Selected]->path_az[i] - OrbitData.Satellites[Selected]->path_az[i - 1]) > 2.0f / RAD_TO_DEG ||
+                        abs(OrbitData.Satellites[Selected]->path_el[i] - OrbitData.Satellites[Selected]->path_el[i - 1]) > 2.0f / RAD_TO_DEG)
                     {
                         Footprint->spline_vertices[k] = Footprint->spline_vertices[k - 3];
                         Footprint->spline_vertices[k + 1] = Footprint->spline_vertices[k - 2];

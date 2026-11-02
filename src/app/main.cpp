@@ -156,9 +156,9 @@ int main(int, char**)
     float ReactiveHeight;
 
     //MIMAN GS
-    State.Fatellites = new SatelliteObject(Yonsei);
-    for(int index = 0 ; index < sizeof(State.Satellites) / sizeof(SatelliteObject *); index++)
-        State.Satellites[index] = new SatelliteObject(Yonsei);
+    OrbitData.Fatellites = new SatelliteObject(Yonsei);
+    for(int index = 0 ; index < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); index++)
+        OrbitData.Satellites[index] = new SatelliteObject(Yonsei);
     mim::Initialize_SatContext();
 
     for(int index = 0; index < 2; index++)
@@ -366,10 +366,10 @@ if (should_close) {
                 mim::svc::InitializeHardware(shutdown_handler);
             }
 
-            if(State.ModelRefreshRequired)
+            if(OrbitData.ModelRefreshRequired)
             {
                 SatelliteModelInitialize(GetNowTracking());
-                State.ModelRefreshRequired = false;
+                OrbitData.ModelRefreshRequired = false;
             }
 
             // Rendering
@@ -492,10 +492,10 @@ if (should_close) {
     // delete Polarmap2D_azEW;
     // Polarmap2D_azEW = NULL;
     free(command);
-    for(int i = 0; i < sizeof(State.Satellites) / sizeof(SatelliteObject *); i++)
+    for(int i = 0; i < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); i++)
     {
-        delete State.Satellites[i];
-        State.Satellites[i] = NULL;
+        delete OrbitData.Satellites[i];
+        OrbitData.Satellites[i] = NULL;
     }
     PathDelete();
     if(sgs != NULL)

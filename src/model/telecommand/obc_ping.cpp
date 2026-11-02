@@ -18,9 +18,9 @@ FSWTle * NewFswTleBuffer()
 packetsign * BuildObcPing(FSWTle * buffer, int tracking_index)
 {
     if (tracking_index == -1)
-        FSWTleConverter(State.Fatellites->tle, buffer);
+        FSWTleConverter(OrbitData.Fatellites->tle, buffer);
     else
-        FSWTleConverter(State.Satellites[tracking_index]->tle, buffer);
+        FSWTleConverter(OrbitData.Satellites[tracking_index]->tle, buffer);
     return PingInit(buffer);
 }
 

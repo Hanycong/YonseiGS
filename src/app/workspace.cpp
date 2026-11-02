@@ -42,7 +42,7 @@ void ImGui_SatelliteTabs(float W) {
 
     for (int slot = 0; slot < SatTabs.VisibleSatsCount; slot++) {
         int sat = SatTabs.VisibleSats[slot];
-        if (sat < 0 || !State.Satellites[sat]) continue;
+        if (sat < 0 || !OrbitData.Satellites[sat]) continue;
 
         bool active = (sat == SatTabs.ActiveSatIndex);
         ImVec4 col  = GetVisibleSatColor(slot);
@@ -86,14 +86,14 @@ void ImGui_SatelliteTabs(float W) {
         // 위성 이름 — DroidSans-Bold 18pt (네이티브 42pt를 다운스케일이지만 bold 유지)
         dl->AddText(mim::font_title, 18.0f, ImVec2(p.x + 24, p.y + 6),
                     ImGui::ColorConvertFloat4ToU32(active ? TEXT_HI : TEXT),
-                    State.Satellites[sat]->Name());
+                    OrbitData.Satellites[sat]->Name());
 
         char status[64];
         if (sat == GetNowTracking() && RotatorFlags.Engage) {
             snprintf(status, sizeof(status), "TRACKING");
         } else {
             DateTime now = DateTime::Now(false);
-            double sec = (State.Satellites[sat]->_nextaos[0] - now).TotalSeconds();
+            double sec = (OrbitData.Satellites[sat]->_nextaos[0] - now).TotalSeconds();
             if (sec < 0) sec = 0;                          // CLAUDE.md known defect 가드
             int hh = (int)(sec / 3600);
             int mm = (int)((sec - hh * 3600) / 60);
@@ -132,7 +132,7 @@ void ImGui_StatusBar_Body(float W) {
 
     ImGui::SameLine(0, 20);
     int sat = SatTabs.ActiveSatIndex;
-    if (sat >= 0 && State.Satellites[sat]) {
+    if (sat >= 0 && OrbitData.Satellites[sat]) {
         ImGui::PushStyleColor(ImGuiCol_Text, TEXT_DIM);
         ImGui::Text("Track:");
         ImGui::PopStyleColor();
@@ -140,7 +140,7 @@ void ImGui_StatusBar_Body(float W) {
         Dot(GetVisibleSatColor(sat));
         ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, GetVisibleSatColor(sat));
-        ImGui::Text("%s", State.Satellites[sat]->Name());
+        ImGui::Text("%s", OrbitData.Satellites[sat]->Name());
         ImGui::PopStyleColor();
     }
 

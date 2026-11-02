@@ -40,10 +40,10 @@ static bool wdt_notsent;
 
 int FindValuablePath(int satIndex)
 {
-    if (satIndex < 0 || satIndex >= SAT_MAX_NUM || !State.Satellites[satIndex]) return 0;
+    if (satIndex < 0 || satIndex >= SAT_MAX_NUM || !OrbitData.Satellites[satIndex]) return 0;
     int Valuable = 0;
     for (int i = 0; i < 64; i++) {
-        if (State.Satellites[satIndex]->MaxElevation(i) > 10.0f) { Valuable = i; break; }
+        if (OrbitData.Satellites[satIndex]->MaxElevation(i) > 10.0f) { Valuable = i; break; }
     }
     return Valuable;
 }
@@ -80,8 +80,8 @@ static bool NowOn(int SatIndex, int NextValuablePath)
 {
     if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM) return false;
     if (NextValuablePath < 0 || NextValuablePath >= 64) return false;
-    if (!State.Satellites[SatIndex]) return false;
-    return (DateTime::Now(false) - State.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() < 0;
+    if (!OrbitData.Satellites[SatIndex]) return false;
+    return (DateTime::Now(false) - OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() < 0;
 }
 
 
@@ -92,15 +92,15 @@ int AutoPilot_task()
     bool PingAvailable = false;
     char NowTrackingNameBuffer[32];
     int NowTracking = GetNowTracking();
-    if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !State.Satellites[NowTracking]) {
+    if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !OrbitData.Satellites[NowTracking]) {
         console.AddLog("[ERROR]##[Auto]Invalid tracking at start. trk=%d", NowTracking);
         AutoPilotCfg.Autopilot = false;
         return -2;
     }
     snprintf(NowTrackingNameBuffer, sizeof(NowTrackingNameBuffer), "%s",
-            State.Satellites[NowTracking]->Name());
+            OrbitData.Satellites[NowTracking]->Name());
     int SatIndex = GetNowTracking();
-    if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !State.Satellites[SatIndex]) return -2;
+    if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !OrbitData.Satellites[SatIndex]) return -2;
 
     while(AutoPilotCfg.Autopilot)
     {
@@ -111,16 +111,16 @@ int AutoPilot_task()
         printf("Start AutoPilot.\n");
         int NextValuablePath = FindValuablePath(SatIndex);
         console.AddLog("[Auto]Start Autopilot. Next Valuable AOS : %d/%d %d:%d:%d",
-                                                        State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Month(), 
-                                                        State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Day(),
-                                                        State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Hour(),
-                                                        State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Minute(),
-                                                        State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Second());
-        console.AddLog("[Auto]Max Elevation : %.2lf° Please Keep Devices On.", State.Satellites[SatIndex]->_max_elevation[NextValuablePath] * RAD_TO_DEG);
+                                                        OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Month(), 
+                                                        OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Day(),
+                                                        OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Hour(),
+                                                        OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Minute(),
+                                                        OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Second());
+        console.AddLog("[Auto]Max Elevation : %.2lf° Please Keep Devices On.", OrbitData.Satellites[SatIndex]->_max_elevation[NextValuablePath] * RAD_TO_DEG);
         // printf("%f\n", (State.Satellites[SatIndex]->_nextaos[NextValuablePath] -  DateTime::Now(true)).TotalMinutes());
         while(AutoPilotCfg.Autopilot)
         {
-            if((State.Satellites[SatIndex]->_nextaos[NextValuablePath] -  DateTime::Now(true)).TotalMinutes() < 5.0f)
+            if((OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath] -  DateTime::Now(true)).TotalMinutes() < 5.0f)
                 break;
             usleep(20000); // 20 ms
         }
@@ -168,7 +168,7 @@ int AutoPilot_task()
         {
     // --- DEBUG: show computed minutes-to-LOS ---
     double min_to_los =
-        (State.Satellites[SatIndex]->_nextlos[NextValuablePath] - DateTime::Now(true)).TotalMinutes();
+        (OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath] - DateTime::Now(true)).TotalMinutes();
 
     // console.AddLog("[DBG][AMP] enter: SatIndex=%d Path=%d min_to_los=%.3f Autopilot=%d",
     //                SatIndex, NextValuablePath, min_to_los, (int)State.Autopilot);
@@ -179,7 +179,7 @@ int AutoPilot_task()
     while (AutoPilotCfg.Autopilot)
     {
         min_to_los =
-            (State.Satellites[SatIndex]->_nextlos[NextValuablePath] - DateTime::Now(false)).TotalMinutes();
+            (OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath] - DateTime::Now(false)).TotalMinutes();
 
         if (min_to_los <= 15.0)
             break;
@@ -505,7 +505,7 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
                 for(int i = 0; i < 10; i++)
                 {
                     sleep(AutoPilotCfg.SpanTime);
-                    if((DateTime::Now(false) - State.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() > 0)
+                    if((DateTime::Now(false) - OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() > 0)
                     {
                         // console.AddLog("[ERROR]##[Auto]Failed to Send UL Signal.");
                         break;
@@ -705,13 +705,13 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         console.AddLog("[Auto]Update TLE...");
         for(int i = 0; i < SAT_MAX_NUM; i++)
         {
-            if (State.Satellites[i]) State.Satellites[i]->use = false;
+            if (OrbitData.Satellites[i]) OrbitData.Satellites[i]->use = false;
         }
-        if(DownloadTLE(State.tleinfolistup[NowTLE]->remote, State.tleinfolistup[NowTLE]->local))
+        if(DownloadTLE(OrbitData.tleinfolistup[NowTLE]->remote, OrbitData.tleinfolistup[NowTLE]->local))
         {
-            State.NowTracking = false;
+            OrbitData.NowTracking = false;
             
-            console.AddLog("[OK]##[Auto]TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
+            console.AddLog("[OK]##[Auto]TLE \"%s\" Download Completed.", OrbitData.tleinfolistup[NowTLE]->label);
 
             // pthread_create(&p_thread[15], NULL, &SatelliteInitialize,  &sgp4check);
             // SatelliteInitialize(NULL);
@@ -753,32 +753,32 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         
         printf("Search Samename Satellite.\n");
 
-        State.tleallindex = SAT_MAX_NUM;
-        if((State.tleallindex = ReadTLELines_Errorhandling(State.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
+        OrbitData.tleallindex = SAT_MAX_NUM;
+        if((OrbitData.tleallindex = ReadTLELines_Errorhandling(OrbitData.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
             console.AddLog("[ERROR]##Invalid type of TLE File. Please check again.");
         AppUi.Display_TLE = true;
        
         sleep(3);
-        if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !State.Satellites[NowTracking]) {
+        if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !OrbitData.Satellites[NowTracking]) {
             console.AddLog("[ERROR]##[Auto]NowTracking invalid after TLE reload. idx=%d", NowTracking);
             return -2;
         }
 
 
 
-        State.Satellites[NowTracking]->use = true;
-        if(State.Satellites[NowTracking]->cal == false)
-            State.Satellites[NowTracking]->Refresh(State.Satellites[NowTracking]->tle, State.Satellites[NowTracking]->obs, true, true);
+        OrbitData.Satellites[NowTracking]->use = true;
+        if(OrbitData.Satellites[NowTracking]->cal == false)
+            OrbitData.Satellites[NowTracking]->Refresh(OrbitData.Satellites[NowTracking]->tle, OrbitData.Satellites[NowTracking]->obs, true, true);
         printf("Updated Propagator.\n");
         sleep(3);
-        State.NowTracking = true;
-        State.ModelRefreshRequired = true;
+        OrbitData.NowTracking = true;
+        OrbitData.ModelRefreshRequired = true;
         printf("Model Refresh.\n");
         sleep(3);
 
         SetNowTracking(NowTracking);
         SatIndex = GetNowTracking();
-        if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !State.Satellites[SatIndex]) return -2;
+        if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !OrbitData.Satellites[SatIndex]) return -2;
         // BEFORE calling PathGenerator()
         if (!AutoPilotCfg.Autopilot) {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User (before PathGenerator).");
@@ -786,9 +786,9 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         }
 
         int trk = GetNowTracking();
-        if (trk < 0 || trk >= SAT_MAX_NUM || State.Satellites[trk] == NULL) {
+        if (trk < 0 || trk >= SAT_MAX_NUM || OrbitData.Satellites[trk] == NULL) {
             console.AddLog("[ERROR]##[Auto]Invalid tracking index before PathGenerator. trk=%d ptr=%p",
-                        trk, (trk >= 0 && trk < SAT_MAX_NUM) ? State.Satellites[trk] : NULL);
+                        trk, (trk >= 0 && trk < SAT_MAX_NUM) ? OrbitData.Satellites[trk] : NULL);
             return -2;
         }
 
@@ -810,16 +810,16 @@ int TLE_Autoupdate_Test()
     int NowTracking = GetNowTracking();
     char NowTrackingNameBuffer[32];
     printf("[Auto]Update TLE...\n");
-    sprintf(NowTrackingNameBuffer, State.Satellites[NowTracking]->Name());
+    sprintf(NowTrackingNameBuffer, OrbitData.Satellites[NowTracking]->Name());
     for(int i = 0; i < SAT_MAX_NUM; i++)
     {
-        if (State.Satellites[i]) State.Satellites[i]->use = false;
+        if (OrbitData.Satellites[i]) OrbitData.Satellites[i]->use = false;
     }
-    if(DownloadTLE(State.tleinfolistup[NowTLE]->remote, State.tleinfolistup[NowTLE]->local))
+    if(DownloadTLE(OrbitData.tleinfolistup[NowTLE]->remote, OrbitData.tleinfolistup[NowTLE]->local))
     {
-        State.NowTracking = false;
+        OrbitData.NowTracking = false;
         
-        printf("[OK]##[Auto]TLE \"%s\" Download Completed.\n", State.tleinfolistup[NowTLE]->label);
+        printf("[OK]##[Auto]TLE \"%s\" Download Completed.\n", OrbitData.tleinfolistup[NowTLE]->label);
 
         // pthread_create(&p_thread[15], NULL, &SatelliteInitialize,  &sgp4check);
         // SatelliteInitialize(NULL);
@@ -843,25 +843,25 @@ int TLE_Autoupdate_Test()
     
     printf("Search Samename Satellite.\n");
 
-    State.tleallindex = 32768;
-    if((State.tleallindex = ReadTLELines_Errorhandling(State.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
+    OrbitData.tleallindex = 32768;
+    if((OrbitData.tleallindex = ReadTLELines_Errorhandling(OrbitData.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
         printf("[ERROR]##Invalid type of TLE File. Please check again.\n");
     AppUi.Display_TLE = true;
     
     sleep(3);
 
-    if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !State.Satellites[NowTracking]) {
+    if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !OrbitData.Satellites[NowTracking]) {
     console.AddLog("[ERROR]##[Auto]NowTracking invalid after TLE reload. idx=%d", NowTracking);
     return -2;
     }   
 
-    State.Satellites[NowTracking]->use = true;
-    if(State.Satellites[NowTracking]->cal == false)
-        State.Satellites[NowTracking]->Refresh(State.Satellites[NowTracking]->tle, State.Satellites[NowTracking]->obs, true, true);
+    OrbitData.Satellites[NowTracking]->use = true;
+    if(OrbitData.Satellites[NowTracking]->cal == false)
+        OrbitData.Satellites[NowTracking]->Refresh(OrbitData.Satellites[NowTracking]->tle, OrbitData.Satellites[NowTracking]->obs, true, true);
     printf("Updated Propagator.\n");
     sleep(3);
-    State.NowTracking = true;
-    State.ModelRefreshRequired = true;
+    OrbitData.NowTracking = true;
+    OrbitData.ModelRefreshRequired = true;
     printf("Model Refresh.\n");
     sleep(3);
     SetNowTracking(NowTracking);

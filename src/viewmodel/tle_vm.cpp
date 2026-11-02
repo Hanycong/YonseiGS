@@ -18,13 +18,13 @@ namespace mim {
 namespace vm {
 
 int * TleVM::SelectedList() { return &NowTLE; }
-const char * TleVM::SelectedListLabel() const { return State.tleinfolistup[NowTLE]->label; }
+const char * TleVM::SelectedListLabel() const { return OrbitData.tleinfolistup[NowTLE]->label; }
 int TleVM::ListCapacity() const { return IM_ARRAYSIZE(FtpShared.ftplistup); }
 const char * TleVM::ListLabel(int i) const
 {
-    if (!State.tleinfolistup[i])
+    if (!OrbitData.tleinfolistup[i])
         return nullptr;
-    return State.tleinfolistup[i]->label;
+    return OrbitData.tleinfolistup[i]->label;
 }
 
 char * TleVM::SearchText() { return search_; }
@@ -35,22 +35,22 @@ size_t TleVM::LocalPathSize() const { return sizeof(local_path_); }
 
 void TleVM::LoadFromLocal()
 {
-    State.NowTracking = false;
-    memset(State.tleinfolistup[NowTLE]->local, 0, sizeof(State.tleinfolistup[NowTLE]->local));
-    memcpy(State.tleinfolistup[NowTLE]->local, local_path_, sizeof(local_path_));
+    OrbitData.NowTracking = false;
+    memset(OrbitData.tleinfolistup[NowTLE]->local, 0, sizeof(OrbitData.tleinfolistup[NowTLE]->local));
+    memcpy(OrbitData.tleinfolistup[NowTLE]->local, local_path_, sizeof(local_path_));
 
-    console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
+    console.AddLog("[OK]##TLE \"%s\" Download Completed.", OrbitData.tleinfolistup[NowTLE]->label);
 
     mim::svc::StartSatelliteInitialize(&sgp4check);
 }
 
 void TleVM::DownloadAndLoad()
 {
-    if(DownloadTLE(State.tleinfolistup[NowTLE]->remote, State.tleinfolistup[NowTLE]->local))
+    if(DownloadTLE(OrbitData.tleinfolistup[NowTLE]->remote, OrbitData.tleinfolistup[NowTLE]->local))
     {
-        State.NowTracking = false;
+        OrbitData.NowTracking = false;
 
-        console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
+        console.AddLog("[OK]##TLE \"%s\" Download Completed.", OrbitData.tleinfolistup[NowTLE]->label);
 
         mim::svc::StartSatelliteInitialize(&sgp4check);
     }
@@ -60,32 +60,32 @@ void TleVM::DownloadAndLoad()
     }
 }
 
-bool TleVM::HasSatellite(int i) const { return strlen(State.Satellites[i]->Name()) != 0; }
+bool TleVM::HasSatellite(int i) const { return strlen(OrbitData.Satellites[i]->Name()) != 0; }
 
 bool TleVM::IsFilteredOut(int i) const
 {
-    if(State.Satellites[i]->_max_elevation[0] < 0 && sgp4check)
+    if(OrbitData.Satellites[i]->_max_elevation[0] < 0 && sgp4check)
         return true;
-    if(strlen(search_) != 0 && strstr(State.Satellites[i]->Name(), search_) == NULL)
+    if(strlen(search_) != 0 && strstr(OrbitData.Satellites[i]->Name(), search_) == NULL)
         return true;
     return false;
 }
 
-const char * TleVM::SatelliteName(int i) const { return State.Satellites[i]->Name(); }
-bool TleVM::InUse(int i) const { return State.Satellites[i]->use; }
+const char * TleVM::SatelliteName(int i) const { return OrbitData.Satellites[i]->Name(); }
+bool TleVM::InUse(int i) const { return OrbitData.Satellites[i]->use; }
 
 void TleVM::Use(int i)
 {
-    State.Satellites[i]->use = true;
-    if(State.Satellites[i]->cal == false)
-        State.Satellites[i]->Refresh(State.Satellites[i]->tle, State.Satellites[i]->obs, true, true);
+    OrbitData.Satellites[i]->use = true;
+    if(OrbitData.Satellites[i]->cal == false)
+        OrbitData.Satellites[i]->Refresh(OrbitData.Satellites[i]->tle, OrbitData.Satellites[i]->obs, true, true);
     SatelliteModelInitialize(i);
     mim::Initialize_SatContext();   // ← VisibleSats 재계산
 }
 
 void TleVM::Unuse(int i)
 {
-    State.Satellites[i]->use = false;
+    OrbitData.Satellites[i]->use = false;
     SatelliteModelDelete(i);
     mim::Initialize_SatContext();   // ← VisibleSats 재계산
 }
@@ -93,17 +93,17 @@ void TleVM::Unuse(int i)
 LocalTime TleVM::NextAos(int i) const
 {
     LocalTime t;
-    t.month  = State.Satellites[i]->_nextaos[0].AddHours(9).Month();
-    t.day    = State.Satellites[i]->_nextaos[0].AddHours(9).Day();
-    t.hour   = State.Satellites[i]->_nextaos[0].AddHours(9).Hour();
-    t.minute = State.Satellites[i]->_nextaos[0].AddHours(9).Minute();
-    t.second = State.Satellites[i]->_nextaos[0].AddHours(9).Second();
+    t.month  = OrbitData.Satellites[i]->_nextaos[0].AddHours(9).Month();
+    t.day    = OrbitData.Satellites[i]->_nextaos[0].AddHours(9).Day();
+    t.hour   = OrbitData.Satellites[i]->_nextaos[0].AddHours(9).Hour();
+    t.minute = OrbitData.Satellites[i]->_nextaos[0].AddHours(9).Minute();
+    t.second = OrbitData.Satellites[i]->_nextaos[0].AddHours(9).Second();
     return t;
 }
 
-double TleVM::MaxElevationDeg(int i) const { return State.Satellites[i]->_max_elevation[0] * RAD_TO_DEG; }
+double TleVM::MaxElevationDeg(int i) const { return OrbitData.Satellites[i]->_max_elevation[0] * RAD_TO_DEG; }
 
-int TleVM::LoadProgressPercent() const { return State.loadindex * 100 / State.tleallindex; }
+int TleVM::LoadProgressPercent() const { return OrbitData.loadindex * 100 / OrbitData.tleallindex; }
 
 TleVM & TleViewModel()
 {

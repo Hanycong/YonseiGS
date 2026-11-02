@@ -63,23 +63,23 @@ TLEinfo * SetTLEinfo(const char * label)
 
 void Initialize_TLESettings()
 {
-    State.tleinfolistup[0] = SetTLEinfo("cubesat");
-    State.tleinfolistup[1] = SetTLEinfo("last-30-days");
-    State.tleinfolistup[2] = SetTLEinfo("weather");
-    State.tleinfolistup[3] = SetTLEinfo("dmc");
-    State.tleinfolistup[4] = SetTLEinfo("amateur");
-    State.tleinfolistup[5] = SetTLEinfo("active");
+    OrbitData.tleinfolistup[0] = SetTLEinfo("cubesat");
+    OrbitData.tleinfolistup[1] = SetTLEinfo("last-30-days");
+    OrbitData.tleinfolistup[2] = SetTLEinfo("weather");
+    OrbitData.tleinfolistup[3] = SetTLEinfo("dmc");
+    OrbitData.tleinfolistup[4] = SetTLEinfo("amateur");
+    OrbitData.tleinfolistup[5] = SetTLEinfo("active");
 
     // printf("%s\t%s\t%s\n", State.tleinfolistup[0]->label, State.tleinfolistup[0]->remote, State.tleinfolistup[0]->local);
 }
 
 void Delete_TLESettings()
 {
-    for(int i = 0; i < sizeof(State.tleinfolistup); i++)
+    for(int i = 0; i < sizeof(OrbitData.tleinfolistup); i++)
     {
-        if(State.tleinfolistup[i] != NULL)
-            free(State.tleinfolistup[i]);
-        memset(State.tleinfolistup[i], 0, sizeof(State.tleinfolistup[i]));
+        if(OrbitData.tleinfolistup[i] != NULL)
+            free(OrbitData.tleinfolistup[i]);
+        memset(OrbitData.tleinfolistup[i], 0, sizeof(OrbitData.tleinfolistup[i]));
     }
 }
 
@@ -116,40 +116,40 @@ bool DownloadTLE(char *TLEURL, char *Local)
 
 void * TrackingSatellites(void *)
 {
-    while(State.TrackThread)
+    while(OrbitData.TrackThread)
     {
-        if(!State.NowTracking)
+        if(!OrbitData.NowTracking)
             continue;
-        if((State.Fatellites != NULL) && (State.Fatellites->use != false))
+        if((OrbitData.Fatellites != NULL) && (OrbitData.Fatellites->use != false))
         {
             try
             {
-                State.Fatellites->Update();
+                OrbitData.Fatellites->Update();
             }
             catch(const std::exception& e)
             {
-                console.AddLog("[ERROR]##Unable to Track Satellite : %s", State.Fatellites->Name());
+                console.AddLog("[ERROR]##Unable to Track Satellite : %s", OrbitData.Fatellites->Name());
                 console.AddLog(e.what());
             }
         }
-        for(int i = 0; i < sizeof(State.Satellites) / sizeof(SatelliteObject *); i++)
+        for(int i = 0; i < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); i++)
         {
-            if((State.Satellites[i] == NULL) || (State.Satellites[i]->use == false))
+            if((OrbitData.Satellites[i] == NULL) || (OrbitData.Satellites[i]->use == false))
                 continue;
             else
             {
-                if(State.Satellites[i]->cal = false)
+                if(OrbitData.Satellites[i]->cal = false)
                 {
-                    State.Satellites[State.loadindex]->Refresh(State.Satellites[i]->tle, Yonsei, false, true);
-                    State.loadindex++;
+                    OrbitData.Satellites[OrbitData.loadindex]->Refresh(OrbitData.Satellites[i]->tle, Yonsei, false, true);
+                    OrbitData.loadindex++;
                 }
                 try
                 {
-                    State.Satellites[i]->Update();
+                    OrbitData.Satellites[i]->Update();
                 }
                 catch(const std::exception& e)
                 {
-                    console.AddLog("[ERROR]##Unable to Track Satellite : %s", State.Satellites[i]->Name());
+                    console.AddLog("[ERROR]##Unable to Track Satellite : %s", OrbitData.Satellites[i]->Name());
                     console.AddLog(e.what());
                 }
             }
@@ -166,7 +166,7 @@ int ReadTLELines_Errorhandling(char * TLEFilename, char * trackingTLEname, bool 
     std::string TLEResultLine2;
     std::ifstream TLEDATA;
     TLEDATA.open(TLEFilename);
-    State.loadindex = GetNowTracking();
+    OrbitData.loadindex = GetNowTracking();
 
     DateTime start_date = DateTime::Now(true);
     DateTime end_date(start_date.AddDays(7.0));
@@ -187,30 +187,30 @@ int ReadTLELines_Errorhandling(char * TLEFilename, char * trackingTLEname, bool 
                 FDSlistup = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
             else
             {
-                TLElistup[State.loadindex] = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
+                TLElistup[OrbitData.loadindex] = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
                 
             }
                 
         }
         catch(const std::exception& e)
         {
-            console.AddLog("[DEBUG]##TLE Load Error. Index : %d, Error : %s", State.loadindex, e.what());
+            console.AddLog("[DEBUG]##TLE Load Error. Index : %d, Error : %s", OrbitData.loadindex, e.what());
         }
         try
         {
             if(fds)
             {
-                if(strlen(State.Fatellites->Name()) != 0)
-                    State.Fatellites->~SatelliteObject();
-                State.Fatellites->Refresh(FDSlistup, Yonsei);
+                if(strlen(OrbitData.Fatellites->Name()) != 0)
+                    OrbitData.Fatellites->~SatelliteObject();
+                OrbitData.Fatellites->Refresh(FDSlistup, Yonsei);
                 break;
             }
             else
             {
-                if(strlen(State.Satellites[State.loadindex]->Name()) != 0)
-                    State.Satellites[State.loadindex]->~SatelliteObject();
-                State.Satellites[State.loadindex]->Refresh(TLElistup[State.loadindex], Yonsei, false, sgp4on);
-                State.loadindex++;
+                if(strlen(OrbitData.Satellites[OrbitData.loadindex]->Name()) != 0)
+                    OrbitData.Satellites[OrbitData.loadindex]->~SatelliteObject();
+                OrbitData.Satellites[OrbitData.loadindex]->Refresh(TLElistup[OrbitData.loadindex], Yonsei, false, sgp4on);
+                OrbitData.loadindex++;
                 // printf("Now : %d\n", State.loadindex);
             }
             
@@ -222,7 +222,7 @@ int ReadTLELines_Errorhandling(char * TLEFilename, char * trackingTLEname, bool 
         
     }
     TLEDATA.close();
-    return State.loadindex;
+    return OrbitData.loadindex;
 }
 
 int ReadTLELines(char *TLEFilename, bool fds, bool sgp4on)
@@ -232,7 +232,7 @@ int ReadTLELines(char *TLEFilename, bool fds, bool sgp4on)
     std::string TLEResultLine2;
     std::ifstream TLEDATA;
     TLEDATA.open(TLEFilename);
-    State.loadindex = 0;
+    OrbitData.loadindex = 0;
 
     DateTime start_date = DateTime::Now(true);
     DateTime end_date(start_date.AddDays(7.0));
@@ -248,30 +248,30 @@ int ReadTLELines(char *TLEFilename, bool fds, bool sgp4on)
                 FDSlistup = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
             else
             {
-                TLElistup[State.loadindex] = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
+                TLElistup[OrbitData.loadindex] = Tle(TLEResultName, TLEResultLine1, TLEResultLine2);
                 
             }
                 
         }
         catch(const std::exception& e)
         {
-            console.AddLog("[DEBUG]##TLE Load Error. Index : %d, Error : %s", State.loadindex, e.what());
+            console.AddLog("[DEBUG]##TLE Load Error. Index : %d, Error : %s", OrbitData.loadindex, e.what());
         }
         try
         {
             if(fds)
             {
-                if(strlen(State.Fatellites->Name()) != 0)
-                    State.Fatellites->~SatelliteObject();
-                State.Fatellites->Refresh(FDSlistup, Yonsei);
+                if(strlen(OrbitData.Fatellites->Name()) != 0)
+                    OrbitData.Fatellites->~SatelliteObject();
+                OrbitData.Fatellites->Refresh(FDSlistup, Yonsei);
                 break;
             }
             else
             {
-                if(strlen(State.Satellites[State.loadindex]->Name()) != 0)
-                    State.Satellites[State.loadindex]->~SatelliteObject();
-                State.Satellites[State.loadindex]->Refresh(TLElistup[State.loadindex], Yonsei, false, sgp4on);
-                State.loadindex++;
+                if(strlen(OrbitData.Satellites[OrbitData.loadindex]->Name()) != 0)
+                    OrbitData.Satellites[OrbitData.loadindex]->~SatelliteObject();
+                OrbitData.Satellites[OrbitData.loadindex]->Refresh(TLElistup[OrbitData.loadindex], Yonsei, false, sgp4on);
+                OrbitData.loadindex++;
                 // printf("Now : %d\n", State.loadindex);
             }
             
@@ -283,33 +283,33 @@ int ReadTLELines(char *TLEFilename, bool fds, bool sgp4on)
         
     }
     TLEDATA.close();
-    return State.loadindex;
+    return OrbitData.loadindex;
 }
 
 void * SatelliteInitialize(void * sgp4on)
 {
     
-    State.tleallindex = 32768;
+    OrbitData.tleallindex = 32768;
     AppUi.Display_TLE = false;
     AppUi.Display_load = true;
-    for(State.loadindex = 0; State.loadindex < sizeof(State.Satellites) / sizeof(SatelliteObject *); State.loadindex++)
+    for(OrbitData.loadindex = 0; OrbitData.loadindex < sizeof(OrbitData.Satellites) / sizeof(SatelliteObject *); OrbitData.loadindex++)
     {
         
-        if(State.Satellites[State.loadindex] != NULL)
+        if(OrbitData.Satellites[OrbitData.loadindex] != NULL)
         {
-            if(strlen(State.Satellites[State.loadindex]->Name()) == 0)
+            if(strlen(OrbitData.Satellites[OrbitData.loadindex]->Name()) == 0)
                 break;
-            State.Satellites[State.loadindex]->~SatelliteObject();
+            OrbitData.Satellites[OrbitData.loadindex]->~SatelliteObject();
         }
     }
-    if((State.tleallindex = ReadTLELines(State.tleinfolistup[NowTLE]->local, false, *((bool *)sgp4on))) <= 0)
+    if((OrbitData.tleallindex = ReadTLELines(OrbitData.tleinfolistup[NowTLE]->local, false, *((bool *)sgp4on))) <= 0)
         console.AddLog("[ERROR]##Invalid type of TLE File. Please check again.");
     
     
     AppUi.Display_load = false;
     AppUi.Display_TLE = true;
-    State.NowTracking = true;
-    State.loadindex = 0;
+    OrbitData.NowTracking = true;
+    OrbitData.loadindex = 0;
     return NULL;
 }
 

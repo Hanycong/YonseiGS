@@ -427,23 +427,15 @@ struct StateCheckUnit{
     bool GUI = true;
     bool SbandUse = false;
     bool Debugmode = false;
-    bool NowTracking = true;
-    bool TrackThread = true;
     bool AllThread = true;
     bool Sleep = false;
-    bool ModelRefreshRequired = false;
 
 
-    int loadindex;
-    int tleallindex;
 
 
 
     
 
-    SatelliteObject * Satellites[32768];
-    SatelliteObject * Fatellites;
-    TLEinfo * tleinfolistup[64];
 
      // ===== ADDED for satellite tabs =====
 };
@@ -5428,4 +5420,5 @@ typedef struct __attribute__ ((packed)) {
 #include "autopilot_state.h"
 #include "rotator_state.h"
 #include "link_state.h"
+#include "orbit_state.h"
 #endif
