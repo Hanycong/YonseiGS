@@ -452,7 +452,7 @@ if (should_close) {
             mim::svc::StopAllThreads();
         }
 
-        if(State.Autopilot)
+        if(AutoPilotCfg.Autopilot)
         {
             sleep(10);
         }

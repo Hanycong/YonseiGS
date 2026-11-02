@@ -110,7 +110,7 @@ void StopAllThreads()
     State.RotatorReading = false;
 
     State.InitializeRequired = true;
-    State.Autopilot = false;
+    AutoPilotCfg.Autopilot = false;
     printf("Joined thread : \n");
     for(int i = 0; i < SLOT_COUNT; i++)
     {

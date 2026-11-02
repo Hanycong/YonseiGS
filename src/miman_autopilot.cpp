@@ -67,11 +67,11 @@ void * AutoPilot(void *)
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
         RotatorSetTo(0, 0);
-        console.AddLog("[Auto]Beacon Success : %d, Ping Success : %d CMD Success : %d", BeaconCounter, PingCounter, State.CMDCount);
+        console.AddLog("[Auto]Beacon Success : %d, Ping Success : %d CMD Success : %d", BeaconCounter, PingCounter, AutoPilotCfg.CMDCount);
         BeaconCounter = 0;
         PingCounter = 0;
     }
-    State.Successed = 0;
+    AutoPilotCfg.Successed = 0;
     return NULL;
 
 }
@@ -94,7 +94,7 @@ int AutoPilot_task()
     int NowTracking = GetNowTracking();
     if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !State.Satellites[NowTracking]) {
         console.AddLog("[ERROR]##[Auto]Invalid tracking at start. trk=%d", NowTracking);
-        State.Autopilot = false;
+        AutoPilotCfg.Autopilot = false;
         return -2;
     }
     snprintf(NowTrackingNameBuffer, sizeof(NowTrackingNameBuffer), "%s",
@@ -102,7 +102,7 @@ int AutoPilot_task()
     int SatIndex = GetNowTracking();
     if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !State.Satellites[SatIndex]) return -2;
 
-    while(State.Autopilot)
+    while(AutoPilotCfg.Autopilot)
     {
 
         bool BeaconAvailable = false;
@@ -118,7 +118,7 @@ int AutoPilot_task()
                                                         State.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Second());
         console.AddLog("[Auto]Max Elevation : %.2lf° Please Keep Devices On.", State.Satellites[SatIndex]->_max_elevation[NextValuablePath] * RAD_TO_DEG);
         // printf("%f\n", (State.Satellites[SatIndex]->_nextaos[NextValuablePath] -  DateTime::Now(true)).TotalMinutes());
-        while(State.Autopilot)
+        while(AutoPilotCfg.Autopilot)
         {
             if((State.Satellites[SatIndex]->_nextaos[NextValuablePath] -  DateTime::Now(true)).TotalMinutes() < 5.0f)
                 break;
@@ -126,7 +126,7 @@ int AutoPilot_task()
         }
         PathGenerator(SatIndex);
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -142,9 +142,9 @@ int AutoPilot_task()
 
         //Task
         //Check Beacon Received
-        while(State.Autopilot && State.DoBeaconCheck)
+        while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoBeaconCheck)
         {
-            if(BeaconCounter >= State.iteration)
+            if(BeaconCounter >= AutoPilotCfg.iteration)
             {
                 BeaconAvailable = true;
                 break;
@@ -157,14 +157,14 @@ int AutoPilot_task()
             }
         }
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
         }
 
 
-        if(State.AMPmode)
+        if(AutoPilotCfg.AMPmode)
         {
     // --- DEBUG: show computed minutes-to-LOS ---
     double min_to_los =
@@ -176,7 +176,7 @@ int AutoPilot_task()
     // throttle log inside loop (e.g., once per 1 second)
     DateTime last_log = DateTime::Now(false);
 
-    while (State.Autopilot)
+    while (AutoPilotCfg.Autopilot)
     {
         min_to_los =
             (State.Satellites[SatIndex]->_nextlos[NextValuablePath] - DateTime::Now(false)).TotalMinutes();
@@ -200,7 +200,7 @@ int AutoPilot_task()
     // console.AddLog("[DBG][AMP] exit-wait: min_to_los=%.3f Autopilot=%d",
                 //    min_to_los, (int)State.Autopilot);
 
-    if (!State.Autopilot)
+    if (!AutoPilotCfg.Autopilot)
         return 0;
 
 
@@ -217,7 +217,7 @@ int AutoPilot_task()
                 console.AddLog("[ERROR]##If you don't want it, restart the software.");
                 console.AddLog("[ERROR]##Remind the AMP would be turned off after the timer goes on");
                 console.AddLog("[ERROR]##even if you restart the software.");
-            while (State.AmpTime > 0 && State.Autopilot)
+            while (State.AmpTime > 0 && AutoPilotCfg.Autopilot)
             {
                 usleep(20000); // 20 ms
             }
@@ -240,18 +240,18 @@ int AutoPilot_task()
         }
         
         /*-----------------Calibration Code-------------------*/
-        if (State.DoBaudCalibration) {
+        if (AutoPilotCfg.DoBaudCalibration) {
             mim::svc::StartThread(mim::svc::SLOT_CALIBRATION, csp_baud_calibration, NULL);
         }
-        if (State.DoFreqCalibration) {
+        if (AutoPilotCfg.DoFreqCalibration) {
             mim::svc::StartThread(mim::svc::SLOT_CALIBRATION, csp_freq_calibration, NULL);
         }
         /*-----------------------------------------------------*/
 
         //Ping Try
-        while(State.Autopilot && State.DoPing && NowOn(SatIndex, NextValuablePath))
+        while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoPing && NowOn(SatIndex, NextValuablePath))
         {
-            sleep(State.SpanTime);
+            sleep(AutoPilotCfg.SpanTime);
             
             mim::svc::StartPingConsole();
             if(PingCounter >= 5)
@@ -269,7 +269,7 @@ int AutoPilot_task()
         }
 
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -280,13 +280,13 @@ int AutoPilot_task()
         //Send Watchdog
 
 if (wdt_notsent &&
-    State.Autopilot &&
-    State.DoCMD &&
+    AutoPilotCfg.Autopilot &&
+    AutoPilotCfg.DoCMD &&
     NowOn(SatIndex, NextValuablePath))
 {
     /* ================= Get EPS HK 3형제 ==================-*/
 
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd4[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x14,0x47};
 
@@ -306,7 +306,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     sleep(10);
 }
 
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd5[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x17,0x44};
 
@@ -325,7 +325,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     sleep(10);
 }
 
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd6[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x1a,0x00};
 
@@ -349,7 +349,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     /* ================= AX100 ================= */
     uint8_t cmd1[8] = {0x18,0x50,0xC0,0x00,0x00,0x01,0x06,0x70};
 
-    for (int i = 0; i < 2 && State.Autopilot; i++)
+    for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
     {
         packetsign* pkt =
             (packetsign*)malloc(2 + 2 + 4 + sizeof(cmd1));
@@ -367,13 +367,13 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         sleep(10);
     }
 
-    if (!State.Autopilot) return 0;
+    if (!AutoPilotCfg.Autopilot) return 0;
 
     /* ================= EPS P60 DOCK ================= */
     uint8_t cmd2[12] =
         {0x18,0x75,0xC0,0x00,0x00,0x05,0x1e,0xa2,0xe8,0x03,0x00,0x00};
 
-    for (int i = 0; i < 2 && State.Autopilot; i++)
+    for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
     {
         packetsign* pkt =
             (packetsign*)malloc(2 + 2 + 4 + sizeof(cmd2));
@@ -396,7 +396,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
 
     /* ================= Get EPS HK 3형제 ==================-*/
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd7[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x14,0x47};
 
@@ -414,7 +414,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     console.AddLog("[Auto]EPS P60 DOCK GET TABLE HK Command Sent (%d/2)", i+1);
     sleep(10);
 }
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd8[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x17,0x44};
 
@@ -432,7 +432,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     console.AddLog("[Auto]EPS P60 PDU GET TABLE HK Command Sent (%d/2)", i+1);
     sleep(10);
 }
-for (int i = 0; i < 2 && State.Autopilot; i++)
+for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
 {
     uint8_t cmd9[8] = {0x18,0x75,0xC0,0x00,0x00,0x01,0x1a,0x00};
 
@@ -474,7 +474,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
     wdt_notsent = false;
 }
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -482,11 +482,11 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
         bool ulsigdone = false;
         //UL SIGNAL
-        if((State.DoFTPDL || State.DoFTPUL) && NowOn(SatIndex, NextValuablePath))
+        if((AutoPilotCfg.DoFTPDL || AutoPilotCfg.DoFTPUL) && NowOn(SatIndex, NextValuablePath))
         {
             int NowBecCount = BeaconCounter;
         while (NowBecCount == BeaconCounter &&
-            State.Autopilot &&
+            AutoPilotCfg.Autopilot &&
             NowOn(SatIndex, NextValuablePath))
         {
             usleep(5000); 
@@ -495,7 +495,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
             uint32_t initial = get_rx_bytes();
             DateTime inittime = DateTime::Now(false);
             
-            while(State.Autopilot && !ulsigdone)
+            while(AutoPilotCfg.Autopilot && !ulsigdone)
             {
                 if((inittime - DateTime::Now()).TotalSeconds() > 30)
                     console.AddLog("[Auto]No Beacon for 30 seconds. Try Next Task.");
@@ -504,7 +504,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
                 DateTime BeaconStandard = DateTime::Now(false);
                 for(int i = 0; i < 10; i++)
                 {
-                    sleep(State.SpanTime);
+                    sleep(AutoPilotCfg.SpanTime);
                     if((DateTime::Now(false) - State.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() > 0)
                     {
                         // console.AddLog("[ERROR]##[Auto]Failed to Send UL Signal.");
@@ -523,7 +523,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
                 console.AddLog("Try to config total rx bytes.");
                 int trying = 0;
-                while(State.Autopilot && NowOn(SatIndex, NextValuablePath))
+                while(AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath))
                 {
                     if(gs_rparam_get_uint32(setup->ax100_node, 4, 0x003C, 0xB00B, setup->default_timeout, get_rx_bytes_address()) == GS_OK)
                     {
@@ -555,7 +555,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
         
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -606,7 +606,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         //     }
         // }
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -614,13 +614,13 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
         //FTP DL
         //Temporary condition : max_el > 30.0deg
-        while(State.Autopilot && State.DoFTPDL && NowOn(SatIndex, NextValuablePath))
+        while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoFTPDL && NowOn(SatIndex, NextValuablePath))
         {
             if(FtpShared.ftp_mode)
                 {usleep(10000); 
                     continue;
                 }
-            sleep(State.SpanTime);
+            sleep(AutoPilotCfg.SpanTime);
             if(!NowOn(SatIndex, NextValuablePath))
             {
                 console.AddLog("[Auto]Stop FTP Download after LOS.");
@@ -640,7 +640,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
             
         }
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -648,11 +648,11 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
         //FTP UL
         //Temporary condition : max_el > 30.0deg
-        while(State.Autopilot && State.DoFTPUL && NowOn(SatIndex, NextValuablePath))
+        while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoFTPUL && NowOn(SatIndex, NextValuablePath))
         {
             if(FtpShared.ftp_mode)
                 continue;
-            sleep(State.SpanTime);
+            sleep(AutoPilotCfg.SpanTime);
             if(!NowOn(SatIndex, NextValuablePath))
             {
                 console.AddLog("[Auto]Stop FTP Upload after LOS.");
@@ -673,7 +673,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         }
         
 
-        if(!State.Autopilot)
+        if(!AutoPilotCfg.Autopilot)
         {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User.");
             return 0;
@@ -684,7 +684,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         mim::svc::JoinThread(mim::svc::SLOT_FTP);
         mim::svc::WaitTx();
 
-        while(State.Autopilot && NowOn(SatIndex, NextValuablePath))
+        while(AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath))
             usleep(20000);
         State.Doppler = false;
         mim::svc::JoinThread(mim::svc::SLOT_DOPPLER);
@@ -696,7 +696,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         console.AddLog("[OK]##[Auto]Finish Engaging.");
         
         RotatorSetTo(0, 0);
-        console.AddLog("[Auto]Beacon Success : %d, Ping Success : %d CMD Success : %d", BeaconCounter, PingCounter, State.CMDCount);
+        console.AddLog("[Auto]Beacon Success : %d, Ping Success : %d CMD Success : %d", BeaconCounter, PingCounter, AutoPilotCfg.CMDCount);
         BeaconCounter = 0;
         PingCounter = 0;
 
@@ -780,7 +780,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         SatIndex = GetNowTracking();
         if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !State.Satellites[SatIndex]) return -2;
         // BEFORE calling PathGenerator()
-        if (!State.Autopilot) {
+        if (!AutoPilotCfg.Autopilot) {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User (before PathGenerator).");
             return 0;
         }

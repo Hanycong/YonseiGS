@@ -29,20 +29,20 @@ static CFE_MSG_CommandHeader dummy_hdr;
 namespace mim {
 namespace vm {
 
-bool * AutoPilotVM::DoBeaconCheck() { return &State.DoBeaconCheck; }
-bool * AutoPilotVM::DoPing()        { return &State.DoPing; }
-bool * AutoPilotVM::DoCmd()         { return &State.DoCMD; }
-bool * AutoPilotVM::AmpMode()       { return &State.AMPmode; }
-int *  AutoPilotVM::Iteration()     { return &State.iteration; }
-int *  AutoPilotVM::SpanTime()      { return &State.SpanTime; }
+bool * AutoPilotVM::DoBeaconCheck() { return &AutoPilotCfg.DoBeaconCheck; }
+bool * AutoPilotVM::DoPing()        { return &AutoPilotCfg.DoPing; }
+bool * AutoPilotVM::DoCmd()         { return &AutoPilotCfg.DoCMD; }
+bool * AutoPilotVM::AmpMode()       { return &AutoPilotCfg.AMPmode; }
+int *  AutoPilotVM::Iteration()     { return &AutoPilotCfg.iteration; }
+int *  AutoPilotVM::SpanTime()      { return &AutoPilotCfg.SpanTime; }
 
-bool AutoPilotVM::Running() const { return State.Autopilot; }
+bool AutoPilotVM::Running() const { return AutoPilotCfg.Autopilot; }
 void AutoPilotVM::Start() { mim::svc::StartAutoPilot(); }
 void AutoPilotVM::Stop()  { mim::svc::StopAutoPilot(); }
 
 int AutoPilotVM::BeaconCount() const { return BeaconCounter; }
 int AutoPilotVM::PingCount() const   { return PingCounter; }
-int AutoPilotVM::CmdCount() const    { return State.CMDCount; }
+int AutoPilotVM::CmdCount() const    { return AutoPilotCfg.CMDCount; }
 bool AutoPilotVM::QueuedCommandReady(int i) const { return SatCMD[i] != NULL; }
 
 uint32_t * AutoPilotVM::TestMsgId()   { return &test_msgid; }

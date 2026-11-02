@@ -155,7 +155,7 @@ void ImGui_StatusBar_Body(float W) {
     };
     mode("Engage",    State.Engage);
     mode("Doppler",   State.Doppler);
-    mode("AutoPilot", State.Autopilot);
+    mode("AutoPilot", AutoPilotCfg.Autopilot);
     mode("AMP",       State.AMPON);
 }
 

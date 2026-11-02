@@ -1164,8 +1164,8 @@ void * task_uplink_onorbit(void * sign_)
             {
                 packetsign* confirmlist =  PacketDecoder(confirm_);
                 uint8_t * retcode = (uint8_t *)&confirmlist->Data[0];
-                console.AddLog("[OK]Received Command Reply. Retcode %d CMD Count %d", *retcode, State.CMDCount);
-                State.CMDCount ++;
+                console.AddLog("[OK]Received Command Reply. Retcode %d CMD Count %d", *retcode, AutoPilotCfg.CMDCount);
+                AutoPilotCfg.CMDCount ++;
                 if(confirmlist!=NULL)
                 {
                     free(confirmlist);

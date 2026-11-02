@@ -66,13 +66,13 @@ void StopDoppler()
 
 void StartAutoPilot()
 {
-    State.Autopilot = true;
+    AutoPilotCfg.Autopilot = true;
     StartThread(SLOT_AUTOPILOT, AutoPilot, NULL);
 }
 
 void StopAutoPilot()
 {
-    State.Autopilot = false;
+    AutoPilotCfg.Autopilot = false;
     JoinThread(SLOT_AUTOPILOT);
 }
 

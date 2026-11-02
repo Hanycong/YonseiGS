@@ -444,10 +444,8 @@ struct StateCheckUnit{
     bool TrackThread = true;
     bool AllThread = true;
     bool Sleep = false;
-    bool Autopilot = false;
     bool ModelRefreshRequired = false;
     bool AMPON = false;
-    bool AMPmode = true;
     time_t AmpTime;
     struct tm * AmpTM;
 
@@ -457,17 +455,6 @@ struct StateCheckUnit{
 
     int loadindex;
     int tleallindex;
-    int iteration = 3;
-    int SpanTime = 5;
-    int CMDCount = 0;
-    int Successed = 0;
-    bool DoBeaconCheck = false;
-    bool DoPing = true;
-    bool DoCMD = true;
-    bool DoFTPDL = false;
-    bool DoFTPUL = false;
-    bool DoBaudCalibration = false;
-    bool DoFreqCalibration = false;
 
 
     int Paramtype = 0;
@@ -5459,4 +5446,5 @@ typedef struct __attribute__ ((packed)) {
 #include "ui_state.h"
 #include "sat_tabs.h"
 #include "ftp_state.h"
+#include "autopilot_state.h"
 #endif
