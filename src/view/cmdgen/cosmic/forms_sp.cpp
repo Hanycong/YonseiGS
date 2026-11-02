@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -61,31 +63,8 @@ case 212: { // SP DEPLOY (CC 2)
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {0x00, (uint8_t)(sizeof(SP_DEPLOY) - 7)};
-
-        memcpy(command->spdeploy.CmdHeader,     &mid, 2);
-        memcpy(command->spdeploy.CmdHeader + 2, seq,  2);
-        memcpy(command->spdeploy.CmdHeader + 4, len,  2);
-        memcpy(command->spdeploy.CmdHeader + 6, &fnccode, 1);
-
-        command->spdeploy.CmdHeader[7] = 0;
-        uint16_t total = sizeof(SP_DEPLOY);
-        const uint8_t *p = (const uint8_t *)&command->spdeploy;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
-        command->spdeploy.CmdHeader[7] = crc;
-
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(SP_DEPLOY));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(SP_DEPLOY);
-        memcpy(pkt->Data, &command->spdeploy, sizeof(SP_DEPLOY));
-
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::EncodeCfeCommand(&command->spdeploy, sizeof(SP_DEPLOY), msgid, fnccode);
+        mim::tc::SendTelecommand(&command->spdeploy, sizeof(SP_DEPLOY));
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
