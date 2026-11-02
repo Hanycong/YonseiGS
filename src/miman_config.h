@@ -493,10 +493,6 @@ struct StateCheckUnit{
     ftpinfo ftplistup[64];
 
      // ===== ADDED for satellite tabs =====
-    int  ActiveSatIndex   = 0;          // 현재 활성 위성 탭 (Satellites[] 인덱스)
-    int  VisibleSats[8]   = {0,-1,-1,-1,-1,-1,-1,-1};  // 탭으로 띄울 위성들 (-1=빈슬롯)
-    int  VisibleSatsCount = 1;
-    int  ActiveFuncTab    = 1;          // 0=Pre-Pass, 1=Pass Operation, 2=Post-Pass
 };
 
 #ifdef __cplusplus
@@ -5474,4 +5470,5 @@ typedef struct __attribute__ ((packed)) {
 
 
 #include "ui_state.h"
+#include "sat_tabs.h"
 #endif

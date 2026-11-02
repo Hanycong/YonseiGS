@@ -40,11 +40,11 @@ void ImGui_SatelliteTabs(float W) {
     ImGui::BeginChild("##sattabs", ImVec2(W, 56), false,
                       ImGuiWindowFlags_NoScrollbar);
 
-    for (int slot = 0; slot < State.VisibleSatsCount; slot++) {
-        int sat = State.VisibleSats[slot];
+    for (int slot = 0; slot < SatTabs.VisibleSatsCount; slot++) {
+        int sat = SatTabs.VisibleSats[slot];
         if (sat < 0 || !State.Satellites[sat]) continue;
 
-        bool active = (sat == State.ActiveSatIndex);
+        bool active = (sat == SatTabs.ActiveSatIndex);
         ImVec4 col  = GetVisibleSatColor(slot);
 
         ImGui::PushStyleColor(ImGuiCol_Button,
@@ -131,7 +131,7 @@ void ImGui_StatusBar_Body(float W) {
     pill("S-band",  State.SbandUse);
 
     ImGui::SameLine(0, 20);
-    int sat = State.ActiveSatIndex;
+    int sat = SatTabs.ActiveSatIndex;
     if (sat >= 0 && State.Satellites[sat]) {
         ImGui::PushStyleColor(ImGuiCol_Text, TEXT_DIM);
         ImGui::Text("Track:");
@@ -193,7 +193,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
 
     if (ImGui::BeginTabBar("##functabs", ImGuiTabBarFlags_None)) {
         if (ImGui::BeginTabItem("1. Pre-Pass")) {
-            State.ActiveFuncTab = 0;
+            SatTabs.ActiveFuncTab = 0;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
             ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
@@ -210,7 +210,7 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("2. Pass Operation")) {
-            State.ActiveFuncTab = 1;
+            SatTabs.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
             ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
