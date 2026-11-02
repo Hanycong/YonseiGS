@@ -756,7 +756,7 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
         State.tleallindex = SAT_MAX_NUM;
         if((State.tleallindex = ReadTLELines_Errorhandling(State.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
             console.AddLog("[ERROR]##Invalid type of TLE File. Please check again.");
-        State.Display_TLE = true;
+        AppUi.Display_TLE = true;
        
         sleep(3);
         if (NowTracking < 0 || NowTracking >= SAT_MAX_NUM || !State.Satellites[NowTracking]) {
@@ -798,8 +798,8 @@ for (int i = 0; i < 2 && State.Autopilot; i++)
 
 
         // PathGenerator(GetNowTracking());
-        State.Display_load = false;
-        State.Display_TLE = false;
+        AppUi.Display_load = false;
+        AppUi.Display_TLE = false;
         printf("Finish Autopilot.\n");
     }
     return 0;
@@ -846,7 +846,7 @@ int TLE_Autoupdate_Test()
     State.tleallindex = 32768;
     if((State.tleallindex = ReadTLELines_Errorhandling(State.tleinfolistup[NowTLE]->local, NowTrackingNameBuffer,false, false)) <= 0)
         printf("[ERROR]##Invalid type of TLE File. Please check again.\n");
-    State.Display_TLE = true;
+    AppUi.Display_TLE = true;
     
     sleep(3);
 
@@ -866,8 +866,8 @@ int TLE_Autoupdate_Test()
     sleep(3);
     SetNowTracking(NowTracking);
     PathGenerator(GetNowTracking());
-    State.Display_load = false;
-    State.Display_TLE = false;
+    AppUi.Display_load = false;
+    AppUi.Display_TLE = false;
     printf("Finish Autopilot.\n");
     return 0;
 }

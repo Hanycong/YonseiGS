@@ -157,16 +157,16 @@ void ImGui_MainMenu()
 
                 if (ImGui::BeginMenu("File"))
                 {
-                    if(ImGui::MenuItem("FDS Manager"))    State.Display_FDS = true;
-                    if(ImGui::MenuItem("TLE Manager"))    State.Display_TLE = true;
-                    if(ImGui::MenuItem("S-band Manager")) State.Display_Sband = true;
+                    if(ImGui::MenuItem("FDS Manager"))    AppUi.Display_FDS = true;
+                    if(ImGui::MenuItem("TLE Manager"))    AppUi.Display_TLE = true;
+                    if(ImGui::MenuItem("S-band Manager")) AppUi.Display_Sband = true;
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Hardware"))
                 {
-                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
-                    if(ImGui::MenuItem("GS100 Param 1")) State.Display_paramt1 = true;
-                    if(ImGui::MenuItem("GS100 Param 5")) State.Display_paramt5 = true;
+                    if(ImGui::MenuItem("GS100 Param 0")) AppUi.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 1")) AppUi.Display_paramt1 = true;
+                    if(ImGui::MenuItem("GS100 Param 5")) AppUi.Display_paramt5 = true;
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Test"))
@@ -211,17 +211,17 @@ void ImGui_MainMenu()
                 }
                 if (ImGui::BeginMenu("Tools"))
                 {
-                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 0")) AppUi.Display_paramt0 = true;
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Debug"))
                 {
-                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 0")) AppUi.Display_paramt0 = true;
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Help"))
                 {
-                    if(ImGui::MenuItem("GS100 Param 0")) State.Display_paramt0 = true;
+                    if(ImGui::MenuItem("GS100 Param 0")) AppUi.Display_paramt0 = true;
                     ImGui::EndMenu();
                 }
                 

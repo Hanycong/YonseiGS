@@ -327,37 +327,37 @@ if (should_close) {
 
 
             //Display Popup Windows
-            if (State.Display_paramt0)
-                State.Display_paramt0 = popup_param_table0();
+            if (AppUi.Display_paramt0)
+                AppUi.Display_paramt0 = popup_param_table0();
             
-            if (State.Display_paramt1)
-                State.Display_paramt1 = popup_param_table1();
+            if (AppUi.Display_paramt1)
+                AppUi.Display_paramt1 = popup_param_table1();
 
-            if (State.Display_paramt5)
-                State.Display_paramt5 = popup_param_table5();
+            if (AppUi.Display_paramt5)
+                AppUi.Display_paramt5 = popup_param_table5();
 
             // if (State.Display_CMD)
             //     State.Display_CMD = popup_cmd();
 
-            if (State.Display_Setup)
-                State.Display_Setup = popup_setup(setup);
+            if (AppUi.Display_Setup)
+                AppUi.Display_Setup = popup_setup(setup);
 
-            if(State.Display_load)
-                State.Display_load = popup_load();
+            if(AppUi.Display_load)
+                AppUi.Display_load = popup_load();
             else
             {
-                if (State.Display_TLE)
-                    State.Display_TLE = popup_tle();
+                if (AppUi.Display_TLE)
+                    AppUi.Display_TLE = popup_tle();
             }
 
-            if (State.Display_FDS)
-                State.Display_FDS = popup_fds();
+            if (AppUi.Display_FDS)
+                AppUi.Display_FDS = popup_fds();
 
-            if (State.Display_Satinfo)
-                State.Display_Satinfo = popup_satinfo(Requested);
+            if (AppUi.Display_Satinfo)
+                AppUi.Display_Satinfo = popup_satinfo(Requested);
 
-            if (State.Display_Sband)
-                State.Display_Sband = popup_s_band();
+            if (AppUi.Display_Sband)
+                AppUi.Display_Sband = popup_s_band();
 
 
 

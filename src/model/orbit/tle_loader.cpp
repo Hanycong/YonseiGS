@@ -290,8 +290,8 @@ void * SatelliteInitialize(void * sgp4on)
 {
     
     State.tleallindex = 32768;
-    State.Display_TLE = false;
-    State.Display_load = true;
+    AppUi.Display_TLE = false;
+    AppUi.Display_load = true;
     for(State.loadindex = 0; State.loadindex < sizeof(State.Satellites) / sizeof(SatelliteObject *); State.loadindex++)
     {
         
@@ -306,8 +306,8 @@ void * SatelliteInitialize(void * sgp4on)
         console.AddLog("[ERROR]##Invalid type of TLE File. Please check again.");
     
     
-    State.Display_load = false;
-    State.Display_TLE = true;
+    AppUi.Display_load = false;
+    AppUi.Display_TLE = true;
     State.NowTracking = true;
     State.loadindex = 0;
     return NULL;

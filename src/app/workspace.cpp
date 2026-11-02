@@ -111,7 +111,7 @@ void ImGui_SatelliteTabs(float W) {
 
     // [+ Add] 버튼
     if (ImGui::Button(" + Add Satellite ", ImVec2(0, 46))) {
-        State.Display_TLE = true;   // 기존 popup 재활용
+        AppUi.Display_TLE = true;   // 기존 popup 재활용
     }
 
     ImGui::EndChild();

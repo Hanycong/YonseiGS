@@ -80,7 +80,7 @@ void ControlVM::TurnAmpOn()  { mim::svc::AmpOn(); }
 void ControlVM::TurnAmpOff() { mim::svc::AmpOff(); }
 
 // "CMD Manager"
-void ControlVM::OpenCommandManager() { State.Display_CMD = true; }
+void ControlVM::OpenCommandManager() { AppUi.Display_CMD = true; }
 
 // "Clear"
 void ControlVM::ClearCommandQueue()

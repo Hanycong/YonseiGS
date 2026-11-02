@@ -430,19 +430,8 @@ struct StateCheckUnit{
     bool RotatorReading = false;
     bool RotatorReadReady = false;
     bool SwitchConnection = false;
-    bool ImGuiLoadState = true;
     bool GS100_Connection = false;
     bool GUI = true;
-    bool Display_Setup = true;
-    bool Display_paramt0 = false;
-    bool Display_paramt1 = false;
-    bool Display_paramt5 = false;
-    bool Display_CMD = false;
-    bool Display_TLE = false;
-    bool Display_FDS = false;
-    bool Display_Satinfo = false;
-    bool Display_load = false;
-    bool Display_Sband = false;
     bool SbandUse = false;
     bool TRx_mode = false;
     bool downlink_mode = false;
@@ -473,7 +462,6 @@ struct StateCheckUnit{
     int SpanTime = 5;
     int CMDCount = 0;
     int Successed = 0;
-    bool Display_Autopilot = true;
     bool DoBeaconCheck = false;
     bool DoPing = true;
     bool DoCMD = true;
@@ -5485,4 +5473,5 @@ typedef struct __attribute__ ((packed)) {
 } reply_packet_t;
 
 
+#include "ui_state.h"
 #endif
