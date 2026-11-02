@@ -108,7 +108,7 @@ ${MIMAN_SRC}/model/orbit/track_target.cpp ${MIMAN_SRC}/model/orbit/pass_table.cp
 ${MIMAN_SRC}/model/device/ax100_radio.cpp ${MIMAN_SRC}/model/telemetry/telemetry_store.cpp ${MIMAN_SRC}/model/telecommand/direct_shell.cpp
 ${MIMAN_SRC}/model/device/csp_remote_param.cpp ${MIMAN_SRC}/model/telecommand/obc_ping.cpp ${MIMAN_SRC}/model/telecommand/command_queue.cpp ${MIMAN_SRC}/model/telecommand/ftp_client.cpp ${MIMAN_SRC}/model/telecommand/downlink_request.cpp
 ${MIMAN_SRC}/model/telecommand/ccsds_cmd.cpp ${MIMAN_SRC}/model/telecommand/telecommand_sender.cpp
-${MIMAN_SRC}/model/missions/cosmic/cosmic_procedures.cpp)
+${MIMAN_SRC}/model/missions/cosmic/cosmic_procedures.cpp ${MIMAN_SRC}/model/telecommand/scheduled_command.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
