@@ -422,6 +422,10 @@ typedef enum __attribute__ ((packed)) {
 
 
 // State Monitoring
+// 앱 수명주기 플래그 (시작·종료·초기화 요청·디버그 출력). 모듈별 상태는 분해해서 각 모듈 헤더로 옮겼다:
+//   app/ui_state.h (AppUi), app/sat_tabs.h (SatTabs), model/service/ftp_state.h (FtpShared),
+//   model/service/autopilot_state.h (AutoPilotCfg), model/device/rotator_state.h (RotatorFlags),
+//   model/device/link_state.h (LinkFlags), model/orbit/orbit_state.h (OrbitData)
 struct StateCheckUnit{
     bool InitializeRequired = false;
     bool GUI = true;
@@ -429,16 +433,8 @@ struct StateCheckUnit{
     bool Debugmode = false;
     bool AllThread = true;
     bool Sleep = false;
-
-
-
-
-
-    
-
-
-     // ===== ADDED for satellite tabs =====
 };
+
 
 #ifdef __cplusplus
 extern "C" {
