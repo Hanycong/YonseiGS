@@ -112,7 +112,8 @@ ${MIMAN_SRC}/model/missions/cosmic/cosmic_procedures.cpp ${MIMAN_SRC}/model/tele
 ${MIMAN_SRC}/viewmodel/setup_vm.cpp ${MIMAN_SRC}/viewmodel/gs100_param_vm.cpp ${MIMAN_SRC}/viewmodel/tle_vm.cpp
 ${MIMAN_SRC}/viewmodel/fds_vm.cpp ${MIMAN_SRC}/viewmodel/satinfo_vm.cpp ${MIMAN_SRC}/viewmodel/s_band_vm.cpp
 ${MIMAN_SRC}/model/service/console_log.cpp ${MIMAN_SRC}/view/console_view.cpp ${MIMAN_SRC}/view/autopilot_view.cpp ${MIMAN_SRC}/viewmodel/autopilot_vm.cpp
-${MIMAN_SRC}/model/telemetry/report_parser.cpp ${MIMAN_SRC}/model/telemetry/telemetry_logger.cpp)
+${MIMAN_SRC}/model/telemetry/report_parser.cpp ${MIMAN_SRC}/model/telemetry/telemetry_logger.cpp
+${MIMAN_SRC}/model/telecommand/cmd_generator_gs.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
