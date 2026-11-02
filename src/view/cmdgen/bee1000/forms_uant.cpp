@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -115,35 +117,10 @@ bool DrawBee1000UantForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  sequence[2] = {0xC0, 0x00};
-                uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(UANT_BurnChannelCmd_t) - 7)};
-
-                memcpy(command->uantburnchannelcmd.CmdHeader,       &mid,      sizeof(uint16_t));
-                memcpy(command->uantburnchannelcmd.CmdHeader + 2,   sequence,  sizeof(uint16_t));
-                memcpy(command->uantburnchannelcmd.CmdHeader + 4,   length,    sizeof(uint16_t));
-                memcpy(command->uantburnchannelcmd.CmdHeader + 6,   &fnccode,  sizeof(uint8_t));
-
-                command->uantburnchannelcmd.CmdHeader[7] = 0x00;
-                uint16_t len = sizeof(UANT_BurnChannelCmd_t);
-                const uint8_t *byteptr = (const uint8_t *)&command->uantburnchannelcmd;
-                uint8_t checksum = 0xFF;
-                while (len--) {
-                    checksum ^= *(byteptr++);
-                }
-                memcpy(command->uantburnchannelcmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
-
                 // 래핑해서 uplink
-                packetsign *TestPacket =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(UANT_BurnChannelCmd_t));
-                TestPacket->Identifier = HVD_TEST;
-                TestPacket->PacketType = MIM_PT_TMTC_TEST;
-                TestPacket->Length     = sizeof(UANT_BurnChannelCmd_t);
-                memcpy(TestPacket->Data, &command->uantburnchannelcmd,
-                    sizeof(UANT_BurnChannelCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)TestPacket);
+                mim::tc::EncodeCfeCommand(&command->uantburnchannelcmd, sizeof(UANT_BurnChannelCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->uantburnchannelcmd, sizeof(UANT_BurnChannelCmd_t));
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -179,35 +156,10 @@ bool DrawBee1000UantForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  sequence[2] = {0xC0, 0x00};
-                uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(UANT_SetSettingsCmd_t) - 7)};
-
-                memcpy(command->uantsetsettingscmd.CmdHeader,       &mid,      sizeof(uint16_t));
-                memcpy(command->uantsetsettingscmd.CmdHeader + 2,   sequence,  sizeof(uint16_t));
-                memcpy(command->uantsetsettingscmd.CmdHeader + 4,   length,    sizeof(uint16_t));
-                memcpy(command->uantsetsettingscmd.CmdHeader + 6,   &fnccode,  sizeof(uint8_t));
-
                 // CRC 계산
-                command->uantsetsettingscmd.CmdHeader[7] = 0x00;
-                uint16_t len = sizeof(UANT_SetSettingsCmd_t);
-                const uint8_t *byteptr = (const uint8_t *)&command->uantsetsettingscmd;
-                uint8_t checksum = 0xFF;
-                while (len--) {
-                    checksum ^= *(byteptr++);
-                }
-                memcpy(command->uantsetsettingscmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
 
-                packetsign *TestPacket =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(UANT_SetSettingsCmd_t));
-                TestPacket->Identifier = HVD_TEST;
-                TestPacket->PacketType = MIM_PT_TMTC_TEST;
-                TestPacket->Length     = sizeof(UANT_SetSettingsCmd_t);
-                memcpy(TestPacket->Data, &command->uantsetsettingscmd,
-                    sizeof(UANT_SetSettingsCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)TestPacket);
+                mim::tc::EncodeCfeCommand(&command->uantsetsettingscmd, sizeof(UANT_SetSettingsCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->uantsetsettingscmd, sizeof(UANT_SetSettingsCmd_t));
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -244,35 +196,10 @@ bool DrawBee1000UantForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  sequence[2] = {0xC0, 0x00};
-                uint8_t  length[2]   = {0x00, (uint8_t)(sizeof(UANT_AutoDeployCmd_t) - 7)};
-
-                memcpy(command->uantautodeploycmd.CmdHeader,       &mid,      sizeof(uint16_t));
-                memcpy(command->uantautodeploycmd.CmdHeader + 2,   sequence,  sizeof(uint16_t));
-                memcpy(command->uantautodeploycmd.CmdHeader + 4,   length,    sizeof(uint16_t));
-                memcpy(command->uantautodeploycmd.CmdHeader + 6,   &fnccode,  sizeof(uint8_t));
-
                 // CRC 계산
-                command->uantautodeploycmd.CmdHeader[7] = 0x00;
-                uint16_t len = sizeof(UANT_AutoDeployCmd_t);
-                const uint8_t *byteptr = (const uint8_t *)&command->uantautodeploycmd;
-                uint8_t checksum = 0xFF;
-                while (len--) {
-                    checksum ^= *(byteptr++);
-                }
-                memcpy(command->uantautodeploycmd.CmdHeader + 7, &checksum, sizeof(uint8_t));
 
-                packetsign *TestPacket =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(UANT_AutoDeployCmd_t));
-                TestPacket->Identifier = HVD_TEST;
-                TestPacket->PacketType = MIM_PT_TMTC_TEST;
-                TestPacket->Length     = sizeof(UANT_AutoDeployCmd_t);
-                memcpy(TestPacket->Data, &command->uantautodeploycmd,
-                    sizeof(UANT_AutoDeployCmd_t));
-
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)TestPacket);
+                mim::tc::EncodeCfeCommand(&command->uantautodeploycmd, sizeof(UANT_AutoDeployCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&command->uantautodeploycmd, sizeof(UANT_AutoDeployCmd_t));
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
