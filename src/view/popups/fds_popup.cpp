@@ -32,29 +32,23 @@
 
 
 #include "popups_common.h"
+#include "fds_vm.h"
 
 using namespace mim;
 
 bool popup_fds()
 {
+    mim::vm::FdsVM & vm = mim::vm::FdsViewModel();
     ImGui::OpenPopup("FDS Manager");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(640, 300), ImGuiCond_Appearing);
     if ( ImGui::BeginPopupModal("FDS Manager", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
         ImGui::Text("FDS Path");
-        ImGui::InputText("##FDSPath", FDSFilePath, sizeof(FDSFilePath), 0, NULL);
+        ImGui::InputText("##FDSPath", vm.Path(), vm.PathSize(), 0, NULL);
         if (ImGui::Button("Load FDS", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetContentRegionAvail().y)))
         {
-            ReadTLELines(FDSFilePath, true);
-            if(strlen(State.Fatellites->Name()) != 0)
-            {
-                State.Fatellites->use = true;
-            }
-            else
-                console.AddLog("[ERROR]##Cannot Load FDS File.");
-            // State.Fatellites = new SatelliteObject(Tle(), Yonsei, false);
-            SatelliteModelInitialize(-1);
+            vm.Load();
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();
             return false;

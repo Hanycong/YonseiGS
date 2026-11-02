@@ -124,9 +124,7 @@ uint16_t msgidinfo;
 
 // SelectButtonTextBuf / DeleteButtonTextBuf / SearchBuf / tlepopupindex -> viewmodel/tle_vm (TleVM 멤버, 행 버튼 라벨은 View 지역 버퍼)
 bool sgp4check = false;
-char FDSFilePath[256] = "../bin/fds/fds.dat";
-char SatWindowLabelBuf[64];
-char inputbuf[1024];
+// FDSFilePath / SatWindowLabelBuf / inputbuf -> viewmodel/fds_vm, satinfo_vm, s_band_vm (멤버)
 extern Sband * sgs;
 
 char ComboboxLabel[32];

@@ -32,11 +32,13 @@
 
 
 #include "popups_common.h"
+#include "s_band_vm.h"
 
 using namespace mim;
 
 bool popup_s_band()
 {
+    mim::vm::SbandVM & vm = mim::vm::SbandViewModel();
     ImGui::OpenPopup("S-Band Manager");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(720, 540), ImGuiCond_Appearing);
@@ -44,14 +46,14 @@ bool popup_s_band()
     {
         ImGui::Text("S-Band GS PC Remote Control");
         
-        ImGui::InputText("##s-bandcmd", inputbuf, sizeof(inputbuf), NULL, NULL);
+        ImGui::InputText("##s-bandcmd", vm.Command(), vm.CommandSize(), NULL, NULL);
         ImGui::SameLine();
         if(ImGui::Button("Send##s-band"))
         {
-            sgs->cmd(inputbuf);
+            vm.Send();
         }
         ImGui::BeginChild("##s-band", ImVec2(ImGui::GetContentRegionAvail().x, 650), true, mim_winflags);
-        ImGui::Text(sgs->buffer);
+        ImGui::Text(vm.Output());
         ImGui::EndChild();
         if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, 40)))
         {

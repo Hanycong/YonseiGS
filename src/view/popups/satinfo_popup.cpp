@@ -32,22 +32,21 @@
 
 
 #include "popups_common.h"
+#include "satinfo_vm.h"
 
 using namespace mim;
 
 bool popup_satinfo(int index)
 {
+    mim::vm::SatInfoVM & vm = mim::vm::SatInfoViewModel();
     if(index < -1)
         return false;
-    else if(index == -1)
-        sprintf(SatWindowLabelBuf, "Details : %s", State.Fatellites->Name());
-    else
-        sprintf(SatWindowLabelBuf, "Details : %s", State.Satellites[index]->Name());
+    const char * title = vm.Title(index);
 
-    ImGui::OpenPopup(SatWindowLabelBuf);
+    ImGui::OpenPopup(title);
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(1080, 640), ImGuiCond_Appearing);
-    if ( ImGui::BeginPopupModal(SatWindowLabelBuf, NULL, ImGuiWindowFlags_AlwaysAutoResize) )
+    if ( ImGui::BeginPopupModal(title, NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
         if (ImGui::BeginTable("##State.SatellitesInformations", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable, ImVec2(ImGui::GetContentRegionAvail().x, 480)));
         {
@@ -56,53 +55,19 @@ bool popup_satinfo(int index)
             ImGui::TableSetupColumn("LOS",       ImGuiTableColumnFlags_NoHide, 0.0f);
             ImGui::TableSetupColumn("Max Elevation",  ImGuiTableColumnFlags_NoHide, 0.0f);
             ImGui::TableHeadersRow();
-            
-            // ImGui::TableNextColumn();
-            if(index == -1)
+
+            mim::vm::PassRow row;
+            for(int i = 0; i < 64; i++)
             {
-                for(int i = 0; i < 64; i++)
-                {
-                    if(State.Fatellites->_max_elevation[i] <= 0.0f || State.Satellites[i]->_max_elevation[i] > 90.0f)
-                        break;
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::Text("%d/%d %d:%d:%d",   State.Fatellites->_nextaos[i].AddHours(9).Month(), 
-                                                    State.Fatellites->_nextaos[i].AddHours(9).Day(),
-                                                    State.Fatellites->_nextaos[i].AddHours(9).Hour(),
-                                                    State.Fatellites->_nextaos[i].AddHours(9).Minute(),
-                                                    State.Fatellites->_nextaos[i].AddHours(9).Second());
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d/%d %d:%d:%d",   State.Fatellites->_nextlos[i].AddHours(9).Month(), 
-                                                    State.Fatellites->_nextlos[i].AddHours(9).Day(),
-                                                    State.Fatellites->_nextlos[i].AddHours(9).Hour(),
-                                                    State.Fatellites->_nextlos[i].AddHours(9).Minute(),
-                                                    State.Fatellites->_nextlos[i].AddHours(9).Second());
-                    ImGui::TableSetColumnIndex(2);
-                    ImGui::Text("%.2f", State.Fatellites->_max_elevation[i] * RAD_TO_DEG);
-                }
-            }
-            else
-            {
-                for(int i = 0; i < 64; i++)
-                {
-                    if(State.Satellites[index]->_max_elevation[i] <= 0.0f || State.Satellites[index]->_max_elevation[i] > 90.0f)
-                        break;
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::Text("%d/%d %d:%d:%d",   State.Satellites[index]->_nextaos[i].AddHours(9).Month(), 
-                                                    State.Satellites[index]->_nextaos[i].AddHours(9).Day(),
-                                                    State.Satellites[index]->_nextaos[i].AddHours(9).Hour(),
-                                                    State.Satellites[index]->_nextaos[i].AddHours(9).Minute(),
-                                                    State.Satellites[index]->_nextaos[i].AddHours(9).Second());
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d/%d %d:%d:%d",   State.Satellites[index]->_nextlos[i].AddHours(9).Month(), 
-                                                    State.Satellites[index]->_nextlos[i].AddHours(9).Day(),
-                                                    State.Satellites[index]->_nextlos[i].AddHours(9).Hour(),
-                                                    State.Satellites[index]->_nextlos[i].AddHours(9).Minute(),
-                                                    State.Satellites[index]->_nextlos[i].AddHours(9).Second());
-                    ImGui::TableSetColumnIndex(2);
-                    ImGui::Text("%.2f", State.Satellites[index]->_max_elevation[i] * RAD_TO_DEG);
-                }
+                if(!vm.Pass(index, i, &row))
+                    break;
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%d/%d %d:%d:%d", row.aos.month, row.aos.day, row.aos.hour, row.aos.minute, row.aos.second);
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Text("%d/%d %d:%d:%d", row.los.month, row.los.day, row.los.hour, row.los.minute, row.los.second);
+                ImGui::TableSetColumnIndex(2);
+                ImGui::Text("%.2f", row.max_elevation_deg);
             }
             ImGui::EndTable();
             
