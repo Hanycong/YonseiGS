@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -55,35 +57,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_NoopCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucnoopcmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucnoopcmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucnoopcmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucnoopcmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucnoopcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_NoopCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucnoopcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucnoopcmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_NoopCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_NoopCmd_t);
-            memcpy(pkt->Data, &command->payuzucnoopcmd,
-                   sizeof(PAYUZUC_NoopCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucnoopcmd, sizeof(PAYUZUC_NoopCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucnoopcmd, sizeof(PAYUZUC_NoopCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -108,35 +83,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_ResetCountersCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucresetcounterscmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucresetcounterscmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucresetcounterscmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucresetcounterscmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucresetcounterscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_ResetCountersCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucresetcounterscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucresetcounterscmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_ResetCountersCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_ResetCountersCmd_t);
-            memcpy(pkt->Data, &command->payuzucresetcounterscmd,
-                   sizeof(PAYUZUC_ResetCountersCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucresetcounterscmd, sizeof(PAYUZUC_ResetCountersCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucresetcounterscmd, sizeof(PAYUZUC_ResetCountersCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -168,35 +116,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_PingCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucpingcmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucpingcmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucpingcmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucpingcmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucpingcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_PingCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucpingcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucpingcmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_PingCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_PingCmd_t);
-            memcpy(pkt->Data, &command->payuzucpingcmd,
-                   sizeof(PAYUZUC_PingCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucpingcmd, sizeof(PAYUZUC_PingCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucpingcmd, sizeof(PAYUZUC_PingCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -229,35 +150,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_SetModeCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucsetmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucsetmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucsetmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucsetmodecmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucsetmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_SetModeCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucsetmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucsetmodecmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_SetModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_SetModeCmd_t);
-            memcpy(pkt->Data, &command->payuzucsetmodecmd,
-                   sizeof(PAYUZUC_SetModeCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucsetmodecmd, sizeof(PAYUZUC_SetModeCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucsetmodecmd, sizeof(PAYUZUC_SetModeCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -283,35 +177,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_MemoryStatusCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucmemorystatuscmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucmemorystatuscmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucmemorystatuscmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucmemorystatuscmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucmemorystatuscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_MemoryStatusCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucmemorystatuscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucmemorystatuscmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_MemoryStatusCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_MemoryStatusCmd_t);
-            memcpy(pkt->Data, &command->payuzucmemorystatuscmd,
-                   sizeof(PAYUZUC_MemoryStatusCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucmemorystatuscmd, sizeof(PAYUZUC_MemoryStatusCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucmemorystatuscmd, sizeof(PAYUZUC_MemoryStatusCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -343,35 +210,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_SetExposureCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucsetexposurecmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucsetexposurecmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucsetexposurecmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucsetexposurecmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucsetexposurecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_SetExposureCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucsetexposurecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucsetexposurecmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_SetExposureCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_SetExposureCmd_t);
-            memcpy(pkt->Data, &command->payuzucsetexposurecmd,
-                   sizeof(PAYUZUC_SetExposureCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucsetexposurecmd, sizeof(PAYUZUC_SetExposureCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucsetexposurecmd, sizeof(PAYUZUC_SetExposureCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -404,35 +244,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_CaptureCmd_t) - 7)
-            };
-
-            memcpy(command->payuzuccapturecmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzuccapturecmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzuccapturecmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzuccapturecmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzuccapturecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_CaptureCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzuccapturecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzuccapturecmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_CaptureCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_CaptureCmd_t);
-            memcpy(pkt->Data, &command->payuzuccapturecmd,
-                   sizeof(PAYUZUC_CaptureCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzuccapturecmd, sizeof(PAYUZUC_CaptureCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzuccapturecmd, sizeof(PAYUZUC_CaptureCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -467,35 +280,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_DownloadCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucdownloadcmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucdownloadcmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucdownloadcmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucdownloadcmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucdownloadcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_DownloadCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucdownloadcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucdownloadcmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_DownloadCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_DownloadCmd_t);
-            memcpy(pkt->Data, &command->payuzucdownloadcmd,
-                   sizeof(PAYUZUC_DownloadCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucdownloadcmd, sizeof(PAYUZUC_DownloadCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucdownloadcmd, sizeof(PAYUZUC_DownloadCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -529,35 +315,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_ReadRegisterCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucreadregistercmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucreadregistercmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucreadregistercmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucreadregistercmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucreadregistercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_ReadRegisterCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucreadregistercmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucreadregistercmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_ReadRegisterCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_ReadRegisterCmd_t);
-            memcpy(pkt->Data, &command->payuzucreadregistercmd,
-                   sizeof(PAYUZUC_ReadRegisterCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucreadregistercmd, sizeof(PAYUZUC_ReadRegisterCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucreadregistercmd, sizeof(PAYUZUC_ReadRegisterCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -592,35 +351,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_WriteRegisterCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucwriteregistercmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucwriteregistercmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucwriteregistercmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucwriteregistercmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucwriteregistercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_WriteRegisterCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucwriteregistercmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucwriteregistercmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_WriteRegisterCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_WriteRegisterCmd_t);
-            memcpy(pkt->Data, &command->payuzucwriteregistercmd,
-                   sizeof(PAYUZUC_WriteRegisterCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucwriteregistercmd, sizeof(PAYUZUC_WriteRegisterCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucwriteregistercmd, sizeof(PAYUZUC_WriteRegisterCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -656,35 +388,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_DownloadAllCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucdownloadallcmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucdownloadallcmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucdownloadallcmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucdownloadallcmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucdownloadallcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_DownloadAllCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucdownloadallcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucdownloadallcmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_DownloadAllCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_DownloadAllCmd_t);
-            memcpy(pkt->Data, &command->payuzucdownloadallcmd,
-                   sizeof(PAYUZUC_DownloadAllCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucdownloadallcmd, sizeof(PAYUZUC_DownloadAllCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucdownloadallcmd, sizeof(PAYUZUC_DownloadAllCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -717,35 +422,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_MosaicCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucmosaiccmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucmosaiccmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucmosaiccmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucmosaiccmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucmosaiccmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_MosaicCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucmosaiccmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucmosaiccmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_MosaicCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_MosaicCmd_t);
-            memcpy(pkt->Data, &command->payuzucmosaiccmd,
-                   sizeof(PAYUZUC_MosaicCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucmosaiccmd, sizeof(PAYUZUC_MosaicCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucmosaiccmd, sizeof(PAYUZUC_MosaicCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -780,35 +458,8 @@ bool DrawBee1000PayuzucForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYUZUC_DownloadAllCmd_t) - 7)
-            };
-
-            memcpy(command->payuzucdownloadallchildcmd.CmdHeader,     &mid, 2);
-            memcpy(command->payuzucdownloadallchildcmd.CmdHeader + 2, seq,  2);
-            memcpy(command->payuzucdownloadallchildcmd.CmdHeader + 4, len,  2);
-            memcpy(command->payuzucdownloadallchildcmd.CmdHeader + 6, &fnccode, 1);
-
-            command->payuzucdownloadallchildcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUZUC_DownloadAllCmd_t);
-            const uint8_t *p = (const uint8_t *)&command->payuzucdownloadallchildcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command->payuzucdownloadallchildcmd.CmdHeader[7] = crc;
-
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYUZUC_DownloadAllCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYUZUC_DownloadAllCmd_t);
-            memcpy(pkt->Data, &command->payuzucdownloadallchildcmd,
-                   sizeof(PAYUZUC_DownloadAllCmd_t));
-
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand(&command->payuzucdownloadallchildcmd, sizeof(PAYUZUC_DownloadAllCmd_t), msgid, fnccode);
+            mim::tc::SendTelecommand(&command->payuzucdownloadallchildcmd, sizeof(PAYUZUC_DownloadAllCmd_t));
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
