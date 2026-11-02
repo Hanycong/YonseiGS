@@ -1402,31 +1402,8 @@ case 80: {
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid_be = htons(msgid);
-        uint16_t ccsds_len_be = htons((uint16_t)(sizeof(ADCS_SatOrbitParamConfigCmd_t) - 7));
-
-        memcpy(command->adcssatorbitparamconfigcmd.CmdHeader + 0, &mid_be, 2);
-        command->adcssatorbitparamconfigcmd.CmdHeader[2] = 0xC0;
-        command->adcssatorbitparamconfigcmd.CmdHeader[3] = 0x00;
-        memcpy(command->adcssatorbitparamconfigcmd.CmdHeader + 4, &ccsds_len_be, 2);
-        memcpy(command->adcssatorbitparamconfigcmd.CmdHeader + 6, &fnccode, 1);
-        command->adcssatorbitparamconfigcmd.CmdHeader[7] = 0x00;
-
-        uint16_t total = (uint16_t)sizeof(ADCS_SatOrbitParamConfigCmd_t);
-        const uint8_t *pp = (const uint8_t *)&command->adcssatorbitparamconfigcmd;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(pp++);
-        command->adcssatorbitparamconfigcmd.CmdHeader[7] = crc;
-
-        packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_SatOrbitParamConfigCmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(ADCS_SatOrbitParamConfigCmd_t);
-
-        memcpy(pkt->Data, &command->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t));
-
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::EncodeCfeCommand(&command->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t), msgid, fnccode);
+        mim::tc::SendTelecommand(&command->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t));
     }
 
     break;

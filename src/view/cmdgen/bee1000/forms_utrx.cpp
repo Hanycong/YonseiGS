@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -55,43 +57,11 @@ case 206: {
     if (ImGui::Button("Generate CMD"))
     {
         WriteSystemName(msgid);
-        mim::svc::WaitTx();
-
 
         uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
 
-
-        uint16_t mid_be = htons(msgid);
-        memcpy(cmd, &mid_be, sizeof(uint16_t));   
-
-        cmd[2] = 0xC0;
-        cmd[3] = 0x00;
-
-
-        uint16_t ccsds_len = htons(sizeof(cmd) - 7); 
-        memcpy(cmd + 4, &ccsds_len, sizeof(uint16_t)); 
-
-        // CC
-        cmd[6] = fnccode;   // 0
-
-
-        cmd[7] = 0x00;
-
-
-        uint8_t checksum = 0xFF;
-        for (size_t i = 0; i < sizeof(cmd); ++i)
-            checksum ^= cmd[i];
-        cmd[7] = checksum;
-
-
-        packetsign* TestPacket =
-            (packetsign*)malloc(2 + 2 + 4 + sizeof(cmd));
-        TestPacket->Identifier = HVD_TEST;
-        TestPacket->PacketType = MIM_PT_TMTC_TEST;
-        TestPacket->Length     = sizeof(cmd);   
-        memcpy(TestPacket->Data, cmd, sizeof(cmd));
-
-        mim::svc::SendUplink((void*)TestPacket);
+        mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
+        mim::tc::SendTelecommand(cmd, sizeof(cmd));
     }
 
     break;
