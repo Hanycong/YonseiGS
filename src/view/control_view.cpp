@@ -6,6 +6,7 @@
 #include "control_popups.h"
 #include "cmdgen_view.h"
 #include "control_view.h"
+#include "ui_kit.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
@@ -25,32 +26,7 @@ void ImGui_ControlWindow(float fontscale)
     ImGui::End();
 }
 
-// 섹션 머리글: 흐린 글씨 + 구분선
-static void SectionHeader(const char * title)
-{
-    ImGui::Spacing();
-    ImGui::TextDisabled("%s", title);
-    ImGui::Separator();
-}
-
-// 2열 버튼 격자: col 0 은 줄 시작(왼쪽 절반), col 1 은 같은 줄 남은 칸
-static bool GridButton(const char * label, int col)
-{
-    float w;
-    if (col == 0)
-        w = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
-    else
-    {
-        ImGui::SameLine();
-        w = ImGui::GetContentRegionAvail().x;
-    }
-    return ImGui::Button(label, ImVec2(w, ImGui::GetFrameHeight() * 1.3f));
-}
-
-static bool WideButton(const char * label)
-{
-    return ImGui::Button(label, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight() * 1.3f));
-}
+using namespace mim::ui;
 
 void ImGui_ControlWindow_Body(float fontscale)
 {
@@ -91,20 +67,14 @@ void ImGui_ControlWindow_Body(float fontscale)
 
     SectionHeader("AMPLIFIER");
     mim::vm::AmpButton amp = vm.Amp();
-    if (amp.on)
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-    if (WideButton(amp.label))
+    if (ToggleWideButton(amp.label, amp.on))
     {
         if (amp.on || amp.timer)
             vm.TurnAmpOff();
         else
             vm.TurnAmpOn();
     }
-    if (amp.on)
-        ImGui::PopStyleColor();
 
-    // 팝업 창은 Pass Operation 열의 작은 글꼴이 아니라 기본 글꼴로 그린다
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 popup_size(600.0f, 380.0f);
     ImVec2 popup_pos((io.DisplaySize.x - popup_size.x) * 0.5f,
@@ -154,5 +124,4 @@ void ImGui_ControlWindow_Body(float fontscale)
         HMACWindow();
         ImGui::End();
     }
-    ImGui::PopFont();
 }

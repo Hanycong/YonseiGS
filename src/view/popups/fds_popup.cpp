@@ -32,6 +32,7 @@
 
 
 #include "popups_common.h"
+#include "ui_kit.h"
 #include "fds_vm.h"
 
 using namespace mim;
@@ -44,9 +45,11 @@ bool popup_fds()
     ImGui::SetNextWindowSize(ImVec2(640, 300), ImGuiCond_Appearing);
     if ( ImGui::BeginPopupModal("FDS Manager", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
-        ImGui::Text("FDS Path");
+        mim::ui::RowLabel("FDS Path", 5.0f);
+        ImGui::SetNextItemWidth(ImGui::GetFontSize() * 26.0f);
         ImGui::InputText("##FDSPath", vm.Path(), vm.PathSize(), 0, NULL);
-        if (ImGui::Button("Load FDS", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetContentRegionAvail().y)))
+        ImGui::Spacing();
+        if (ImGui::Button("Load FDS", ImVec2((ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f, mim::ui::ButtonHeight())))
         {
             vm.Load();
             ImGui::EndPopup();
@@ -54,7 +57,7 @@ bool popup_fds()
             return false;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+        if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
         {
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();

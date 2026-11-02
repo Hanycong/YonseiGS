@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "imgui.h"
+#include "ui_kit.h"
 #include "YonseiGS_config.h"     // TYPE_SYSCMD 등 쉘 명령 종류, cmd_packet_t
 #include "ax100_vm.h"
 #include "shell_vm.h"
@@ -17,7 +18,7 @@ void DrawAx100RparamTab(float fontscale)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
         ImGui::Text("Total RX Bytes(Beacon) : %"PRIu32, vm.TotalRxBytes());
-        ImGui::SetWindowFontScale(0.6 * fontscale);
+        ImGui::SetWindowFontScale(fontscale);
         ImGui::PopStyleColor();
         
         ImGui::BeginChild("##AX100_shell_typeselect", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.8), true, NULL);
@@ -42,8 +43,7 @@ void DrawAx100RparamTab(float fontscale)
 
 
 
-        ImGui::Text("RSSI busy        ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("RSSI busy", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct4_rssi_busy", ImGuiDataType_S16, vm.RssiBusy(), NULL, NULL, "%d");
         if(ImGui::Button("Load##ax100_direct4_rssi_busy", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -72,8 +72,7 @@ void DrawAx100RparamTab(float fontscale)
 
 
         
-        ImGui::Text("CAN enable       ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CAN enable", 8.0f);
         ImGui::Checkbox("##ax100_direct0_can_en", vm.CanEnable());
         if(ImGui::Button("Load##ax100_direct0_can_en", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
         {
@@ -89,8 +88,7 @@ void DrawAx100RparamTab(float fontscale)
 
 
 
-        ImGui::Text("TX inhibit       ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX inhibit", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct0_tx_inhibit", ImGuiDataType_U32, vm.TxInhibit(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct0_tx_inhibit", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -108,8 +106,7 @@ void DrawAx100RparamTab(float fontscale)
 
 
 
-        ImGui::Text("TX power         ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX power", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct0_tx_pwr", ImGuiDataType_U8, vm.TxPower(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct0_tx_pwr", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -129,8 +126,7 @@ void DrawAx100RparamTab(float fontscale)
 
         ImGui::Spacing();
         
-        ImGui::Text("CSP rtable       ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CSP rtable", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputText("##ax100_direct0_csp_rtable", vm.CspRtable(), vm.CspRtableSize());
         if(ImGui::Button("Load##ax100_direct0_csp_rtable", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -164,8 +160,7 @@ void DrawAx100RparamTab(float fontscale)
         }
         ImGui::Spacing();
 
-        ImGui::Text("RX guard         ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("RX guard", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct1_rx_guard", ImGuiDataType_U16, vm.RxGuard(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct1_rx_guard", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -179,8 +174,7 @@ void DrawAx100RparamTab(float fontscale)
         }
         ImGui::Spacing();
         
-        ImGui::Text("TX guard         ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX guard", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct5_tx_guard", ImGuiDataType_U16, vm.TxGuard(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct5_tx_guard", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -194,8 +188,7 @@ void DrawAx100RparamTab(float fontscale)
         }
         ImGui::Spacing();
 
-        ImGui::Text("RX Baudrate         ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("RX Baudrate", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct1_rxbaud", ImGuiDataType_U32, vm.RxBaud(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct1_rx_baud", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -209,8 +202,7 @@ void DrawAx100RparamTab(float fontscale)
         }
         ImGui::Spacing();
 
-        ImGui::Text("TX Baudrate         ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX Baudrate", 8.0f);
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         ImGui::InputScalar("##ax100_direct5_txbaud", ImGuiDataType_U32, vm.TxBaud(), NULL, NULL, "%u");
         if(ImGui::Button("Load##ax100_direct5_txbaud", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
@@ -261,32 +253,27 @@ void DrawAx100RparamTab(float fontscale)
         {
         case TYPE_SYSCMD:
         {   
-            ImGui::Text("Out U8   ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("Out U8", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputScalar("##shell_syscmd_redirout", ImGuiDataType_U8, &(shell.Command()->required.syscmd.redir_out), NULL, NULL, "%u");
-            ImGui::Text("CMD      ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("CMD", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputText("##shell_syscmd_cmd", shell.Command()->required.syscmd.cmd, sizeof(shell.Command()->required.syscmd.cmd));
             break;
         }
         case TYPE_SYSCMD_REDIR:
         {   
-            ImGui::Text("CMD      ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("CMD", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputText("##shell_syscmd_cmd1", shell.Command()->required.syscmd_redir.cmd, sizeof(shell.Command()->required.syscmd_redir.cmd));
-            ImGui::Text("Redirect ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("Redirect", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputText("##shell_syscmd_cmd2", shell.Command()->required.syscmd_redir.redir_path, sizeof(shell.Command()->required.syscmd_redir.redir_path));
             break;
         }
         case TYPE_SET_REDIR_PATH:
         {   
-            ImGui::Text("Path     ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("Path", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputText("##shell_syscmd_cmd4", shell.Command()->required.set_redir.redir_path, sizeof(shell.Command()->required.set_redir.redir_path));
             ImGui::Text("");
@@ -294,8 +281,7 @@ void DrawAx100RparamTab(float fontscale)
         }
         case TYPE_DS_CLEANUP:
         {   
-            ImGui::Text("Path     ");
-            ImGui::SameLine();
+            mim::ui::RowLabel("Path", 8.0f);
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
             ImGui::InputScalar("##shell_syscmd_redirout5", ImGuiDataType_U8, &(shell.Command()->required.ds_cleanup.opt), NULL, NULL, "%u");
             ImGui::Text("");

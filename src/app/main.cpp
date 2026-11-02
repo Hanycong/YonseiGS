@@ -145,9 +145,12 @@ int main(int, char**)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
     // Load Fonts
-    io.Fonts->AddFontFromFileTTF(fontfile, 30.0f);       // [0] 기본 (Inconsolata 30)
-    mim::font_title    = io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans-Bold.ttf", 36.0f);   // [1] 타이틀 bold 큰 글씨
-    mim::font_subtitle = io.Fonts->AddFontFromFileTTF(fontfile, 20.0f);  
+    // 본문은 DroidSans(가독성 좋은 산세리프) 하나로 통일, 고정폭이 필요한 콘솔만 Inconsolata
+    io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans.ttf", 20.0f);                          // [0] 기본 본문
+    mim::font_title    = io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans-Bold.ttf", 36.0f);   // 타이틀
+    mim::font_subtitle = io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans.ttf", 18.0f);        // 부제
+    mim::font_section  = io.Fonts->AddFontFromFileTTF("../bin/font/DroidSans-Bold.ttf", 15.0f);   // 섹션 머리글
+    mim::font_mono     = io.Fonts->AddFontFromFileTTF(fontfile, 18.0f);                           // 콘솔 (Inconsolata)  
     
     ImVec4 clear_color = ImVec4(0.925f, 0.870f, 0.945f, 1.00f);  
     int WinWidth;

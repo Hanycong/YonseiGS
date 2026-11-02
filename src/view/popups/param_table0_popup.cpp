@@ -11,6 +11,7 @@
 #include <csp/delay.h>
 
 #include "YonseiGS_config.h"
+#include "ui_kit.h"
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_csp.h"
 #include "YonseiGS_radial.h"
@@ -47,58 +48,41 @@ bool popup_param_table0()
     {
         ImGui::BeginChild("##Ptable0", ImVec2(ImGui::GetContentRegionAvail().x, 650), true, mim_winflags);
         ImGui::PushItemWidth(300);
-        ImGui::Text("RSSI Offset        : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("RSSI Offset", 11.0f);
         ImGui::InputScalar("##rssi_offset", ImGuiDataType_S8, &tbl.rssi_offset, NULL, NULL, "%d");
-        ImGui::Text("Max Temperature    : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Max Temperature", 11.0f);
         ImGui::InputScalar("°C##max_temp", ImGuiDataType_S16, &tbl.max_temp, NULL, NULL, "%d");
-        ImGui::Text("bgndrssl_ema       : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("bgndrssl_ema", 11.0f);
         ImGui::InputScalar("##bgndrssl_ema", ImGuiDataType_Float, &tbl.bgndrssl_ema);
-        ImGui::Text("CSP Node           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CSP Node", 11.0f);
         ImGui::InputScalar("##csp_node", ImGuiDataType_U8, &tbl.csp_node, NULL, NULL, "%u");
-        ImGui::Text("I2C                : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("I2C", 11.0f);
         ImGui::Checkbox("##i2c_enable", &tbl.i2c_en);
-        ImGui::Text("CAN                : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CAN", 11.0f);
         ImGui::Checkbox("##can_enable", &tbl.can_en);
-        ImGui::Text("EXTPTT             : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("EXTPTT", 11.0f);
         ImGui::Checkbox("##extptt_enable", &tbl.extptt_en);
         ImGui::SameLine();
         ImGui::InputScalar("##max_temp", ImGuiDataType_S8, &tbl.max_temp, NULL, NULL, "%d");
-        ImGui::Text("I2C Address        : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("I2C Address", 11.0f);
         ImGui::InputScalar("##i2c_addr", ImGuiDataType_U8, &tbl.i2c_addr, NULL, NULL, "%u");
-        ImGui::Text("I2C Frequency      : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("I2C Frequency", 11.0f);
         ImGui::InputScalar("kHz##i2c_khz", ImGuiDataType_U16, &tbl.i2c_khz, NULL, NULL, "%u");
-        ImGui::Text("CAN Frequency      : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CAN Frequency", 11.0f);
         ImGui::InputScalar("kHz##can_khz", ImGuiDataType_U16, &tbl.can_khz, NULL, NULL, "%u");
-        ImGui::Text("Reboot in          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Reboot in", 11.0f);
         ImGui::InputScalar("##reboot_in", ImGuiDataType_U16, &tbl.reboot_in, NULL, NULL, "%u");
-        ImGui::Text("TX Inhibit         : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX Inhibit", 11.0f);
         ImGui::InputScalar("##tx_inhibit", ImGuiDataType_U32, &tbl.tx_inhibit, NULL, NULL, "%u");
-        ImGui::Text("Store Log          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Store Log", 11.0f);
         ImGui::InputScalar("##log_store", ImGuiDataType_U8, &tbl.log_store, NULL, NULL, "%u");
-        ImGui::Text("TX Power           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("TX Power", 11.0f);
         ImGui::InputScalar("##tx_power", ImGuiDataType_U8, &tbl.tx_pwr, NULL, NULL, "%d");
-        ImGui::Text("Maximum TX Time    : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Maximum TX Time", 11.0f);
         ImGui::InputScalar("second##max_tx_time", ImGuiDataType_U16, &tbl.max_tx_time, NULL, NULL, "%u");
-        ImGui::Text("Maximum IDLE Time  : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Maximum IDLE Time", 11.0f);
         ImGui::InputScalar("second##max_idle_time", ImGuiDataType_U16, &tbl.max_idle_time, NULL, NULL, "%u");
-        ImGui::Text("CSP Routing Table  : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("CSP Routing Table", 11.0f);
         ImGui::InputText("##csp_rtable", tbl.csp_rtable, sizeof(tbl.csp_rtable));
         ImGui::PopItemWidth();
         ImGui::EndChild();

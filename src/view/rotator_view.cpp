@@ -4,94 +4,81 @@
 #include "imgui.h"
 #include "rotator_vm.h"
 #include "rotator_view.h"
+#include "ui_kit.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
 
-// YonseiGS_imgui.cpp 의 같은 이름 static 과 같은 값 (표 머리글 고정 행/열 수)
-static int freeze_cols = 1;
-static int freeze_rows = 1;
+using namespace mim::ui;
 
 void ImGui_RotatorWindow_Body(float fontscale)
 {
     mim::vm::RotatorVM & vm = mim::vm::RotatorViewModel();
 
-    if(vm.Engaging() == false)
+    // ───── 자동 추적
+    SectionHeader("AUTO TRACKING");
+    bool engaging = vm.Engaging();
+    if (ToggleWideButton(engaging ? "Stop Rotator Engaging" : "Start Rotator Engaging", engaging))
     {
-        if (ImGui::Button("Start Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
-        {
-            vm.StartEngage();
-        }
-    }
-    else
-    {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-        if (ImGui::Button("Stop Rotator Engaging", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
-        {
+        if (engaging)
             vm.StopEngage();
-        }
-        ImGui::PopStyleColor();
-    }
-    
-    
-    ImGui::Text("Rotator Manual Control");
-    ImGui::Text("AZ : ");
-    ImGui::SameLine();
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::InputInt("##tg_az", vm.TargetAzimuth());
-    ImGui::PopItemWidth();
-    ImGui::Text("EL : ");
-    ImGui::SameLine();
-    ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-    ImGui::InputInt("##tg_el", vm.TargetElevation());
-    ImGui::PopItemWidth();
-    if (ImGui::Button("Set", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
-    {
-        vm.MoveToTarget();
-        //memset(&ControlBuf,0,sizeof(ControlBuf));
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Init", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
-    {
-        vm.MoveToHome();
+        else
+            vm.StartEngage();
     }
 
-    if (ImGui::BeginTable("##Rotspectable", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 3.8)))
+    // ───── 현재 지향
+    SectionHeader("CURRENT POSITION");
+    if (ImGui::BeginTable("##Rotspectable", 3, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH))
     {
-        ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
-        ImGui::TableSetupColumn("Band",         ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_NoHide, 0.0f);
-        ImGui::TableSetupColumn("Azimuth",      ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_NoHide, 0.0f);
-        ImGui::TableSetupColumn("Elevation",    ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_NoHide, 0.0f);
+        ImGui::TableSetupColumn("Band");
+        ImGui::TableSetupColumn("Azimuth");
+        ImGui::TableSetupColumn("Elevation");
         ImGui::TableHeadersRow();
-        ImGui::TableNextColumn();
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("UHF");
+        ImGui::TextDisabled("UHF");
         ImGui::TableSetColumnIndex(1);
         ImGui::Text("%d °", vm.CurrentAzimuth());
         ImGui::TableSetColumnIndex(2);
         ImGui::Text("%d °", vm.CurrentElevation());
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        ImGui::Text("S-band");
+        ImGui::TextDisabled("S-band");
         ImGui::TableSetColumnIndex(1);
-        // ImGui::Text("%d °", Now.az_now);
+        ImGui::TextDisabled("-");
         ImGui::TableSetColumnIndex(2);
-        // ImGui::Text("%d °", Now.el_now);
+        ImGui::TextDisabled("-");
         ImGui::EndTable();
     }
 
+    // ───── 수동 제어
+    SectionHeader("MANUAL CONTROL");
+    RowLabel("Azimuth", 6.0f);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+    ImGui::InputInt("##tg_az", vm.TargetAzimuth());
+    RowLabel("Elevation", 6.0f);
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+    ImGui::InputInt("##tg_el", vm.TargetElevation());
+    if (GridButton("Move to Target##Set", 0))
+    {
+        vm.MoveToTarget();
+    }
+    if (GridButton("Home (0, 0)##Init", 1))
+    {
+        vm.MoveToHome();
+    }
 
-    if(ImGui::Button("Rotator On", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
+    // ───── 전원 / IO
+    SectionHeader("POWER");
+    if (GridButton("Rotator On", 0))
     {
         vm.RotatorOn();
     }
-    ImGui::SameLine();
-    if(ImGui::Button("Rotator OFF", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+    if (GridButton("Rotator Off##RotatorOFF", 1))
     {
         vm.RotatorOff();
     }
-    if(ImGui::Button("Rotator IO Buffer Free", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+    if (WideButton("Flush IO Buffer##RotatorIOBufferFree"))
     {
         vm.FlushIo();
     }

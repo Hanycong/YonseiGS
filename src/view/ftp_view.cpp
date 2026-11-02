@@ -9,28 +9,13 @@
 #include "ftp_vm.h"
 #include "control_vm.h"       // AMP 버튼 (Control 창과 같은 버튼)
 #include "ftp_view.h"
+#include "ui_kit.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
 
 
-// 섹션 머리글: 흐린 글씨 + 구분선
-static void SectionHeader(const char * title)
-{
-    ImGui::Spacing();
-    ImGui::TextDisabled("%s", title);
-    ImGui::Separator();
-}
-
-// 왼쪽 라벨 열 너비를 맞춘 행 라벨
-static void RowLabel(const char * label)
-{
-    ImGui::AlignTextToFramePadding();
-    ImGui::TextUnformatted(label);
-    ImGui::SameLine(ImGui::GetFontSize() * 6.0f);
-}
-
-static float ButtonHeight() { return ImGui::GetFrameHeight() * 1.3f; }
+using namespace mim::ui;
 
 // 파일 선택 콤보 + 실행 버튼 한 줄
 static bool FileComboWithButton(mim::vm::FtpVM & vm, const char * button)
@@ -242,17 +227,13 @@ void ImGui_CommandWindow_Body(float fontscale)
     ImGui::Separator();
     mim::vm::ControlVM & amp_vm = mim::vm::ControlViewModel();
     mim::vm::AmpButton amp = amp_vm.Amp();
-    if (amp.on)
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-    if (ImGui::Button(amp.label, ImVec2(ImGui::GetContentRegionAvail().x, ButtonHeight())))
+    if (ToggleWideButton(amp.label, amp.on))
     {
         if (amp.on || amp.timer)
             amp_vm.TurnAmpOff();
         else
             amp_vm.TurnAmpOn();
     }
-    if (amp.on)
-        ImGui::PopStyleColor();
 }
 
 void ImGui_CommandWindow(float fontscale)

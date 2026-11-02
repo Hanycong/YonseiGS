@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "YonseiGS_config.h"
+#include "ui_kit.h"
 #include "YonseiGS_imgui.h"
 #include "autopilot_vm.h"
 
@@ -38,12 +39,10 @@ void ImGui_AutoPilotWindow(float fontscale)
     // ImGui::SameLine();
     // ImGui::Checkbox("Freq Calibration", &State.DoFreqCalibration);
 
-    ImGui::Text("iteration");
-    ImGui::SameLine();
+    mim::ui::RowLabel("iteration", 10.0f);
     ImGui::InputInt("##AutoPilotIter", vm.Iteration());
 
-    ImGui::Text("Time Span");
-    ImGui::SameLine();
+    mim::ui::RowLabel("Time Span", 10.0f);
     ImGui::InputInt("##AutoPilotSpan", vm.SpanTime());
 
     if (!vm.Running())
@@ -100,17 +99,13 @@ int CMDDataGenerator(uint32_t msgid, uint16_t fnccode, void *Requested, size_t R
 	if(*vm.SchedulerOn())
 	{
         *vm.ChecksumOn() = true;
-		ImGui::Text("Execution Time     : ");
-		ImGui::SameLine();
+		mim::ui::RowLabel("Execution Time", 10.0f);
 		ImGui::InputScalar("##ExecutionTime", ImGuiDataType_U32, vm.ExecutionTime(), NULL, NULL, "%u");
-		ImGui::Text("Execution Window   : ");
-		ImGui::SameLine();
+		mim::ui::RowLabel("Execution Window", 10.0f);
 		ImGui::InputScalar("##ExecutionWindow", ImGuiDataType_U32, vm.ExecutionWindow(), NULL, NULL, "%u");
-		ImGui::Text("Entry ID           : ");
-		ImGui::SameLine();
+		mim::ui::RowLabel("Entry ID", 10.0f);
 		ImGui::InputScalar("##EntryID", ImGuiDataType_U16, vm.EntryId(), NULL, NULL, "%u");
-		ImGui::Text("GroupID            : ");
-		ImGui::SameLine();
+		mim::ui::RowLabel("GroupID", 10.0f);
 		ImGui::InputScalar("##GroupID", ImGuiDataType_U16, vm.GroupId(), NULL, NULL, "%u");
 	}
 	if(ImGui::Button("Generate", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))

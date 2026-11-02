@@ -11,6 +11,7 @@
 #include <csp/delay.h>
 
 #include "YonseiGS_config.h"
+#include "ui_kit.h"
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_csp.h"
 #include "YonseiGS_radial.h"
@@ -47,44 +48,31 @@ bool popup_param_table1()
     {
         ImGui::BeginChild("##Ptable1", ImVec2(ImGui::GetContentRegionAvail().x, 650), true, mim_winflags);
         ImGui::PushItemWidth(300);
-        ImGui::Text("Rx Frequency       : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Rx Frequency", 11.0f);
         ImGui::InputScalar("##freq", ImGuiDataType_U32, &tbl.freq, NULL, NULL, "%u");
-        ImGui::Text("BaudRate           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("BaudRate", 11.0f);
         ImGui::InputScalar("##baud", ImGuiDataType_U32, &tbl.baud, NULL, NULL, "%u");
-        ImGui::Text("modindex           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("modindex", 11.0f);
         ImGui::InputScalar("##modeindex", ImGuiDataType_Float, &tbl.modindex, NULL, NULL, "%f");
-        ImGui::Text("Guard              : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Guard", 11.0f);
         ImGui::InputScalar("##guard", ImGuiDataType_U16, &tbl.guard, NULL, NULL, "%u");
-        ImGui::Text("pllrang            : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("pllrang", 11.0f);
         ImGui::InputScalar("##pllrang", ImGuiDataType_U8, &tbl.pllrang, NULL, NULL, "%u");
-        ImGui::Text("mode               : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("mode", 11.0f);
         ImGui::InputScalar("##mode", ImGuiDataType_U8, &tbl.mode, NULL, NULL, "%u");
-        ImGui::Text("csp_hmac           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_hmac", 11.0f);
         ImGui::Checkbox("##csp_hmac", &tbl.csp_hmac);
-        ImGui::Text("csp_rs             : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_rs", 11.0f);
         ImGui::Checkbox("##csp_rs", &tbl.csp_rs);
-        ImGui::Text("csp_crc            : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_crc", 11.0f);
         ImGui::Checkbox("##csp_crc", &tbl.csp_crc);
-        ImGui::Text("csp_rand           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_rand", 11.0f);
         ImGui::Checkbox("##csp_rand", &tbl.csp_rand);
-        ImGui::Text("AX25 Call          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("AX25 Call", 11.0f);
         ImGui::InputText("##ax25_call", tbl.ax25_call, sizeof(tbl.ax25_call));
-        ImGui::Text("Bandwidth          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Bandwidth", 11.0f);
         ImGui::InputScalar("##bw", ImGuiDataType_U32, &tbl.bw, NULL, NULL, "%u");
-        ImGui::Text("AFC Range          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("AFC Range", 11.0f);
         ImGui::InputScalar("##afcrange", ImGuiDataType_S32, &tbl.afcrange, NULL, NULL, "%d");
         ImGui::PopItemWidth();
         ImGui::EndChild();

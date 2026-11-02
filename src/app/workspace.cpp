@@ -32,6 +32,7 @@
 
 
 #include "app_common.h"
+#include "ui_kit.h"
 
 using namespace mim;
 
@@ -119,22 +120,18 @@ void ImGui_SatelliteTabs(float W) {
 }
 
 void ImGui_StatusBar_Body(float W) {
-    auto pill = [](const char* name, bool ok) {
-        Dot(ok ? OK : ERR);
-        ImGui::SameLine(0, 4);
-        ImGui::TextUnformatted(name);
-        ImGui::SameLine(0, 14);
-    };
-    pill("GS100",   LinkFlags.GS100_Connection);
-    pill("Rotator", RotatorFlags.RotatorConnection);
-    pill("Switch",  LinkFlags.SwitchConnection);
-    pill("S-band",  State.SbandUse);
+    // 장비 연결 상태와 운용 모드를 같은 점등 규칙으로 표시: 녹색 = 연결/동작 중, 적색 = 끊김/정지
+    const float gap = ImGui::GetFontSize() * 1.1f;
+    mim::ui::StatusLamp("GS100",   LinkFlags.GS100_Connection);    ImGui::SameLine(0, gap);
+    mim::ui::StatusLamp("Rotator", RotatorFlags.RotatorConnection); ImGui::SameLine(0, gap);
+    mim::ui::StatusLamp("Switch",  LinkFlags.SwitchConnection);    ImGui::SameLine(0, gap);
+    mim::ui::StatusLamp("S-band",  State.SbandUse);
 
-    ImGui::SameLine(0, 20);
     int sat = SatTabs.ActiveSatIndex;
     if (sat >= 0 && OrbitData.Satellites[sat]) {
+        ImGui::SameLine(0, gap * 2.0f);
         ImGui::PushStyleColor(ImGuiCol_Text, TEXT_DIM);
-        ImGui::Text("Track:");
+        ImGui::TextUnformatted("Track");
         ImGui::PopStyleColor();
         ImGui::SameLine(0, 6);
         Dot(GetVisibleSatColor(sat));
@@ -144,19 +141,18 @@ void ImGui_StatusBar_Body(float W) {
         ImGui::PopStyleColor();
     }
 
-    ImGui::SameLine(W - 520);
-    auto mode = [](const char* n, bool on) {
-        Dot(on ? OK : TEXT_DIM);
-        ImGui::SameLine(0, 4);
-        ImGui::PushStyleColor(ImGuiCol_Text, on ? OK : TEXT_DIM);
-        ImGui::Text("%s", n);
-        ImGui::PopStyleColor();
-        ImGui::SameLine(0, 10);
-    };
-    mode("Engage",    RotatorFlags.Engage);
-    mode("Doppler",   LinkFlags.Doppler);
-    mode("AutoPilot", AutoPilotCfg.Autopilot);
-    mode("AMP",       LinkFlags.AMPON);
+    // 운용 모드는 오른쪽 정렬
+    const char * modes[] = {"Engage", "Doppler", "AutoPilot", "AMP"};
+    bool on[] = {RotatorFlags.Engage, LinkFlags.Doppler, AutoPilotCfg.Autopilot, LinkFlags.AMPON};
+    float lampW = ImGui::GetFontSize() * 0.44f + ImGui::GetFontSize() * 0.22f * 1.6f;
+    float groupW = 0;
+    for (int i = 0; i < 4; i++)
+        groupW += lampW + ImGui::CalcTextSize(modes[i]).x + (i ? gap : 0);
+    ImGui::SameLine(W - groupW - ImGui::GetFontSize());
+    for (int i = 0; i < 4; i++) {
+        if (i) ImGui::SameLine(0, gap);
+        mim::ui::StatusLamp(modes[i], on[i]);
+    }
 }
 
 void ImGui_StatusBar(float W) {
@@ -197,15 +193,15 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
             ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
-                ImGui_TrackWindow_Body(Rh * 0.5f);
+                ImGui_TrackWindow_Body(1.0f);
             ImGui::EndChild();
             ImGui::SameLine();
             ImGui::BeginChild("##col2", ImVec2(colW, colH), true);
-                ImGui_FrequencyWindow_Body(Rh * 0.5f);
+                ImGui_FrequencyWindow_Body(1.0f);
             ImGui::EndChild();
             ImGui::SameLine();
             ImGui::BeginChild("##col3", ImVec2(colW, colH), true);
-                ImGui_RotatorWindow_Body(Rh * 0.5f);
+                ImGui_RotatorWindow_Body(1.0f);
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
@@ -213,8 +209,6 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             SatTabs.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
-            // 세 열 모두 같은 작은 글꼴(Inconsolata 20)로 그린다. 기본 글꼴(30)은 이 탭에서 너무 크다
-            ImGui::PushFont(mim::font_subtitle);
             ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
                 ImGui_ControlWindow_Body(1.0f);
             ImGui::EndChild();
@@ -226,7 +220,6 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::BeginChild("##col3", ImVec2(colW, colH), true);
                 ImGui_BeaconWindow_Body(1.0f);
             ImGui::EndChild();
-            ImGui::PopFont();
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -235,5 +228,5 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
 
     // ───── 4. Console (탭 무관, 하단 고정)
     console.ChangeWindowSize(0, H - console_h, W, console_h);
-    console.Draw("General Console", &Showstate, Rh * 0.6f);
+    console.Draw("General Console", &Showstate, 1.0f);
 }

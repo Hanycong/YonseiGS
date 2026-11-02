@@ -11,6 +11,7 @@
 #include <csp/delay.h>
 
 #include "YonseiGS_config.h"
+#include "ui_kit.h"
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_csp.h"
 #include "YonseiGS_radial.h"
@@ -47,59 +48,41 @@ bool popup_param_table5()
     {
         ImGui::BeginChild("##Ptable5", ImVec2(ImGui::GetContentRegionAvail().x, 650), true, mim_winflags);
         ImGui::PushItemWidth(300);
-        ImGui::Text("Tx Frequency       : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Tx Frequency", 11.0f);
         ImGui::InputScalar("##freq", ImGuiDataType_U32, &tbl.freq, NULL, NULL, "%u");
-        ImGui::Text("BaudRate           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("BaudRate", 11.0f);
         ImGui::InputScalar("##baud", ImGuiDataType_U32, &tbl.baud, NULL, NULL, "%u");
-        ImGui::Text("modindex           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("modindex", 11.0f);
         ImGui::InputScalar("##modeindex", ImGuiDataType_Float, &tbl.modindex, NULL, NULL, "%f");
-        ImGui::Text("Guard              : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("Guard", 11.0f);
         ImGui::InputScalar("##guard", ImGuiDataType_U16, &tbl.guard, NULL, NULL, "%u");
-        ImGui::Text("pllrang            : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("pllrang", 11.0f);
         ImGui::InputScalar("##pllrang", ImGuiDataType_U8, &tbl.pllrang, NULL, NULL, "%u");
-        ImGui::Text("mode               : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("mode", 11.0f);
         ImGui::InputScalar("##mode", ImGuiDataType_U8, &tbl.mode, NULL, NULL, "%u");
-        ImGui::Text("csp_hmac           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_hmac", 11.0f);
         ImGui::Checkbox("##csp_hmac", &tbl.csp_hmac);
-        ImGui::Text("csp_rs             : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_rs", 11.0f);
         ImGui::Checkbox("##csp_rs", &tbl.csp_rs);
-        ImGui::Text("csp_crc            : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_crc", 11.0f);
         ImGui::Checkbox("##csp_crc", &tbl.csp_crc);
-        ImGui::Text("csp_rand           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("csp_rand", 11.0f);
         ImGui::Checkbox("##csp_rand", &tbl.csp_rand);
-        ImGui::Text("AX25 Call          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("AX25 Call", 11.0f);
         ImGui::InputText("##ax25_call", tbl.ax25_call, sizeof(tbl.ax25_call));
-        ImGui::Text("preamblen          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("preamblen", 11.0f);
         ImGui::InputScalar("##preamblen", ImGuiDataType_U8, &tbl.preamblen, NULL, NULL, "%u");
-        ImGui::Text("preambflags        : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("preambflags", 11.0f);
         ImGui::InputScalar("##preambflags", ImGuiDataType_U8, &tbl.preambflags, NULL, NULL, "%u");
-        ImGui::Text("intfrmlen          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("intfrmlen", 11.0f);
         ImGui::InputScalar("##intfrmlen", ImGuiDataType_U8, &tbl.intfrmlen, NULL, NULL, "%u");
-        ImGui::Text("intfrmflags        : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("intfrmflags", 11.0f);
         ImGui::InputScalar("##intfrmflags", ImGuiDataType_U8, &tbl.intfrmflags, NULL, NULL, "%u");
-        ImGui::Text("RSSI busy          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("RSSI busy", 11.0f);
         ImGui::InputScalar("##rssibusy", ImGuiDataType_S16, &tbl.rssibusy, NULL, NULL, "%d");
-        ImGui::Text("kup delay          : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("kup delay", 11.0f);
         ImGui::InputScalar("##kup_delay", ImGuiDataType_U8, &tbl.kup_delay, NULL, NULL, "%u");
-        ImGui::Text("PA Level           : ");
-        ImGui::SameLine();
+        mim::ui::RowLabel("PA Level", 11.0f);
         ImGui::InputScalar("##pa_level", ImGuiDataType_S16, &tbl.pa_level, NULL, NULL, "%d");
         ImGui::PopItemWidth();
         ImGui::EndChild();

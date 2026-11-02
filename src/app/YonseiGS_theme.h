@@ -21,7 +21,9 @@ namespace mim {
  *  폰트 핸들 (main.cpp에서 로딩, 사용처에서 PushFont)
  * ========================================================= */
 extern ImFont* font_title;       // 타이틀용 (DroidSans-Bold)
-extern ImFont* font_subtitle;    // 부제용 (Inconsolata)
+extern ImFont* font_subtitle;    // 부제용 (DroidSans 18)
+extern ImFont* font_section;     // 섹션 머리글 (DroidSans-Bold 15)
+extern ImFont* font_mono;        // 고정폭 (Inconsolata 18): 콘솔 로그, 16진수 값
  
 /* =========================================================
  *  1. 컬러 토큰  — Navy Dark (Yonsei Cubesat GS)

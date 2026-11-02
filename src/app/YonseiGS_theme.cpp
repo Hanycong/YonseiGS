@@ -15,6 +15,8 @@ namespace mim {
 
 ImFont* font_title    = nullptr;
 ImFont* font_subtitle = nullptr;
+ImFont* font_section  = nullptr;
+ImFont* font_mono     = nullptr;
 
 /* =========================================================
  *  Color utility — name hash → palette index

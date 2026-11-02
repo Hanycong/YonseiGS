@@ -8,6 +8,8 @@
 #include "imgui_internal.h"
 #include "track_vm.h"
 #include "track_view.h"
+#include "ui_kit.h"
+#include "YonseiGS_theme.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
@@ -16,8 +18,6 @@ void ImGui_TrackWindow_Body(float fontscale)
 {
     mim::vm::TrackVM & vm = mim::vm::TrackViewModel();
 
-    float scale = fontscale * 1.2f;
-    ImGui::SetWindowFontScale(scale);
     vm.BeginFrame();
 
     float totalW = ImGui::GetContentRegionAvail().x;
@@ -30,7 +30,8 @@ void ImGui_TrackWindow_Body(float fontscale)
     // ════════════════════════════════════════════
     ImGui::BeginChild("##top_panel", ImVec2(totalW, topH), false,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    ImGui::SetWindowFontScale(scale);
+
+    mim::ui::SectionHeader("PASS SCHEDULE");
 
     // ── 검색창 + TLE 버튼 ──
     float btnW = ImGui::CalcTextSize("TLE").x + ImGui::GetStyle().FramePadding.x * 4;
@@ -44,9 +45,7 @@ void ImGui_TrackWindow_Body(float fontscale)
 
     ImGui::Spacing();
 
-    float searchBarH = ImGui::GetFrameHeightWithSpacing()
-                     + ImGui::GetStyle().ItemSpacing.y * 2;
-    float tableH     = topH - searchBarH;
+    float tableH     = ImGui::GetContentRegionAvail().y;
     if (tableH < 50.f) tableH = 50.f;
 
     // ── 테이블 ──
@@ -55,7 +54,7 @@ void ImGui_TrackWindow_Body(float fontscale)
         ImGuiTableFlags_RowBg         |
         ImGuiTableFlags_Borders       |
         ImGuiTableFlags_Resizable     |
-        ImGuiTableFlags_SizingStretchProp,
+        ImGuiTableFlags_SizingFixedFit,
         ImVec2(ImGui::GetContentRegionAvail().x, tableH)))
     {
 
@@ -72,14 +71,15 @@ void ImGui_TrackWindow_Body(float fontscale)
             ImGui::TextUnformatted(buf);
         };
 
-        ImGui::SetWindowFontScale(scale);
-
-        ImGui::TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed,   24.f);
-        ImGui::TableSetupColumn("NAME",     ImGuiTableColumnFlags_WidthFixed,   150.f);
-        ImGui::TableSetupColumn("NEXT AOS", ImGuiTableColumnFlags_WidthFixed,   200.f);
-        ImGui::TableSetupColumn("NEXT LOS", ImGuiTableColumnFlags_WidthFixed,   200.f);
-        ImGui::TableSetupColumn("MAX EL",   ImGuiTableColumnFlags_WidthFixed,   100.f);
-        ImGui::TableSetupColumn("##Track",  ImGuiTableColumnFlags_WidthFixed,    55.f);
+    
+        // 이름 열만 늘어나고 나머지는 내용 폭에 맞춘다
+        float timeW = ImGui::CalcTextSize("6/3 00:00:00").x;
+        ImGui::TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed,   ImGui::CalcTextSize("00").x);
+        ImGui::TableSetupColumn("NAME",     ImGuiTableColumnFlags_WidthStretch, 1.0f);
+        ImGui::TableSetupColumn("NEXT AOS", ImGuiTableColumnFlags_WidthFixed,   timeW);
+        ImGui::TableSetupColumn("NEXT LOS", ImGuiTableColumnFlags_WidthFixed,   timeW);
+        ImGui::TableSetupColumn("MAX EL",   ImGuiTableColumnFlags_WidthFixed,   ImGui::CalcTextSize("MAX EL").x);
+        ImGui::TableSetupColumn("##Track",  ImGuiTableColumnFlags_WidthFixed,   ImGui::CalcTextSize("Track").x + ImGui::GetStyle().FramePadding.x * 2);
         ImGui::TableSetupScrollFreeze(0, 1);
 
         // 커스텀 헤더
@@ -159,7 +159,6 @@ void ImGui_TrackWindow_Body(float fontscale)
     // ════════════════════════════════════════════
     ImGui::BeginChild("##bottom_panel", ImVec2(totalW, botH), false,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    ImGui::SetWindowFontScale(scale);
 
     // 선택된 위성 이름 - Track 버튼 기준 (추적 대상)
     const char* selName = vm.TrackedName();
@@ -167,11 +166,11 @@ void ImGui_TrackWindow_Body(float fontscale)
     float dummyAz = vm.TrackedAzimuth();
     float dummyEl = vm.TrackedElevation();
 
-    // ── 구분선 + SELECTED ──
-    ImGui::Separator();
-    ImGui::TextColored(ImVec4(0.5f,0.5f,0.5f,1.f), "SELECTED");
+    // ── 하늘 지도 머리글 + 추적 대상 ──
+    mim::ui::SectionHeader("SKY VIEW");
+    ImGui::TextDisabled("Tracking");
     ImGui::SameLine();
-    ImGui::TextColored(ImVec4(0.35f,0.65f,1.f,1.f), selName ? selName : "—");
+    ImGui::TextColored(mim::INFO, "%s", selName ? selName : "-");
 
     ImGui::Spacing();
 
@@ -194,7 +193,7 @@ void ImGui_TrackWindow_Body(float fontscale)
     draw->AddRect(
         leftAreaPos,
         ImVec2(leftAreaPos.x + leftW, leftAreaPos.y + availH),
-        IM_COL32(120, 120, 120, 180), 4.f, 0, 1.5f);
+        mim::U32(mim::BORDER), 4.f, 0, 1.0f);
 
     // 극좌표계 위치 (테두리 박스 안 중앙)
     ImVec2 polarPos = ImVec2(leftAreaPos.x + polarPadX, leftAreaPos.y + polarPadY);
@@ -206,24 +205,25 @@ void ImGui_TrackWindow_Body(float fontscale)
     const char* rlbl[] = {"0°","30°","60°"};
     for (int r = 1; r <= 3; r++) {
         float rad = R * (float)(4-r) / 3.f;
-        draw->AddCircle(ctr, rad, IM_COL32(0,0,0,200), 64, 1.f);
-        draw->AddText(ImVec2(ctr.x + 3, ctr.y - rad - ImGui::GetFontSize() - 1),
-                      IM_COL32(0,0,0,200), rlbl[r-1]);
+        draw->AddCircle(ctr, rad, mim::U32(mim::BORDER_HI), 64, 1.f);
+        // 고도 라벨은 북동 대각선 위에 둔다 (N 라벨과 겹치지 않게)
+        draw->AddText(ImVec2(ctr.x + rad * 0.707f + 2, ctr.y - rad * 0.707f - ImGui::GetFontSize()),
+                      mim::U32(mim::TEXT_MUTE), rlbl[r-1]);
     }
 
     // 십자선
     draw->AddLine(ImVec2(ctr.x, ctr.y-R), ImVec2(ctr.x, ctr.y+R),
-                  IM_COL32(0,0,0,200));
+                  mim::U32(mim::BORDER));
     draw->AddLine(ImVec2(ctr.x-R, ctr.y), ImVec2(ctr.x+R, ctr.y),
-                  IM_COL32(0,0,0,200));
+                  mim::U32(mim::BORDER));
 
     // N/E/S/W
     float lo = R + 6.f;
     float fh = ImGui::GetFontSize();
-    draw->AddText(ImVec2(ctr.x - fh*0.3f, ctr.y - lo - fh), IM_COL32(0,0,0,200), "N");
-    draw->AddText(ImVec2(ctr.x + lo,      ctr.y - fh*0.5f), IM_COL32(0,0,0,200), "E");
-    draw->AddText(ImVec2(ctr.x - fh*0.3f, ctr.y + lo),      IM_COL32(0,0,0,200), "S");
-    draw->AddText(ImVec2(ctr.x - lo - fh, ctr.y - fh*0.5f), IM_COL32(0,0,0,200), "W");
+    draw->AddText(ImVec2(ctr.x - fh*0.3f, ctr.y - lo - fh), mim::U32(mim::TEXT_DIM), "N");
+    draw->AddText(ImVec2(ctr.x + lo,      ctr.y - fh*0.5f), mim::U32(mim::TEXT_DIM), "E");
+    draw->AddText(ImVec2(ctr.x - fh*0.3f, ctr.y + lo),      mim::U32(mim::TEXT_DIM), "S");
+    draw->AddText(ImVec2(ctr.x - lo - fh, ctr.y - fh*0.5f), mim::U32(mim::TEXT_DIM), "W");
 
     // 위성 점
     if (vm.HasTrackTarget()) {
@@ -242,7 +242,6 @@ void ImGui_TrackWindow_Body(float fontscale)
     ImGui::SameLine();
     ImGui::BeginChild("##rightinfo", ImVec2(rightW, availH), false,
         ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-    ImGui::SetWindowFontScale(scale);
     {
         // 세로 중앙 정렬
         float lineH  = ImGui::GetFrameHeightWithSpacing();
@@ -254,14 +253,14 @@ void ImGui_TrackWindow_Body(float fontscale)
         float rw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().WindowPadding.x;
 
         sprintf(buf, "%.1f°", dummyAz);
-        ImGui::TextColored(ImVec4(0.f,0.f,0.f,1.f), "Azimuth");
+        ImGui::TextDisabled("Azimuth");
         ImGui::SameLine(rw - ImGui::CalcTextSize(buf).x);
-        ImGui::TextColored(ImVec4(0.f,0.f,0.f,1.f), "%s", buf);
+        ImGui::TextUnformatted(buf);
 
         sprintf(buf, "%.1f°", dummyEl);
-        ImGui::TextColored(ImVec4(0.f,0.f,0.f,1.f), "Elevation");
+        ImGui::TextDisabled("Elevation");
         ImGui::SameLine(rw - ImGui::CalcTextSize(buf).x);
-        ImGui::TextColored(ImVec4(0.f,0.f,0.f,1.f), "%s", buf);
+        ImGui::TextUnformatted(buf);
     }
     ImGui::EndChild();
 

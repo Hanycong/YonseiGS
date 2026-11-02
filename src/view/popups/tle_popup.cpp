@@ -32,6 +32,7 @@
 
 
 #include "popups_common.h"
+#include "ui_kit.h"
 #include "tle_vm.h"
 
 using namespace mim;
@@ -72,7 +73,7 @@ bool popup_tle()
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.6);
         ImGui::InputText("##localtleimport", vm.LocalPath(), vm.LocalPathSize(), 0, NULL, NULL);
         ImGui::SameLine();
-        if(ImGui::Button("Load from local", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+        if(ImGui::Button("Load from local", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
         {
             vm.LoadFromLocal();
         }
@@ -99,7 +100,7 @@ bool popup_tle()
                 if(vm.InUse(i) == false)
                 {
                     sprintf(ButtonLabel, "Select##TLE%d", i);
-                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
                     {
                         vm.Use(i);
                     }
@@ -108,7 +109,7 @@ bool popup_tle()
                 {
                     sprintf(ButtonLabel, "Delete##TLE%d", i);
                     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
                     {
                         vm.Unuse(i);
                     }
@@ -124,12 +125,12 @@ bool popup_tle()
             
             ImGui::EndTable();
         }
-        if(ImGui::Button("Load TLE", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetContentRegionAvail().y)))
+        if(ImGui::Button("Load TLE", ImVec2((ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f, mim::ui::ButtonHeight())))
         {
             vm.DownloadAndLoad();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))
+        if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
         {
             ImGui::EndPopup();
             ImGui::CloseCurrentPopup();

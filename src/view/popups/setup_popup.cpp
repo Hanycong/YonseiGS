@@ -33,6 +33,7 @@
 
 #include "popups_common.h"
 #include "setup_vm.h"
+#include "ui_kit.h"
 
 using namespace mim;
 
@@ -40,79 +41,78 @@ bool popup_setup(Setup * setup)
 {
     mim::vm::SetupVM & vm = mim::vm::SetupViewModel();
     Setup & cfg = vm.Config();
-    ImGui::OpenPopup("MIMAN Setup Page");
+    ImGui::OpenPopup("YonseiGS Setup");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(720, 540), ImGuiCond_Appearing);
 
-    if ( ImGui::BeginPopupModal("MIMAN Setup Page", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
+    if ( ImGui::BeginPopupModal("YonseiGS Setup", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
-        ImGui::SetWindowFontScale(0.8f);
-        ImGui::Text("Transceiver");
-        ImGui::BeginChild("##setup_transceiver", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 13.5), true, mim_winflags);
-        ImGui::Text("Device Name");
-        ImGui::InputText("##GS100_name", &cfg.Transciever_devname[0], sizeof(cfg.Transciever_devname));
-        ImGui::Text("Default Frequency(Hz)");
-        ImGui::InputDouble("##GS100_freq", &cfg.default_freq);
-        ImGui::Text("Baudrate");
-        ImGui::InputScalar("##GS100_baud", ImGuiDataType_U32, &cfg.Transceiver_baud, NULL, NULL, "%u");
-        ImGui::Text("Delay(ms)");
-        ImGui::InputScalar("##GS100_delay", ImGuiDataType_U32, &cfg.default_timeout, NULL, NULL, "%u");
-        ImGui::EndChild();
+        using namespace mim::ui;
+        const float lw = 7.5f;   // 라벨 열 너비 (글자 수)
+        auto Field = [](const char * label, float w) {
+            RowLabel(label, w);
+            ImGui::SetNextItemWidth(-FLT_MIN);
+        };
 
-        ImGui::Text("Switch Box");
-        ImGui::BeginChild("##setup_switch", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 7.5), true, mim_winflags);
-        ImGui::Text("Device Name");
-        ImGui::InputText("##KTA223_name", &cfg.Switch_devname[0], sizeof(cfg.Switch_devname));
-        ImGui::Text("Baudrate");
-        ImGui::InputScalar("##KTA223_baud", ImGuiDataType_U32, &cfg.Switch_baud, NULL, NULL, "%u");
-        ImGui::EndChild();
-
-        ImGui::Text("Rotator Controller");
-        ImGui::BeginChild("##setup_rotator", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 7.5), true, mim_winflags);
-        ImGui::Text("Device Name");
-        ImGui::InputText("##GS232B_name", &cfg.Rotator_devname[0], sizeof(cfg.Rotator_devname));
-        ImGui::Text("Baudrate");
-        ImGui::InputScalar("##GS232B_baud", ImGuiDataType_U32, &cfg.Rotator_baud, NULL, NULL, "%u");
-        ImGui::EndChild();
-
-        ImGui::Text("Route Table");
-        ImGui::BeginChild("##setup_node", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 8.0), true, mim_winflags);
-        ImGui::Text("GS100 node");
-        ImGui::SameLine();
-        ImGui::InputScalar("##gs100_node", ImGuiDataType_U8, &cfg.gs100_node, NULL, NULL, "%u");
-        ImGui::Text("GS PC node");
-        ImGui::SameLine();
-        ImGui::InputScalar("##gspc_node", ImGuiDataType_U8, &cfg.kiss_node, NULL, NULL, "%u");
-        ImGui::Text("AX100 node");
-        ImGui::SameLine();
-        ImGui::InputScalar("##ax100_node", ImGuiDataType_U8, &cfg.ax100_node, NULL, NULL, "%u");
-        ImGui::Text("OBC   node");
-        ImGui::SameLine();
-        ImGui::InputScalar("##obc_node", ImGuiDataType_U8, &cfg.obc_node, NULL, NULL, "%u");
-        ImGui::EndChild();
-
-        ImGui::Text("Use S-Band GS");
-        ImGui::SameLine();
-        ImGui::Checkbox("##s_band_use_state_check", vm.UseSband());
-        if(*vm.UseSband())
+        // 왼쪽: 장비 연결 / 오른쪽: CSP 라우팅, S-band
+        if (ImGui::BeginTable("##setup_cols", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_PadOuterX,
+                              ImVec2(ImGui::GetFontSize() * 46.0f, 0)))
         {
-            ImGui::Text("S-Band");
-            ImGui::BeginChild("##setup_s_band", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 6.5), true, mim_winflags);
-            ImGui::Text("Username");
-            ImGui::SameLine();
-            ImGui::InputText("##S-BandUsername", &cfg.S_Username[0], sizeof(cfg.S_Username));
-            ImGui::Text("IP Address");
-            ImGui::SameLine();
-            ImGui::InputText("##S-BandIP", &cfg.S_Address[0], sizeof(cfg.S_Address));
-            ImGui::Text("Password");
-            ImGui::SameLine();
-            ImGui::InputText("##S-BandPW", &cfg.S_passwd[0], sizeof(cfg.S_passwd));
-            ImGui::EndChild();
-        }
-        ImGui::SetWindowFontScale(1.0f);
-        
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
 
-        if (ImGui::Button("Start", ImVec2(ImGui::GetContentRegionAvail().x * 0.33, ImGui::GetFontSize() * 1.5)))
+            mim::ui::SectionHeader("TRANSCEIVER (GS100)");
+            Field("Device", lw);
+            ImGui::InputText("##GS100_name", &cfg.Transciever_devname[0], sizeof(cfg.Transciever_devname));
+            Field("Frequency (Hz)", lw);
+            ImGui::InputDouble("##GS100_freq", &cfg.default_freq);
+            Field("Baudrate", lw);
+            ImGui::InputScalar("##GS100_baud", ImGuiDataType_U32, &cfg.Transceiver_baud, NULL, NULL, "%u");
+            Field("Delay (ms)", lw);
+            ImGui::InputScalar("##GS100_delay", ImGuiDataType_U32, &cfg.default_timeout, NULL, NULL, "%u");
+
+            mim::ui::SectionHeader("SWITCH BOX (KTA223)");
+            Field("Device", lw);
+            ImGui::InputText("##KTA223_name", &cfg.Switch_devname[0], sizeof(cfg.Switch_devname));
+            Field("Baudrate", lw);
+            ImGui::InputScalar("##KTA223_baud", ImGuiDataType_U32, &cfg.Switch_baud, NULL, NULL, "%u");
+
+            mim::ui::SectionHeader("ROTATOR (GS232B)");
+            Field("Device", lw);
+            ImGui::InputText("##GS232B_name", &cfg.Rotator_devname[0], sizeof(cfg.Rotator_devname));
+            Field("Baudrate", lw);
+            ImGui::InputScalar("##GS232B_baud", ImGuiDataType_U32, &cfg.Rotator_baud, NULL, NULL, "%u");
+
+            ImGui::TableSetColumnIndex(1);
+
+            mim::ui::SectionHeader("ROUTE TABLE (CSP NODE)");
+            Field("GS100", lw);
+            ImGui::InputScalar("##gs100_node", ImGuiDataType_U8, &cfg.gs100_node, NULL, NULL, "%u");
+            Field("GS PC", lw);
+            ImGui::InputScalar("##gspc_node", ImGuiDataType_U8, &cfg.kiss_node, NULL, NULL, "%u");
+            Field("AX100", lw);
+            ImGui::InputScalar("##ax100_node", ImGuiDataType_U8, &cfg.ax100_node, NULL, NULL, "%u");
+            Field("OBC", lw);
+            ImGui::InputScalar("##obc_node", ImGuiDataType_U8, &cfg.obc_node, NULL, NULL, "%u");
+
+            mim::ui::SectionHeader("S-BAND GROUND STATION");
+            RowLabel("Use S-band", lw);
+            ImGui::Checkbox("##s_band_use_state_check", vm.UseSband());
+            if(*vm.UseSband())
+            {
+                Field("Username", lw);
+                ImGui::InputText("##S-BandUsername", &cfg.S_Username[0], sizeof(cfg.S_Username));
+                Field("IP Address", lw);
+                ImGui::InputText("##S-BandIP", &cfg.S_Address[0], sizeof(cfg.S_Address));
+                Field("Password", lw);
+                ImGui::InputText("##S-BandPW", &cfg.S_passwd[0], sizeof(cfg.S_passwd));
+            }
+            ImGui::EndTable();
+        }
+
+        ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
+        if (ImGui::Button("Start", ImVec2((ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2) / 3.0f, mim::ui::ButtonHeight())))
         {
             vm.Start();
 
@@ -122,12 +122,12 @@ bool popup_setup(Setup * setup)
             return false;
         }
         ImGui::SameLine();
-        if(ImGui::Button("Reset Watchdog", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetFontSize() * 1.5)))
+        if(ImGui::Button("Reset Watchdog", ImVec2((ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f, mim::ui::ButtonHeight())))
         {
             vm.ResetWatchdog();
         }
         ImGui::SameLine();
-        if (ImGui::Button("Quit", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+        if (ImGui::Button("Quit", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
         {
             vm.Quit();
             ImGui::EndPopup();

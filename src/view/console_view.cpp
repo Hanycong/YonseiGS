@@ -20,9 +20,9 @@ void Console::Draw(const char* title, bool* p_open, float fontscale)
     ImGui::SetNextWindowSize(ImVec2(this -> _width, this -> _height), ImGuiCond_Always);
 
     // 콘솔 배경 검정, 텍스트 흰색
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.05f, 0.05f, 0.05f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ChildBg,  ImVec4(0.05f, 0.05f, 0.05f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_Text,     ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, mim::BG_DEEP);
+    ImGui::PushStyleColor(ImGuiCol_ChildBg,  mim::BG_DEEP);
+    ImGui::PushStyleColor(ImGuiCol_Text,     mim::TEXT);
 
     if (!ImGui::Begin(title, p_open, this -> _window_flags))
     {
@@ -30,6 +30,7 @@ void Console::Draw(const char* title, bool* p_open, float fontscale)
         return;
     }
     ImGui::SetWindowFontScale(fontscale);
+    ImGui::PushFont(mim::font_mono);    // 로그 정렬(점 채움 등)을 위해 고정폭
 
     bool copy_to_clipboard = false;
 
@@ -77,13 +78,11 @@ void Console::Draw(const char* title, bool* p_open, float fontscale)
         {
             item += 1;
         }
-        ImGui::SetWindowFontScale(1.1);
         ImGui::TextUnformatted(item);
         if (pop_color)
         {
             ImGui::PopStyleColor();
         }
-        ImGui::SetWindowFontScale(1.0);
     }
 
     if (copy_to_clipboard)
@@ -94,6 +93,7 @@ void Console::Draw(const char* title, bool* p_open, float fontscale)
 
     ImGui::PopStyleVar();
     ImGui::EndChild();
+    ImGui::PopFont();
     ImGui::SetWindowFontScale(1.0);
 
     ImGui::End();
