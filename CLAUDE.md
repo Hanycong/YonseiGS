@@ -27,20 +27,21 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 | WSL2 + VSCode build & run guide | [docs/BUILD_WSL.md](docs/BUILD_WSL.md) |
 | Honest code quality assessment ("is this spaghetti?") | [docs/CODE_REVIEW.md](docs/CODE_REVIEW.md) |
 
-## Module quick reference (src/miman_*.cpp)
+## Module quick reference (YonseiGS_* files, formerly miman_*)
 
 | Module | Role | Hardware/Protocol | Threads |
 |---|---|---|---|
-| miman_config | Global state, Setup, Console class | — | — |
-| miman_imgui | All GUI windows + popups | GLFW/ImGui | main loop |
-| miman_orbital | TLE tracking (SGP4), rotator command, Doppler | `/dev/GS232B`, CURL | T[2], T[3], T[7] |
-| miman_radial | Radio param tables (Ptable_0/1/5) | `/dev/GS102` via libparam | T[12] |
-| miman_csp | CSP stack init, KISS USART, watchdog | `/dev/GS100`, `/dev/GS101` | T[0] (csp route) |
-| miman_coms | TX/RX scheduler, beacon/HK parse | CSP network | T[4], T[10], T[11] |
-| miman_model | 3D satellite mesh (ASSIMP+OpenGL) | GPU | main loop |
-| miman_s_control | S-band GS remote control | SSH 165.132.28.235 | — |
-| miman_autopilot | Pass auto-scheduling | CSP | T[13] |
-| miman_ftpfcd, miman_ftprdp | FTP up/download/list | libftp_client | T[8] |
+| common/YonseiGS_config | Shared defs (packet structs, Setup, Console decl), state structs | — | — |
+| view/YonseiGS_imgui | 3D model window, View function declarations | GLFW/ImGui | main loop |
+| view/YonseiGS_model | OpenGL satellite/globe/path drawing (a View, despite the name) | GPU | main loop |
+| model/orbit/YonseiGS_orbital | TLE tracking (SGP4), rotator command, Doppler | `/dev/GS232B`, CURL | T[2], T[3], T[7] |
+| model/device/YonseiGS_radial | Radio param tables (Ptable_0/1/5) | `/dev/GS102` via libparam | T[12] |
+| model/device/YonseiGS_csp | CSP stack init, KISS USART, watchdog | `/dev/GS100`, `/dev/GS101` | T[0] (csp route) |
+| model/device/YonseiGS_coms | TX/RX scheduler, beacon/HK parse | CSP network | T[4], T[10], T[11] |
+| model/device/YonseiGS_s_control | S-band GS remote control | SSH | — |
+| model/service/YonseiGS_autopilot | Pass auto-scheduling | CSP | T[13] |
+| model/service/YonseiGS_ftprdp | FTP up/download/list | libftp_client | T[8] |
+| app/YonseiGS_satcontext, app/YonseiGS_theme | Active/visible satellite tabs; theme tokens + fonts | — | — |
 
 ## Conventions
 
@@ -205,17 +206,29 @@ the *separation of concerns*, not the binding mechanism:
 ## UI theme (Navy Dark — current target)
 
 - Global style is applied by `mim::ApplyTheme()` (in YonseiGS_theme.cpp), called
-  from main.cpp. The old `ImGuiCustomStyle()` is dead code, kept for rollback;
-  delete only after the navy theme is fully settled.
+  from main.cpp. The old `ImGuiCustomStyle()` is dead code, kept for rollback.
 - Color tokens live in `YonseiGS_theme.h` as `mim::` constants (BG_MAIN, ACCENT,
   TEXT, OK, ERR, DANGER, ...). **Never hardcode `ImVec4(...)` colors in views —
-  always use a token** so future theme changes propagate. (Two hardcoded teal
-  values in sat tabs / status bar were already replaced with `BG_PANEL2`/`BG_MAIN`.)
+  always use a token** so future theme changes propagate.
+- **Fonts (2026-11-02):** body = DroidSans 20 (font [0], used everywhere by default),
+  `mim::font_title` DroidSans-Bold 36, `mim::font_subtitle` DroidSans 18,
+  `mim::font_section` DroidSans-Bold 15 (section headers), `mim::font_mono` Inconsolata 18
+  (console only — log lines are aligned with dots). Do not scale windows with
+  `SetWindowFontScale(Rh * k)` any more; workspace bodies are called with `fontscale = 1.0`.
+  Do not align labels with spaces (`"Name     : "`) — the body font is proportional; use
+  `mim::ui::RowLabel()`.
+- **`view/ui_kit.h` (mim::ui)** is the shared widget set every window uses: `SectionHeader`
+  (small bold caps + separator), `RowLabel` (label column), `GridButton` (2-column button grid),
+  `WideButton`, `ToggleWideButton` (red while active = the click stops something),
+  `StatusLamp` (green ok / red not), `ValueRow`. New UI should be built from these so all
+  windows keep the same spacing and button height (`ButtonHeight()` = frame height x 1.3).
+- Status bar: devices (GS100/Rotator/Switch/S-band) and modes (Engage/Doppler/AutoPilot/AMP)
+  all use `StatusLamp`: green = connected / running, red = disconnected / stopped.
 - `mim_winflags` no longer includes `HorizontalScrollbar` (default = no scroll).
-  Add it explicitly only where a window genuinely needs scrolling.
-- Glyphs `●`/`○`/`①②` are NOT in Inconsolata.ttf and render as `?`. Use the
-  `mim::Dot()` helper (draws a real circle via DrawList) instead of `●` text.
-  Tab labels use ASCII (`1. Pre-Pass`) instead of `①`.
+- Glyphs `●`/`○`/`①②`/`—` are not in the loaded fonts. Use `mim::Dot()` / `StatusLamp`
+  (DrawList circles) and ASCII.
+- Snapshot harness click coordinates (tools/ui_snapshot.sh) are tied to this layout; after any
+  layout change update them and confirm the console/stdout logs still match the baseline.
 
 ## Layout entry point
 
@@ -261,9 +274,10 @@ the *separation of concerns*, not the binding mechanism:
   `sig_handler` → `exit(1)` (about half of the runs). Now SIGINT only clears `State.GUI` and takes
   the same cleanup path as closing the window. Note libcsp's `sig_handler` still turns any
   SIGSEGV/SIGFPE/SIGTERM into a silent `exit(1)` — check the exit status, not just the log.
-- Track window `SELECTED` shows `?` when nothing is tracked: the `—` (em dash) glyph is not
-  in Inconsolata.ttf. Polar plot reads `dummies[GetNowTracking()]` without an upper bound
+- ~~Track window `SELECTED` shows `?`~~ (now "Tracking -", ASCII). Polar plot reads `dummies[GetNowTracking()]` without an upper bound
   check (out of bounds if the tracking index is >= 20, e.g. set by AutoPilot).
+- S-band Manager popup shows garbage text (e.g. a window ID path) in its output box before any
+  command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
 
