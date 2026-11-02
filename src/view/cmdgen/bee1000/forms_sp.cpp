@@ -29,6 +29,8 @@
 #include "svc_radio.h"
 #include "svc_ftp.h"
 #include "command_catalog.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 #include <mutex>
 
 
@@ -57,38 +59,17 @@ bool DrawBee1000SpForms(uint16_t fnccode)
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 8;
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd[8] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd, &msgid, sizeof(uint16_t));
-            memcpy(cmd + 6, &fnccode, sizeof(uint8_t));
-            cmd[2] = 0xc0;
-            cmd[3] = 0x00;
-            cmd[4] = 0x00;
-            cmd[5] = 0x01;
 
-            uint16_t len = 8;
-            const uint8_t* byteptr = cmd;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd, sizeof(cmd));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd); i++)
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::SendTelecommand(cmd, sizeof(cmd));
             
-            msgid = htons(msgid);
     }
 
 
@@ -108,38 +89,17 @@ bool DrawBee1000SpForms(uint16_t fnccode)
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 8;
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd[8] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd, &msgid, sizeof(uint16_t));
-            memcpy(cmd + 6, &fnccode, sizeof(uint8_t));
-            cmd[2] = 0xc0;
-            cmd[3] = 0x00;
-            cmd[4] = 0x00;
-            cmd[5] = 0x01;
 
-            uint16_t len = 8;
-            const uint8_t* byteptr = cmd;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd, sizeof(cmd));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd); i++)
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::SendTelecommand(cmd, sizeof(cmd));
             
-            msgid = htons(msgid);
     }
 
 
@@ -159,38 +119,17 @@ bool DrawBee1000SpForms(uint16_t fnccode)
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 8;
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd[8] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd, &msgid, sizeof(uint16_t));
-            memcpy(cmd + 6, &fnccode, sizeof(uint8_t));
-            cmd[2] = 0xc0;
-            cmd[3] = 0x00;
-            cmd[4] = 0x00;
-            cmd[5] = 0x01;
 
-            uint16_t len = 8;
-            const uint8_t* byteptr = cmd;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd, sizeof(cmd));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd); i++)
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::SendTelecommand(cmd, sizeof(cmd));
             
-            msgid = htons(msgid);
     }
 
 
@@ -210,38 +149,17 @@ bool DrawBee1000SpForms(uint16_t fnccode)
 
     if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            mim::svc::WaitTx();
-
-            packetsign* TestPacket = (packetsign*)malloc(2 + 2 + 4 + 8);
-            TestPacket->Identifier = HVD_TEST;
-            TestPacket->PacketType = MIM_PT_TMTC_TEST;
-            TestPacket->Length = 8;
-            memset(TestPacket->Data, 0, TestPacket->Length);
 
             uint8_t cmd[8] = {0,};
-            msgid = htons(msgid);
-            memcpy(cmd, &msgid, sizeof(uint16_t));
-            memcpy(cmd + 6, &fnccode, sizeof(uint8_t));
-            cmd[2] = 0xc0;
-            cmd[3] = 0x00;
-            cmd[4] = 0x00;
-            cmd[5] = 0x01;
 
-            uint16_t len = 8;
-            const uint8_t* byteptr = cmd;
-            uint8_t checksum = 0xFF;
-            while (len--)
-                checksum ^= *(byteptr++);
-            cmd[7] = checksum;
+            mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
-            memcpy(TestPacket->Data, cmd, sizeof(cmd));
-            for (int i = 0; i < TestPacket->Length; i++)
+            for (int i = 0; i < sizeof(cmd); i++)
                 printf("0x%x ", cmd[i]);
             printf("\n");
 
-            mim::svc::SendUplink((void*)TestPacket);
+            mim::tc::SendTelecommand(cmd, sizeof(cmd));
             
-            msgid = htons(msgid);
     }
 
 
