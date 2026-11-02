@@ -8,18 +8,9 @@
 extern StateCheckUnit State;
 extern Console console;
 extern ImGuiWindowFlags mim_winflags;
-extern Ptable_0 param0;
-extern Ptable_1 param1;
-extern Ptable_5 param5;
 extern Sband * sgs;
-extern int NowTLE;
-extern int tlepopupindex;
-extern bool sgp4check;
 extern char FDSFilePath[256];
 extern char SatWindowLabelBuf[64];
-extern char SearchBuf[256];
-extern char SelectButtonTextBuf[32];
-extern char DeleteButtonTextBuf[32];
 extern char inputbuf[1024];
 
 // miman_imgui.cpp 의 같은 이름 static 과 같은 값 (표 머리글 고정 행/열 수, 바뀌지 않음)

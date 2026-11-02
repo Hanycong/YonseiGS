@@ -32,29 +32,30 @@
 
 
 #include "popups_common.h"
+#include "tle_vm.h"
 
 using namespace mim;
 
-char localtleurl[256] = "/home/hyyang/GS_refactoring/YonseiGS/home/TLE/NORAD_TLE.txt";
 bool popup_tle()
 {
+    mim::vm::TleVM & vm = mim::vm::TleViewModel();
     ImGui::OpenPopup("TLE Manager");
     ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     ImGui::SetNextWindowSize(ImVec2(1080, 720), ImGuiCond_Appearing);
     if ( ImGui::BeginPopupModal("TLE Manager", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
-        if (ImGui::BeginCombo("##TLECombobox", State.tleinfolistup[NowTLE]->label))
+        if (ImGui::BeginCombo("##TLECombobox", vm.SelectedListLabel()))
         {
-            for (int TLEindex = 0; TLEindex < IM_ARRAYSIZE(State.ftplistup); TLEindex++)
+            for (int TLEindex = 0; TLEindex < vm.ListCapacity(); TLEindex++)
             {
-                if (!State.tleinfolistup[TLEindex])
+                if (!vm.ListLabel(TLEindex))
                     break;
-                bool SelectedTLE = (NowTLE == TLEindex);
+                bool SelectedTLE = (*vm.SelectedList() == TLEindex);
                 char Selectedlabel[64];
-                strcpy(Selectedlabel, State.tleinfolistup[TLEindex]->label);
+                strcpy(Selectedlabel, vm.ListLabel(TLEindex));
                 if (ImGui::Selectable(Selectedlabel, SelectedTLE))
                 {
-                    NowTLE = TLEindex;
+                    *vm.SelectedList() = TLEindex;
                 }
                 if (SelectedTLE)
                     ImGui::SetItemDefaultFocus();
@@ -62,28 +63,18 @@ bool popup_tle()
             ImGui::EndCombo();
         }
         ImGui::SameLine();
-        ImGui::InputText("##", SearchBuf, sizeof(SearchBuf));
+        ImGui::InputText("##", vm.SearchText(), vm.SearchTextSize());
         ImGui::SameLine();
         ImGui::Text("SGP4");
         ImGui::SameLine();
-        ImGui::Checkbox("##sgp4checkbox", &sgp4check);
+        ImGui::Checkbox("##sgp4checkbox", vm.Sgp4Only());
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.6);
-        ImGui::InputText("##localtleimport", localtleurl, sizeof(localtleurl), 0, NULL, NULL);
+        ImGui::InputText("##localtleimport", vm.LocalPath(), vm.LocalPathSize(), 0, NULL, NULL);
         ImGui::SameLine();
         if(ImGui::Button("Load from local", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
         {
-            
-            State.NowTracking = false;
-            memset(State.tleinfolistup[NowTLE]->local, 0, sizeof(State.tleinfolistup[NowTLE]->local));
-            memcpy(State.tleinfolistup[NowTLE]->local, localtleurl, sizeof(localtleurl));
-            
-            console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
-
-            mim::svc::StartSatelliteInitialize(&sgp4check);
-            // SatelliteInitialize(NULL);
-                
-            
+            vm.LoadFromLocal();
         }
         
         if (ImGui::BeginTable("##TLESatelliteListup", 4, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Sortable, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 0.9)))
@@ -94,78 +85,40 @@ bool popup_tle()
             ImGui::TableSetupColumn("Next AOS##tle",            ImGuiTableColumnFlags_NoHide, 0.0f);
             ImGui::TableSetupColumn("Max Elevation##tle",       ImGuiTableColumnFlags_NoHide, 0.0f);
             ImGui::TableHeadersRow();
-            tlepopupindex = 0;
 
-            // if (ImGuiTableSortSpecs* sorts_specs = ImGui::TableGetSortSpecs())
-            // {
-            //     if (sorts_specs->SpecsDirty)
-            //     {
-            //         // If the sorting specs have changed, update the sorting state
-            //         if (items.Size > 1)
-            //             qsort(&items[0], (size_t)items.Size, sizeof(items[0]), MyItem::CompareWithSortSpecs);
-            //         MyItem::s_current_sort_specs = NULL;
-            //         sorts_specs->SpecsDirty = false;
-            //         sort_column = sorts_specs->Specs[0].ColumnIndex;
-            //         sort_ascending = sorts_specs->Specs[0].SortDirection == ImGuiSortDirection_Ascending;
-            //     }
-            // }
-
-            while(1)
+            char ButtonLabel[32];
+            for (int i = 0; vm.HasSatellite(i); i++)
             {
-                    
-                if(strlen(State.Satellites[tlepopupindex]->Name())== NULL)
-                    break;
+                if (vm.IsFilteredOut(i))
+                    continue;
+
+                ImGui::TableNextRow();
+                ImGui::TableSetColumnIndex(0);
+                ImGui::Text("%s", vm.SatelliteName(i));
+                ImGui::TableSetColumnIndex(1);
+                if(vm.InUse(i) == false)
+                {
+                    sprintf(ButtonLabel, "Select##TLE%d", i);
+                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
+                    {
+                        vm.Use(i);
+                    }
+                }
                 else
                 {
-                    if(State.Satellites[tlepopupindex]->_max_elevation[0] < 0 && sgp4check)
+                    sprintf(ButtonLabel, "Delete##TLE%d", i);
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
+                    if(ImGui::Button(ButtonLabel, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
                     {
-                        tlepopupindex += 1;
-                        continue;
+                        vm.Unuse(i);
                     }
-                    if(strlen(SearchBuf) != 0 && strstr(State.Satellites[tlepopupindex]->Name(), SearchBuf) == NULL)
-                    {
-                        tlepopupindex += 1;
-                        continue;
-                    }
-                        
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::Text("%s", State.Satellites[tlepopupindex]->Name());
-                    ImGui::TableSetColumnIndex(1);
-                    if(State.Satellites[tlepopupindex]->use == false)
-                    {
-                        sprintf(SelectButtonTextBuf, "Select##TLE%d", tlepopupindex);
-                        if(ImGui::Button(SelectButtonTextBuf, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
-                        {
-                           State.Satellites[tlepopupindex]->use = true;
-                           if(State.Satellites[tlepopupindex]->cal == false)
-                                State.Satellites[tlepopupindex]->Refresh(State.Satellites[tlepopupindex]->tle, State.Satellites[tlepopupindex]->obs, true, true);
-                           SatelliteModelInitialize(tlepopupindex);
-                           mim::Initialize_SatContext();   // ← VisibleSats 재계산
-                        }
-                    }
-                    else
-                    {
-                        sprintf(DeleteButtonTextBuf, "Delete##TLE%d", tlepopupindex);
-                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.650f, 0.266f, 0.322f, 1.0f));
-                        if(ImGui::Button(DeleteButtonTextBuf, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFontSize() * 1.5)))
-                        {
-                            State.Satellites[tlepopupindex]->use = false;
-                            SatelliteModelDelete(tlepopupindex);
-                            mim::Initialize_SatContext();   // ← VisibleSats 재계산
-                        }
-                        ImGui::PopStyleColor();
-                    }
-                    ImGui::TableSetColumnIndex(2);
-                    ImGui::Text("%d/%d %d:%d:%d",   State.Satellites[tlepopupindex]->_nextaos[0].AddHours(9).Month(), 
-                                                    State.Satellites[tlepopupindex]->_nextaos[0].AddHours(9).Day(),
-                                                    State.Satellites[tlepopupindex]->_nextaos[0].AddHours(9).Hour(),
-                                                    State.Satellites[tlepopupindex]->_nextaos[0].AddHours(9).Minute(),
-                                                    State.Satellites[tlepopupindex]->_nextaos[0].AddHours(9).Second());
-                    ImGui::TableSetColumnIndex(3);
-                    ImGui::Text("%.3lf°", State.Satellites[tlepopupindex]->_max_elevation[0] * RAD_TO_DEG);
+                    ImGui::PopStyleColor();
                 }
-                tlepopupindex += 1;
+                ImGui::TableSetColumnIndex(2);
+                mim::vm::LocalTime aos = vm.NextAos(i);
+                ImGui::Text("%d/%d %d:%d:%d", aos.month, aos.day, aos.hour, aos.minute, aos.second);
+                ImGui::TableSetColumnIndex(3);
+                ImGui::Text("%.3lf°", vm.MaxElevationDeg(i));
             }
 
             
@@ -173,22 +126,7 @@ bool popup_tle()
         }
         if(ImGui::Button("Load TLE", ImVec2(ImGui::GetContentRegionAvail().x * 0.5, ImGui::GetContentRegionAvail().y)))
         {
-            
-            if(DownloadTLE(State.tleinfolistup[NowTLE]->remote, State.tleinfolistup[NowTLE]->local))
-            {
-                State.NowTracking = false;
-                
-                console.AddLog("[OK]##TLE \"%s\" Download Completed.", State.tleinfolistup[NowTLE]->label);
-
-                mim::svc::StartSatelliteInitialize(&sgp4check);
-                // SatelliteInitialize(NULL);
-                
-            }
-            else
-            {
-                console.AddLog("[ERROR]##TLE Download failed. Please check again.");
-            }
-            
+            vm.DownloadAndLoad();
         }
         ImGui::SameLine();
         if (ImGui::Button("Close", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y)))

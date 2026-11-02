@@ -122,10 +122,7 @@ char Deletelabelbuf[16];
 uint8_t msgidbuf[2];
 uint16_t msgidinfo;
 
-char SelectButtonTextBuf[32];
-char DeleteButtonTextBuf[32];
-char SearchBuf[256];
-int tlepopupindex;
+// SelectButtonTextBuf / DeleteButtonTextBuf / SearchBuf / tlepopupindex -> viewmodel/tle_vm (TleVM 멤버, 행 버튼 라벨은 View 지역 버퍼)
 bool sgp4check = false;
 char FDSFilePath[256] = "../bin/fds/fds.dat";
 char SatWindowLabelBuf[64];

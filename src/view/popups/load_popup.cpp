@@ -32,6 +32,7 @@
 
 
 #include "popups_common.h"
+#include "tle_vm.h"
 
 using namespace mim;
 
@@ -42,7 +43,7 @@ bool popup_load()
     ImGui::SetNextWindowSize(ImVec2(500, 200), ImGuiCond_Appearing);
     if ( ImGui::BeginPopupModal("Load", NULL, ImGuiWindowFlags_AlwaysAutoResize) )
     {
-        ImGui::Text("Progress : %d%c", State.loadindex * 100 / State.tleallindex, '%');
+        ImGui::Text("Progress : %d%c", mim::vm::TleViewModel().LoadProgressPercent(), '%');
         ImGui::EndPopup();
     }
     return true;
