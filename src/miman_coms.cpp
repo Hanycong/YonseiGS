@@ -1394,114 +1394,13 @@ void * task_uplink_onorbit(void * sign_)
     return NULL;
 }
 
-int PacketHandler(csp_packet_t *packet, int type, int NowCursor)
-{
-    while(1) {
-        switch(type) {
-            case 0: {
-                type = packet->data[NowCursor];
-                NowCursor ++;
-                return PacketHandler(packet, type, NowCursor);
-            }
-            case 1: {
-                // Declare NowHK as a pointer to HK struct
-                // HK *NowHK; 
-                for (HKbufCursor; HKbufCursor < sizeof(HKbuf); HKbufCursor ++)
-                {
-                    HKbuf[HKbufCursor] = packet->data[NowCursor];
-                    NowCursor ++;
-                    if (NowCursor > MIM_LEN_PACKET)
-                    {
-                        //Read All Packet
-                        //Need to go next packet
-                        NowCursor = 0;
-                        return 0;
-                    }
-                }
-                // NowHK = (HK *)HKbuf;
-                buf_allclear();
-                return NowCursor;
-            }
-            case 3: {
-                // for (AODbufCursor; AODbufCursor < sizeof(AODbuf); AODbufCursor ++)
-                // {
-                //     AODbuf[AODbufCursor] = packet->data[NowCursor];
-                //     NowCursor ++;
-                //     if (NowCursor > MIM_LEN_PACKET)
-                //     {
-                //         //Read All Packet
-                //         //Need to go next packet
-                //         NowCursor = 0;
-                //         return 0;
-                //     }
-                // }
-                // NowAOD = (AOD *)HKbuf;
-                // buf_allclear();
-                // return NowCursor;
-            }
-            default :{
-                
-            }
-        }
-    }
-}
+// PacketHandler -> model/telecommand/packet_codec.cpp 로 이동
 
-packetsign * PingInit(FSWTle * FSWTleinfo)
-{
-    packetsign * sign;
-    sign = (packetsign *)malloc(sizeof(FSWTle) + MIM_HAND_DATAFDSTART);
-    sign->Identifier = MIM_ID;
-    sign->PacketType = MIM_PT_PING;
-    sign->Length = sizeof(FSWTle);
-    // printf("Start. Length : %u, Second : %u\n", sign->Length, FSWTleinfo->sec);
-    memcpy(sign->Data, (void *)FSWTleinfo, sizeof(FSWTle));
+// PingInit -> model/telecommand/packet_codec.cpp 로 이동
 
-    if(FSWTleinfo != NULL)
-    {
-        // free(FSWTleinfo);
-        FSWTleinfo = NULL;
-    }
-    
+// PacketEncoder -> model/telecommand/packet_codec.cpp 로 이동
 
-    return sign;
-}
-
-csp_packet_t * PacketEncoder(packetsign * sign,bool freeer)
-{
-    if(sign == NULL)
-    {
-        console.AddLog("[DEBUG]##NULL POINTER GIVEN TO PACKETENCODER");
-        return NULL;
-    }
-    uint32_t len = sign->Length;
-    csp_packet_t *packet = (csp_packet_t *)csp_buffer_get(len);    
-    packet->length = len;
-    printf("packet len: %u\n", packet->length);
-    memcpy(packet->data, sign->Data, len);
-    // uint32_t packetsignlen = sign->Length +4; // Data size + Identifier(uint16) + PacketType(uint16)
-    // csp_packet_t * packet = (csp_packet_t *)csp_buffer_get(packetsignlen);
-    // packet->length = packetsignlen;
-    // console.AddLog("[DEBUG]##Encoding Pakcets...Lnegth : %u", packetsignlen);
-    // //Copy Header
-    // memcpy((packet->data), sign, 4);
-    // memcpy((packet->data) + 4, sign->Data, packetsignlen-4 ); // copy data
-    for (int i =0; i < packet->length; i++) {
-        printf("0x%x ", packet->data[i]);
-    }printf("\n");
-    if(freeer)
-        sign = NULL;
-    return packet;
-}
-
-packetsign * PacketDecoder(csp_packet_t * packet)
-{
-    uint32_t packetsignlen = packet->length +4;
-    packetsign * sign = (packetsign *)malloc(packetsignlen);
-    memcpy(sign, (packet->data), 4);
-    sign->Length = packet->length-4;
-    memcpy(sign->Data, packet->data + 4, sign->Length);
-    return sign;
-}
+// PacketDecoder -> model/telecommand/packet_codec.cpp 로 이동
 
 // CmdGenerator_GS::Scheduling -> model/telecommand/cmd_generator_gs.cpp 로 이동
 
