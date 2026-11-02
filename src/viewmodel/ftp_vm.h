@@ -2,11 +2,11 @@
 //
 // 위: 다운링크 파일 요청(종류/상태/번호/스텝/오프셋 -> Save, Request)
 // 아래: FTP 작업(버전, 청크 크기, 작업 종류별 입력 칸과 버튼). AMP 버튼은 ControlVM::Amp() 를 같이 쓴다.
-// 입력 칸은 ImGui 위젯이 직접 편집하도록 주소/구조체를 돌려준다 (구조체 형식은 miman_config.h).
+// 입력 칸은 ImGui 위젯이 직접 편집하도록 주소/구조체를 돌려준다 (구조체 형식은 YonseiGS_config.h).
 #pragma once
 
 #include <stdint.h>
-#include "miman_config.h"     // ftpinfo, gsftp_*_t, FTP_*_REQUEST
+#include "YonseiGS_config.h"     // ftpinfo, gsftp_*_t, FTP_*_REQUEST
 
 namespace mim {
 namespace vm {

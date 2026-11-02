@@ -2,7 +2,7 @@
 #pragma once
 
 #include <GL/glew.h>
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 extern StateCheckUnit State;
 extern Console console;

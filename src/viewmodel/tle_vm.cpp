@@ -3,10 +3,10 @@
 #include <string.h>
 
 #include "imgui.h"
-#include "miman_config.h"
-#include "miman_orbital.h"
-#include "miman_model.h"
-#include "miman_satcontext.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_model.h"
+#include "YonseiGS_satcontext.h"
 #include "svc_tracking.h"
 
 extern StateCheckUnit State;

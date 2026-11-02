@@ -3,7 +3,7 @@
 // 쉘 명령 종류(State.Shelltype, 화면 상태)를 가지고, 명령 버퍼와 전송은 model/telecommand/direct_shell.
 #pragma once
 
-#include "miman_config.h"     // cmd_packet_t
+#include "YonseiGS_config.h"     // cmd_packet_t
 
 namespace mim {
 namespace vm {

@@ -1,11 +1,11 @@
 // Model - 지상국 내부 패킷(packetsign) <-> CSP 패킷 변환, 핑 패킷 생성, 수신 조각 모으기
 //
-// miman_coms.cpp 에서 PacketHandler / PingInit / PacketEncoder / PacketDecoder 를 내용 그대로 옮긴 것.
-// 선언은 miman_coms.h 그대로.
-#include "miman_config.h"
-#include "miman_csp.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
+// YonseiGS_coms.cpp 에서 PacketHandler / PingInit / PacketEncoder / PacketDecoder 를 내용 그대로 옮긴 것.
+// 선언은 YonseiGS_coms.h 그대로.
+#include "YonseiGS_config.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_orbital.h"
 #include <netinet/in.h>
 
 extern Console console;

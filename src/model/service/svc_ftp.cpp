@@ -1,9 +1,9 @@
 #include "svc_ftp.h"
 #include "svc_thread.h"
 
-#include "miman_config.h"
-#include "miman_coms.h"
-#include "miman_ftp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_ftp.h"
 
 extern StateCheckUnit State;
 extern Console console;

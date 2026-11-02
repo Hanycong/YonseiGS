@@ -1,9 +1,9 @@
 // BEE-1000 미션 명령 정의
 //
-// MID / CC 는 명령 생성기의 기본값과 같은 식(매크로)을 쓴다. 매크로는 miman_config.h 에 있다.
+// MID / CC 는 명령 생성기의 기본값과 같은 식(매크로)을 쓴다. 매크로는 YonseiGS_config.h 에 있다.
 // 결함 표시(Dn)는 docs/CMDGEN_ANALYSIS.md §4 참고.
 #include "command_catalog.h"
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 namespace mim {
 namespace tc {
@@ -160,7 +160,7 @@ static const CommandDef kCommands[] = {
 };
 
 // 초기 운용(LEOP) 명령 세트. 배열 순서가 Initial Operations 창의 표시 순서다.
-// (기존 miman_imgui.cpp INITIAL_CMD_INDICES 와 동일)
+// (기존 YonseiGS_imgui.cpp INITIAL_CMD_INDICES 와 동일)
 static const int kInitialOps[] = {
     0, 1, 2, 3, 4,   // no arg, u8, u16, u32, u64
     72, 73, 74, 76, 77, 79, 81, 82, 85, 86, 58,80, // ADCS sunpointing용

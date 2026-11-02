@@ -1,11 +1,11 @@
 // Model - 텔레메트리 기록 (비콘·미션 비콘·리포트·이벤트를 받을 때마다 전역 구조체와 파일에 남긴다)
 //
-// miman_coms.cpp 에서 *Saver 함수와 리포트 덤프 도우미를 내용 그대로 옮긴 것.
-#include "miman_config.h"
-#include "miman_csp.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
-#include "miman_radial.h"
+// YonseiGS_coms.cpp 에서 *Saver 함수와 리포트 덤프 도우미를 내용 그대로 옮긴 것.
+#include "YonseiGS_config.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_radial.h"
 #include <netinet/in.h>
 
 #include <mutex>

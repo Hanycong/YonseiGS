@@ -1,6 +1,6 @@
 # DrawCmdGeneratorBody 분석과 분할 설계
 
-> 대상: `src/miman_imgui.cpp` `DrawCmdGeneratorBody(bool initial_mode)` (L4768–13618, 8,851줄)
+> 대상: `src/YonseiGS_imgui.cpp` `DrawCmdGeneratorBody(bool initial_mode)` (L4768–13618, 8,851줄)
 > 분석 기준 커밋: `5a9137d`. 이 문서는 코드를 바꾸지 않는다. 설계안은 사용자 승인 후 단계별로 진행한다.
 
 ## 1. 이 함수가 실제로 하는 일
@@ -35,7 +35,7 @@ CCSDS 명령 패킷으로 조립하고, 지상국 송신 큐(TX 슬롯)에 넣�
   다만 CMD Manager(`SatCMD[]`, `popup_cmd`) 경로에서만 쓰이고, 엔벨로프가 다르다
   (`MIM_ID` + `MIM_PT_CMD/STCMD/NCCMD` → 응답을 기다리는 다른 송신 분기).
   DrawCmdGeneratorBody는 이 클래스를 쓰지 않고 헤더 조립을 152번 손으로 반복한다.
-- 명령의 MID, CC, payload 구조체(사실상 ICD)는 `miman_config.h` L700–5450에 있다.
+- 명령의 MID, CC, payload 구조체(사실상 ICD)는 `YonseiGS_config.h` L700–5450에 있다.
   전역 `Command * command`는 131개 명령 구조체를 모두 담은 거대한 구조체이며 **입력 폼의 저장소로 쓰인다.**
 
 ## 2. 기능 분류 (cFS 비행 소프트웨어 앱 기준)
@@ -88,7 +88,7 @@ CCSDS 명령 패킷으로 조립하고, 지상국 송신 큐(TX 슬롯)에 넣�
 | D5 | case 89(ADCS Open-Loop RW)가 ADCS 필터 범위(47–88) 밖 | "ADCS" 필터에서 안 보임 | FilterRules |
 | D6 | 라벨만 있고 구현 없는 명령 14개 (78, 83, 84, 87, 126–135) | 골라도 폼이 비어 있음 | Templabels |
 | D7 | 필터 항목 5개(LGPM, LTRX, STX, PAYUEL_ROMA, PAYUEL_LGBAT)에 명령이 하나도 없음 | 빈 목록 | FilterRules 230–342 |
-| D8 | `WriteSystemName`의 MID→이름 표가 BEE-1000 MID와 맞지 않음 (EPS 0x1875=6261이 "FM"으로, ADCS 0x1865는 기록 안 됨) | TC 로그 오기 | miman_config.cpp L140 |
+| D8 | `WriteSystemName`의 MID→이름 표가 BEE-1000 MID와 맞지 않음 (EPS 0x1875=6261이 "FM"으로, ADCS 0x1865는 기록 안 됨) | TC 로그 오기 | YonseiGS_config.cpp L140 |
 | D9 | "Write Raw Data" 체크박스(`raw_data`)를 읽는 코드가 없음 | 효과 없는 UI | 전역 검색 |
 | D10 | 207/208이 UI 스레드에서 `sleep(1)`·`WaitTx()`로 대기, `sleep(0.1)`은 정수 0초 | 화면 멈춤, 의도한 간격 아님 | case 207/208 |
 | D11 | `malloc`한 packetsign을 아무도 `free`하지 않음 | 명령마다 메모리 누수 | task_uplink_onorbit |
@@ -163,7 +163,7 @@ GomSpace 계열 부품)의 큐브위성이면 위성 정의만 추가해서 운�
 | 플랫폼 | 명령 정의 형식 (앱, MID, CC, payload 필드 목록, 분류, 위험도) | 없음 (case 코드가 곧 정의) | `model/telecommand/cmd_schema.h` |
 | 플랫폼 | 필드 목록으로 입력 폼을 그리는 범용 폼 | 없음 (명령마다 손으로 작성) | `view/cmdgen/schema_form` |
 | 플랫폼 | 송신: 엔벨로프 + TC 감사 로그 + TX 큐 | case마다 반복 | `svc_tx::SendTelecommand` |
-| 미션 | MID 표, CC 값, payload 구조, 라벨 | `miman_config.h`, Templabels, case 본문 | `model/missions/<sat>/commands.*` |
+| 미션 | MID 표, CC 값, payload 구조, 라벨 | `YonseiGS_config.h`, Templabels, case 본문 | `model/missions/<sat>/commands.*` |
 | 미션 | 분류(필터), 초기운용 목록, ADCS 고정 구성값 | FilterRules, INITIAL_CMD_INDICES, case 안 static | `model/missions/<sat>/` |
 | 미션 | 링크 주소: OBC 노드·포트, AX100 노드, HMAC 키 | `main.cpp` 설정 + `coms.cpp`의 `csp_connect(…, 3, 13, …)` 하드코딩 | `model/missions/<sat>/link` |
 | 미션 | 운용 절차(다중 패킷 시퀀스) | case 207/208 (COSMIC) | `model/missions/<sat>/procedures` |

@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 #include "imgui.h"
-#include "miman_config.h"     // TYPE_SYSCMD 등 쉘 명령 종류, cmd_packet_t
+#include "YonseiGS_config.h"     // TYPE_SYSCMD 등 쉘 명령 종류, cmd_packet_t
 #include "ax100_vm.h"
 #include "shell_vm.h"
 #include "beacon_tabs.h"

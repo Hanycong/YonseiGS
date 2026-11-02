@@ -1,6 +1,6 @@
 #include "rotator_vm.h"
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 #include "svc_tracking.h"
 #include "rotator.h"
 

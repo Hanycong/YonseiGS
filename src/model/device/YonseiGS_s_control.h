@@ -7,7 +7,7 @@
 #include <libssh/callbacks.h>
 
 //Custom Headers
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 int init_sband(Setup * setups);
 int verify_knownhost(ssh_session session);

@@ -6,8 +6,8 @@
 #include <GL/glew.h> 
 #include <GLFW/glfw3.h>
 
-#include "miman_config.h"
-#include "miman_imgui.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_imgui.h"
 #include "autopilot_vm.h"
 
 extern ImGuiWindowFlags mim_winflags;

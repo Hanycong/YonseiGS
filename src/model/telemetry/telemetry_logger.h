@@ -3,7 +3,7 @@
 // 수신 스레드(task_downlink_onorbit)가 패킷 종류별로 부른다.
 #pragma once
 
-#include "miman_coms.h"     // Beacon, MissionBeacon, Report, Event
+#include "YonseiGS_coms.h"     // Beacon, MissionBeacon, Report, Event
 
 int BeaconSaver(Beacon* bec);
 int MissionBeaconSaver(MissionBeacon* misnbec);

@@ -1,5 +1,5 @@
 #pragma once
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 using namespace std;
 
 GLint TextureFromFile( const char *path, string directory );

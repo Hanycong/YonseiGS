@@ -2,8 +2,8 @@
 
 #include <stddef.h>
 
-#include "miman_config.h"
-#include "miman_coms.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
 
 extern int NowCMD;
 extern CmdGenerator_GS * SatCMD[256];

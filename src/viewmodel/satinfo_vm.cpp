@@ -2,8 +2,8 @@
 
 #include <stdio.h>
 
-#include "miman_config.h"
-#include "miman_orbital.h"   // RAD_TO_DEG
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"   // RAD_TO_DEG
 
 extern StateCheckUnit State;
 

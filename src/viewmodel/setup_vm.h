@@ -3,7 +3,7 @@
 // 입력 칸이 바로 편집하는 설정값(Setup)은 Config() 로 그대로 내준다 (ImGui 즉시 모드라 바인딩 대신 참조).
 #pragma once
 
-#include "miman_config.h"   // Setup
+#include "YonseiGS_config.h"   // Setup
 
 namespace mim {
 namespace vm {

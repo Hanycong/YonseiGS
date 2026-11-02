@@ -1,9 +1,9 @@
 #include "svc_tx.h"
 #include "svc_thread.h"
 
-#include "miman_config.h"
-#include "miman_coms.h"
-#include "miman_csp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_csp.h"
 
 namespace mim {
 namespace svc {

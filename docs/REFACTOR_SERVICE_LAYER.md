@@ -8,7 +8,7 @@
 
 현재 의존 방향은 **UI → 백엔드 한쪽으로만** 엉켜 있다.
 
-| `miman_imgui.cpp` 안의 백엔드 코드 | 개수 (리팩토링 전) |
+| `YonseiGS_imgui.cpp` 안의 백엔드 코드 | 개수 (리팩토링 전) |
 |---|---|
 | `pthread_create` | 188 |
 | `pthread_join` | 약 170 |
@@ -76,8 +76,8 @@ Model / Backend (miman_coms, miman_orbital, miman_radial, miman_csp, ...)
 
 | 지표 | 리팩토링 전 | 후 |
 |---|---|---|
-| `miman_imgui.cpp` 의 `pthread_create/join` (주석 제외) | 358 | **0** |
-| `miman_imgui.cpp` 의 `p_thread` / `ftp_start_worker` extern | 있음 | **없음** (UI 가 슬롯에 접근하면 컴파일 에러) |
+| `YonseiGS_imgui.cpp` 의 `pthread_create/join` (주석 제외) | 358 | **0** |
+| `YonseiGS_imgui.cpp` 의 `p_thread` / `ftp_start_worker` extern | 있음 | **없음** (UI 가 슬롯에 접근하면 컴파일 에러) |
 | `main.cpp` 의 스레드 생성/조인 | 21 | **0** (`p_thread` 정의만 남음) |
 | `p_thread[]` 를 직접 만지는 빌드 대상 파일 | main, imgui, autopilot (+extern 4개) | **`service/svc_thread.cpp` 하나** |
 | UI 안의 `fork/execl` (앰프) | 6곳 | **0** (`svc_radio` AmpOn/AmpOff) |
@@ -109,4 +109,4 @@ tools/ui_snapshot.sh /tmp/snap_after
 2. Setup → Start → Pre-Pass → Pass Operation 시나리오에서 앱이 살아 있음
 3. 콘솔 로그 순서/문구 동일 (`run.log`, `applogs/`)
 4. 스크린샷 비교 (시간 표시 영역 제외 동일)
-5. 단계별 불변식: `grep -c pthread_ src/miman_imgui.cpp` 가 단계마다 줄어 최종 0
+5. 단계별 불변식: `grep -c pthread_ src/YonseiGS_imgui.cpp` 가 단계마다 줄어 최종 0

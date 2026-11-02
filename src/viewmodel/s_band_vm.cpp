@@ -1,7 +1,7 @@
 #include "s_band_vm.h"
 
-#include "miman_config.h"
-#include "miman_s_control.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_s_control.h"
 
 extern Sband * sgs;
 

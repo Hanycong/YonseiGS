@@ -6,8 +6,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "miman_imgui.h"
-#include "miman_config.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_config.h"
 
 extern Setup * setup;
 extern StateCheckUnit State;

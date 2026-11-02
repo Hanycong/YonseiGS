@@ -6,7 +6,7 @@
 #include <time.h>
 #include <csp/csp.h>
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 #include "svc_tx.h"
 #include "svc_radio.h"
 #include "csp_remote_param.h"

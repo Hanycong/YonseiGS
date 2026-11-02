@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "miman_config.h"   // HVD_TEST, MIM_PT_TMTC_TEST
-#include "miman_coms.h"     // packetsign
+#include "YonseiGS_config.h"   // HVD_TEST, MIM_PT_TMTC_TEST
+#include "YonseiGS_coms.h"     // packetsign
 #include "svc_tx.h"
 
 namespace mim {

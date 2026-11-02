@@ -1,6 +1,6 @@
 #include "frequency_vm.h"
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 #include "svc_tracking.h"
 #include "gs100_radio.h"
 #include "switch_box.h"

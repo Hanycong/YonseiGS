@@ -2,7 +2,7 @@
 
 #include <gs/param/rparam.h>
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 extern Setup * setup;
 

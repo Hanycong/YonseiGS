@@ -5,8 +5,8 @@
 
 #include <stdint.h>
 
-#include "miman_config.h"
-#include "miman_radial.h"   // Ptable_0, Ptable_1, Ptable_5
+#include "YonseiGS_config.h"
+#include "YonseiGS_radial.h"   // Ptable_0, Ptable_1, Ptable_5
 
 namespace mim {
 namespace vm {

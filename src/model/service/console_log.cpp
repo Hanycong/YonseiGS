@@ -1,13 +1,13 @@
 // Model - 공용 로거 (Console 의 로그 저장·검색·파일 기록 부분)
 //
-// miman_imgui.cpp 에서 Console 멤버 함수 중 화면과 관계없는 것을 내용 그대로 옮긴 것.
+// YonseiGS_imgui.cpp 에서 Console 멤버 함수 중 화면과 관계없는 것을 내용 그대로 옮긴 것.
 // 창 그리기(Draw, ChangeWindowSize)는 view/console_view.cpp.
 #include <pthread.h>
 #include <inttypes.h>
 #include <GL/glew.h> 
 #include <GLFW/glfw3.h>
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 extern StateCheckUnit State;
 extern FILE *log_ptr;

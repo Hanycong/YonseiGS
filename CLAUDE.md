@@ -15,15 +15,15 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 1. **Linux-only**. Uses `pthread`, `termios`, `/dev/GS102`, `system("../amp/ampoff")`, `libssh`. Windows native build is not feasible — use **WSL2 Ubuntu**.
 2. **Working directory matters**. The executable must be launched from `bin/` because main.cpp references `../bin/font/Inconsolata.ttf`, `../data/BEE_TC_Log/`, `../amp/ampoff` as relative paths.
 3. **Hardware-coupled**. Without `/dev/GS102` (UHF transceiver), `/dev/GS232B` (rotator), `/dev/KTA223` (switch) the GUI still appears but device init logs `[ERROR]`. Do not "fix" those errors — they are expected on a dev machine.
-4. **The header `src/miman_config.h` is the choke point**. 5,477 lines, 70+ includes, defines all packet/command types. Editing it triggers a full rebuild. See [docs/MIMAN_CONFIG_ANALYSIS.md](docs/MIMAN_CONFIG_ANALYSIS.md).
-5. **Global state hub**: `StateCheckUnit State` (defined in miman_config.h, instantiated in main.cpp) carries ~35 boolean flags that drive every module's control flow. Threads communicate via these flags, not direct calls.
+4. **The header `src/YonseiGS_config.h` is the choke point**. 5,477 lines, 70+ includes, defines all packet/command types. Editing it triggers a full rebuild. See [docs/MIMAN_CONFIG_ANALYSIS.md](docs/MIMAN_CONFIG_ANALYSIS.md).
+5. **Global state hub**: `StateCheckUnit State` (defined in YonseiGS_config.h, instantiated in main.cpp) carries ~35 boolean flags that drive every module's control flow. Threads communicate via these flags, not direct calls.
 
 ## Detailed docs
 
 | Topic | File |
 |---|---|
 | Folder layout, module dependencies, data flow, 5-layer architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
-| `miman_config.h` deep dive (Setup / SatelliteObject / StateCheckUnit / Command) | [docs/MIMAN_CONFIG_ANALYSIS.md](docs/MIMAN_CONFIG_ANALYSIS.md) |
+| `YonseiGS_config.h` deep dive (Setup / SatelliteObject / StateCheckUnit / Command) | [docs/MIMAN_CONFIG_ANALYSIS.md](docs/MIMAN_CONFIG_ANALYSIS.md) |
 | WSL2 + VSCode build & run guide | [docs/BUILD_WSL.md](docs/BUILD_WSL.md) |
 | Honest code quality assessment ("is this spaghetti?") | [docs/CODE_REVIEW.md](docs/CODE_REVIEW.md) |
 
@@ -44,7 +44,7 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 
 ## Conventions
 
-- **Do not amend `miman_config.h` lightly** — full rebuild. Add new files under `src/` and include them only where needed.
+- **Do not amend `YonseiGS_config.h` lightly** — full rebuild. Add new files under `src/` and include them only where needed.
 - **Don't add new pthread slots without updating the comment block at the top of [src/app/main.cpp](src/app/main.cpp)**. The 16-slot array uses fixed indices.
 - **Cleanup**: `temp.cpp` and `tmtctest.cpp` exist in `src/` but are NOT in CMakeLists — they are scratch files.
 
@@ -140,7 +140,7 @@ it by report type when miman_coms' report parser moves into `model/telemetry/`.
 Note: the middle Pass Operation column (`ImGui_CommandWindow_Body`) is actually the **FTP
 manager** (file list / upload / download), not telecommands. The telecommand generator
 (`DrawCmdGeneratorBody`, ~8,900 lines) is the popup opened by Control's "Send Telecommand" /
-"Initial Ops" — it is still in miman_imgui.cpp (non-static now) and is the last window.
+"Initial Ops" — it is still in YonseiGS_imgui.cpp (non-static now) and is the last window.
 **FTP is done**: `view/ftp_view.cpp` (functions keep the old `ImGui_CommandWindow*` names) →
 `viewmodel/ftp_vm.*` (`FtpVM`; AMP button shares `ControlVM::Amp()`) →
 `model/telecommand/ftp_client.*` (`FtpClient`), `model/telecommand/downlink_request.*`.
@@ -164,11 +164,11 @@ dispatched by `cmdgen_forms.h`). **Popups** are extracted verbatim to `view/popu
 2. **Popup ViewModels — done.** `SetupVM`, `Gs100ParamVM`, `TleVM` (+ Load progress), `FdsVM`, `SatInfoVM`,
    `SbandVM`. `view/popups/` has no `State.` / `console.` / `setup->`; `popups_common.h` keeps only
    `mim_winflags` and the table freeze constants.
-3. **miman_imgui.cpp leftovers — done.** Console → `model/service/console_log.cpp` (log storage/file) +
+3. **YonseiGS_imgui.cpp leftovers — done.** Console → `model/service/console_log.cpp` (log storage/file) +
    `view/console_view.cpp` (Draw); AutoPilot window → `view/autopilot_view.cpp` + `AutoPilotVM`
    (window is still not called from main.cpp, as before); legacy `Templabels`/`Initialize_CMDLabels`/
    `FilterRules`/`INITIAL_CMD_INDICES` deleted from src, frozen copy in `tools/cmdgen_golden/legacy_tables.h`
-   for the catalog check. `miman_imgui.cpp` is ~430 lines (globals + GL helpers).
+   for the catalog check. `YonseiGS_imgui.cpp` is ~430 lines (globals + GL helpers).
 4. **Backend split into model/ — done.** `model/telemetry/report_parser` + `telemetry_logger` (*Saver);
    `model/telecommand/cmd_generator_gs` + `packet_codec`; `view/beacon/report/report_{eps,adcs,uant}.cpp`
    (Report tab split by report type); `model/orbit/satellite_object`, `tle_loader`, `doppler`;
@@ -179,7 +179,7 @@ dispatched by `cmdgen_forms.h`). **Popups** are extracted verbatim to `view/popu
    rewritten mechanically) into `AppUi` (app/ui_state.h), `SatTabs` (app/sat_tabs.h), `FtpShared`
    (model/service/ftp_state.h), `AutoPilotCfg` (model/service/autopilot_state.h), `RotatorFlags`
    (model/device/rotator_state.h), `LinkFlags` (model/device/link_state.h), `OrbitData`
-   (model/orbit/orbit_state.h). These headers are included at the end of miman_config.h. `State` keeps
+   (model/orbit/orbit_state.h). These headers are included at the end of YonseiGS_config.h. `State` keeps
    only app lifecycle flags (InitializeRequired, GUI, SbandUse, Debugmode, AllThread, Sleep).
    Still plain globals without locks (same as before) — turning them into classes with accessors /
    locking is a behavior-affecting follow-up, not done.
@@ -204,10 +204,10 @@ the *separation of concerns*, not the binding mechanism:
 
 ## UI theme (Navy Dark — current target)
 
-- Global style is applied by `mim::ApplyTheme()` (in miman_theme.cpp), called
+- Global style is applied by `mim::ApplyTheme()` (in YonseiGS_theme.cpp), called
   from main.cpp. The old `ImGuiCustomStyle()` is dead code, kept for rollback;
   delete only after the navy theme is fully settled.
-- Color tokens live in `miman_theme.h` as `mim::` constants (BG_MAIN, ACCENT,
+- Color tokens live in `YonseiGS_theme.h` as `mim::` constants (BG_MAIN, ACCENT,
   TEXT, OK, ERR, DANGER, ...). **Never hardcode `ImVec4(...)` colors in views —
   always use a token** so future theme changes propagate. (Two hardcoded teal
   values in sat tabs / status bar were already replaced with `BG_PANEL2`/`BG_MAIN`.)
@@ -220,7 +220,7 @@ the *separation of concerns*, not the binding mechanism:
 ## Layout entry point
 
 - Active path: `main.cpp` → `ImGui_MainMenu()` + `ImGui_MainWorkspace(Rw,Rh)`
-  (the latter defined inside miman_imgui.cpp). It draws: satellite tabs host →
+  (the latter defined inside YonseiGS_imgui.cpp). It draws: satellite tabs host →
   status bar host → function tab bar (Pre-Pass / Pass Operation, each a 3-column
   workspace) → console.
 - `miman_layout.cpp` is an OLDER duplicate implementation and is **excluded from

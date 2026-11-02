@@ -4,7 +4,7 @@
 // 전송은 호출하는 쪽이 TX Service(svc_tx SendUplink)로 한다.
 #pragma once
 
-#include "miman_coms.h"     // FSWTle, packetsign
+#include "YonseiGS_coms.h"     // FSWTle, packetsign
 
 namespace mim {
 namespace model {

@@ -1,5 +1,5 @@
 /* ============================================================
- *  miman_satcontext.h
+ *  YonseiGS_satcontext.h
  *
  *  활성 위성 컨텍스트 관리 — Phase 1
  *  ------------------------------------------------------------
@@ -14,7 +14,7 @@
 #ifndef __MIMAN_SATCONTEXT_H_
 #define __MIMAN_SATCONTEXT_H_
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 namespace mim {
 

@@ -1,12 +1,12 @@
 // Model - CSP 진단 스레드 (노드 핑 스캔·콘솔 핑, 보드레이트/주파수 캘리브레이션)
 //
-// miman_csp.cpp 에서 내용 그대로 옮긴 것. 선언은 miman_csp.h 그대로.
+// YonseiGS_csp.cpp 에서 내용 그대로 옮긴 것. 선언은 YonseiGS_csp.h 그대로.
 #include "csp_conn.h"
 #include "csp_promisc.h"
-#include "miman_imgui.h"
-#include "miman_csp.h"
-#include "miman_config.h"
-#include "miman_radial.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_radial.h"
 #ifdef CSP_USE_PROMISC
 extern csp_queue_handle_t csp_promisc_queue;
 #endif

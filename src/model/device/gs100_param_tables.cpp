@@ -1,6 +1,6 @@
 // Model - GS100 파라미터 테이블 0/1/5 읽기·쓰기 스레드 (gs_rparam)
 //
-// miman_radial.cpp 에서 Load_Paramtable* / Save_Paramtable* 를 내용 그대로 옮긴 것. 선언은 miman_radial.h 그대로.
+// YonseiGS_radial.cpp 에서 Load_Paramtable* / Save_Paramtable* 를 내용 그대로 옮긴 것. 선언은 YonseiGS_radial.h 그대로.
 //Custom Headers
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,11 +39,11 @@
 // #include "MIMAN_CSP/csp_io_custom.h"
 // #include "MIMAN_CSP/csp_conn.h"
 
-#include "miman_config.h"
-#include "miman_radial.h"
-#include "miman_csp.h"
-#include "miman_imgui.h"
-#include "miman_orbital.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_orbital.h"
 
 
 extern Console console;
@@ -53,7 +53,7 @@ extern Ptable_5 param5;
 extern CoordTopocentric TrackingTopo;
 extern StateCheckUnit State;
 
-// Load_Paramtable* 만 쓰는 결과 값 (miman_radial.cpp 의 file static 에서 옮김)
+// Load_Paramtable* 만 쓰는 결과 값 (YonseiGS_radial.cpp 의 file static 에서 옮김)
 static int GetResult;
 static int SetResult;
 

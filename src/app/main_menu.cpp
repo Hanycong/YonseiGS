@@ -1,6 +1,6 @@
 // App - 메인 메뉴 / 헤더 (브랜드, 메뉴 막대, 상태 표시줄 자리)
 //
-// miman_imgui.cpp 에서 내용 그대로 옮긴 것.
+// YonseiGS_imgui.cpp 에서 내용 그대로 옮긴 것.
 #include <pthread.h>
 #include <inttypes.h>
 #include <GL/glew.h> 
@@ -10,19 +10,19 @@
 #include <csp/switch.h>
 #include <csp/delay.h>
 
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_csp.h"
-#include "miman_radial.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
-#include "miman_model.h"
-#include "miman_s_control.h"
-#include "miman_ftp.h"
-#include "miman_autopilot.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_model.h"
+#include "YonseiGS_s_control.h"
+#include "YonseiGS_ftp.h"
+#include "YonseiGS_autopilot.h"
 
-#include "miman_theme.h"
-#include "miman_satcontext.h"
+#include "YonseiGS_theme.h"
+#include "YonseiGS_satcontext.h"
 #include "svc_tx.h"
 #include "svc_tracking.h"
 #include "svc_radio.h"

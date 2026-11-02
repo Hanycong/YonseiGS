@@ -1,7 +1,7 @@
 #include "gs100_radio.h"
 
-#include "miman_config.h"
-#include "miman_radial.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_radial.h"
 
 extern Ptable_1 param1;
 extern Ptable_5 param5;

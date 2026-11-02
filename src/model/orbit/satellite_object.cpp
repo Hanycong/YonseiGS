@@ -1,6 +1,6 @@
 // Model - 위성 객체 (SGP4 위치·관측 방위/고도, 패스(AOS/LOS/최대 고도) 예측, 지도 경로)
 //
-// miman_orbital.cpp 에서 SatelliteObject 멤버 함수를 내용 그대로 옮긴 것. 클래스 선언은 miman_config.h.
+// YonseiGS_orbital.cpp 에서 SatelliteObject 멤버 함수를 내용 그대로 옮긴 것. 클래스 선언은 YonseiGS_config.h.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,11 +27,11 @@
 #include <SGP4.h>
 
 //Custom Headers
-#include "miman_orbital.h"
-#include "miman_radial.h"
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_s_control.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_s_control.h"
 #include <gs/util/crc32.h>
 
 

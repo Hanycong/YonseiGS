@@ -1,7 +1,7 @@
 // Model - 다운링크 파일 요청 (MIM_PT_DLREQ 패킷)
 //
 // 위성에 저장된 텔레메트리 파일(HK/AOD/LOG/SNSR/GPS/CTRLO)을 번호/스텝/오프셋으로 요청한다.
-// 요청 내용은 miman_imgui.cpp 의 전역 버퍼 request(dlreqdata)에 저장해 두고 Send 때 패킷으로 만든다.
+// 요청 내용은 YonseiGS_imgui.cpp 의 전역 버퍼 request(dlreqdata)에 저장해 두고 Send 때 패킷으로 만든다.
 #pragma once
 
 #include <stdint.h>

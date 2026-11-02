@@ -2,8 +2,8 @@
 //
 // 지금 어떤 위성을 추적하는지(State.Satellites 의 인덱스, 없으면 -1)를 가진다.
 // Track 창, 자동 추적(Sattracker), AutoPilot, 도플러가 함께 쓰는 값이다.
-// 현재는 miman_orbital.cpp 의 GetNowTracking / SetNowTracking(전역 NowSat)을 감싼다.
-// miman_orbital.cpp 를 분해할 때 NowSat 와 범위 검사가 이 클래스 안으로 들어온다.
+// 현재는 YonseiGS_orbital.cpp 의 GetNowTracking / SetNowTracking(전역 NowSat)을 감싼다.
+// YonseiGS_orbital.cpp 를 분해할 때 NowSat 와 범위 검사가 이 클래스 안으로 들어온다.
 #pragma once
 
 namespace mim {

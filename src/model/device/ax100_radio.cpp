@@ -2,10 +2,10 @@
 
 #include <gs/param/rparam.h>
 
-#include "miman_config.h"
-#include "miman_coms.h"
-#include "miman_radial.h"
-#include "miman_csp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_csp.h"
 
 extern Setup * setup;
 extern Ptable_1 param1;

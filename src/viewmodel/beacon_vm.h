@@ -2,12 +2,12 @@
 //
 // 화면(view/beacon/*_tab.cpp)이 매 프레임 읽어 가는 "마지막으로 받은" 텔레메트리를 내준다.
 // View 는 이 클래스만 알고 수신 스레드가 채우는 전역(beacon, missionbeacon, ...)은 모른다.
-// 값의 형식(Beacon, MissionBeacon, ...)은 miman_coms.h 의 패킷 구조체 그대로다.
+// 값의 형식(Beacon, MissionBeacon, ...)은 YonseiGS_coms.h 의 패킷 구조체 그대로다.
 // (AX100 RPARAM 탭은 Ax100VM / ShellVM 이 맡는다)
 #pragma once
 
 #include <stdint.h>
-#include "miman_coms.h"
+#include "YonseiGS_coms.h"
 
 namespace mim {
 namespace vm {

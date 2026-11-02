@@ -3,7 +3,7 @@
 // 각 함수는 view.kind 가 자기 종류면 행을 그리고 true, 아니면 아무것도 하지 않고 false.
 #pragma once
 
-#include "miman_coms.h"     // ReportView_t
+#include "YonseiGS_coms.h"     // ReportView_t
 
 bool DrawEpsReport(ReportView_t & view);
 bool DrawAdcsReport(ReportView_t & view);

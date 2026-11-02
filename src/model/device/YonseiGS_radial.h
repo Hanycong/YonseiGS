@@ -30,7 +30,7 @@
 #include <gs/util/vmem.h>
 
 //Custom Headers
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 #define AX100_PORT_RPARAM			7
 #define AX100_PORT_HMAC_SET                     8

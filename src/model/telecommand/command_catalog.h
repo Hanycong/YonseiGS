@@ -2,7 +2,7 @@
 //
 // 지상국이 보낼 수 있는 명령의 "정체"(라벨, 대상 미션과 FSW 앱, MID, CC, 분류, 위험도)를
 // 데이터로 표현한다. 명령마다 무엇을 입력받고 어떻게 조립하는지는 아직 명령 생성기
-// (miman_imgui.cpp DrawCmdGeneratorBody)에 있고, 이후 단계에서 옮긴다.
+// (YonseiGS_imgui.cpp DrawCmdGeneratorBody)에 있고, 이후 단계에서 옮긴다.
 //
 // 위성별 명령 목록은 src/model/missions/<위성>/ 에서 MissionCommands 로 정의하고,
 // command_catalog.cpp 의 미션 목록에 등록한다. 플랫폼 코드는 특정 위성을 모른다.

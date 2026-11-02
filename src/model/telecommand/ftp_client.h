@@ -7,7 +7,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "miman_config.h"     // ftpinfo, gsftp_*_t
+#include "YonseiGS_config.h"     // ftpinfo, gsftp_*_t
 
 namespace mim {
 namespace model {

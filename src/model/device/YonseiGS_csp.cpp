@@ -21,10 +21,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "csp_promisc.h"
 
 /* Custom only includes */
-#include "miman_imgui.h"
-#include "miman_csp.h"
-#include "miman_config.h"
-#include "miman_radial.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_radial.h"
 
 #ifdef CSP_USE_PROMISC
 extern csp_queue_handle_t csp_promisc_queue;

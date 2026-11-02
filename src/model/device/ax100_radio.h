@@ -2,7 +2,7 @@
 //
 // 지상국에서 CSP 로 위성 AX100 의 원격 파라미터(rparam)를 읽고 쓴다. 노드 번호와 대기 시간은
 // 지상국 설정(setup->ax100_node, setup->default_timeout)을 쓴다.
-// 현재는 miman_imgui.cpp 의 전역(rparam0/1/5, remote_*)과 miman_coms 의 get_boot_count 등을 감싼다.
+// 현재는 YonseiGS_imgui.cpp 의 전역(rparam0/1/5, remote_*)과 miman_coms 의 get_boot_count 등을 감싼다.
 // Load* 는 원격 값을 읽어 아래 값 칸에 채우고, Save* 는 값 칸의 값을 보낸다. 성공하면 true.
 // (모두 호출한 스레드에서 CSP 응답을 기다린다)
 #pragma once

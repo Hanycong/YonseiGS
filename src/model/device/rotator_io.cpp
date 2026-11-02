@@ -1,7 +1,7 @@
 // Model - GS-232B 로테이터 시리얼 I/O 와 추적 제어 스레드
 //
-// miman_orbital.cpp 에서 로테이터 장치 열기/닫기, 위치 설정·읽기, 추적(Sattracker) 함수를 내용 그대로 옮긴 것.
-// 선언은 miman_orbital.h 그대로. 장치 파일 디스크립터 등 전역은 miman_orbital.cpp 에 둔다.
+// YonseiGS_orbital.cpp 에서 로테이터 장치 열기/닫기, 위치 설정·읽기, 추적(Sattracker) 함수를 내용 그대로 옮긴 것.
+// 선언은 YonseiGS_orbital.h 그대로. 장치 파일 디스크립터 등 전역은 YonseiGS_orbital.cpp 에 둔다.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,11 +28,11 @@
 #include <SGP4.h>
 
 //Custom Headers
-#include "miman_orbital.h"
-#include "miman_radial.h"
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_s_control.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_s_control.h"
 #include <gs/util/crc32.h>
 
 

@@ -10,7 +10,7 @@
 #include <SGP4.h>
 #include <termios.h>
 //Custom Headers
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 #define RAD_TO_DEG 57.2958
 

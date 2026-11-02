@@ -12,8 +12,8 @@
 #include <fstream>
 //Custom Headers
 
-#include "miman_coms.h"
-#include "miman_config.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_config.h"
 #include "frequency_view.h"
 #include "rotator_view.h"
 #include "track_view.h"

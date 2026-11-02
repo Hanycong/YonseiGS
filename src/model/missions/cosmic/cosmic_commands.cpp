@@ -3,7 +3,7 @@
 // BEE-1000 지상국 코드에 덧붙여져 있던 COSMIC 위성 명령을 분리한 것.
 // COSMIC 의 MID 는 십진수 체계(6257 등)를 쓴다. 207/208 은 여러 패킷을 보내는 운용 절차.
 #include "command_catalog.h"
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 namespace mim {
 namespace tc {

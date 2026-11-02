@@ -7,7 +7,7 @@
 #include "beacon_vm.h"
 #include "beacon_tabs.h"
 
-// 표 머리글 고정 행/열 수 (miman_imgui.cpp 의 같은 이름 static 과 같은 값)
+// 표 머리글 고정 행/열 수 (YonseiGS_imgui.cpp 의 같은 이름 static 과 같은 값)
 static int freeze_cols = 1;
 static int freeze_rows = 1;
 

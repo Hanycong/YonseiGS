@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "miman_coms.h"     // Report, ReportView_t
+#include "YonseiGS_coms.h"     // Report, ReportView_t
 
 static constexpr size_t REPORT_WIRE_SIZE = 540;     // 리포트 와이어 프레임 길이
 

@@ -1,13 +1,13 @@
 /* ============================================================
- *  miman_satcontext.cpp
+ *  YonseiGS_satcontext.cpp
  * ============================================================ */
-#include "miman_satcontext.h"
-#include "miman_theme.h"      /* SatColor */
+#include "YonseiGS_satcontext.h"
+#include "YonseiGS_theme.h"      /* SatColor */
 #include <cstring>
 
 extern StateCheckUnit State;
 
-/* miman_orbital.cpp 가 정의한 전역 — 그대로 사용 */
+/* YonseiGS_orbital.cpp 가 정의한 전역 — 그대로 사용 */
 extern int  GetNowTracking(void);
 extern void SetNowTracking_impl(int idx, const char* file, int line);
 

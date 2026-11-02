@@ -11,18 +11,18 @@
 
 
 //Custom Headers
-#include "miman_config.h"
-#include "miman_orbital.h"
-#include "miman_imgui.h"
-#include "miman_satcontext.h"
-#include "miman_theme.h"
-#include "miman_radial.h"
-#include "miman_coms.h"
-#include "miman_csp.h"
-#include "miman_model.h"
-#include "miman_s_control.h"
-#include "miman_autopilot.h"
-#include "miman_ftp.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_satcontext.h"
+#include "YonseiGS_theme.h"
+#include "YonseiGS_radial.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_model.h"
+#include "YonseiGS_s_control.h"
+#include "YonseiGS_autopilot.h"
+#include "YonseiGS_ftp.h"
 #include "svc_station.h"
 
 #undef CSP_USE_RDP

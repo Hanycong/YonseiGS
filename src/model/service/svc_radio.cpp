@@ -4,10 +4,10 @@
 #include <unistd.h>
 #include <gs/param/rparam.h>
 
-#include "miman_config.h"
-#include "miman_csp.h"
-#include "miman_coms.h"
-#include "miman_radial.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_radial.h"
 
 extern StateCheckUnit State;
 extern Console console;
@@ -17,7 +17,7 @@ namespace mim {
 namespace svc {
 
 /********************************************5차 추가***************************************************/
-// (miman_imgui.cpp 에서 이동)
+// (YonseiGS_imgui.cpp 에서 이동)
 
 static const char* sat_names[3] = { "BEE1000", "BEE1012", "Uelysys" };
 static const char* hmac_keys[3] = { "BEE1000", "BEE1012", "UELYSYS" };

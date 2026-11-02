@@ -1,13 +1,13 @@
 // Model - 리포트(RPT) 수신 파서
 //
-// miman_coms.cpp 에서 리포트 패킷 해석 함수를 내용 그대로 옮긴 것.
+// YonseiGS_coms.cpp 에서 리포트 패킷 해석 함수를 내용 그대로 옮긴 것.
 // 540바이트 와이어 프레임 -> Report 구조체 (ParseReportWire540), Report -> 화면용 ReportView_t (UpdateReportViewFromReport).
 // 두 함수는 다른 파일(task_downlink_onorbit)에서 부르므로 static 을 뗐다. 나머지 도우미는 이 파일 안에서만 쓴다.
-#include "miman_config.h"
-#include "miman_csp.h"
-#include "miman_coms.h"
-#include "miman_orbital.h"
-#include "miman_radial.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_coms.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_radial.h"
 #include <netinet/in.h>
 
 #include <mutex>

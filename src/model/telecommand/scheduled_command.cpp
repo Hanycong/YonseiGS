@@ -5,8 +5,8 @@
 #include <string.h>
 #include <arpa/inet.h>
 
-#include "miman_config.h"
-#include "miman_coms.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
 #include "svc_tx.h"
 
 extern StateCheckUnit State;

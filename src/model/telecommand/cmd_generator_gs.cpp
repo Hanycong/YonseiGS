@@ -1,9 +1,9 @@
 // Model - 명령 큐용 cFE 명령 생성기 (CmdGenerator_GS: 헤더·크기·체크섬·예약 실행 정보)
 //
-// miman_coms.cpp 에서 CmdGenerator_GS 멤버 함수를 내용 그대로 옮긴 것. 클래스 선언은 miman_coms.h.
-#include "miman_config.h"
-#include "miman_csp.h"
-#include "miman_coms.h"
+// YonseiGS_coms.cpp 에서 CmdGenerator_GS 멤버 함수를 내용 그대로 옮긴 것. 클래스 선언은 YonseiGS_coms.h.
+#include "YonseiGS_config.h"
+#include "YonseiGS_csp.h"
+#include "YonseiGS_coms.h"
 #include <netinet/in.h>
 
 extern Console console;

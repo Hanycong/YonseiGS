@@ -1,14 +1,14 @@
 // View - 콘솔 창 (Console 의 그리기 부분)
 //
-// miman_imgui.cpp 에서 Console::Draw / ChangeWindowSize 를 내용 그대로 옮긴 것.
+// YonseiGS_imgui.cpp 에서 Console::Draw / ChangeWindowSize 를 내용 그대로 옮긴 것.
 // 로그 저장·파일 기록은 model/service/console_log.cpp.
 #include <pthread.h>
 #include <inttypes.h>
 #include <GL/glew.h> 
 #include <GLFW/glfw3.h>
 
-#include "miman_config.h"
-#include "miman_theme.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_theme.h"
 
 
 void Console::Draw(const char* title, bool* p_open, float fontscale)

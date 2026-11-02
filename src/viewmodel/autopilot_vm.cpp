@@ -2,8 +2,8 @@
 
 #include <string.h>
 
-#include "miman_config.h"
-#include "miman_coms.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_coms.h"
 #include "svc_tracking.h"
 
 extern StateCheckUnit State;
@@ -13,7 +13,7 @@ extern int PingCounter;
 extern CmdGenerator_GS * SatCMD[256];
 extern int NowCMD;
 
-// 옛 CMDDataGenerator 의 입력 상태 (miman_imgui.cpp 전역에서 옮김)
+// 옛 CMDDataGenerator 의 입력 상태 (YonseiGS_imgui.cpp 전역에서 옮김)
 bool SchedulerState = false;
 bool ChecksumState = true;
 uint32_t ExecutionTimeBuf = 0;

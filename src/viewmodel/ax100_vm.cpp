@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 #include "ax100_radio.h"
 
 extern Console console;

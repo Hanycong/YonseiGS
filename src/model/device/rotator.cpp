@@ -1,7 +1,7 @@
 #include "rotator.h"
 
-#include "miman_config.h"
-#include "miman_orbital.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"
 
 extern struct Antenna Now;
 

@@ -2,8 +2,8 @@
 #ifndef _MIMAN_COMS_H_
 #define _MIMAN_COMS_H_
 
-#include "miman_config.h"
-#include "miman_orbital.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"
 #include <mutex>
 
 #pragma once

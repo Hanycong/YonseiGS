@@ -5,7 +5,7 @@
 // 리팩토링 전후 출력이 1바이트라도 다르면 위성으로 나가는 패킷이 바뀐 것이다.
 //
 // 동작 방식
-//  - miman_imgui.cpp 를 이 파일에 직접 include 해서 static 함수/변수에 접근한다.
+//  - YonseiGS_imgui.cpp 를 이 파일에 직접 include 해서 static 함수/변수에 접근한다.
 //  - ImGui::Button 을 이 파일에서 다시 정의해 "Generate CMD" 만 눌린 것으로 만든다
 //    (링크 시 --allow-multiple-definition, 이 오브젝트를 라이브러리보다 먼저 둔다).
 //  - svc_tx 대신 아래 가짜 구현을 링크해 SendUplink 로 들어온 패킷을 기록한다.
@@ -20,7 +20,7 @@
 // 빌드/실행: tools/cmdgen_golden.sh <OUT_DIR>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "../../src/miman_imgui.cpp"
+#include "../../src/view/YonseiGS_imgui.cpp"
 #include "legacy_tables.h"
 
 #include <string>

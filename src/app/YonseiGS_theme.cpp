@@ -1,11 +1,11 @@
 /* ============================================================
- *  miman_theme.cpp
+ *  YonseiGS_theme.cpp
  *
- *  miman_theme.h 의 구현부.
+ *  YonseiGS_theme.h 의 구현부.
  *  - 외부 의존성: ImGui 만.
  *  - imgui_internal.h 불필요 (모두 public API 사용).
  * ============================================================ */
-#include "miman_theme.h"
+#include "YonseiGS_theme.h"
 
 #include <cstdarg>
 #include <cstdio>

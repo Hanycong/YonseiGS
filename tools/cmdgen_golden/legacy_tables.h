@@ -1,6 +1,6 @@
 // 명령 생성기의 옛 표 고정본 (회귀 검사 전용)
 //
-// src/miman_imgui.cpp 에 있던 Templabels / Initialize_CMDLabels / FilterRules / INITIAL_CMD_INDICES 를
+// src/YonseiGS_imgui.cpp 에 있던 Templabels / Initialize_CMDLabels / FilterRules / INITIAL_CMD_INDICES 를
 // 삭제하기 전에 내용 그대로 옮겨 둔 것. 프로그램은 더 이상 이 표를 쓰지 않고 model/telecommand 카탈로그를 쓴다.
 // golden_main.cpp 가 이 표와 카탈로그를 대조하고(catalog.txt), 명령 번호·라벨 순회에도 쓴다.
 #pragma once

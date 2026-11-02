@@ -5,9 +5,9 @@
 #include <libssh/libssh.h>
 #include <libssh/callbacks.h>
 
-#include "miman_config.h"
-#include "miman_imgui.h"
-#include "miman_s_control.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_imgui.h"
+#include "YonseiGS_s_control.h"
 
 extern Console console;
 Sband * sgs;

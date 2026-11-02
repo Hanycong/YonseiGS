@@ -1,4 +1,4 @@
 // AutoPilotState 인스턴스 정의
-#include "miman_config.h"
+#include "YonseiGS_config.h"
 
 AutoPilotState AutoPilotCfg;

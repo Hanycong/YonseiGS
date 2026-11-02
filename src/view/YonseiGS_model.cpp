@@ -1,6 +1,6 @@
-#include "miman_config.h"
-#include "miman_model.h"
-#include "miman_orbital.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_model.h"
+#include "YonseiGS_orbital.h"
 
 extern StateCheckUnit State;
 extern Console console;

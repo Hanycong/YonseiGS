@@ -1,9 +1,9 @@
 #include "svc_tracking.h"
 #include "svc_thread.h"
 
-#include "miman_config.h"
-#include "miman_orbital.h"
-#include "miman_autopilot.h"
+#include "YonseiGS_config.h"
+#include "YonseiGS_orbital.h"
+#include "YonseiGS_autopilot.h"
 
 extern StateCheckUnit State;
 extern Console console;
