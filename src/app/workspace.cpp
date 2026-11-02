@@ -137,7 +137,8 @@ void ImGui_StatusBar_Body(float W) {
         Dot(GetVisibleSatColor(sat));
         ImGui::SameLine(0, 4);
         ImGui::PushStyleColor(ImGuiCol_Text, GetVisibleSatColor(sat));
-        ImGui::Text("%s", OrbitData.Satellites[sat]->Name());
+        const char * nm = OrbitData.Satellites[sat]->Name();
+        ImGui::Text("%s", (nm && nm[0]) ? nm : "(no TLE)");
         ImGui::PopStyleColor();
     }
 
@@ -187,8 +188,27 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
     ImGui::SetNextWindowSize(ImVec2(W, H - top - console_h));
     ImGui::Begin("##workspace_host", NULL, mim_winflags);
 
-    if (ImGui::BeginTabBar("##functabs", ImGuiTabBarFlags_None)) {
-        if (ImGui::BeginTabItem("1. Pre-Pass")) {
+    // 기능 탭은 화면 전환의 주 진입점이라 굵은 글꼴·넓은 여백으로 크게 그린다
+    // (탭 바 높이는 BeginTabBar, 탭 글자는 BeginTabItem 시점의 글꼴을 쓰므로 두 곳 모두 감싼다)
+    auto TabStyle = [](bool on) {
+        if (on) {
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(18, 8));
+            ImGui::PushFont(mim::font_title);
+            ImGui::SetWindowFontScale(0.6f);
+        } else {
+            ImGui::SetWindowFontScale(1.0f);
+            ImGui::PopFont();
+            ImGui::PopStyleVar();
+        }
+    };
+    TabStyle(true);
+    bool functabs = ImGui::BeginTabBar("##functabs", ImGuiTabBarFlags_None);
+    TabStyle(false);
+    if (functabs) {
+        TabStyle(true);
+        bool prepass = ImGui::BeginTabItem("1. Pre-Pass");
+        TabStyle(false);
+        if (prepass) {
             SatTabs.ActiveFuncTab = 0;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;
@@ -205,7 +225,10 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::EndChild();
             ImGui::EndTabItem();
         }
-        if (ImGui::BeginTabItem("2. Pass Operation")) {
+        TabStyle(true);
+        bool passop = ImGui::BeginTabItem("2. Pass Operation");
+        TabStyle(false);
+        if (passop) {
             SatTabs.ActiveFuncTab = 1;
             float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
             float colH = ImGui::GetContentRegionAvail().y;

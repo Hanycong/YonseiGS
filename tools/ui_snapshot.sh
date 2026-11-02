@@ -64,23 +64,23 @@ sleep 6
 import -window root "$OUT/1_pre_pass.png"
 
 # Pre-Pass / Frequency 창: Set(중심 주파수) -> Set to RX -> Set to TX -> Apply(지연 설정) -> 캡처
-xdotool mousemove 1215 291 click 1     # Set (Center Frequency)
+xdotool mousemove 1215 298 click 1     # Set (Center Frequency)
 sleep 3
-xdotool mousemove 803 445 click 1      # Set to RX
+xdotool mousemove 803 452 click 1      # Set to RX
 sleep 2
-xdotool mousemove 1107 445 click 1     # Set to TX
+xdotool mousemove 1107 452 click 1     # Set to TX
 sleep 2
-xdotool mousemove 955 745 click 1      # Apply (Default/Guard/Queue Delay)
+xdotool mousemove 955 752 click 1      # Apply (Default/Guard/Queue Delay)
 sleep 2
 import -window root "$OUT/1a_frequency.png"
 
 # Pre-Pass: Rotator On -> 캡처 -> Rotator OFF -> 캡처
 # (Start Doppler Correction / Start Rotator Engaging 은 누르지 않는다:
 #  TLE 없이 누르면 원본 코드도 세그폴트로 죽는다. CLAUDE.md "Known defects" 참고)
-xdotool mousemove 1435 634 click 1     # Rotator On
+xdotool mousemove 1435 641 click 1     # Rotator On
 sleep 3
 import -window root "$OUT/1b_pre_pass_started.png"
-xdotool mousemove 1739 634 click 1     # Rotator OFF
+xdotool mousemove 1739 641 click 1     # Rotator OFF
 sleep 3
 import -window root "$OUT/1c_pre_pass_stopped.png"
 
@@ -88,9 +88,9 @@ import -window root "$OUT/1c_pre_pass_stopped.png"
 # (장비가 없으므로 쓰기 실패 로그가 남는다. Set/Init 은 원래 UI 스레드에서 1초 sleep)
 # (Rotator IO Buffer Free 는 시나리오에 넣지 않았다: return 누락 수정 전 기준과 비교할 수 없어서.
 #  수정 후에는 멈추지 않음을 별도로 확인했다)
-xdotool mousemove 1435 556 click 1     # Move to Target (원래 Set)
+xdotool mousemove 1435 563 click 1     # Move to Target (원래 Set)
 sleep 3
-xdotool mousemove 1739 556 click 1     # Home (원래 Init)
+xdotool mousemove 1739 563 click 1     # Home (원래 Init)
 sleep 3
 import -window root "$OUT/1d_rotator.png"
 
@@ -98,13 +98,13 @@ import -window root "$OUT/1d_rotator.png"
 # 행 선택(ISS) -> Track 버튼(NOAA-19) -> 검색어 입력 -> 검색어 지우기
 # (행 Selectable 과 Track 버튼이 겹쳐 있어, 누름/뗌이 한 프레임에 들어가면 어느 쪽이 클릭을 받는지 실행마다
 #  달라진다. 키 입력처럼 한 프레임 이상 눌렀다 뗀다)
-xdotool mousemove 100 384; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # ISS 행 선택
+xdotool mousemove 100 391; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # ISS 행 선택
 sleep 2
 import -window root "$OUT/1e_track_select.png"
-xdotool mousemove 575 418; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # NOAA-19 Track
+xdotool mousemove 575 425; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # NOAA-19 Track
 sleep 2
 import -window root "$OUT/1f_track_on.png"
-xdotool mousemove 290 291 click 1      # 검색창
+xdotool mousemove 290 298 click 1      # 검색창
 sleep 1
 for k in S E N T; do xdotool keydown $k; sleep 0.15; xdotool keyup $k; sleep 0.3; done
 sleep 2
@@ -113,73 +113,73 @@ import -window root "$OUT/1g_track_search.png"
 # 한 프레임 이상, ImGui 키 반복 지연(0.275s)보다 짧게 누른다
 for _ in $(seq 8); do xdotool keydown BackSpace; sleep 0.15; xdotool keyup BackSpace; sleep 0.3; done
 sleep 1
-xdotool mousemove 540 760 click 1      # 빈 곳 클릭: 검색창 비활성화 (안 하면 다음 탭 클릭이 무시됨)
+xdotool mousemove 540 767 click 1      # 빈 곳 클릭: 검색창 비활성화 (안 하면 다음 탭 클릭이 무시됨)
 sleep 2
 import -window root "$OUT/1h_track_cleared.png"
 
 # 2. Pass Operation 탭
-xdotool mousemove 196 209 click 1
+xdotool mousemove 246 213 click 1
 sleep 4
 import -window root "$OUT/2_pass_operation.png"
 
 # Pass Operation: FTP Upload 버튼 (선택된 파일 없음 -> 워커 시작/에러 경로)
-xdotool mousemove 1185 619 click 1
+xdotool mousemove 1185 626 click 1
 sleep 5
 import -window root "$OUT/3_ftp_upload.png"
 
 # Pass Operation / Beacon 창(오른쪽 열)의 탭 6개: Beacon 은 2_pass_operation 에 이미 찍힘
 # (잘린 탭 이름 위에 커서가 있으면 툴팁이 떠서, 클릭 후 커서를 콘솔 영역으로 옮긴다)
-xdotool mousemove 1436 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Mission Beacon
+xdotool mousemove 1436 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Mission Beacon
 sleep 1
 xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
 sleep 3
 import -window root "$OUT/4a_mission_beacon.png"
-xdotool mousemove 1545 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Report
+xdotool mousemove 1545 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Report
 sleep 1
 xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
 sleep 3
 import -window root "$OUT/4b_report.png"
-xdotool mousemove 1616 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Event
+xdotool mousemove 1616 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Event
 sleep 1
 xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
 sleep 3
 import -window root "$OUT/4c_event.png"
-xdotool mousemove 1697 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Response
+xdotool mousemove 1697 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Response
 sleep 1
 xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
 sleep 3
 import -window root "$OUT/4d_response.png"
-xdotool mousemove 1817 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # AX100 RPARAM
+xdotool mousemove 1817 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # AX100 RPARAM
 sleep 1
 xdotool mousemove 1000 1060           # 탭 툴팁이 뜨지 않게 콘솔(비교 제외 영역)로 커서 이동
 sleep 3
 import -window root "$OUT/4e_ax100_rparam.png"
-xdotool mousemove 1324 258; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Beacon 탭으로 복귀
+xdotool mousemove 1324 265; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Beacon 탭으로 복귀
 sleep 2
 
 # Pass Operation / Control 창(왼쪽 열): 팝업 창 5개를 차례로 연다 (닫지 않으므로 나중 것이 위에 겹친다)
 # Ping/Calibration/AMP/Clear 는 누르지 않는다 (CSP 전송, 장시간 스레드, 외부 스크립트, 상태 삭제)
-xdotool mousemove 323 295; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Switch Satellite
+xdotool mousemove 323 302; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Switch Satellite
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5a_switch_satellite.png"
-xdotool mousemove 171 418; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Ping each node
+xdotool mousemove 171 425; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Ping each node
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5b_ping_each_node.png"
-xdotool mousemove 475 418; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Custom RParam Get
+xdotool mousemove 475 425; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Custom RParam Get
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5c_custom_rparam.png"
-xdotool mousemove 171 496; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Send Telecommand
+xdotool mousemove 171 503; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Send Telecommand
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
 import -window root "$OUT/5d_send_telecommand.png"
-xdotool mousemove 475 496; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Initial Ops
+xdotool mousemove 475 503; sleep 0.3; xdotool mousedown 1; sleep 0.15; xdotool mouseup 1   # Initial Ops
 sleep 1
 xdotool mousemove 1000 1060
 sleep 3
