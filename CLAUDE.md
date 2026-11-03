@@ -264,6 +264,32 @@ the *separation of concerns*, not the binding mechanism:
   own `ImGui::Begin/End` — the caller wraps them in `BeginChild`. (Track and
   Frequency previously had a stray inner `Begin` that made their columns blank.)
 
+## 누리호 5차 GS(GS_nuri5) 기능 이식 (2026-11-03~)
+
+The operational code for the Nuri rocket 5th launch lives at `git@165.132.141.168:DSS/GS_nuri5.git`
+(local clone `~/Nuri_5_GS/GS_nuri5`). Its **features** are ported into this refactored tree; this tree's
+structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](docs/NURI5_FEATURE_DIFF.md).
+
+- **Satellite mode**: `model/missions/sat_mode.*` — `mim::sat::Current()` = BEE1000 / BEE1012 / UELYSYS / SD1-SAT
+  (atomic). "Switch Satellite" sets it + GS100 TX HMAC key (BEE1000: HMAC off) + TC log folder.
+  BEE1000 mode keeps every pre-existing BEE-1000/COSMIC screen and command exactly as before.
+- **Definitions**: `common/mission_defs.h` = GS_nuri5 `miman_config.h` items missing from `YonseiGS_config.h`.
+  Same-name/different-value items keep the BEE-1000 meaning; 5th-gen variants are renamed
+  (`EPS_P80_*_TLM_ID`, `TO_LAB_EnableOutputIpCmd_t`, `TO_LAB_AddPacket5Cmd_t` unpacked 16 B,
+  BEE1012 ADCS raw/seq CCs → `ADCS_GET_RAW_CALIBRATED_*` / `ADCS_SEQ_{SUN,TGT,NADIR}_CC`;
+  nuri5 packet type `BEE1000` (=14) → `MIM_PT_NODE_TC`). `YonseiGS_coms.h` is a 3-way merge with nuri5 `miman_coms.h`.
+- **TC generator**: `view/cmdgen/{bee1012,uelysys,sd1sat}/forms_<app>.cpp` (nuri5 cases verbatim, sending via svc_tx),
+  `view/cmdgen/bee1012/forms_cfe_table.cpp` (table-driven cFE/THRUST/PAYYONSEI/SDR), `view/cmdgen/raw/forms_generic5.cpp`
+  (0–9 with target node), catalogs `model/missions/<sat>/<sat>_commands.cpp` (labels + per-sat filter combos).
+  5th-gen forms use their own buffer `command5` (Command5), not BEE-1000's `command`.
+- **TC log**: `model/service/tc_log.*` — BEE1000 `../log/TC_Log`, others `../data/<SAT>/tc_log`; every uplinked TC is also
+  written to `../data/<SAT>/tc_log/packet/` from the uplink thread. Console/debug logs: `../log/{Console,Debug}_Log`.
+- **Uplink types**: `MIM_PT_NODE_TC` (2-byte node prefix, port 13), `B12_UL_AIOBC` (node 14/port 10),
+  `UEL_UL_PAYYONSEI_OBC` / `UEL_UL_SDR_CONTROLLER` (node 13/14, port 13). TMTC test commands go to `setup->obc_node` (default 10).
+- **CSP library**: `lib/gscsp` = GS_nuri5 version, `libmimancsp.a` (XTEA off, QoS on), rebuilt from source with waf.
+- **Verification**: `tools/nuri5_reference.sh <GS_nuri5> <OUT>` dumps GS_nuri5's command menus/packets;
+  `tools/cmdgen_golden.sh` now also writes `picker5.txt` / `golden5.txt` in the same format (must match).
+
 ## Known defects (write here, fix separately — do NOT fix mid-refactor)
 
 - `GetVisibleSatColor()` called with satellite index instead of slot index in
