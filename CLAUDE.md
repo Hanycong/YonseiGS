@@ -317,6 +317,12 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   in `src/model/telecommand/`, per-satellite data in `src/model/missions/` (`mim::tc`).
 - UI must not call `pthread_create/join` on `p_thread[]` directly — add or use a
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
+- `JoinThread` joins a `StartThread` thread at most once (later calls return 0), so a Stop
+  button and `StopAllThreads()` can both join the same slot. Slots handed out through
+  `ThreadHandle()` (FTP) are created/joined outside and keep the old always-join behaviour.
+- ~~Stop AutoPilot, then quit → exit 1~~ **fixed**: `StopAutoPilot()` joined the AutoPilot thread
+  and `StopAllThreads()` joined it again (double `pthread_join` → SIGSEGV → libcsp `exit(1)`).
+  `StopAutoPilot()` now only clears the flag; the thread cleans up itself (tab shows "Stopping...").
 - Verify each step with `tools/ui_snapshot.sh <out>` against the previous commit and
   compare with `tools/ui_compare.sh <before> <after>`
   (screens pixel-identical above the console, sorted console log identical).

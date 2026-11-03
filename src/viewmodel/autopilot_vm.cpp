@@ -162,9 +162,15 @@ float AutoPilotVM::PassMaxElevation() const
     return sat >= 0 ? (float)OrbitData.Satellites[sat]->MaxElevation(TargetPass(sat)) : 0.f;
 }
 
-bool AutoPilotVM::CanStart() const { return !Running() && HasTarget(); }
+// 이전 실행이 정리를 마칠 때까지(Stage 가 AP_IDLE) 다시 시작하지 않는다
+bool AutoPilotVM::CanStart() const { return !Running() && Stage() == AP_IDLE && HasTarget(); }
 
-int AutoPilotVM::Stage() const { return AutoPilotCfg.Stage; }
+// Stop 을 누른 뒤 스레드가 정리하는 동안은 "Stopping..."
+int AutoPilotVM::Stage() const
+{
+    int st = AutoPilotCfg.Stage;
+    return (!Running() && st != AP_IDLE) ? AP_STOPPING : st;
+}
 
 const char * AutoPilotVM::StageName(int stage)
 {
@@ -179,6 +185,7 @@ const char * AutoPilotVM::StageName(int stage)
     case AP_FTP:        return "UL signal / FTP";
     case AP_WAIT_LOS:   return "Waiting for LOS";
     case AP_POST_PASS:  return "Pass finished - updating TLE";
+    case AP_STOPPING:   return "Stopping...";
     default:            return "Stopped";
     }
 }

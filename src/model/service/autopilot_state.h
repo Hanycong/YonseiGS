@@ -19,6 +19,7 @@ enum AutoPilotStage {
     AP_FTP,             // UL 신호 / FTP
     AP_WAIT_LOS,        // LOS 까지 대기
     AP_POST_PASS,       // 패스 종료 처리 (추적 해제, TLE 갱신)
+    AP_STOPPING,        // (화면 표시용) Stop 후 스레드가 정리 중
 };
 
 struct AutoPilotState {

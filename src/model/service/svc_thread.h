@@ -35,10 +35,13 @@ typedef void * (*ThreadFn)(void *);
 // pthread_create(&p_thread[slot], NULL, fn, arg) 와 동일
 int StartThread(Slot slot, ThreadFn fn, void * arg);
 
-// pthread_join(p_thread[slot], NULL) 와 동일
+// pthread_join(p_thread[slot], NULL).
+// StartThread 로 만든 스레드는 한 번만 join 한다: 이미 join 했거나 만든 적이 없으면 바로 0 을 돌려준다
+// (같은 스레드를 두 번 join 하면 정의되지 않은 동작 - Stop 후 종료 시 크래시가 났다).
 int JoinThread(Slot slot);
 
 // 슬롯의 pthread_t 주소 (ftp_start_worker 처럼 pthread_t* 를 받는 기존 API 용)
+// 이 슬롯은 밖에서 만들고 join 하므로, JoinThread 는 예전처럼 항상 pthread_join 한다.
 pthread_t * ThreadHandle(Slot slot);
 
 } // namespace svc

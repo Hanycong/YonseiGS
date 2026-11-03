@@ -66,14 +66,16 @@ void StopDoppler()
 
 void StartAutoPilot()
 {
+    JoinThread(SLOT_AUTOPILOT);         // 이전 실행의 스레드 (이미 끝났으면 바로 돌아온다)
     AutoPilotCfg.Autopilot = true;
     StartThread(SLOT_AUTOPILOT, AutoPilot, NULL);
 }
 
+// 멈추라고만 알린다. 스레드는 추적 해제 등 정리를 마치고 스스로 끝나며 (Stage 가 AP_IDLE 로 돌아온다),
+// join 은 다음 StartAutoPilot 또는 종료 시 StopAllThreads 가 한다 (UI 스레드를 막지 않도록).
 void StopAutoPilot()
 {
     AutoPilotCfg.Autopilot = false;
-    JoinThread(SLOT_AUTOPILOT);
 }
 
 int StartSatelliteInitialize(void * sgp4check)
