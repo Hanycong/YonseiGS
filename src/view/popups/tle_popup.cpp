@@ -33,9 +33,12 @@
 
 #include "popups_common.h"
 #include "ui_kit.h"
+#include "file_dialog.h"
 #include "tle_vm.h"
 
 using namespace mim;
+
+static mim::ui::FileDialog tle_file_dialog;   // "Load from local..." 파일 선택 창
 
 bool popup_tle()
 {
@@ -71,9 +74,17 @@ bool popup_tle()
         ImGui::Checkbox("##sgp4checkbox", vm.Sgp4Only());
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.6);
-        ImGui::InputText("##localtleimport", vm.LocalPath(), vm.LocalPathSize(), 0, NULL, NULL);
+        // 경로를 직접 입력하고 Enter 를 눌러도 불러온다
+        if (ImGui::InputText("##localtleimport", vm.LocalPath(), vm.LocalPathSize(), ImGuiInputTextFlags_EnterReturnsTrue, NULL, NULL))
+        {
+            vm.LoadFromLocal();
+        }
         ImGui::SameLine();
-        if(ImGui::Button("Load from local", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
+        if(ImGui::Button("Load from local...", ImVec2(ImGui::GetContentRegionAvail().x, mim::ui::ButtonHeight())))
+        {
+            tle_file_dialog.Open(vm.LocalPath(), ".txt;.tle");
+        }
+        if (tle_file_dialog.Draw("Open TLE File", vm.LocalPath(), vm.LocalPathSize()))
         {
             vm.LoadFromLocal();
         }

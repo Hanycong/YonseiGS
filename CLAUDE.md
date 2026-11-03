@@ -222,6 +222,12 @@ the *separation of concerns*, not the binding mechanism:
   `WideButton`, `ToggleWideButton` (red while active = the click stops something),
   `StatusLamp` (green ok / red not), `ValueRow`. New UI should be built from these so all
   windows keep the same spacing and button height (`ButtonHeight()` = frame height x 1.3).
+- **`view/file_dialog.h` (mim::ui::FileDialog)** is the Windows-Explorer-style file picker
+  (back/forward/up, breadcrumb, Quick access incl. WSL Windows Downloads/Desktop, sortable
+  Name/Date/Type/Size, search, extension filter). Keep one static instance per caller; call
+  `Open(start, ".txt;.tle")` on the button and `Draw(title, buf, size)` every frame inside the
+  parent popup (returns true with an absolute path). Used by TLE Manager "Load from local...".
+  Non-ASCII (Korean) file names render as `?` — the bundled fonts have no Hangul glyphs.
 - Status bar: devices (GS100/Rotator/Switch/S-band) and modes (Engage/Doppler/AutoPilot/AMP)
   all use `StatusLamp`: green = connected / running, red = disconnected / stopped.
 - `mim_winflags` no longer includes `HorizontalScrollbar` (default = no scroll).
