@@ -1,4 +1,4 @@
-// App - 메인 작업 공간 배치: 위성 탭, 상태 표시줄, 기능 탭(Pre-Pass / Pass Operation)의 3열
+// App - 메인 작업 공간 배치: 위성 탭, 상태 표시줄, 기능 탭(Pre-Pass / Pass Operation / Autopilot)의 3열
 //
 // YonseiGS_imgui.cpp 에서 내용 그대로 옮긴 것. 각 열은 view/ 의 창 Body 함수를 부른다.
 #include <pthread.h>
@@ -242,6 +242,26 @@ void ImGui_MainWorkspace(float Rw, float Rh) {
             ImGui::SameLine();
             ImGui::BeginChild("##col3", ImVec2(colW, colH), true);
                 ImGui_BeaconWindow_Body(1.0f);
+            ImGui::EndChild();
+            ImGui::EndTabItem();
+        }
+        TabStyle(true);
+        bool autopilot = ImGui::BeginTabItem("3. Autopilot");
+        TabStyle(false);
+        if (autopilot) {
+            SatTabs.ActiveFuncTab = 2;
+            float colW = ImGui::GetContentRegionAvail().x / 3.0f - 8;
+            float colH = ImGui::GetContentRegionAvail().y;
+            ImGui::BeginChild("##col1", ImVec2(colW, colH), true);
+                ImGui_AutoPilotControl_Body();
+            ImGui::EndChild();
+            ImGui::SameLine();
+            ImGui::BeginChild("##col2", ImVec2(colW, colH), true);
+                ImGui_AutoPilotStatus_Body();
+            ImGui::EndChild();
+            ImGui::SameLine();
+            ImGui::BeginChild("##col3", ImVec2(colW, colH), true);
+                ImGui_PassScript_Body();
             ImGui::EndChild();
             ImGui::EndTabItem();
         }

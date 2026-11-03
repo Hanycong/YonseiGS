@@ -45,7 +45,8 @@ int FindValuablePath(int satIndex)
     if (satIndex < 0 || satIndex >= SAT_MAX_NUM || !OrbitData.Satellites[satIndex]) return 0;
     int Valuable = 0;
     for (int i = 0; i < 64; i++) {
-        if (OrbitData.Satellites[satIndex]->MaxElevation(i) > 10.0f) { Valuable = i; break; }
+        // TC 송신 최저 앙각(3. Autopilot 탭 설정)보다 높이 올라오는 첫 패스
+        if (OrbitData.Satellites[satIndex]->MaxElevation(i) > AutoPilotCfg.MinElevation) { Valuable = i; break; }
     }
     return Valuable;
 }
@@ -74,6 +75,12 @@ void * AutoPilot(void *)
         PingCounter = 0;
     }
     AutoPilotCfg.Successed = 0;
+    // 오류로 끝났을 때도 화면이 "실행 중" 으로 남지 않게 한다
+    AutoPilotCfg.Autopilot = false;
+    AutoPilotCfg.Stage = AP_IDLE;
+    AutoPilotCfg.PassSat = -1;
+    AutoPilotCfg.PassIndex = -1;
+    AutoPilotCfg.ScriptStep = -1;
     return NULL;
 
 }
@@ -84,6 +91,33 @@ static bool NowOn(int SatIndex, int NextValuablePath)
     if (NextValuablePath < 0 || NextValuablePath >= 64) return false;
     if (!OrbitData.Satellites[SatIndex]) return false;
     return (DateTime::Now(false) - OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() < 0;
+}
+
+static bool KeepSending() { return AutoPilotCfg.Autopilot; }
+
+// TC 송신 조건(앙각·안테나·링크)이 맞을 때까지 기다린다. LOS 가 지나거나 Stop 이면 false
+static bool WaitPassGate(int SatIndex, int NextValuablePath)
+{
+    bool logged = false;
+    DateTime last_log = DateTime::Now(false);
+    while (AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath))
+    {
+        mim::svc::PassGate g = mim::svc::EvaluatePassGate(SatIndex);
+        if (g.Ok())
+            return true;
+        // 무엇을 기다리는지 처음 한 번, 이후 30 초마다 남긴다
+        if (!logged || (DateTime::Now(false) - last_log).TotalSeconds() >= 30)
+        {
+            console.AddLog("[Auto]Waiting to send TC: elevation %.1f/%.0f deg %s, antenna %s (rotator %s, engage %s, GS100 %s), link %s",
+                           g.elevation_deg, AutoPilotCfg.MinElevation, g.elevation_ok ? "OK" : "LOW",
+                           g.Antenna() ? "OK" : "NO", g.rotator_ok ? "on" : "off", g.engage_ok ? "on" : "off",
+                           g.radio_ok ? "on" : "off", g.link_ok ? "OK" : "no reply yet");
+            logged = true;
+            last_log = DateTime::Now(false);
+        }
+        usleep(200000); // 200 ms
+    }
+    return false;
 }
 
 
@@ -112,6 +146,12 @@ int AutoPilot_task()
         bool CalibrationSuccess = false; // Add
         printf("Start AutoPilot.\n");
         int NextValuablePath = FindValuablePath(SatIndex);
+        AutoPilotCfg.Stage = AP_WAIT_PASS;
+        AutoPilotCfg.PassSat = SatIndex;
+        AutoPilotCfg.PassIndex = NextValuablePath;
+        AutoPilotCfg.ScriptStep = -1;
+        AutoPilotCfg.ScriptSteps = 0;
+        AutoPilotCfg.ScriptSent = 0;
         console.AddLog("[Auto]Start Autopilot. Next Valuable AOS : %d/%d %d:%d:%d",
                                                         OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Month(), 
                                                         OrbitData.Satellites[SatIndex]->_nextaos[NextValuablePath].AddHours(9).Day(),
@@ -134,6 +174,11 @@ int AutoPilot_task()
             return 0;
         }
 
+        // 링크 확인(비콘·핑 횟수)은 이번 패스 응답만 센다
+        AutoPilotCfg.Stage = AP_ENGAGE;
+        BeaconCounter = 0;
+        PingCounter = 0;
+
         RotatorFlags.Engage = true;
         mim::svc::StartThread(mim::svc::SLOT_ROTATOR_CONTROL, Sattracker, NULL);
         console.AddLog("[OK]##[Auto]Start Engaging.");
@@ -144,6 +189,8 @@ int AutoPilot_task()
 
         //Task
         //Check Beacon Received
+        if (AutoPilotCfg.DoBeaconCheck)
+            AutoPilotCfg.Stage = AP_BEACON;
         while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoBeaconCheck)
         {
             if(BeaconCounter >= AutoPilotCfg.iteration)
@@ -255,6 +302,8 @@ int AutoPilot_task()
         /*-----------------------------------------------------*/
 
         //Ping Try
+        if (AutoPilotCfg.DoPing)
+            AutoPilotCfg.Stage = AP_PING;
         while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoPing && NowOn(SatIndex, NextValuablePath))
         {
             sleep(AutoPilotCfg.SpanTime);
@@ -290,11 +339,31 @@ if (wdt_notsent &&
     AutoPilotCfg.DoCMD &&
     NowOn(SatIndex, NextValuablePath))
 {
-    // 이 패스에서 보낼 TC 목록 (model/service/pass_script)
-    for (const mim::svc::TcStep & step : mim::svc::DefaultPassScript())
-        mim::svc::SendTcStep(step, [] { return AutoPilotCfg.Autopilot; });
+    // 이 패스에서 보낼 TC 목록 (3. Autopilot 탭의 TC SCRIPT, model/service/pass_script)
+    // 단계마다 송신 조건(앙각·안테나·링크)을 다시 확인하고, 맞지 않으면 맞을 때까지 기다린다
+    std::vector<mim::svc::TcStep> script = mim::svc::CurrentPassScript().Snapshot();
+    AutoPilotCfg.ScriptSteps = (int)script.size();
+    AutoPilotCfg.ScriptSent = 0;
+    bool completed = true;
+    for (size_t i = 0; i < script.size(); i++)
+    {
+        AutoPilotCfg.Stage = AP_WAIT_GATE;
+        if (!WaitPassGate(SatIndex, NextValuablePath))
+        {
+            completed = false;
+            break;
+        }
+        AutoPilotCfg.Stage = AP_TC_SCRIPT;
+        AutoPilotCfg.ScriptStep = (int)i;
+        mim::svc::SendTcStep(script[i], KeepSending, &AutoPilotCfg.ScriptSent);
+    }
+    AutoPilotCfg.ScriptStep = -1;
 
-    console.AddLog("[Auto]AutoPilot sequence Ended");
+    if (completed && AutoPilotCfg.Autopilot)
+        console.AddLog("[Auto]AutoPilot sequence Ended (%d TC sent)", AutoPilotCfg.ScriptSent.load());
+    else if (AutoPilotCfg.Autopilot)
+        console.AddLog("[ERROR]##[Auto]TC script not finished before LOS (%d TC sent). The remaining steps were skipped.",
+                       AutoPilotCfg.ScriptSent.load());
     wdt_notsent = false;
 }
 
@@ -305,6 +374,8 @@ if (wdt_notsent &&
         }
 
         bool ulsigdone = false;
+        if (AutoPilotCfg.DoFTPDL || AutoPilotCfg.DoFTPUL)
+            AutoPilotCfg.Stage = AP_FTP;
         //UL SIGNAL
         if((AutoPilotCfg.DoFTPDL || AutoPilotCfg.DoFTPUL) && NowOn(SatIndex, NextValuablePath))
         {
@@ -508,6 +579,7 @@ if (wdt_notsent &&
         mim::svc::JoinThread(mim::svc::SLOT_FTP);
         mim::svc::WaitTx();
 
+        AutoPilotCfg.Stage = AP_WAIT_LOS;
         while(AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath))
             usleep(20000);
         LinkFlags.Doppler = false;
@@ -526,6 +598,7 @@ if (wdt_notsent &&
 
 
         //TLE update시 주석 해제 필수
+        AutoPilotCfg.Stage = AP_POST_PASS;
         console.AddLog("[Auto]Update TLE...");
         for(int i = 0; i < SAT_MAX_NUM; i++)
         {

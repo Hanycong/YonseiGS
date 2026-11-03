@@ -57,7 +57,10 @@ void ImGui_MainMenu();
 void ImGui_ModelWindow(float fontscale);
 void ImGui_AutoPilotWindow(float fontscale);
 
-void ImGui_AutoPilotWindow(float fontscale);
+// 3. Autopilot 탭의 세 열 (view/autopilot_view.cpp)
+void ImGui_AutoPilotControl_Body();
+void ImGui_AutoPilotStatus_Body();
+void ImGui_PassScript_Body();
 
 
 void ImGuiCustomStyle(ImGuiStyle* style);

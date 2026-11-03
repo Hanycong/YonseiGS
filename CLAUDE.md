@@ -232,6 +232,15 @@ the *separation of concerns*, not the binding mechanism:
   Name/Date/Type/Size, search, extension filter). Keep one static instance per caller; call
   `Open(start, ".txt;.tle")` on the button and `Draw(title, buf, size)` every frame inside the
   parent popup (returns true with an absolute path). Used by TLE Manager "Load from local...".
+- **3. Autopilot tab** (view/autopilot_view.cpp `ImGui_AutoPilotControl_Body` / `_Status_Body` /
+  `ImGui_PassScript_Body`, `AutoPilotVM`): target pass (the Track-button satellite), TC conditions,
+  pass tasks, Start/Stop; stage + gate lamps; editable **pass TC script**. The script lives in
+  `model/service/pass_script` (`CurrentPassScript()`, file `data/autopilot/pass_script.txt`,
+  format `name | repeat | delay_s | hex bytes`; built-in default = the old hardcoded EPS HK /
+  GND WDT list). AutoPilot sends each step only while `EvaluatePassGate()` is OK: elevation >=
+  `AutoPilotCfg.MinElevation`, antenna (rotator connected + Engage + GS100), and a satellite reply
+  this pass (ping/beacon counters, reset at Engage) unless `RequireLink` is off.
+  Test: `tools/pass_script_test.sh <out>` (unit test, exit 1 on failure).
 - Status bar: devices (GS100/Rotator/Switch/S-band) and modes (Engage/Doppler/AutoPilot/AMP)
   all use `StatusLamp`: green = connected / running, red = disconnected / stopped.
 - `mim_winflags` no longer includes `HorizontalScrollbar` (default = no scroll).
@@ -292,6 +301,10 @@ the *separation of concerns*, not the binding mechanism:
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
+- AutoPilot **Check Beacon** loop (`AutoPilot_task`) spins without sleeping (100% CPU while it
+  waits for `iteration` beacons).
+- After every pass AutoPilot sets `use = false` on all satellites and re-downloads the TLE, so
+  the Pass Schedule list empties until satellites are selected again in TLE Manager.
 - `SatelliteObject::Initializer` propagates all 64 `_nextaos` slots, including empty ones (default
   `DateTime`, year 1) when there are fewer than 64 passes in 7 days → SGP4 throws `(e <= -0.001)`,
   caught and logged as `[DEBUG]`, for every satellite on TLE Manager **Select**. Harmless today
