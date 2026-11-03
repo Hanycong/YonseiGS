@@ -10,9 +10,9 @@
 #include "svc_thread.h"
 #include "svc_tx.h"
 #include "svc_radio.h"
+#include "svc_ftp.h"
 #include "pass_script.h"
 
-extern bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), void *arg, const char *label);
 
 extern StateCheckUnit State;
 extern Setup * setup;
@@ -500,7 +500,8 @@ if (wdt_notsent &&
         //Temporary condition : max_el > 30.0deg
         while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoFTPDL && NowOn(SatIndex, NextValuablePath))
         {
-            if(FtpShared.ftp_mode)
+            // 워커가 시작 요청~끝 사이면 기다린다 (ftp_mode 는 워커가 실제로 돌기 시작해야 서므로 FtpBusy 로 본다)
+            if(mim::svc::FtpBusy())
                 {usleep(10000); 
                     continue;
                 }
@@ -510,16 +511,10 @@ if (wdt_notsent &&
                 console.AddLog("[Auto]Stop FTP Download after LOS.");
                 break;
             }
-            if(FtpShared.ftp_version == 1)
-
-                console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");   
-                // pthread_create(&p_thread[8], NULL, ftp_downlink_force, &State.ftplistup[NowFTP]);
-            else
-            {
-                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_downlink_onorbit, &FtpShared.ftplistup[NowFTP], "download")) {
-                    console.AddLog("[Auto]FTP download launch blocked. Stop automatic FTP retries for this pass.");
-                    break;
-                }
+            // 엔진(V1 force / V2 / Ryu)은 FTP 창에서 고른 FtpShared.ftp_version (누리호 5차 GS 와 같음)
+            if (!mim::svc::FtpDownload(&FtpShared.ftplistup[NowFTP])) {
+                console.AddLog("[Auto]FTP download launch blocked. Stop automatic FTP retries for this pass.");
+                break;
             }
             
         }
@@ -534,23 +529,19 @@ if (wdt_notsent &&
         //Temporary condition : max_el > 30.0deg
         while(AutoPilotCfg.Autopilot && AutoPilotCfg.DoFTPUL && NowOn(SatIndex, NextValuablePath))
         {
-            if(FtpShared.ftp_mode)
-                continue;
+            if(mim::svc::FtpBusy())
+                {usleep(10000);     // 예전에는 쉬지 않고 돌았다
+                    continue;
+                }
             sleep(AutoPilotCfg.SpanTime);
             if(!NowOn(SatIndex, NextValuablePath))
             {
                 console.AddLog("[Auto]Stop FTP Upload after LOS.");
                 break;
             }
-            if(FtpShared.ftp_version == 1)
-                console.AddLog("[ERROR]##ftp V1 is deprecated. Use V2.");   
-                // pthread_create(&p_thread[8], NULL, ftp_uplink_force, &State.ftplistup[NowFTP]);
-            else
-            {
-                if (!ftp_start_worker(mim::svc::ThreadHandle(mim::svc::SLOT_FTP), ftp_uplink_onorbit, &FtpShared.ftplistup[NowFTP], "upload")) {
-                    console.AddLog("[Auto]FTP upload launch blocked. Stop automatic FTP retries for this pass.");
-                    break;
-                }
+            if (!mim::svc::FtpUpload(&FtpShared.ftplistup[NowFTP])) {
+                console.AddLog("[Auto]FTP upload launch blocked. Stop automatic FTP retries for this pass.");
+                break;
             }
             
             
@@ -567,7 +558,9 @@ if (wdt_notsent &&
         // AMP 타이머가 끝날 때까지 (join 은 svc_radio 만 한다: GUI AmpOn 과 겹쳐도 타이머가 둘이 되지 않게)
         while (mim::svc::AmpTimerRunning() && AutoPilotCfg.Autopilot)
             usleep(100000);
-        mim::svc::JoinThread(mim::svc::SLOT_FTP);
+        // FTP 워커가 끝날 때까지 (SLOT_FTP 는 ftp_start_worker / 종료 때만 join: 같은 스레드를 두 번 join 하지 않게)
+        while (mim::svc::FtpBusy() && AutoPilotCfg.Autopilot)
+            usleep(100000);
         mim::svc::WaitTx();
 
         AutoPilotCfg.Stage = AP_WAIT_LOS;

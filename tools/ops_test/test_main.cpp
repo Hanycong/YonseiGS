@@ -2,6 +2,9 @@
 //
 //  - AMP: 타이머 재시작(AmpOn 이 쓰는 RestartAmpTimer)을 연달아 불러도 바로 돌아오는지,
 //         Stop / 종료(InitializeRequired) 때 타이머 스레드가 100 ms 단위로 끝나는지
+//  - FTP: 엔진(V1/V2/Ryu)별 워커가 TX 모드를 기다리는 동안 Stop 하면 바로 끝나는지, 중복 실행 차단,
+//         사용자 Stop 뒤에는 실패 쿨다운이 없는지, 실패 뒤에는 30 초 쿨다운, 워커 인자가 시작 순간 경로를 갖는지
+//         (CSP/무선 장치 없이: 실제 전송은 하지 않는다)
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
 // 빌드/실행: tools/ops_test.sh <OUT_DIR>   (실패가 있으면 종료 코드 1)
@@ -20,6 +23,9 @@
 #include "YonseiGS_config.h"
 #include "YonseiGS_coms.h"
 #include "svc_radio.h"
+#include "svc_ftp.h"
+#include "ftp_transfer.h"
+#include <gs/util/error.h>
 #include <csp/csp.h>
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
@@ -147,12 +153,113 @@ static void TestAmpTimer()
     CHECK(!AmpTimerRunning());
 }
 
+static miman_ftp_transfer_status_t LastFtp()
+{
+    miman_ftp_transfer_status_t st;
+    memset(&st, 0, sizeof(st));
+    miman_ftp_get_last_transfer_status(&st);
+    return st;
+}
+
+// TX 모드를 기다리는 워커를 띄우고 Stop -> 0.5 초 안에 끝나는지
+static void StopWaitingTransfer(int version, bool upload, const char * engine)
+{
+    using namespace mim::svc;
+    printf("# FTP stop while waiting for TX: version %d %s\n", version, upload ? "upload" : "download");
+    FtpShared.ftp_version = version;
+    LinkFlags.uplink_mode = false;
+    ftpinfo info;
+    snprintf(info.local_path, sizeof(info.local_path), "file://local_%d", version);
+    snprintf(info.remote_path, sizeof(info.remote_path), "file://remote_%d", version);
+
+    CHECK(upload ? FtpUpload(&info) : FtpDownload(&info));
+    // 시작 뒤 칸을 바꿔도 워커는 시작 순간 경로를 쓴다
+    snprintf(info.local_path, sizeof(info.local_path), "file://changed");
+    CHECK(FtpBusy());
+    CHECK(!FtpStopping());
+    usleep(200000);
+    CHECK(FtpBusy());           // TX 모드를 기다리는 중
+    CHECK(FtpShared.ftp_mode);
+    // 중복 실행 차단
+    CHECK(!FtpUpload(&info));
+    CHECK(!FtpDownload(&info));
+
+    double t0 = Now();
+    FtpStop();
+    CHECK(WaitFor([] { return !FtpBusy(); }, 0.5));
+    printf("     stopped in %.3f s\n", Now() - t0);
+    CHECK(!FtpShared.ftp_mode);
+    CHECK(!FtpStopping());
+    miman_ftp_transfer_status_t st = LastFtp();
+    CHECK(st.user_stopped == 1);
+    CHECK(st.cleanup_done == 1);
+    CHECK(st.return_code == GS_ERROR_BREAK);
+    CHECK(strcmp(st.engine, engine) == 0);
+    CHECK(strcmp(st.direction, upload ? "UPLOAD" : "DOWNLOAD") == 0);
+    char expect[64];
+    snprintf(expect, sizeof(expect), "file://local_%d", version);
+    CHECK(strcmp(st.local_path, expect) == 0);
+}
+
+static void TestFtp()
+{
+    using namespace mim::svc;
+    CHECK(FtpShared.ftp_version == 2);      // 기본 엔진은 V2 (Ryu 는 고를 때만)
+
+    StopWaitingTransfer(2, true, "V2");
+    // 사용자 Stop 뒤에는 쿨다운 없이 바로 다시 (이어받기)
+    StopWaitingTransfer(3, false, "RYU");
+    StopWaitingTransfer(1, true, "V1");
+    StopWaitingTransfer(1, false, "V1");
+    StopWaitingTransfer(3, true, "RYU");
+    StopWaitingTransfer(2, false, "V2");
+
+    // 시작 직후 (워커가 돌기 전) Stop
+    printf("# FTP stop right after start\n");
+    FtpShared.ftp_version = 2;
+    ftpinfo info;
+    CHECK(FtpUpload(&info));
+    FtpStop();
+    CHECK(WaitFor([] { return !FtpBusy(); }, 0.5));
+    CHECK(LastFtp().user_stopped == 1);
+
+    // Stop 이 끝난 뒤 새 전송은 (abort 유지 스레드에) 멈추지 않는다
+    printf("# FTP new transfer after stop is not aborted\n");
+    usleep(200000);
+    CHECK(FtpUpload(&info));
+    usleep(300000);
+    CHECK(FtpBusy());
+    CHECK(!FtpStopping());
+    FtpStop();
+    CHECK(WaitFor([] { return !FtpBusy(); }, 0.5));
+
+    // Stop 은 돌고 있는 FTP 가 없으면 아무것도 안 한다
+    FtpStop();
+    CHECK(!FtpBusy());
+    CHECK(!FtpStopping());
+
+    // 실패(로컬 파일 없음)는 30 초 쿨다운 -> 다음 시작 차단
+    printf("# FTP failure cooldown\n");
+    LinkFlags.uplink_mode = true;
+    snprintf(info.local_path, sizeof(info.local_path), "file:///nonexistent_ops_test/none.bin");
+    snprintf(info.remote_path, sizeof(info.remote_path), "file://none.bin");
+    CHECK(FtpUpload(&info));
+    CHECK(WaitFor([] { return !FtpBusy(); }, 5.0));
+    miman_ftp_transfer_status_t st = LastFtp();
+    printf("     failed upload retcode %d\n", st.return_code);
+    CHECK(st.return_code != 0);
+    CHECK(st.user_stopped == 0);
+    CHECK(!FtpUpload(&info));       // 쿨다운
+    LinkFlags.uplink_mode = false;
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
     State.InitializeRequired = false;
 
     TestAmpTimer();
+    TestFtp();
 
     printf("%s: %d failure(s)\n", g_fail ? "FAILED" : "PASSED", g_fail);
     return g_fail ? 1 : 0;

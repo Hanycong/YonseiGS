@@ -9,7 +9,8 @@
 struct FtpState {
     bool ftp_mode = false;
     uint32_t chunk_sz = 200;
-    int ftp_version = 2;
+    int ftp_version = 2;                // 1 = V1 force, 2 = V2 (기본), 3 = Ryu (ftp_transfer.h FtpVersion)
+    int force_iteration = 3;            // V1 force 반복 횟수 (누리호 5차 GS State.iteration 기본값과 같음)
     int ftp_task = FTP_UPLOAD_REQUEST;
     char FTPWindowBuffer[64];
     chunkstate_t * ChunkState;

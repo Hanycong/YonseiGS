@@ -25,7 +25,9 @@ public:
     void SendDownlinkRequest();         // 요청 버퍼를 업링크
 
     // ---- FTP 작업 ----
-    int *      Version();               // 1, 2
+    int *      Version();               // 1 = V1 force, 2 = V2 (기본), 3 = Ryu
+    int *      ForceIteration();        // V1 반복 횟수 (V1 일 때만 보인다)
+    void       ClampForceIteration();   // >= 1
     uint32_t * ChunkSize();
     void       ClampChunkSize();        // >= 1 (입력 칸 다음 매 프레임)
     int *      Task();                  // FTP_*_REQUEST
@@ -53,6 +55,11 @@ public:
     void Copy();
     void Mkdir();
     void Rmdir();
+
+    // 업/다운로드 진행 중이면 버튼 자리에 Stop (Stop 을 누른 뒤 워커가 끝날 때까지 "Stopping...")
+    bool TransferBusy() const;
+    bool TransferStopping() const;
+    void Stop();
 };
 
 FtpVM & FtpViewModel();

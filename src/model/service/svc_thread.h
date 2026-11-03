@@ -20,7 +20,8 @@ enum Slot
     SLOT_CALIBRATION     = 5,   // baud/freq calibration
     SLOT_AMP_TIMER       = 6,   // AmpTimer
     SLOT_DOPPLER         = 7,   // Doppler shift correction
-    SLOT_FTP             = 8,   // FTP downlink/uplink
+    SLOT_FTP             = 8,   // FTP downlink/uplink (ftp_start_worker 가 만들고 join)
+    SLOT_FTP_STOP        = 9,   // FTP Stop 뒤 워커가 끝날 때까지 ftp_abort() 를 다시 세우는 스레드
     SLOT_SIGNALTEST      = 10,  // SignalTest
     SLOT_TRX_CONTROLLER  = 11,  // TRxController
     SLOT_RADIO_INIT      = 12,  // RadInitialize
@@ -40,7 +41,7 @@ int StartThread(Slot slot, ThreadFn fn, void * arg);
 // (같은 스레드를 두 번 join 하면 정의되지 않은 동작 - Stop 후 종료 시 크래시가 났다).
 int JoinThread(Slot slot);
 
-// 슬롯의 pthread_t 주소 (ftp_start_worker 처럼 pthread_t* 를 받는 기존 API 용)
+// 슬롯의 pthread_t 주소 (pthread_t* 를 받는 기존 API 용. 지금은 쓰는 곳이 없다 - FTP 도 StartThread/JoinThread)
 // 이 슬롯은 밖에서 만들고 join 하므로, JoinThread 는 예전처럼 항상 pthread_join 한다.
 pthread_t * ThreadHandle(Slot slot);
 

@@ -46,6 +46,13 @@ void FtpVM::SendDownlinkRequest()
 
 int *      FtpVM::Version()   { return Ftp().Version(); }
 uint32_t * FtpVM::ChunkSize() { return Ftp().ChunkSize(); }
+int *      FtpVM::ForceIteration() { return Ftp().ForceIteration(); }
+
+void FtpVM::ClampForceIteration()
+{
+    if(*Ftp().ForceIteration() < 1)
+        *Ftp().ForceIteration() = 1;
+}
 
 void FtpVM::ClampChunkSize()
 {
@@ -88,6 +95,10 @@ void FtpVM::Remove()   { Ftp().Remove(); }
 void FtpVM::Copy()     { Ftp().Copy(); }
 void FtpVM::Mkdir()    { Ftp().Mkdir(); }
 void FtpVM::Rmdir()    { Ftp().Rmdir(); }
+
+bool FtpVM::TransferBusy() const     { return Ftp().Busy(); }
+bool FtpVM::TransferStopping() const { return Ftp().Stopping(); }
+void FtpVM::Stop()                   { Ftp().Stop(); }
 
 FtpVM & FtpViewModel()
 {
