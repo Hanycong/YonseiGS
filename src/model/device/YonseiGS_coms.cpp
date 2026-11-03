@@ -89,6 +89,9 @@ void * TRxController(void *)
     csp_socket_t * DLsocket = DL_sock_initialize();
     while(LinkFlags.TRx_mode)
     {
+        if(!FtpShared.ftp_mode)   /* [FTP-BEACON-BUFFER] FTP 가 끝났으면 쌓아 둔 5차 비콘 저장 (n5_beacon.cpp) */
+            FlushFtpBeaconBuffers();
+
         if(LinkFlags.downlink_mode)
         {
             printf("Create downlink onorbit...\n");
@@ -96,6 +99,8 @@ void * TRxController(void *)
             pthread_join(LinkTrhead, NULL);
             LinkFlags.uplink_mode = true;
         }
+        else if(FtpShared.ftp_mode)   /* [FTP-BEACON-CLOSE] 수신 스레드가 멈춘 동안 연결 슬롯이 차지 않게 받아서 닫는다 */
+            CloseDownlinkConnDuringFtp(DLsocket);
         else
             continue;
     }
