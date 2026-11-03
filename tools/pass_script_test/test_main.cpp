@@ -2,7 +2,8 @@
 //
 //  - 16진수 바이트 읽기/쓰기, 스크립트 파일 저장 → 읽기 왕복, 잘못된 파일 거부
 //  - 기본 스크립트를 보냈을 때 나가는 패킷이 예전 AutoPilot 하드코딩 순서와 같은지
-//  - Stop(keep_going=false) 이 반복·대기 중에도 바로 먹는지
+//  - 송신 조건을 TC 한 번마다 묻는지, Stop/LOS(keep_going=false) 가 대기 중에도 바로 먹는지
+//  - 시작 때 틀린 스크립트 파일은 기본 스크립트가 아니라 빈 스크립트 + 오류로 (지운 명령이 되살아나지 않게)
 //  - 송신 조건(앙각·안테나·링크) 판정
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
@@ -40,6 +41,7 @@ char * fontfile = (char *)"../bin/font/Inconsolata.ttf";
 extern int PingCounter;
 extern int BeaconCounter;
 extern Observer Yonsei;
+extern int NowSat;
 
 static std::vector<std::vector<uint8_t>> g_sent;
 static std::vector<std::string> g_head;
@@ -73,6 +75,7 @@ static int g_budget = 0;
 static bool Budget() { return g_budget-- > 0; }
 static volatile bool g_go = true;
 static bool Go() { return g_go; }
+static int g_asked = 0;
 static void * StopSoon(void *) { usleep(300000); g_go = false; return NULL; }
 
 static double Now()
@@ -118,6 +121,7 @@ int main(int argc, char ** argv)
 
     // ---- 저장 → 읽기 왕복
     PassScript & ps = CurrentPassScript();
+    ps.ResetToDefault();                // bin/../data 에 운용자가 저장한 파일이 있어도 기본값에서 시작
     CHECK(SameScript(ps.Snapshot(), DefaultPassScript()));
     TcStep extra;
     extra.name = "NAME | WITH BAR";
@@ -145,7 +149,6 @@ int main(int argc, char ** argv)
         "A | 2 | 601 | 01\n",                   // 대기 초과
         "A | 2 | 10 | 0Z\n",                    // 16진수 아님
         " | 2 | 10 | 01\n",                     // 이름 없음
-        "# only comment\n",                     // 단계 없음
         "OK | 1 | 0 | 01\nB | x | 1 | 01\n",    // 2번째 줄 오류
     };
     for (const char * text : bad)
@@ -159,6 +162,31 @@ int main(int argc, char ** argv)
     ps.Load(dir + "/bad.txt", err);
     CHECK(err.find("line 2") == 0);
     CHECK(!ps.Load(dir + "/no_such_file.txt", err));
+
+    // 단계 없는 파일(모두 지우고 저장) 왕복, BOM, '#' 으로 시작하는 이름
+    WriteFile((dir + "/empty.txt").c_str(), "# only comment\n");
+    CHECK(ps.Load(dir + "/empty.txt", err) && ps.Count() == 0);
+    CHECK(ps.Save(dir + "/empty2.txt", err) && ps.Load(dir + "/empty2.txt", err) && ps.Count() == 0);
+    WriteFile((dir + "/bom.txt").c_str(), "\xEF\xBB\xBF# comment\nA | 1 | 0 | 01\n");
+    CHECK(ps.Load(dir + "/bom.txt", err) && ps.Count() == 1);
+    TcStep hash;
+    hash.name = "#2 EPS DOCK GND WDT";
+    hash.bytes = {0x01};
+    ps.Set(0, hash);
+    CHECK(ps.Save(dir + "/hash.txt", err) && ps.Load(dir + "/hash.txt", err) && ps.Count() == 1 && ps.At(0).name == hash.name);
+    CHECK(access((dir + "/hash.txt.tmp").c_str(), F_OK) != 0);         // 임시 파일이 남지 않음
+
+    // 시작 때 파일 읽기: 없으면 기본, 틀리면 빈 스크립트 + 오류 (Load / Reset 하면 풀린다)
+    ps.ResetToDefault();
+    ps.LoadAtStartup(dir + "/no_such_file.txt");
+    CHECK(SameScript(ps.Snapshot(), DefaultPassScript()) && ps.StartupError().empty());
+    WriteFile((dir + "/bad.txt").c_str(), "OK | 1 | 0 | 01\nB | x | 1 | 01\n");
+    ps.LoadAtStartup(dir + "/bad.txt");
+    CHECK(ps.Count() == 0 && !ps.StartupError().empty());
+    CHECK(ps.Load(dir + "/bom.txt", err) && ps.StartupError().empty());
+    ps.LoadAtStartup(dir + "/bad.txt");
+    ps.ResetToDefault();
+    CHECK(ps.StartupError().empty());
 
     // ---- 기본 스크립트 송신 = 예전 AutoPilot 하드코딩 순서 (각 2회)
     const std::vector<std::vector<uint8_t>> legacy = {
@@ -177,7 +205,7 @@ int main(int argc, char ** argv)
     {
         CHECK(st.repeat == 2 && st.delay_s == 10);
         st.delay_s = 0;
-        SendTcStep(st, Always, &sent);
+        SendTcStep(st, Always, Always, &sent);
     }
     CHECK(g_sent == expect);
     CHECK(sent == 16);
@@ -190,21 +218,26 @@ int main(int argc, char ** argv)
     }
     CHECK(heads_ok);
 
-    // ---- Stop: 반복 도중, 대기 도중
+    // ---- 송신 조건은 TC 한 번마다 묻는다 (반복 도중 조건이 깨지면 남은 반복을 보내지 않는다)
     TcStep five;
     five.name = "FIVE";
     five.bytes = {0x01};
     five.repeat = 5;
     five.delay_s = 0;
     g_budget = 3;
-    CHECK(SendTcStep(five, Budget) == 3);
+    CHECK(SendTcStep(five, Budget, Always) == 3);
+    g_asked = 0;
+    SendTcStep(five, [] { g_asked++; return true; }, Always);
+    CHECK(g_asked == 5);
+
+    // ---- Stop / LOS: 대기 도중
     five.repeat = 2;
     five.delay_s = 5;
     g_go = true;
     pthread_t t;
     pthread_create(&t, NULL, StopSoon, NULL);
     double t0 = Now();
-    int n = SendTcStep(five, Go);
+    int n = SendTcStep(five, Always, Go);
     double took = Now() - t0;
     pthread_join(t, NULL);
     CHECK(n == 1);
@@ -212,6 +245,7 @@ int main(int argc, char ** argv)
 
     // ---- 송신 조건
     OrbitData.NowTracking = false;
+    NowSat = 0;
     RotatorFlags.RotatorConnection = true;
     RotatorFlags.Engage = true;
     LinkFlags.GS100_Connection = true;
@@ -235,6 +269,10 @@ int main(int argc, char ** argv)
     LinkFlags.GS100_Connection = false;
     CHECK(!EvaluatePassGate(0).Antenna());
     LinkFlags.GS100_Connection = true;
+    NowSat = 1;                         // 로테이터가 다른 위성을 추적 중
+    CHECK(!EvaluatePassGate(0).target_ok && !EvaluatePassGate(0).Antenna());
+    NowSat = 0;
+    CHECK(EvaluatePassGate(0).target_ok);
 
     // 앙각: 실제 TLE 로 만든 위성의 SGP4 앙각과 비교, 최저 앙각 경계
     Tle tle("UELYSYS",

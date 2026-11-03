@@ -11,6 +11,7 @@
 #include "YonseiGS_config.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "YonseiGS_orbital.h"
 
 extern Console console;
 extern int PingCounter;
@@ -33,10 +34,11 @@ std::vector<TcStep> DefaultPassScript()
     return s;
 }
 
-int SendTcStep(const TcStep & step, bool (*keep_going)(), std::atomic<int> * sent_total)
+int SendTcStep(const TcStep & step, const std::function<bool()> & may_send,
+               const std::function<bool()> & keep_going, std::atomic<int> * sent_total)
 {
     int sent = 0;
-    for (int i = 0; i < step.repeat && keep_going(); i++)
+    for (int i = 0; i < step.repeat && may_send(); i++)
     {
         packetsign * pkt = (packetsign *)malloc(2 + 2 + 4 + step.bytes.size());
         pkt->Identifier = HVD_TEST;
@@ -53,9 +55,13 @@ int SendTcStep(const TcStep & step, bool (*keep_going)(), std::atomic<int> * sen
 
         console.AddLog("[Auto]%s sent (%d/%d)", step.name.c_str(), i + 1, step.repeat);
 
-        // Stop 을 누르면 대기 중에도 바로 멈춘다
-        for (int t = 0; t < step.delay_s * 10 && keep_going(); t++)
+        // 예전처럼 마지막 송신 뒤에도 기다린다 (다음 명령과의 간격). Stop / LOS 면 대기 중에도 바로 멈춘다
+        for (int t = 0; t < step.delay_s * 10; t++)
+        {
+            if (!keep_going())
+                return sent;
             usleep(100000);
+        }
     }
     return sent;
 }
@@ -166,6 +172,26 @@ void PassScript::ResetToDefault()
 {
     std::lock_guard<std::mutex> lk(mu_);
     steps_ = DefaultPassScript();
+    startup_error_.clear();
+}
+
+std::string PassScript::StartupError() const
+{
+    std::lock_guard<std::mutex> lk(mu_);
+    return startup_error_;
+}
+
+void PassScript::LoadAtStartup(const std::string & path)
+{
+    if (access(path.c_str(), F_OK) != 0)
+        return;                         // 파일이 없으면 기본 스크립트
+    std::string err;
+    if (Load(path, err))
+        return;
+    std::lock_guard<std::mutex> lk(mu_);
+    steps_.clear();
+    path_ = path;
+    startup_error_ = err;
 }
 
 std::string PassScript::Path() const
@@ -209,8 +235,11 @@ bool PassScript::Load(const std::string & path, std::string & err)
     while (std::getline(in, line))
     {
         no++;
+        if (no == 1 && line.compare(0, 3, "\xEF\xBB\xBF") == 0)
+            line = line.substr(3);      // 메모장 등이 붙이는 UTF-8 BOM
         std::string t = Trim(line);
-        if (t.empty() || t[0] == '#')
+        // 주석: "#" 다음이 공백이거나 줄 끝, 또는 '|' 가 없는 "#" 줄 ("#2 EPS ..." 같은 이름의 단계는 버리지 않는다)
+        if (t.empty() || (t[0] == '#' && (t.size() == 1 || isspace((unsigned char)t[1]) || t.find('|') == std::string::npos)))
             continue;
 
         std::vector<std::string> f;
@@ -226,9 +255,9 @@ bool PassScript::Load(const std::string & path, std::string & err)
         }
         TcStep st;
         st.name = f[0];
-        if (st.name.empty())
+        if (st.name.empty() || st.name.size() > TC_MAX_NAME)
         {
-            err = where + "empty name";
+            err = where + "name must be 1-" + std::to_string(TC_MAX_NAME) + " bytes";
             return false;
         }
         if (!ParseInt(f[1], 1, TC_MAX_REPEAT, st.repeat))
@@ -249,14 +278,11 @@ bool PassScript::Load(const std::string & path, std::string & err)
         }
         steps.push_back(st);
     }
-    if (steps.empty())
-    {
-        err = "no steps in " + path;
-        return false;
-    }
+    // 단계가 없는 파일도 받는다 (모두 지우고 저장한 스크립트 = 이 패스에 보낼 TC 없음)
     std::lock_guard<std::mutex> lk(mu_);
     steps_.swap(steps);
     path_ = path;
+    startup_error_.clear();
     return true;
 }
 
@@ -267,11 +293,13 @@ bool PassScript::Save(const std::string & path, std::string & err)
     if (slash != std::string::npos && slash > 0)
         mkdir(path.substr(0, slash).c_str(), 0755);
 
+    // 임시 파일에 다 쓴 뒤 바꿔 넣는다 (쓰는 도중 꺼져도 반쪽 스크립트가 남지 않도록)
     std::vector<TcStep> steps = Snapshot();
-    std::ofstream out(path);
+    std::string tmp = path + ".tmp";
+    std::ofstream out(tmp);
     if (!out)
     {
-        err = "cannot write " + path;
+        err = "cannot write " + tmp;
         return false;
     }
     out << "# BEE-1000 pass TC script (AutoPilot)\n";
@@ -285,13 +313,15 @@ bool PassScript::Save(const std::string & path, std::string & err)
         out << name << " | " << s.repeat << " | " << s.delay_s << " | " << FormatHexBytes(s.bytes) << "\n";
     }
     out.close();
-    if (!out)
+    if (!out || rename(tmp.c_str(), path.c_str()) != 0)
     {
+        unlink(tmp.c_str());
         err = "write failed: " + path;
         return false;
     }
     std::lock_guard<std::mutex> lk(mu_);
     path_ = path;
+    startup_error_.clear();
     return true;
 }
 
@@ -299,9 +329,10 @@ PassScript & CurrentPassScript()
 {
     static PassScript * script = [] {
         PassScript * p = new PassScript();
-        std::string err;
-        if (access(PassScript::DefaultPath(), F_OK) == 0 && !p->Load(PassScript::DefaultPath(), err))
-            console.AddLog("[ERROR]##[Auto]Pass TC script not loaded (%s). Using the built-in script.", err.c_str());
+        p->LoadAtStartup(PassScript::DefaultPath());
+        if (!p->StartupError().empty())
+            console.AddLog("[ERROR]##[Auto]Pass TC script has errors (%s). The script is empty and AutoPilot cannot start "
+                           "until the file is fixed and loaded again.", p->StartupError().c_str());
         return p;
     }();
     return *script;
@@ -330,6 +361,7 @@ PassGate EvaluatePassGate(int sat)
     g.elevation_ok = g.has_elevation && g.elevation_deg >= AutoPilotCfg.MinElevation;
     g.rotator_ok   = RotatorFlags.RotatorConnection;
     g.engage_ok    = RotatorFlags.Engage;
+    g.target_ok    = sat >= 0 && GetNowTracking() == sat;   // Sattracker 는 Track 대상(NowSat)을 따라간다
     g.radio_ok     = LinkFlags.GS100_Connection;
     g.link_ok      = !AutoPilotCfg.RequireLink || PingCounter > 0 || BeaconCounter > 0;
     return g;

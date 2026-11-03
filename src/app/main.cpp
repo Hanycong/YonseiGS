@@ -24,6 +24,7 @@
 #include "YonseiGS_autopilot.h"
 #include "YonseiGS_ftp.h"
 #include "svc_station.h"
+#include "svc_tracking.h"
 
 #undef CSP_USE_RDP
 
@@ -456,6 +457,8 @@ if (should_close) {
         }
         
 
+        // Stop 직후 종료하면 AutoPilot 정리(RotatorSetTo 등)가 닫힌 장치를 쓰지 않도록 먼저 기다린다
+        mim::svc::WaitAutoPilotStopped();
         mim::svc::FinishHardware();
 
         if (State.AllThread) // "Start" at popup

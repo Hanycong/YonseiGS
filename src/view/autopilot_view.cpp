@@ -209,6 +209,12 @@ void ImGui_AutoPilotControl_Body()
     else
     {
         bool can = vm.CanStart();
+        if (vm.ScriptError()[0])
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, mim::ERR);
+            ImGui::TextWrapped("TC script file has errors - see TC SCRIPT.");
+            ImGui::PopStyleColor();
+        }
         BeginLocked(!can);
         if (WideButton("Start AutoPilot") && can)
             vm.Start();
@@ -237,6 +243,7 @@ void ImGui_AutoPilotStatus_Body()
     ImGui::Indent(ImGui::GetFontSize() * 1.2f);
     StatusLamp("Rotator connected", g.rotator_ok);
     StatusLamp("Rotator tracking (Engage)", g.engage_ok);
+    StatusLamp("Rotator target = this satellite", g.target_ok);
     StatusLamp("GS100 connected", g.radio_ok);
     ImGui::Unindent(ImGui::GetFontSize() * 1.2f);
     snprintf(label, sizeof(label), "Satellite link (ping %d, beacon %d)%s",
@@ -303,10 +310,14 @@ void ImGui_PassScript_Body()
             ImGui::TableNextColumn();
             ImGui::TextDisabled("%02d", i + 1);
             ImGui::TableNextColumn();
-            char sel[96];
-            snprintf(sel, sizeof(sel), "%s##step%d", r.name, i);
-            if (ImGui::Selectable(sel, vm.SelectedStep() == i, ImGuiSelectableFlags_SpanAllColumns))
+            // 이름에 "##" 가 있어도 ID 가 바뀌지 않도록 행 번호로 ID 를 만들고 이름은 따로 그린다
+            ImGui::PushID(i);
+            if (ImGui::Selectable("##step", vm.SelectedStep() == i,
+                                  ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap))
                 vm.SelectStep(i);
+            ImGui::PopID();
+            ImGui::SameLine(0, 0);
+            ImGui::TextUnformatted(r.name);
             ImGui::TableNextColumn();
             ImGui::Text("%d", r.repeat);
             ImGui::TableNextColumn();
@@ -364,16 +375,23 @@ void ImGui_PassScript_Body()
         ImGui::SetTooltip("Restore the built-in script (EPS HK, GND WDT reset)");
     EndLocked(!editable);
 
-    if (!editable)
+    if (vm.ScriptError()[0])
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, mim::TEXT_MUTE);
-        ImGui::TextUnformatted("Stop AutoPilot to edit the script.");
+        ImGui::PushStyleColor(ImGuiCol_Text, mim::ERR);
+        ImGui::TextWrapped("Script file error: %s. The script is empty and AutoPilot cannot start. "
+                           "Fix the file and Load it, or edit and Save.", vm.ScriptError());
         ImGui::PopStyleColor();
     }
-    else if (vm.Message()[0])
+    if (vm.Message()[0])
     {
         ImGui::PushStyleColor(ImGuiCol_Text, vm.MessageIsError() ? mim::ERR : mim::TEXT_DIM);
         ImGui::TextWrapped("%s", vm.Message());
+        ImGui::PopStyleColor();
+    }
+    else if (!editable)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, mim::TEXT_MUTE);
+        ImGui::TextUnformatted("Stop AutoPilot to edit the script.");
         ImGui::PopStyleColor();
     }
 

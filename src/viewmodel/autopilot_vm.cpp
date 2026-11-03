@@ -1,5 +1,6 @@
 #include "autopilot_vm.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -41,7 +42,7 @@ int *  AutoPilotVM::Iteration()     { return &AutoPilotCfg.iteration; }
 int *  AutoPilotVM::SpanTime()      { return &AutoPilotCfg.SpanTime; }
 
 bool AutoPilotVM::Running() const { return AutoPilotCfg.Autopilot; }
-void AutoPilotVM::Start() { mim::svc::StartAutoPilot(); }
+void AutoPilotVM::Start() { message_.clear(); mim::svc::StartAutoPilot(); }
 void AutoPilotVM::Stop()  { mim::svc::StopAutoPilot(); }
 
 int AutoPilotVM::BeaconCount() const { return BeaconCounter; }
@@ -163,7 +164,16 @@ float AutoPilotVM::PassMaxElevation() const
 }
 
 // 이전 실행이 정리를 마칠 때까지(Stage 가 AP_IDLE) 다시 시작하지 않는다
-bool AutoPilotVM::CanStart() const { return !Running() && Stage() == AP_IDLE && HasTarget(); }
+bool AutoPilotVM::CanStart() const
+{
+    return !Running() && Stage() == AP_IDLE && HasTarget() && CurrentPassScript().StartupError().empty();
+}
+
+const char * AutoPilotVM::ScriptError() const
+{
+    script_error_ = CurrentPassScript().StartupError();
+    return script_error_.c_str();
+}
 
 // Stop 을 누른 뒤 스레드가 정리하는 동안은 "Stopping..."
 int AutoPilotVM::Stage() const
@@ -199,6 +209,7 @@ AutoPilotVM::Gate AutoPilotVM::CurrentGate() const
     r.elevation_ok  = g.elevation_ok;
     r.rotator_ok    = g.rotator_ok;
     r.engage_ok     = g.engage_ok;
+    r.target_ok     = g.target_ok;
     r.radio_ok      = g.radio_ok;
     r.link_ok       = g.link_ok;
     r.antenna_ok    = g.Antenna();
@@ -267,6 +278,16 @@ bool AutoPilotVM::ReadEdit(TcStep & out)
         return false;
     }
     out.name = name.substr(b);
+    if (out.name[0] == '#' && (out.name.size() == 1 || isspace((unsigned char)out.name[1])))
+    {
+        SetMessage("A name cannot start with \"# \" (that marks a comment in the script file).", true);
+        return false;
+    }
+    if (out.name.size() > mim::svc::TC_MAX_NAME)
+    {
+        SetMessage("Name is too long (max " + std::to_string(mim::svc::TC_MAX_NAME) + " bytes).", true);
+        return false;
+    }
     std::string err;
     if (!mim::svc::ParseHexBytes(edit_bytes_, out.bytes, err))
     {
@@ -360,7 +381,10 @@ void AutoPilotVM::SaveScript()
 void AutoPilotVM::LoadScript(const char * path)
 {
     if (!Editable())
+    {
+        SetMessage("Not loaded: stop AutoPilot first.", true);
         return;
+    }
     std::string err;
     if (CurrentPassScript().Load(path, err))
     {

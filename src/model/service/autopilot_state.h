@@ -38,7 +38,7 @@ struct AutoPilotState {
     bool DoFreqCalibration = false;
 
     // TC 스크립트 송신 조건
-    float MinElevation = 10.0f;         // [deg] 이 앙각 이상일 때만 보낸다 (이보다 낮은 패스는 건너뛴다)
+    float MinElevation = 10.0f;         // [deg] 이 앙각 이상일 때만 보낸다 (AutoPilot 은 이보다 높이 오는 패스를 고른다)
     bool RequireLink = true;            // 이번 패스에 핑/비콘 응답이 있어야 보낸다
 
     // 진행 상태 (AutoPilot 스레드가 쓰고 화면이 읽는다)

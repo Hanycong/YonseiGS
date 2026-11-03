@@ -45,7 +45,7 @@ int FindValuablePath(int satIndex)
     if (satIndex < 0 || satIndex >= SAT_MAX_NUM || !OrbitData.Satellites[satIndex]) return 0;
     int Valuable = 0;
     for (int i = 0; i < 64; i++) {
-        // TC 송신 최저 앙각(3. Autopilot 탭 설정)보다 높이 올라오는 첫 패스
+        // TC 송신 최저 앙각(3. Autopilot 탭 설정)보다 높이 올라오는 첫 패스 (없으면 0번 패스 - TC 는 송신 조건이 막는다)
         if (OrbitData.Satellites[satIndex]->MaxElevation(i) > AutoPilotCfg.MinElevation) { Valuable = i; break; }
     }
     return Valuable;
@@ -92,8 +92,6 @@ static bool NowOn(int SatIndex, int NextValuablePath)
     if (!OrbitData.Satellites[SatIndex]) return false;
     return (DateTime::Now(false) - OrbitData.Satellites[SatIndex]->_nextlos[NextValuablePath]).TotalSeconds() < 0;
 }
-
-static bool KeepSending() { return AutoPilotCfg.Autopilot; }
 
 // TC 송신 조건(앙각·안테나·링크)이 맞을 때까지 기다린다. LOS 가 지나거나 Stop 이면 false
 static bool WaitPassGate(int SatIndex, int NextValuablePath)
@@ -344,19 +342,26 @@ if (wdt_notsent &&
     std::vector<mim::svc::TcStep> script = mim::svc::CurrentPassScript().Snapshot();
     AutoPilotCfg.ScriptSteps = (int)script.size();
     AutoPilotCfg.ScriptSent = 0;
+    if (script.empty())
+        console.AddLog("[Auto]Pass TC script is empty. No TC sent in this pass.");
+    // TC 한 번 보낼 때마다 직전에 송신 조건을 확인한다 (반복 송신 사이에 조건이 깨지면 다시 기다린다)
     bool completed = true;
-    for (size_t i = 0; i < script.size(); i++)
-    {
+    auto may_send = [&]() {
         AutoPilotCfg.Stage = AP_WAIT_GATE;
-        if (!WaitPassGate(SatIndex, NextValuablePath))
-        {
-            completed = false;
-            break;
-        }
+        bool ok = WaitPassGate(SatIndex, NextValuablePath);
         AutoPilotCfg.Stage = AP_TC_SCRIPT;
-        AutoPilotCfg.ScriptStep = (int)i;
-        mim::svc::SendTcStep(script[i], KeepSending, &AutoPilotCfg.ScriptSent);
+        if (!ok)
+            completed = false;
+        return ok;
+    };
+    auto keep_going = [&]() { return AutoPilotCfg.Autopilot && NowOn(SatIndex, NextValuablePath); };
+    size_t done = 0;
+    for (; done < script.size() && completed && keep_going(); done++)
+    {
+        AutoPilotCfg.ScriptStep = (int)done;
+        mim::svc::SendTcStep(script[done], may_send, keep_going, &AutoPilotCfg.ScriptSent);
     }
+    completed = completed && done == script.size();
     AutoPilotCfg.ScriptStep = -1;
 
     if (completed && AutoPilotCfg.Autopilot)

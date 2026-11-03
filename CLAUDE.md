@@ -236,10 +236,13 @@ the *separation of concerns*, not the binding mechanism:
   `ImGui_PassScript_Body`, `AutoPilotVM`): target pass (the Track-button satellite), TC conditions,
   pass tasks, Start/Stop; stage + gate lamps; editable **pass TC script**. The script lives in
   `model/service/pass_script` (`CurrentPassScript()`, file `data/autopilot/pass_script.txt`,
-  format `name | repeat | delay_s | hex bytes`; built-in default = the old hardcoded EPS HK /
-  GND WDT list). AutoPilot sends each step only while `EvaluatePassGate()` is OK: elevation >=
-  `AutoPilotCfg.MinElevation`, antenna (rotator connected + Engage + GS100), and a satellite reply
-  this pass (ping/beacon counters, reset at Engage) unless `RequireLink` is off.
+  format `name | repeat | delay_s | hex bytes`, `# ` comments; built-in default = the old hardcoded
+  EPS HK / GND WDT list, used only when the file does not exist). A file that exists but does not
+  parse gives an **empty** script and blocks Start (fail closed: removed TCs must not come back).
+  AutoPilot asks `EvaluatePassGate()` before **every single send** (each repeat): elevation >=
+  `AutoPilotCfg.MinElevation`, antenna (rotator connected + Engage + rotator target `NowSat` == pass
+  satellite + GS100), and a satellite reply this pass (ping/beacon counters, reset at Engage) unless
+  `RequireLink` is off; waits/LOS stop within 0.1 s.
   Test: `tools/pass_script_test.sh <out>` (unit test, exit 1 on failure).
 - Status bar: devices (GS100/Rotator/Switch/S-band) and modes (Engage/Doppler/AutoPilot/AMP)
   all use `StatusLamp`: green = connected / running, red = disconnected / stopped.
@@ -301,6 +304,10 @@ the *separation of concerns*, not the binding mechanism:
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
+- AutoPilot link check uses the global `PingCounter`/`BeaconCounter`; pinging another node
+  (e.g. GS100 via Ping Each Node) during a pass also counts as a "satellite reply".
+- Shared TX slot: UI `WaitTx(); SendUplink()` and AutoPilot `SendUplink(); WaitTx()` can interleave
+  on `p_thread[4]`, so a `WaitTx` may return before its own uplink finished (pre-existing).
 - AutoPilot **Check Beacon** loop (`AutoPilot_task`) spins without sleeping (100% CPU while it
   waits for `iteration` beacons).
 - After every pass AutoPilot sets `use = false` on all satellites and re-downloads the TLE, so
@@ -319,7 +326,11 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
 - `JoinThread` joins a `StartThread` thread at most once (later calls return 0), so a Stop
   button and `StopAllThreads()` can both join the same slot. Slots handed out through
-  `ThreadHandle()` (FTP) are created/joined outside and keep the old always-join behaviour.
+  `ThreadHandle()` (FTP) are created/joined outside and keep the old always-join behaviour —
+  so the FTP slot can still be double-joined (AutoPilot joins it after FTP, then StopAllThreads).
+- After Stop the AutoPilot thread cleans up on its own (Engage/Doppler off, rotator to 0,0);
+  manual Start Engaging / Doppler are refused until it is idle, and `main` waits for it
+  (`WaitAutoPilotStopped`) before `FinishHardware()`.
 - ~~Stop AutoPilot, then quit → exit 1~~ **fixed**: `StopAutoPilot()` joined the AutoPilot thread
   and `StopAllThreads()` joined it again (double `pthread_join` → SIGSEGV → libcsp `exit(1)`).
   `StopAutoPilot()` now only clears the flag; the thread cleans up itself (tab shows "Stopping...").

@@ -8,7 +8,7 @@ namespace mim {
 namespace svc {
 
 // Rotator Engage (Sattracker, SLOT_ROTATOR_CONTROL)
-void StartEngage();
+void StartEngage();     // AutoPilot 이 Stop 후 정리 중이면 에러 로그만 남김
 void StopEngage();      // State.Doppler 도 끈다 (기존 동작)
 
 // Rotator 읽기 (RotatorReadInfo, SLOT_ROTATOR_READ)
@@ -22,6 +22,7 @@ void StopDoppler();
 // AutoPilot (AutoPilot, SLOT_AUTOPILOT)
 void StartAutoPilot();
 void StopAutoPilot();
+void WaitAutoPilotStopped();   // Stop 후 정리 중인 스레드가 끝날 때까지 대기 (실행 중이면 바로 돌아온다)
 
 // TLE 로드 후 위성 객체 초기화 (SatelliteInitialize, SLOT_TLE_LOAD)
 int StartSatelliteInitialize(void * sgp4check);

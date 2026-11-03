@@ -13,8 +13,19 @@ extern int PingCounter;
 namespace mim {
 namespace svc {
 
+// Stop 을 누른 뒤 AutoPilot 스레드가 아직 정리 중 (곧 Engage / Doppler 를 끄고 로테이터를 0,0 으로 돌린다)
+static bool AutoPilotStopping()
+{
+    if (AutoPilotCfg.Autopilot || AutoPilotCfg.Stage == AP_IDLE)
+        return false;
+    console.AddLog("[ERROR]##AutoPilot is still stopping. Try again in a few seconds.");
+    return true;
+}
+
 void StartEngage()
 {
+    if (AutoPilotStopping())
+        return;
     RotatorFlags.Engage = true;
     StartThread(SLOT_ROTATOR_CONTROL, Sattracker, NULL);
     console.AddLog("[OK]##Start Engaging.");
@@ -46,6 +57,8 @@ void RotatorOff()
 
 void StartDoppler()
 {
+    if (AutoPilotStopping())
+        return;
     if(LinkFlags.GS100_Connection)
     {
         LinkFlags.Doppler = true;
@@ -76,6 +89,12 @@ void StartAutoPilot()
 void StopAutoPilot()
 {
     AutoPilotCfg.Autopilot = false;
+}
+
+void WaitAutoPilotStopped()
+{
+    if (!AutoPilotCfg.Autopilot)
+        JoinThread(SLOT_AUTOPILOT);
 }
 
 int StartSatelliteInitialize(void * sgp4check)

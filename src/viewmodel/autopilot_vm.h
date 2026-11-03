@@ -37,7 +37,8 @@ public:
     bool HasPass() const;
     void PassTimes(char * aos, char * los, size_t size) const;  // "11/3 23:05:12" (한국 시각)
     float PassMaxElevation() const;     // [deg]
-    bool CanStart() const;              // 추적 대상이 있어야 시작할 수 있다
+    bool CanStart() const;              // 추적 대상이 있고, 스크립트 파일 오류가 없어야 시작할 수 있다
+    const char * ScriptError() const;   // 시작 때 스크립트 파일을 못 읽은 이유 ("" 이면 없음)
 
     // ---- 3. Autopilot 탭: 진행 상태 ----
     int  Stage() const;                 // AutoPilotStage
@@ -45,7 +46,7 @@ public:
     struct Gate {
         bool has_elevation;
         float elevation;                // [deg]
-        bool elevation_ok, rotator_ok, engage_ok, radio_ok, link_ok, antenna_ok, ok;
+        bool elevation_ok, rotator_ok, engage_ok, target_ok, radio_ok, link_ok, antenna_ok, ok;
     };
     Gate CurrentGate() const;
     int  ScriptStep() const;            // 보내는 중인 단계, 없으면 -1
@@ -55,7 +56,7 @@ public:
     bool Editable() const;
     int  StepCount() const;
     struct StepRow {
-        char name[64];
+        char name[128];
         char bytes[128];                // 16진수 (길면 잘라서 "..." )
         int  repeat;
         int  delay_s;
@@ -108,12 +109,13 @@ private:
     bool ReadEdit(mim::svc::TcStep & out);   // 편집 칸 값 검사 (틀리면 Message 에 이유)
 
     int  selected_ = -1;
-    char edit_name_[64] = "";
+    char edit_name_[128] = "";
     char edit_bytes_[1024] = "";
     int  edit_repeat_ = 1;
     int  edit_delay_ = 10;
     char dialog_path_[512] = "";
     mutable std::string script_path_;   // ScriptPath() 가 돌려줄 문자열
+    mutable std::string script_error_;  // ScriptError() 가 돌려줄 문자열
     std::string message_;
     bool message_error_ = false;
 };
