@@ -87,8 +87,14 @@ public:
     //Modified by JDM
     //For Initializing
     Tle()
+        : mean_motion_dt2_(0.0), mean_motion_ddt6_(0.0), bstar_(0.0),
+          inclination_(0.0), right_ascending_node_(0.0), eccentricity_(0.0),
+          argument_perigee_(0.0), mean_anomaly_(0.0), mean_motion_(0.0),
+          norad_number_(0), orbit_number_(0)
     {
         //Initialize();
+        // 숫자 멤버를 0 으로: 초기화하지 않으면 SGP4() 기본 생성자가 쓰레기값으로 Initialise 해서
+        // 힙 내용에 따라 "Inclination out of range" 예외로 프로그램이 죽는다 (main 의 new SatelliteObject)
     }
 
     /**
