@@ -13,6 +13,8 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
 // BEE1012(포트 15) / UELYSYS(포트 10) 리포트 하나로 g_report_view 갱신 (g_report_view_mtx 잠금, EPS 상태 포함).
 // 종류는 DetermineReportKind, 단 포트 15 의 PAY_SLT MID 는 REPORT_KIND_BEE1012_PAY_SLT
 void UpdateN5ReportView(const Report &rpt, int report_dport);
+// 포트 15(BEE1012) / 10(UELYSYS) 리포트 종류. MID 가 겹치는 앱은 포트로 가른다
+ReportKind_t DetermineN5ReportKind(int report_dport, uint16_t mid, uint8_t cc);
 
 // SD1SAT(포트 20) 리포트 하나로 g_report_view 갱신 (DetermineSD1SATReportKind)
 void UpdateSD1SATReportView(const SD1SATReport &rpt);

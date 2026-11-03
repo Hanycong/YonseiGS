@@ -15,6 +15,36 @@
 
 #include "n5_report_decoder.h"
 
+// 리포트 종류: 받은 포트(위성)를 먼저 본다. GS_nuri5 의 DetermineReportKind 는 UELYSYS MID 를 먼저 검사해서
+// 두 위성이 같은 MID 를 쓰는 앱이 섞인다 (BEE1012 THRUST 0x1870 = UELYSYS PAYYONSEI I2C,
+// BEE1012 MISSION 0x1890 = UELYSYS EO, PAY_SLT 0x1830 = UELYSYS ROMA). 그 MID 만 포트로 갈라 준다.
+//   15 (BEE1012): PAY_SLT, THRUST 는 BEE1012 로. UELYSYS 전용 앱(EO, PAYYONSEI, SDR)으로 판별되면 미분류(hex 표시)
+//   10 (UELYSYS): THRUST MID 는 PAYYONSEI I2C 로
+ReportKind_t DetermineN5ReportKind(int report_dport, uint16_t mid, uint8_t cc)
+{
+    if (report_dport == 15)
+    {
+        if (mid == BEE1012_PAY_SLT_CMD_ID) return REPORT_KIND_BEE1012_PAY_SLT;
+        if (mid == BEE1012_THRUST_CMD_ID)  return REPORT_KIND_BEE1012_THRUST;
+        ReportKind_t k = DetermineReportKind(mid, cc);
+        switch (k)
+        {
+        case REPORT_KIND_UELYSYS_EO:
+        case REPORT_KIND_PAYYONSEI_TEMP:
+        case REPORT_KIND_PAYYONSEI_IMU:
+        case REPORT_KIND_PAYYONSEI_IWSB:
+        case REPORT_KIND_PAYYONSEI_I2C:
+        case REPORT_KIND_SDR_CONTROLLER:
+            return REPORT_KIND_NONE;
+        default:
+            return k;
+        }
+    }
+    if (report_dport == 10 && mid == UELYSYS_PAYYONSEI_I2C_CMD_ID)
+        return REPORT_KIND_PAYYONSEI_I2C;
+    return DetermineReportKind(mid, cc);
+}
+
 extern Console console;
 
 // 화면/저장이 함께 읽는 5차 리포트 상태 (YonseiGS_coms.h 의 extern). 모두 g_report_view_mtx 아래에서 갱신한다
@@ -2614,9 +2644,7 @@ void UpdateN5ReportView(const Report &rpt, int report_dport) {
      * sockets are mission-specific (BEE1012=15, UELYSYS=10), so retain the
      * receiving dport as the primary discriminator instead of guessing from
      * payload bytes or replacing the existing ROMA mapping. */
-    tmp.kind = (report_dport == 15 && tmp.reflected_msg_id == BEE1012_PAY_SLT_CMD_ID)
-                   ? REPORT_KIND_BEE1012_PAY_SLT
-                   : DetermineReportKind(tmp.reflected_msg_id, tmp.reflected_cc);
+    tmp.kind = DetermineN5ReportKind(report_dport, tmp.reflected_msg_id, tmp.reflected_cc);
     tmp.roma_parget_index = (tmp.kind == REPORT_KIND_PAYUEL_ROMA_PARGET)
                                 ? g_roma_parget_requested_index : -1;
 
