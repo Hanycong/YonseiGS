@@ -920,6 +920,78 @@ void * ftp_ryu_uplink_onorbit(void * param){
 }
 
 
+// ---------------------------------------------------------------- 다운링크 파일 경로 (누리호 5차 GS miman_ftpfcd.cpp filelisthandler)
+//
+// 위성 파일 목록(filelist)의 번호 하나 -> FTP 원격/로컬 경로.
+// 누리호 5차 GS 판은 ftpinfo / 이름(10바이트) / 시각(20바이트, 실제로는 23자라 넘침)을 malloc 하고 해제하지 않았다.
+// 여기서는 호출하는 쪽 ftpinfo 에 채우고 지역 버퍼만 쓴다. 모르는 종류/상태면 false.
+
+// 위성 데이터 저장소 경로 (원격)
+static const char * const FTP_REMOTE_DS_HK    = "/mnt/ds/hk";
+static const char * const FTP_REMOTE_DS_AOD   = "/mnt/ds/aod";
+static const char * const FTP_REMOTE_DS_LOG   = "/mnt/ds/log";
+static const char * const FTP_REMOTE_DS_SNSR  = "/mnt/ds/snsr";
+static const char * const FTP_REMOTE_DS_GPS   = "/mnt/ds/gps";
+static const char * const FTP_REMOTE_DS_CTRLO = "/mnt/ds/ctrlo";
+
+struct FtpDlTypePath {
+    uint16_t type;          // MIM_DLTYPE_*
+    const char * remote;    // 원격 폴더
+    const char * label;     // 파일 이름 앞부분
+    const char * ext;       // 확장자
+    const char * local;     // 로컬 폴더
+};
+
+static const FtpDlTypePath ftp_dltype_paths[] = {
+    { MIM_DLTYPE_HK,    FTP_REMOTE_DS_HK,    "hktlm",  ".hk",  "data/hk"    },
+    { MIM_DLTYPE_AOD,   FTP_REMOTE_DS_AOD,   "aodtlm", ".aod", "data/aod"   },
+    { MIM_DLTYPE_LOG,   FTP_REMOTE_DS_LOG,   "logtlm", ".log", "data/log"   },
+    { MIM_DLTYPE_SNSR,  FTP_REMOTE_DS_SNSR,  "snsr",   ".raw", "data/snsr"  },
+    { MIM_DLTYPE_GPS,   FTP_REMOTE_DS_GPS,   "raw",    ".raw", "data/gps"   },
+    { MIM_DLTYPE_CTRLO, FTP_REMOTE_DS_CTRLO, "raw",    ".raw", "data/ctrlo" },
+};
+
+static const char * ftp_dlstat_dir(uint16_t status)
+{
+    switch (status) {
+        case MIM_DLSTAT_NEW: return "/";
+        case MIM_DLSTAT_OLD: return "/sent/";
+        case MIM_DLSTAT_ING: return "/input/";
+        default:             return NULL;
+    }
+}
+
+bool filelisthandler(const filelist * list, uint16_t target, uint16_t status, int index, ftpinfo * out)
+{
+    if (list == NULL || out == NULL || index < 0)
+        return false;
+    const FtpDlTypePath * type = NULL;
+    for (size_t i = 0; i < sizeof(ftp_dltype_paths) / sizeof(ftp_dltype_paths[0]); i++)
+        if (ftp_dltype_paths[i].type == target)
+            type = &ftp_dltype_paths[i];
+    const char * filestatus = ftp_dlstat_dir(status);
+    if (type == NULL || filestatus == NULL)
+        return false;
+
+    char filename[16];
+    snprintf(filename, sizeof(filename), "%08" PRIu32, list->file[index]);
+
+    char nowtime[40];
+    time_t secs = time(0);
+    struct tm local;
+    localtime_r(&secs, &local);
+    snprintf(nowtime, sizeof(nowtime), "__%04d_%02d_%02d_%02d_%02d_%02d__", local.tm_year+1900, local.tm_mon+1,
+             local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
+
+    memset(out, 0, sizeof(*out));
+    snprintf(out->name, sizeof(out->name), "%s", filename);
+    snprintf(out->remote_path, sizeof(out->remote_path), "%s%s%s%s%s",
+             type->remote, filestatus, type->label, filename, type->ext);
+    snprintf(out->local_path, sizeof(out->local_path), "%s%s%s%s%s%s",
+             type->local, filestatus, nowtime, type->label, filename, type->ext);
+    return true;
+}
+
 int ftp_list_callback(uint16_t entries, const gs_ftp_list_entry_t * listent, void * data)
 {
     char pathbuf[256];

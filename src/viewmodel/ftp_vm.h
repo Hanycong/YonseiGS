@@ -39,6 +39,7 @@ public:
     ftpinfo * FileSlot(int i);
     int *     SelectedFileIndex();
     ftpinfo * SelectedFile();
+    void      DefaultEmptyPaths();      // 선택한 칸의 빈 Local/Remote 를 "file://" 로 (누리호 5차 GS 기본 경로)
 
     gsftp_listup_t * ListRequest();
     gsftp_move_t *   MoveRequest();

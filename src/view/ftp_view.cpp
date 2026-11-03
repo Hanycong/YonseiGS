@@ -178,6 +178,7 @@ void ImGui_CommandWindow_Body(float fontscale)
     }
     ImGui::Spacing();
 
+    vm.DefaultEmptyPaths();
     switch(*vm.Task())
     {
     case FTP_UPLOAD_REQUEST :{

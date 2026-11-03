@@ -5,6 +5,7 @@
 //  - FTP: 엔진(V1/V2/Ryu)별 워커가 TX 모드를 기다리는 동안 Stop 하면 바로 끝나는지, 중복 실행 차단,
 //         사용자 Stop 뒤에는 실패 쿨다운이 없는지, 실패 뒤에는 30 초 쿨다운, 워커 인자가 시작 순간 경로를 갖는지
 //         (CSP/무선 장치 없이: 실제 전송은 하지 않는다)
+//  - filelisthandler (V1 다운링크 파일 경로) 경로 모양 / 모르는 종류 거부, 빈 FTP 경로의 file:// 기본값
 //  - Control "UTRX WDT CLEAR" / "EPS WDT CLEAR ALL" 이 누리호 5차 GS 버튼과 같은 바이트를 보내는지
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
@@ -28,6 +29,8 @@
 #include "ftp_transfer.h"
 #include <gs/util/error.h>
 #include "control_vm.h"
+#include "ftp_vm.h"
+#include "YonseiGS_ftp.h"
 #include <csp/csp.h>
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
@@ -298,6 +301,44 @@ static void TestWdtButtons()
     }
 }
 
+static bool EndsWith(const char * s, const char * tail)
+{
+    size_t a = strlen(s), b = strlen(tail);
+    return a >= b && strcmp(s + a - b, tail) == 0;
+}
+
+static void TestFtpPaths()
+{
+    printf("# FTP paths\n");
+    uint8_t buf[sizeof(filelist) + 2 * sizeof(uint32_t)];
+    filelist * list = (filelist *)buf;
+    list->filenum = 2;
+    list->file[0] = 5;
+    list->file[1] = 12345678;
+    ftpinfo out;
+    CHECK(filelisthandler(list, MIM_DLTYPE_HK, MIM_DLSTAT_NEW, 0, &out));
+    CHECK(strcmp(out.remote_path, "/mnt/ds/hk/hktlm00000005.hk") == 0);
+    CHECK(strncmp(out.local_path, "data/hk/__", 10) == 0 && EndsWith(out.local_path, "__hktlm00000005.hk"));
+    CHECK(strcmp(out.name, "00000005") == 0);
+    printf("     %s <- %s\n", out.local_path, out.remote_path);
+    CHECK(filelisthandler(list, MIM_DLTYPE_CTRLO, MIM_DLSTAT_OLD, 1, &out));
+    CHECK(strcmp(out.remote_path, "/mnt/ds/ctrlo/sent/raw12345678.raw") == 0);
+    CHECK(filelisthandler(list, MIM_DLTYPE_AOD, MIM_DLSTAT_ING, 0, &out));
+    CHECK(strcmp(out.remote_path, "/mnt/ds/aod/input/aodtlm00000005.aod") == 0);
+    CHECK(!filelisthandler(list, 99, MIM_DLSTAT_NEW, 0, &out));
+    CHECK(!filelisthandler(list, MIM_DLTYPE_HK, 99, 0, &out));
+    CHECK(!filelisthandler(list, MIM_DLTYPE_HK, MIM_DLSTAT_NEW, 0, NULL));
+
+    // 빈 경로만 file:// 로 (칸의 기본 경로는 그대로)
+    mim::vm::FtpVM & vm = mim::vm::FtpViewModel();
+    char keep[256];
+    snprintf(keep, sizeof(keep), "%s", vm.SelectedFile()->local_path);
+    vm.SelectedFile()->remote_path[0] = 0;
+    vm.DefaultEmptyPaths();
+    CHECK(strcmp(vm.SelectedFile()->local_path, keep) == 0);
+    CHECK(strcmp(vm.SelectedFile()->remote_path, "file://") == 0);
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -306,6 +347,7 @@ int main(int argc, char ** argv)
     TestAmpTimer();
     TestFtp();
     TestWdtButtons();
+    TestFtpPaths();
 
     printf("%s: %d failure(s)\n", g_fail ? "FAILED" : "PASSED", g_fail);
     return g_fail ? 1 : 0;
