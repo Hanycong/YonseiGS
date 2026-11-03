@@ -9,6 +9,7 @@
 #include "YonseiGS_autopilot.h"
 #include "svc_thread.h"
 #include "svc_tx.h"
+#include "svc_radio.h"
 
 extern bool ftp_start_worker(pthread_t *thread, void *(*start_routine)(void *), void *arg, const char *label);
 
@@ -223,8 +224,10 @@ int AutoPilot_task()
             }
             }
                 
-            pid_t pid = fork();
-            if (pid == -1) {
+            pid_t pid = mim::svc::AmpReady("ampcontrol") ? fork() : -2; // -2: 앰프 미연결 (로그는 AmpReady 가 남김)
+            if (pid == -2) {
+            }
+            else if (pid == -1) {
                 console.AddLog("[ERROR]##Failed to fork process");
             }
             else if (pid == 0) {
@@ -729,9 +732,11 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         sleep(3);
 
         //AMP OFF
-        pid_t pid_off = fork();
+        pid_t pid_off = mim::svc::AmpReady("ampoff") ? fork() : -2; // -2: 앰프 미연결 (로그는 AmpReady 가 남김)
 
-        if (pid_off == -1) {
+        if (pid_off == -2) {
+        }
+        else if (pid_off == -1) {
             console.AddLog("[ERROR]##Failed to fork process");
         }
         else if (pid_off == 0) {

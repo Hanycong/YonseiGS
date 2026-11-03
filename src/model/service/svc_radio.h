@@ -23,6 +23,9 @@ void StopSignalTest();
 // 앰프: ../amp/ampcontrol, ../amp/ampoff 프로세스 실행 (+ AmpTimer, SLOT_AMP_TIMER)
 void AmpOn();
 void AmpOff();
+// 앰프(Arduino, /dev/ttyACM0)와 제어 프로그램(../amp/<program>)을 쓸 수 있는지 확인.
+// 못 쓰면 이유를 콘솔에 남기고 false. 장치는 열지 않는다(열면 Arduino 가 리셋될 수 있음)
+bool AmpReady(const char * program);
 
 // 위성 전환 (GS100 HMAC 키 변경, SLOT_SWITCH_SAT)
 const char * SwitchSatelliteName(int mode);

@@ -98,8 +98,34 @@ void StopSignalTest()
     JoinThread(SLOT_SIGNALTEST);
 }
 
+static const char * AMP_DEV = "/dev/ttyACM0"; // ampcontrol.cpp / ampoff.cpp 의 DEVNAME 과 같아야 한다
+
+bool AmpReady(const char * program)
+{
+    if (access(AMP_DEV, F_OK) != 0)
+    {
+        console.AddLog("[ERROR]##AMP not connected: %s not found. Check the AMP (Arduino) USB cable.", AMP_DEV);
+        return false;
+    }
+    if (access(AMP_DEV, R_OK | W_OK) != 0)
+    {
+        console.AddLog("[ERROR]##AMP device %s: permission denied. Run with sudo or add user to dialout.", AMP_DEV);
+        return false;
+    }
+    char path[64];
+    snprintf(path, sizeof(path), "../amp/%s", program);
+    if (access(path, X_OK) != 0)
+    {
+        console.AddLog("[ERROR]##AMP program %s is missing or not executable (chmod +x).", path);
+        return false;
+    }
+    return true;
+}
+
 void AmpOn()
 {
+    if (!AmpReady("ampcontrol"))
+        return;
     JoinThread(SLOT_AMP_TIMER);
     pid_t pid_on = fork();
 
@@ -123,6 +149,11 @@ void AmpOn()
 
 void AmpOff()
 {
+    if (!AmpReady("ampoff"))
+    {
+        LinkFlags.AMPON = false;
+        return;
+    }
     pid_t pid_off = fork();
 
     if (pid_off == -1) {
