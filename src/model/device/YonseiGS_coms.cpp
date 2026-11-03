@@ -14,6 +14,8 @@
 #include "report_parser.h"
 #include "telemetry_logger.h"
 #include "n5_beacon.h"
+#include "n5_report_assembler.h"
+#include "n5_report_logger.h"
 
 
 #define a sizeof(Beacon);
@@ -225,6 +227,15 @@ csp_socket_t * DL_sock_initialize()
     if(!csp_bind(sock, 22)) {
         console.AddLog("[OK]##SD1-SAT BCN Port 22 bind success.");
     }
+    if(!csp_bind(sock, 15)) {
+        console.AddLog("[OK]##BEE-1012 RPT Port 15 bind success.");
+    }
+    if(!csp_bind(sock, 10)) {
+        console.AddLog("[OK]##UEL-Y-Sys. RPT Port 10 bind success.");
+    }
+    if(!csp_bind(sock, 20)) {
+        console.AddLog("[OK]##SD1-SAT RPT Port 20 bind success.");
+    }
         
         
     // while(true) {
@@ -309,7 +320,7 @@ void * task_downlink_onorbit(void * socketinfo)
         const int dport = csp_conn_dport(conn);
         unsigned int read_timeout = setup->default_timeout;
 
-        if (dport == 25) {
+        if (dport == 25 || dport == 15 || dport == 10 || dport == 20) {
             read_timeout = REPORT_CONN_DRAIN_TIMEOUT_MS;
         }
 
@@ -826,6 +837,30 @@ void * task_downlink_onorbit(void * socketinfo)
 
                 case 22: {
                     ProcessSD1SATBeaconPort(packet, dport);
+                    break;
+                }
+
+                // 누리호 5차 위성 리포트 (model/telemetry/n5_report_assembler.cpp).
+                // 종류는 받은 포트(위성)로 먼저 나눈다: 25 = BEE-1000 (위 case 25), 15/10 = GS_nuri5 조립기, 20 = SD1SAT 조각
+                case 15: {
+                    console.AddLog("Received Report from port : %d.", dport);
+                    AssembleN5ReportChunk("case15", dport, packet,
+                                          "../data/BEE1012/report/report_raw", "rpt_raw--",
+                                          BEE1012ReportSaver);
+                    break;
+                }
+
+                case 10: {
+                    console.AddLog("Received Report from port : %d.", dport);
+                    AssembleN5ReportChunk("case10", dport, packet,
+                                          "../data/UELYSYS/report/report_raw", "report_raw_",
+                                          UELYSYSReportSaver);
+                    break;
+                }
+
+                case 20: {
+                    console.AddLog("Received SD1SAT Report Packet.");
+                    AssembleSD1SATReportChunk(dport, packet);
                     break;
                 }
 
