@@ -1,5 +1,8 @@
 #include "tle_vm.h"
 
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "imgui.h"
@@ -16,6 +19,13 @@ extern bool sgp4check;
 
 namespace mim {
 namespace vm {
+
+TleVM::TleVM()
+{
+    char abs[PATH_MAX];
+    if (realpath(local_path_, abs))
+        snprintf(local_path_, sizeof(local_path_), "%s", abs);
+}
 
 int * TleVM::SelectedList() { return &NowTLE; }
 const char * TleVM::SelectedListLabel() const { return OrbitData.tleinfolistup[NowTLE]->label; }

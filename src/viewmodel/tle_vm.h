@@ -17,6 +17,8 @@ struct LocalTime {
 class TleVM
 {
 public:
+    TleVM();                            // local_path_ 를 절대 경로로 바꿔 둔다
+
     // ---- TLE 목록 콤보 ----
     int * SelectedList();               // NowTLE (AutoPilot 과 공유)
     const char * SelectedListLabel() const;
@@ -48,7 +50,8 @@ public:
 
 private:
     char search_[256] = {0};
-    char local_path_[256] = "/home/hyyang/GS_refactoring/YonseiGS/home/TLE/NORAD_TLE.txt";
+    // 기본값: 저장소의 home/TLE/NORAD_TLE.txt (프로그램은 bin/ 에서 실행된다)
+    char local_path_[256] = "../home/TLE/NORAD_TLE.txt";
 };
 
 TleVM & TleViewModel();
