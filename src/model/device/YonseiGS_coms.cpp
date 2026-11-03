@@ -1,3 +1,4 @@
+#include <unistd.h>
 /* Customs */
 #include "YonseiGS_config.h"
 #include "YonseiGS_csp.h"
@@ -100,7 +101,8 @@ void * TRxController(void *)
         else if(FtpShared.ftp_mode)   /* [FTP-BEACON-CLOSE] 수신 스레드가 멈춘 동안 연결 슬롯이 차지 않게 받아서 닫는다 */
             CloseDownlinkConnDuringFtp(DLsocket);
         else
-            continue;
+            usleep(1000);   // 업링크/FTP 가 끝나 downlink_mode 가 다시 켜질 때까지 대기.
+                            // (예전 'continue' 는 -O3 에서 플래그를 다시 읽지 않는 'jmp .' 이 되어 영원히 돌았다)
     }
     return NULL;
 }
