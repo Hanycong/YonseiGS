@@ -13,6 +13,7 @@
 
 #include "report_parser.h"
 #include "telemetry_logger.h"
+#include "n5_beacon.h"
 
 
 #define a sizeof(Beacon);
@@ -207,6 +208,17 @@ csp_socket_t * DL_sock_initialize()
     }
         if(!csp_bind(sock, 23)) {
         console.AddLog("[OK]##Response Port 23 bind success.");
+    }
+
+    // 누리호 5차 위성 (GS_nuri5 포트 배정)
+    if(!csp_bind(sock, 12)) {
+        console.AddLog("[OK]##UEL-Y-Sys. BCN Port 12 bind success.");
+    }
+    if(!csp_bind(sock, 17)) {
+        console.AddLog("[OK]##BEE-1012 BCN Port 17 bind success.");
+    }
+    if(!csp_bind(sock, 22)) {
+        console.AddLog("[OK]##SD1-SAT BCN Port 22 bind success.");
     }
         
         
@@ -796,41 +808,19 @@ void * task_downlink_onorbit(void * socketinfo)
                     break;
                 }
 
+                // 누리호 5차 위성 비콘 (model/telemetry/n5_beacon.cpp)
+                case 17: {
+                    ProcessBEE1012BeaconPort(packet, dport);
+                    break;
+                }
+
                 case 12: {
-                    char bcnpktfilename[128];
-                    time_t tmtime = time(0);
-                    struct tm *local = localtime(&tmtime);
+                    ProcessUELYSYSBeaconPort(packet, dport);
+                    break;
+                }
 
-                    sprintf(bcnpktfilename,
-                            "../data/bcnpkt/bcnpktp13--%04d-%02d-%02d-%02d-%02d-%02d--",
-                            local->tm_year + 1900,
-                            local->tm_mon + 1,
-                            local->tm_mday,
-                            local->tm_hour,
-                            local->tm_min,
-                            local->tm_sec);
-
-                    console.AddLog("Received Beacon from port : %d.", dport);
-
-                    FILE *bcn_fp = fopen(bcnpktfilename, "wb");
-                    printf("Beacon Length: %u", packet->length);
-
-                    for (int i = 0; i < packet->length; i++) {
-                        if (!(i % 10) && i != 0) {
-                            printf("\n");
-                            if (bcn_fp) fprintf(bcn_fp, "\n");
-                        }
-                        printf("0x%x ", packet->data[i]);
-                        if (bcn_fp) fprintf(bcn_fp, "%02hhx\t", packet->data[i]);
-                    }
-
-                    if (packet->length == MIM_LEN_BEACON) {
-                        memcpy(beacon, packet->data, MIM_LEN_BEACON);
-                    } else {
-                        console.AddLog("Received Beacon but brocken.");
-                    }
-
-                    if (bcn_fp) fclose(bcn_fp);
+                case 22: {
+                    ProcessSD1SATBeaconPort(packet, dport);
                     break;
                 }
 
