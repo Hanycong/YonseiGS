@@ -91,9 +91,9 @@ void Tle::Initialize()
     unsigned int sat_number_1;
     unsigned int sat_number_2;
 
-    ExtractInteger(line_one_.substr(TLE1_COL_NORADNUM,
+    ExtractNoradNumber(line_one_.substr(TLE1_COL_NORADNUM,
                 TLE1_LEN_NORADNUM), sat_number_1);
-    ExtractInteger(line_two_.substr(TLE2_COL_NORADNUM,
+    ExtractNoradNumber(line_two_.substr(TLE2_COL_NORADNUM,
                 TLE2_LEN_NORADNUM), sat_number_2);
 
     if (sat_number_1 != sat_number_2)
@@ -195,6 +195,53 @@ void Tle::ExtractInteger(const std::string& str, unsigned int& val)
     else
     {
         val = temp;
+    }
+}
+
+/**
+ * Convert the satellite catalog number field (5 columns)
+ * Accepts the plain 5-digit form (00000-99999) and the Alpha-5 form used
+ * for catalog numbers 100000-339999: the first column is a letter for the
+ * leading two digits (A=10 ... Z=33, I and O are skipped because they look
+ * like 1 and 0), followed by 4 digits. e.g. "A0965" = 100965, "Z9999" = 339999
+ * @param[in] str The 5 column string to convert
+ * @param[out] val The result
+ * @exception TleException on conversion error
+ */
+void Tle::ExtractNoradNumber(const std::string& str, unsigned int& val)
+{
+    const char first = str.empty() ? ' ' : str[0];
+
+    if (first >= 'A' && first <= 'Z')
+    {
+        if (first == 'I' || first == 'O')
+        {
+            throw TleException("Invalid Alpha-5 catalog number letter");
+        }
+
+        unsigned int lead = 10 + static_cast<unsigned int>(first - 'A');
+        if (first > 'I')
+        {
+            lead--;
+        }
+        if (first > 'O')
+        {
+            lead--;
+        }
+
+        unsigned int rest = 0;
+        const std::string digits = str.substr(1);
+        if (digits.length() != 4 ||
+                digits.find_first_not_of("0123456789") != std::string::npos)
+        {
+            throw TleException("Invalid Alpha-5 catalog number");
+        }
+        ExtractInteger(digits, rest);
+        val = lead * 10000 + rest;
+    }
+    else
+    {
+        ExtractInteger(str, val);
     }
 }
 

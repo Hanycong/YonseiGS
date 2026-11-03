@@ -26,11 +26,12 @@ DIR="$OUT/build/CMakeFiles/BEE-1000.dir"
 FLAGS="$(sed -n 's/^CXX_FLAGS = //p' "$DIR/flags.make") $(sed -n 's/^CXX_INCLUDES = //p' "$DIR/flags.make") $(sed -n 's/^CXX_DEFINES = //p' "$DIR/flags.make")"
 OBJS=$(find "$DIR/src" -name '*.o' ! -name 'main.cpp.o' ! -name 'YonseiGS_imgui.cpp.o' ! -name 'svc_tx.cpp.o' | sort)
 # 링크 라이브러리: 본 프로그램 link.txt 에서 오브젝트 목록 뒤의 -o BEE-1000 이후 부분
+# (빌드 폴더 기준 상대 경로가 섞여 있어 링크는 빌드 폴더에서 한다)
 LIBS="$(sed -e 's/.* -o BEE-1000 //' "$DIR/link.txt")"
 
 echo "[golden] compile harness"
 g++ $FLAGS -w -c "$REPO/tools/cmdgen_golden/golden_main.cpp" -o "$OUT/golden_main.o"
-g++ -O3 -rdynamic -Wl,--allow-multiple-definition "$OUT/golden_main.o" $OBJS $LIBS -o "$OUT/cmdgen_golden"
+( cd "$OUT/build" && g++ -O3 -rdynamic -Wl,--allow-multiple-definition "$OUT/golden_main.o" $OBJS $LIBS -o "$OUT/cmdgen_golden" )
 
 echo "[golden] run"
 MARKER="$OUT/.start_marker"

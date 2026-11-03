@@ -7,6 +7,7 @@ This file is auto-loaded by Claude Code. Keep it concise — detailed analysis l
 - **What**: Satellite ground station GUI for BEE-1000 CubeSat (Yonsei University)
 - **Language**: C/C++17, single Linux executable `bin/BEE-1000`
 - **Stack**: GLFW + Dear ImGui + OpenGL (GUI), pthread (16 threads), CSP protocol (radio), libsgp4 (orbital), libssh (S-band remote), CURL (TLE fetch)
+- **libsgp4** is compiled from `lib/libsgp4/*.cc` (target `sgp4_src`); the checked-in `lib/libsgp4/libsgp4.a` is stale and no longer linked. `Tle` accepts Alpha-5 catalog numbers (`A0965` = 100965, letters A–Z without I/O = 10–33).
 - **Entry point**: [src/app/main.cpp](src/app/main.cpp) — single 577-line `main()` runs everything
 - **Build**: CMake → see [docs/BUILD_WSL.md](docs/BUILD_WSL.md)
 
@@ -291,6 +292,10 @@ the *separation of concerns*, not the binding mechanism:
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
 - Rotator **Set / Init** → `RotatorSetTo()` does `sleep(1)` on the UI thread (UI freezes 1 s
   per press).
+- `SatelliteObject::Initializer` propagates all 64 `_nextaos` slots, including empty ones (default
+  `DateTime`, year 1) when there are fewer than 64 passes in 7 days → SGP4 throws `(e <= -0.001)`,
+  caught and logged as `[DEBUG]`, for every satellite on TLE Manager **Select**. Harmless today
+  (the remaining slots are empty anyway) but it hides real SGP4 errors in that try block.
 
 ## Service layer (refactor in progress)
 

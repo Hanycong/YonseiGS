@@ -123,6 +123,10 @@ ${MIMAN_SRC}/app/ui_state.cpp ${MIMAN_SRC}/model/service/ftp_state.cpp ${MIMAN_S
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
 TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
 
-TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/libsgp4/libsgp4.a)
+# libsgp4 는 소스에서 빌드한다 (Tle.cc 의 Alpha-5 위성 번호 지원 등 수정이 반영되도록).
+# lib/libsgp4/libsgp4.a 는 예전 빌드 산출물로 더 이상 링크하지 않는다.
+FILE(GLOB SGP4_SRCS ${MIMAN_LIB}/libsgp4/*.cc)
+ADD_LIBRARY(sgp4_src STATIC ${SGP4_SRCS})
+TARGET_LINK_LIBRARIES(BEE-1000 sgp4_src)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/imgui/libimgui.a)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/gscsp/build/libilovemozart.a)
