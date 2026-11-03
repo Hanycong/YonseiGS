@@ -680,6 +680,7 @@ void CloseDownlinkConnDuringFtp(csp_socket_t * sock)
 bool CopyBEE1012Beacon(BEE1012_Beacon_t & out)
 {
     std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
+    if (bee1012_beacon == NULL) { out = BEE1012_Beacon_t{}; return false; }
     out = *bee1012_beacon;
     return g_have_bee1012_beacon;
 }
@@ -687,6 +688,7 @@ bool CopyBEE1012Beacon(BEE1012_Beacon_t & out)
 bool CopyUELYSYSBeacon(UELYSYS_Beacon_t & out)
 {
     std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
+    if (uelysys_beacon == NULL) { out = UELYSYS_Beacon_t{}; return false; }
     out = *uelysys_beacon;
     return g_have_uelysys_beacon;
 }
@@ -694,6 +696,7 @@ bool CopyUELYSYSBeacon(UELYSYS_Beacon_t & out)
 bool CopySD1SATBeacon(SD1SAT_Beacon_t & out)
 {
     std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
+    if (sd1sat_beacon == NULL) { out = SD1SAT_Beacon_t{}; return false; }
     out = *sd1sat_beacon;
     return g_have_sd1sat_beacon;
 }
