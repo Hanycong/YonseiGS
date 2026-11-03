@@ -21,8 +21,20 @@ public:
     Event *         LastEvent() const;
     GETFILEINFO *   LastFileInfo() const;     // Response 탭 (FM Get File Info 응답)
 
+    // 누리호 5차 위성 비콘 (수신 스레드가 채우는 전역 bee1012_beacon 등. 위성 모드에 따라 Beacon 탭이 고른다)
+    const BEE1012_Beacon_t * LastBee1012Beacon() const;
+    const UELYSYS_Beacon_t * LastUelysysBeacon() const;
+    const SD1SAT_Beacon_t *  LastSd1satBeacon() const;
+
     // Report 탭: 수신 스레드가 갱신하는 리포트 해석 결과를 잠금 아래에서 복사해 온다
     ReportView_t ReportSnapshot() const;
+
+    // Report 탭 (5차 위성): 리포트 해석 결과와 함께 EPS HK 마지막 값, EPS RPARAM 재조립 상태,
+    // RPT Ops Data 를 한 번의 잠금(g_report_view_mtx) 아래에서 복사해 온다 (수신 스레드가 같은 잠금으로 갱신)
+    // eps_rparam 은 128KB 가 넘으므로 호출하는 쪽이 static 등으로 자리를 마련한다.
+    void ReportSnapshot5(ReportView_t & view, EPS_Report_State_t & eps_state,
+                         EPS_RParam_Reassembly_State_t & eps_rparam,
+                         RPT_OpsData_t & rpt_ops, bool & rpt_ops_valid) const;
 
     // AX100 Total RX Bytes (AX100 RPARAM 탭의 Load 로 갱신되는 값)
     uint32_t TotalRxBytes() const;

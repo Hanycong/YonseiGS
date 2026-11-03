@@ -19,7 +19,7 @@ void DrawEventTab(float fontscale)
     {
 
         if (ImGui::BeginTable("##EventTables", 2, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable))
-
+        {
 
     ImGui::TableSetupScrollFreeze(freeze_cols, freeze_rows);
     ImGui::TableSetupColumn("Parameter", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_NoHide, 0.0f);
@@ -95,6 +95,7 @@ void DrawEventTab(float fontscale)
 
 
         ImGui::EndTable();
+        }
         ImGui::EndTabItem();
         ImGui::SetWindowFontScale(1.0 * fontscale);
     }
