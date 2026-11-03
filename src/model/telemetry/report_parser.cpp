@@ -298,7 +298,7 @@ void UpdateReportViewFromReport(const Report &rpt) {
     tmp.ret_val_size = rpt.RetValSize;
     if (tmp.ret_val_size > 512) tmp.ret_val_size = 512;
 
-    tmp.kind = DetermineReportKind(tmp.reflected_msg_id, tmp.reflected_cc);
+    tmp.kind = DetermineBee1000ReportKind(tmp.reflected_msg_id, tmp.reflected_cc);
 
     DecodePayloadToView(tmp, rpt.RetVal, tmp.ret_val_size);
 
