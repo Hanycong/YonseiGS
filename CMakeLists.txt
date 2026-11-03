@@ -96,7 +96,7 @@ INCLUDE_DIRECTORIES (${MIMAN_SRC}/viewmodel)
 
 ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/common/YonseiGS_config.cpp ${MIMAN_SRC}/model/device/YonseiGS_coms.cpp ${MIMAN_SRC}/model/device/YonseiGS_csp.cpp ${MIMAN_SRC}/model/service/YonseiGS_ftprdp.cpp ${MIMAN_SRC}/view/YonseiGS_imgui.cpp ${MIMAN_SRC}/model/orbit/YonseiGS_orbital.cpp ${MIMAN_SRC}/model/device/YonseiGS_radial.cpp ${MIMAN_SRC}/view/YonseiGS_model.cpp ${MIMAN_SRC}/model/device/YonseiGS_s_control.cpp ${MIMAN_SRC}/model/service/YonseiGS_autopilot.cpp ${MIMAN_SRC}/app/main.cpp
 ${MIMAN_SRC}/app/YonseiGS_theme.cpp ${MIMAN_SRC}/app/main_menu.cpp ${MIMAN_SRC}/app/workspace.cpp ${MIMAN_SRC}/app/YonseiGS_satcontext.cpp
-${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp ${MIMAN_SRC}/model/service/svc_tracking.cpp ${MIMAN_SRC}/model/service/svc_radio.cpp ${MIMAN_SRC}/model/service/svc_ftp.cpp ${MIMAN_SRC}/model/service/svc_station.cpp
+${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp ${MIMAN_SRC}/model/service/svc_tracking.cpp ${MIMAN_SRC}/model/service/svc_radio.cpp ${MIMAN_SRC}/model/service/svc_ftp.cpp ${MIMAN_SRC}/model/service/svc_station.cpp ${MIMAN_SRC}/model/service/pass_script.cpp
 ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecommand/raw_commands.cpp
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
 ${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp ${MIMAN_SRC}/view/control_view.cpp ${MIMAN_SRC}/view/ftp_view.cpp ${MIMAN_SRC}/view/ui_kit.cpp ${MIMAN_SRC}/view/file_dialog.cpp
