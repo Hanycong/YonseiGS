@@ -228,12 +228,7 @@ void ImGui_CommandWindow_Body(float fontscale)
     mim::vm::ControlVM & amp_vm = mim::vm::ControlViewModel();
     mim::vm::AmpButton amp = amp_vm.Amp();
     if (ToggleWideButton(amp.label, amp.on))
-    {
-        if (amp.on || amp.timer)
-            amp_vm.TurnAmpOff();
-        else
-            amp_vm.TurnAmpOn();
-    }
+        amp_vm.PressAmp(amp);
 }
 
 void ImGui_CommandWindow(float fontscale)

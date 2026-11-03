@@ -14,6 +14,7 @@ struct AmpButton {
     bool on;                            // State.AMPON
     bool timer;                         // State.AmpTime > 0
     const char * label;                 // "AMP ON" / "Disabled  MM:SS" / "AMP OFF" / "AMP OFF MM:SS"
+                                        // (+ "###AmpButton": 남은 시간이 바뀌어도 ImGui ID 가 같아 클릭이 빠지지 않게)
 };
 
 class ControlVM
@@ -30,6 +31,7 @@ public:
     AmpButton Amp();                    // 라벨 문자열을 만들고(공유 버퍼 AmpTimeBuf) 상태를 돌려준다
     void TurnAmpOn();
     void TurnAmpOff();
+    void PressAmp(const AmpButton & amp);   // AMP 버튼 클릭: on 이면 Off, 아니면 On ("Disabled" 포함)
 
     // ---- 명령 큐 ----
     void OpenCommandManager();          // CMD Manager 팝업

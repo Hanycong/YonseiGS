@@ -61,17 +61,17 @@ AmpButton ControlVM::Amp()
     {
         amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", LinkFlags.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S###AmpButton", LinkFlags.AmpTM);
         else
-            sprintf(AmpTimeBuf, "AMP ON");
+            sprintf(AmpTimeBuf, "AMP ON###AmpButton");
     }
     else
     {
         amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S", LinkFlags.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S###AmpButton", LinkFlags.AmpTM);
         else
-            sprintf(AmpTimeBuf, "AMP OFF");
+            sprintf(AmpTimeBuf, "AMP OFF###AmpButton");
     }
     amp.label = AmpTimeBuf;
     return amp;
@@ -79,6 +79,17 @@ AmpButton ControlVM::Amp()
 
 void ControlVM::TurnAmpOn()  { mim::svc::AmpOn(); }
 void ControlVM::TurnAmpOff() { mim::svc::AmpOff(); }
+
+// AMP 버튼 클릭 (누리호 5차 GS 와 같이): 켜져 있으면 끄고, 꺼져 있으면 켠다.
+// "Disabled MM:SS" (꺼졌지만 타이머가 남음) 를 누르면 AmpOn 으로 다시 켜고 타이머를 새로 시작한다
+// (예전에는 ampoff 를 한 번 더 실행했다).
+void ControlVM::PressAmp(const AmpButton & amp)
+{
+    if (amp.on)
+        TurnAmpOff();
+    else
+        TurnAmpOn();
+}
 
 // "CMD Manager"
 void ControlVM::OpenCommandManager() { AppUi.Display_CMD = true; }
