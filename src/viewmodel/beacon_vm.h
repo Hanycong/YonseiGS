@@ -26,6 +26,12 @@ public:
     const UELYSYS_Beacon_t * LastUelysysBeacon() const;
     const SD1SAT_Beacon_t *  LastSd1satBeacon() const;
 
+private:
+    mutable BEE1012_Beacon_t bee1012_copy_ = {};
+    mutable UELYSYS_Beacon_t uelysys_copy_ = {};
+    mutable SD1SAT_Beacon_t  sd1sat_copy_  = {};
+public:
+
     // Report 탭: 수신 스레드가 갱신하는 리포트 해석 결과를 잠금 아래에서 복사해 온다
     ReportView_t ReportSnapshot() const;
 

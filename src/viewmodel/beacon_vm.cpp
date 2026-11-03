@@ -1,4 +1,5 @@
 #include "beacon_vm.h"
+#include "n5_beacon.h"
 
 #include <mutex>
 
@@ -17,9 +18,10 @@ GETFILEINFO *   BeaconVM::LastFileInfo() const      { return Telemetry().LastFil
 
 ReportView_t BeaconVM::ReportSnapshot() const { return Telemetry().ReportSnapshot(); }
 
-const BEE1012_Beacon_t * BeaconVM::LastBee1012Beacon() const { return bee1012_beacon; }
-const UELYSYS_Beacon_t * BeaconVM::LastUelysysBeacon() const { return uelysys_beacon; }
-const SD1SAT_Beacon_t *  BeaconVM::LastSd1satBeacon() const  { return sd1sat_beacon; }
+// 수신 스레드가 쓰는 비콘 버퍼를 잠금 안에서 복사해 둔 사본 (받기 전에는 0, GS_nuri5 화면처럼 0 으로 그린다)
+const BEE1012_Beacon_t * BeaconVM::LastBee1012Beacon() const { CopyBEE1012Beacon(bee1012_copy_); return &bee1012_copy_; }
+const UELYSYS_Beacon_t * BeaconVM::LastUelysysBeacon() const { CopyUELYSYSBeacon(uelysys_copy_); return &uelysys_copy_; }
+const SD1SAT_Beacon_t *  BeaconVM::LastSd1satBeacon() const  { CopySD1SATBeacon(sd1sat_copy_);   return &sd1sat_copy_; }
 
 void BeaconVM::ReportSnapshot5(ReportView_t & view, EPS_Report_State_t & eps_state,
                                EPS_RParam_Reassembly_State_t & eps_rparam,
