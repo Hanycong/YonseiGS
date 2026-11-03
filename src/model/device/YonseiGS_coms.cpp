@@ -16,6 +16,7 @@
 #include "n5_beacon.h"
 #include "n5_report_assembler.h"
 #include "n5_report_logger.h"
+#include "telemetry_files.h"
 
 
 #define a sizeof(Beacon);
@@ -236,6 +237,24 @@ csp_socket_t * DL_sock_initialize()
     if(!csp_bind(sock, 20)) {
         console.AddLog("[OK]##SD1-SAT RPT Port 20 bind success.");
     }
+    if(!csp_bind(sock, 11)) {
+        console.AddLog("[OK]##UEL-Y-Sys. Event Port 11 bind success.");
+    }
+    if(!csp_bind(sock, 14)) {
+        console.AddLog("[OK]##UEL-Y-Sys. FM Port 14 bind success.");
+    }
+    if(!csp_bind(sock, 16)) {
+        console.AddLog("[OK]##BEE-1012 Event Port 16 bind success.");
+    }
+    if(!csp_bind(sock, 18)) {
+        console.AddLog("[OK]##BEE-1012 FM Port 18 bind success.");
+    }
+    if(!csp_bind(sock, 29)) {
+        console.AddLog("[OK]##BEE-1012 AIOBC Port 29 bind success.");
+    }
+    if(!csp_bind(sock, 21)) {
+        console.AddLog("[OK]##SD1-SAT TO Port 21 bind success.");
+    }
         
         
     // while(true) {
@@ -285,6 +304,44 @@ csp_socket_t * DL_sock_initialize()
 // ReportSaver -> model/telemetry/telemetry_logger.cpp 로 이동
 
 // EventSaver -> model/telemetry/telemetry_logger.cpp 로 이동
+
+// 누리호 5차 위성 패킷 원본을 ../data/<위성>/... 에 "%02hhx\t" 10개씩 줄바꿈으로 저장하고 터미널에도 찍는다 (GS_nuri5 형식)
+static void SaveN5RawPacket(const char * dir, const char * prefix, const csp_packet_t * packet)
+{
+    std::string filename;
+    FILE * fp = OpenTelemetryFile(dir, prefix, "--", NULL, "wb", &filename);
+    if (!fp)
+        console.AddLog("[ERROR] Failed to save packet: %s", filename.c_str());
+
+    for (int i = 0; i < packet->length; i++) {
+        if (!(i % 10) && i != 0) {
+            printf("\n");
+            if (fp) fprintf(fp, "\n");
+        }
+        printf("0x%x ", packet->data[i]);
+        if (fp) fprintf(fp, "%02hhx\t", packet->data[i]);
+    }
+    printf("\n");
+
+    if (fp) fclose(fp);
+}
+
+// 누리호 5차 FM GETFILEINFO 응답 (BEE1012 포트 18, UELYSYS 포트 14). 길이가 맞으면 응답 탭 버퍼(getfileinfo)도 갱신
+static void HandleN5GetFileInfo(const char * sat, const char * dir, const csp_packet_t * packet, int dport)
+{
+    console.AddLog("Received %s GETFILEINFO Response from port : %d.\n", sat, dport);
+    printf("Received %s GETFILEINFO response Length: %u\n", sat, packet->length);
+    SaveN5RawPacket(dir, "GETFILEINFO--", packet);
+
+    if (packet->length == BEE_LEN_GETFILEINFO) {
+        memset(getfileinfo, 0, sizeof(*getfileinfo));
+        memcpy(getfileinfo, packet->data, BEE_LEN_GETFILEINFO);
+    }
+    else {
+        console.AddLog("%s GETFILEINFO length mismatch: received %u, expected %u. Raw data saved.\n",
+                       sat, packet->length, (unsigned)BEE_LEN_GETFILEINFO);
+    }
+}
 
 void * task_downlink_onorbit(void * socketinfo) 
 {
@@ -861,6 +918,46 @@ void * task_downlink_onorbit(void * socketinfo)
                 case 20: {
                     console.AddLog("Received SD1SAT Report Packet.");
                     AssembleSD1SATReportChunk(dport, packet);
+                    break;
+                }
+
+                // 누리호 5차 FM 응답 (BEE-1000 포트 23 은 위 case 23 그대로)
+                case 18: {
+                    HandleN5GetFileInfo("BEE1012", "../data/BEE1012/fm", packet, dport);
+                    break;
+                }
+
+                case 14: {
+                    HandleN5GetFileInfo("UELYSYS", "../data/UELYSYS/fm", packet, dport);
+                    break;
+                }
+
+                // BEE1012 AIOBC TM: 원본만 저장한다. GS_nuri5 는 길이 확인 없이 BEE-1000 이벤트 버퍼에
+                // 복사하고 EventSaver 를 불러 이벤트 탭/로그를 덮어썼다
+                case 29: {
+                    console.AddLog("Received AIOBC TM from port : %d.\n", dport);
+                    printf("AIOBC TM Length: %u\n", packet->length);
+                    SaveN5RawPacket("../data/BEE1012/AIOBC", "aiobc--", packet);
+                    break;
+                }
+
+                case 21: {
+                    console.AddLog("Received SD1SAT TO Response from port : %d\n", dport);
+                    printf("Received SD1SAT TO response Length : %u\n", packet->length);
+                    SaveN5RawPacket("../data/SD1SAT/to", "TO--", packet);
+                    break;
+                }
+
+                // 5차 위성 이벤트: 해석 형식이 확인되지 않아 원본만 저장 (GS_nuri5 는 unknown 으로 저장)
+                case 16: {
+                    console.AddLog("Received BEE1012 Event from port : %d.", dport);
+                    SaveN5RawPacket("../data/BEE1012/event", "event--", packet);
+                    break;
+                }
+
+                case 11: {
+                    console.AddLog("Received UELYSYS Event from port : %d.", dport);
+                    SaveN5RawPacket("../data/UELYSYS/event", "event--", packet);
                     break;
                 }
 
