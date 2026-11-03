@@ -68,7 +68,7 @@ void DrawBeaconTab(float fontscale)
         BeaconSectionHeader("FSW - RPT");
 
         StateWindowColumnManager("RPT Command Counter");
-        ImGui::Text("%" PRIu8, beacon->RPT_ErrCounter);
+        ImGui::Text("%" PRIu8, beacon->RPT_CmdCounter);
 
         StateWindowColumnManager("RPT Error Counter");
         ImGui::Text("%" PRIu8, beacon->RPT_ErrCounter);
