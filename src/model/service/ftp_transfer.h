@@ -5,7 +5,7 @@
 //   2 = V2        (libftp_client gs_ftp_upload/download, CSP 포트 9)  <- 기본
 //   3 = Ryu       (lib/libftp_client_ryu ftpnew_*, CSP 포트 19). 누리호 5차 GS 의 Ryu 이전 보고서가 NO-GO 라
 //                 기본값이 아니고 V3 라디오로만 고른다
-// 목적지 노드는 FtpShared.dest_node (모든 FTP 작업 공통, 누리호 5차 GS "FTP with SLT").
+// 목적지 노드는 FtpShared.dest_node (모든 FTP 작업 공통 - 목록/이동/복사/삭제 포함, 누리호 5차 GS "FTP with SLT").
 //
 // Start/Stop (모든 엔진 공통):
 //   ftp_start_worker 가 busy 를 세우고 (gs_ftp_process = true) 워커를 SLOT_FTP 에 띄운다.
@@ -29,6 +29,8 @@ typedef struct {
     int return_code;
     int cleanup_done;           // 1 = 워커가 정리까지 끝냈다
     int user_stopped;           // 1 = Stop 으로 끝났다
+    uint8_t host;               // 목적지 노드 (FtpShared.dest_node)
+    uint8_t port;               // 엔진별 CSP 포트 (V1 15 / V2 9 / Ryu 19)
     char engine[8];             // "V1" / "V2" / "RYU"
     char direction[16];         // "UPLOAD" / "DOWNLOAD"
     char local_path[256];

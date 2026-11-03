@@ -164,7 +164,7 @@ static miman_ftp_transfer_status_t LastFtp()
 }
 
 // TX 모드를 기다리는 워커를 띄우고 Stop -> 0.5 초 안에 끝나는지
-static void StopWaitingTransfer(int version, bool upload, const char * engine)
+static void StopWaitingTransfer(int version, bool upload, const char * engine, int port)
 {
     using namespace mim::svc;
     printf("# FTP stop while waiting for TX: version %d %s\n", version, upload ? "upload" : "download");
@@ -201,20 +201,24 @@ static void StopWaitingTransfer(int version, bool upload, const char * engine)
     char expect[64];
     snprintf(expect, sizeof(expect), "file://local_%d", version);
     CHECK(strcmp(st.local_path, expect) == 0);
+    CHECK(st.host == FtpShared.dest_node);      // 목적지 = Dest Node 입력값
+    CHECK(st.port == port);
 }
 
 static void TestFtp()
 {
     using namespace mim::svc;
     CHECK(FtpShared.ftp_version == 2);      // 기본 엔진은 V2 (Ryu 는 고를 때만)
+    CHECK(FtpShared.dest_node == 10);       // 기본 목적지 = OBC 기본 노드
 
-    StopWaitingTransfer(2, true, "V2");
+    StopWaitingTransfer(2, true, "V2", 9);
     // 사용자 Stop 뒤에는 쿨다운 없이 바로 다시 (이어받기)
-    StopWaitingTransfer(3, false, "RYU");
-    StopWaitingTransfer(1, true, "V1");
-    StopWaitingTransfer(1, false, "V1");
-    StopWaitingTransfer(3, true, "RYU");
-    StopWaitingTransfer(2, false, "V2");
+    StopWaitingTransfer(3, false, "RYU", 19);
+    FtpShared.dest_node = 23;               // Dest Node 를 바꾸면 다음 전송부터 그 노드로
+    StopWaitingTransfer(1, true, "V1", 15);
+    StopWaitingTransfer(1, false, "V1", 15);
+    StopWaitingTransfer(3, true, "RYU", 19);
+    StopWaitingTransfer(2, false, "V2", 9);
 
     // 시작 직후 (워커가 돌기 전) Stop
     printf("# FTP stop right after start\n");

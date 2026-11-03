@@ -725,6 +725,8 @@ static void ftp_store_transfer_status(const miman_ftp_worker_copy_t * job,
     ftp_transfer_last_status.return_code = return_code;
     ftp_transfer_last_status.cleanup_done = cleanup_done ? 1 : 0;
     ftp_transfer_last_status.user_stopped = user_stopped ? 1 : 0;
+    ftp_transfer_last_status.host = job->settings.host;
+    ftp_transfer_last_status.port = job->settings.port;
     snprintf(ftp_transfer_last_status.engine,
              sizeof(ftp_transfer_last_status.engine), "%s",
              ftp_engine_name(job->engine));
@@ -784,7 +786,7 @@ static bool ftp_copy_worker_param(void * param, miman_ftp_worker_copy_t * job,
         miman_ftp_destroy_worker_arg(owned_arg);
     }
     job->settings.mode = GS_FTP_MODE_STANDARD;
-    job->settings.host = setup->obc_node;
+    job->settings.host = FtpShared.dest_node;
     job->settings.port = ftp_port_for_engine(engine);
     job->settings.timeout = ftp_timeout_for(engine, direction);
     job->settings.chunk_size = ftp_chunk_size_clamped(FtpShared.chunk_sz);
@@ -942,7 +944,7 @@ void * ftp_list_onorbit(void *){
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
@@ -966,7 +968,7 @@ void * ftp_move_onorbit(void *){
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
@@ -989,7 +991,7 @@ void * ftp_remove_onorbit(void *){
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
@@ -1012,7 +1014,7 @@ void * ftp_copy_onorbit(void *){
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
@@ -1036,7 +1038,7 @@ void * ftp_mkdir_onorbit(void *){
     uint32_t mode = 0;
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
@@ -1059,7 +1061,7 @@ void * ftp_rmdir_onorbit(void *){
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = setup->obc_node;
+    ftp_config.host = FtpShared.dest_node;
     ftp_config.port = FTPRDP_PORT;
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);

@@ -82,6 +82,14 @@ static void PathInput(const char * label, const char * id, char * buf, size_t si
     ImGui::InputText(id, buf, size);
 }
 
+// FTP 목적지 노드 (누리호 5차 GS "Dest Node"). 작업별 입력칸 아래에 둔다 (위 버튼 위치가 바뀌지 않게)
+static void DestNodeInput(mim::vm::FtpVM & vm)
+{
+    RowLabel("Dest Node");
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+    ImGui::InputScalar("##ftp_dest_node", ImGuiDataType_U8, vm.DestNode());
+}
+
 void ImGui_CommandWindow_Body(float fontscale)
 {
     mim::vm::FtpVM & vm = mim::vm::FtpViewModel();
@@ -179,6 +187,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         }
         PathInput("Local", "##FTP_local_filepath : ", vm.SelectedFile()->local_path, sizeof(vm.SelectedFile()->local_path));
         PathInput("Remote", "##FTP_remote_filepath : ", vm.SelectedFile()->remote_path, sizeof(vm.SelectedFile()->remote_path));
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -189,6 +198,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         }
         PathInput("Local", "##FTP_local_filepath : ", vm.SelectedFile()->local_path, sizeof(vm.SelectedFile()->local_path));
         PathInput("Remote", "##FTP_remote_filepath : ", vm.SelectedFile()->remote_path, sizeof(vm.SelectedFile()->remote_path));
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -199,6 +209,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.List();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         ImGui::Text(vm.ListRequest()->fdispbuf);
         break;
@@ -211,6 +222,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.Move();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -221,6 +233,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.Remove();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -232,6 +245,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.Copy();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -242,6 +256,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.Mkdir();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }
@@ -252,6 +267,7 @@ void ImGui_CommandWindow_Body(float fontscale)
         {
             vm.Rmdir();
         }
+        DestNodeInput(vm);
         ImGui::TextWrapped("%s", vm.StatusText());
         break;
     }

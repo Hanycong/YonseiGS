@@ -28,6 +28,7 @@ public:
     int *      Version();               // 1 = V1 force, 2 = V2 (기본), 3 = Ryu
     int *      ForceIteration();        // V1 반복 횟수 (V1 일 때만 보인다)
     void       ClampForceIteration();   // >= 1
+    uint8_t *  DestNode();              // FTP 목적지 노드 (모든 작업 공통)
     uint32_t * ChunkSize();
     void       ClampChunkSize();        // >= 1 (입력 칸 다음 매 프레임)
     int *      Task();                  // FTP_*_REQUEST

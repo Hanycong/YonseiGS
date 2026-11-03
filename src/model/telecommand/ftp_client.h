@@ -17,6 +17,7 @@ class FtpClient
 public:
     int *      Version();               // 1 = V1 force, 2 = V2, 3 = Ryu
     int *      ForceIteration();        // V1 반복 횟수
+    uint8_t *  DestNode();              // FTP 목적지 CSP 노드
     uint32_t * ChunkSize();             // [byte]
 
     int       FileSlotCount() const;

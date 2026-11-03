@@ -47,6 +47,7 @@ void FtpVM::SendDownlinkRequest()
 int *      FtpVM::Version()   { return Ftp().Version(); }
 uint32_t * FtpVM::ChunkSize() { return Ftp().ChunkSize(); }
 int *      FtpVM::ForceIteration() { return Ftp().ForceIteration(); }
+uint8_t *  FtpVM::DestNode()       { return Ftp().DestNode(); }
 
 void FtpVM::ClampForceIteration()
 {

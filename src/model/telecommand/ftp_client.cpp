@@ -11,6 +11,7 @@ namespace model {
 int *      FtpClient::Version()   { return &FtpShared.ftp_version; }
 uint32_t * FtpClient::ChunkSize() { return &FtpShared.chunk_sz; }
 int *      FtpClient::ForceIteration() { return &FtpShared.force_iteration; }
+uint8_t *  FtpClient::DestNode()       { return &FtpShared.dest_node; }
 
 int       FtpClient::FileSlotCount() const { return sizeof(FtpShared.ftplistup) / sizeof(FtpShared.ftplistup[0]); }
 ftpinfo * FtpClient::FileSlot(int i)       { return &FtpShared.ftplistup[i]; }
