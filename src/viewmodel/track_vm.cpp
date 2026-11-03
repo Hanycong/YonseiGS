@@ -96,22 +96,32 @@ void TrackVM::Track(int r)            { Tracking().Set(rows_[r].sat); }
 
 void TrackVM::OpenTleManager() { AppUi.Display_TLE = true; }
 
-bool TrackVM::HasTrackTarget() const { return !Loading() && InUse(Tracking().Index()); }
+// 추적 대상 위성 (없으면 NULL). 인덱스는 다른 스레드(AutoPilot)가 바꿀 수 있어 한 번만 읽는다
+static SatelliteObject * TrackedSatellite()
+{
+    int idx = Tracking().Index();
+    return (OrbitData.NowTracking && InUse(idx)) ? OrbitData.Satellites[idx] : NULL;
+}
+
+bool TrackVM::HasTrackTarget() const { return TrackedSatellite() != NULL; }
 
 const char* TrackVM::TrackedName() const
 {
-    return HasTrackTarget() ? OrbitData.Satellites[Tracking().Index()]->Name() : nullptr;
+    SatelliteObject * s = TrackedSatellite();
+    return s ? s->Name() : nullptr;
 }
 
 // topo 는 추적 스레드(TrackingSatellites)가 10 ms 마다 갱신한다 [rad]
 float TrackVM::TrackedAzimuth() const
 {
-    return HasTrackTarget() ? (float)(OrbitData.Satellites[Tracking().Index()]->topo.azimuth * RAD_TO_DEG) : 0.f;
+    SatelliteObject * s = TrackedSatellite();
+    return s ? (float)(s->topo.azimuth * RAD_TO_DEG) : 0.f;
 }
 
 float TrackVM::TrackedElevation() const
 {
-    return HasTrackTarget() ? (float)(OrbitData.Satellites[Tracking().Index()]->topo.elevation * RAD_TO_DEG) : 0.f;
+    SatelliteObject * s = TrackedSatellite();
+    return s ? (float)(s->topo.elevation * RAD_TO_DEG) : 0.f;
 }
 
 TrackVM & TrackViewModel()

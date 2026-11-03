@@ -23,7 +23,7 @@ namespace vm {
 TleVM::TleVM()
 {
     char abs[PATH_MAX];
-    if (realpath(local_path_, abs))
+    if (realpath(local_path_, abs) && strlen(abs) < sizeof(local_path_))
         snprintf(local_path_, sizeof(local_path_), "%s", abs);
 }
 

@@ -53,6 +53,7 @@ private:
     std::string filter_label_;
     int  filter_ = 0;                   // 0: exts_ 만, 1: 모든 파일
     int  selected_ = -1;
+    bool text_enter_ = false;           // 이번 프레임 Enter 로 검색칸/이름칸을 빠져나왔는지
     int  sort_col_ = 0;
     bool sort_asc_ = true;
     char name_[256] = "";

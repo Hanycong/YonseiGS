@@ -346,6 +346,7 @@ void FileDialog::DrawToolbar()
     ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - search_w);
     ImGui::SetNextItemWidth(search_w);
     ImGui::InputTextWithHint("##fd_search", "Search", search_, sizeof(search_));
+    text_enter_ = ImGui::IsItemDeactivated();
 }
 
 void FileDialog::DrawPlaces()
@@ -508,6 +509,7 @@ bool FileDialog::Draw(const char * title, char * out, size_t out_size)
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - filter_w - style.ItemSpacing.x);
     if (ImGui::InputText("##fd_name", name_, sizeof(name_), ImGuiInputTextFlags_EnterReturnsTrue))
         picked = picked || Accept(out, out_size);
+    text_enter_ = text_enter_ || ImGui::IsItemDeactivated();
     ImGui::SameLine();
     ImGui::SetNextItemWidth(filter_w);
     std::string filter_items[2] = {"Files (" + filter_label_ + ")", "All files (*.*)"};
@@ -532,9 +534,10 @@ bool FileDialog::Draw(const char * title, char * out, size_t out_size)
         ImGui::TextDisabled("%d items", n);
     }
     ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - btn_w * 2 - style.ItemSpacing.x);
-    // Enter: 이름칸 밖(목록 등)에 포커스가 있어도 Open 과 같다
-    bool enter = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() &&
-                 ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter));
+    // Enter: 목록에서 파일을 고른 뒤에도 Open 과 같다 (검색칸·이름칸에서 친 Enter 는 제외)
+    bool enter = !text_enter_ && !ImGui::IsAnyItemActive() &&
+                 ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter)) ||
+                                   ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_KeyPadEnter)));
     if (ImGui::Button("Open##fd", ImVec2(btn_w, ButtonHeight())) || enter)
         picked = picked || Accept(out, out_size);
     ImGui::SameLine();
