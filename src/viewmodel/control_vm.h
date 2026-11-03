@@ -14,6 +14,7 @@ struct AmpButton {
     bool on;                            // State.AMPON
     bool timer;                         // State.AmpTime > 0
     const char * label;                 // "AMP ON" / "Disabled  MM:SS" / "AMP OFF" / "AMP OFF MM:SS"
+                                        // (+ "###AmpButton": 남은 시간이 바뀌어도 ImGui ID 가 같아 클릭이 빠지지 않게)
 };
 
 class ControlVM
@@ -23,6 +24,10 @@ public:
     void PingAx100();
     void PingObc();                     // 추적 대상 위성의 TLE 를 실은 핑 패킷 업링크
     void PrintRoutingTable();           // "Send Telecommand" 를 열 때 CSP 라우팅 표를 표준출력에
+
+    // ---- 와치독 (누리호 5차 GS Control 버튼) ----
+    void ClearUtrxWdt();                // "UTRX WDT CLEAR": UTRX(MID 0x1850) CC 6, 페이로드 없음
+    void ClearEpsWdtAll();              // "EPS WDT CLEAR ALL": EPS P80 GND WDT CLEAR ALL (MID 0x1875)
     void StartBaudCalibration();
     void StartFreqCalibration();
 
@@ -30,6 +35,7 @@ public:
     AmpButton Amp();                    // 라벨 문자열을 만들고(공유 버퍼 AmpTimeBuf) 상태를 돌려준다
     void TurnAmpOn();
     void TurnAmpOff();
+    void PressAmp(const AmpButton & amp);   // AMP 버튼 클릭: on 이면 Off, 아니면 On ("Disabled" 포함)
 
     // ---- 명령 큐 ----
     void OpenCommandManager();          // CMD Manager 팝업

@@ -55,8 +55,8 @@ volatile sig_atomic_t g_shutdown_requested = 0;
 // 5 : Calibration
 // 6 : AMP Timer
 // 7 : Doppler Shift Correction
-// 8 : FTP downlink/uplink
-// 9 : 
+// 8 : FTP downlink/uplink (ftp_start_worker, StartThread/JoinThread)
+// 9 : FTP Stop keeper (Stop 뒤 워커가 끝날 때까지 ftp_abort() 유지)
 //10 : Signaltest
 //11 : TRX Controller
 //12 : Radio Controller

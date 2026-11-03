@@ -1,5 +1,7 @@
 #include "ftp_vm.h"
 
+#include <stdio.h>
+
 #include "ftp_client.h"
 #include "downlink_request.h"
 
@@ -46,6 +48,14 @@ void FtpVM::SendDownlinkRequest()
 
 int *      FtpVM::Version()   { return Ftp().Version(); }
 uint32_t * FtpVM::ChunkSize() { return Ftp().ChunkSize(); }
+int *      FtpVM::ForceIteration() { return Ftp().ForceIteration(); }
+uint8_t *  FtpVM::DestNode()       { return Ftp().DestNode(); }
+
+void FtpVM::ClampForceIteration()
+{
+    if(*Ftp().ForceIteration() < 1)
+        *Ftp().ForceIteration() = 1;
+}
 
 void FtpVM::ClampChunkSize()
 {
@@ -72,6 +82,17 @@ ftpinfo * FtpVM::FileSlot(int i)        { return Ftp().FileSlot(i); }
 int *     FtpVM::SelectedFileIndex()    { return Ftp().SelectedIndex(); }
 ftpinfo * FtpVM::SelectedFile()         { return Ftp().Selected(); }
 
+// 누리호 5차 GS 는 처음 그릴 때 선택 칸 경로를 "file://" 로 덮어썼다. 여기서는 칸마다 기본 경로가 있으므로
+// (ftpinfo 기본값) 빈 칸만 채운다: URL 형식(file://...)을 잊고 경로만 적는 실수를 줄이려는 것
+void FtpVM::DefaultEmptyPaths()
+{
+    ftpinfo * f = Ftp().Selected();
+    if (f->local_path[0] == 0)
+        snprintf(f->local_path, sizeof(f->local_path), "file://");
+    if (f->remote_path[0] == 0)
+        snprintf(f->remote_path, sizeof(f->remote_path), "file://");
+}
+
 gsftp_listup_t * FtpVM::ListRequest()   { return Ftp().ListRequest(); }
 gsftp_move_t *   FtpVM::MoveRequest()   { return Ftp().MoveRequest(); }
 gsftp_remove_t * FtpVM::RemoveRequest() { return Ftp().RemoveRequest(); }
@@ -88,6 +109,10 @@ void FtpVM::Remove()   { Ftp().Remove(); }
 void FtpVM::Copy()     { Ftp().Copy(); }
 void FtpVM::Mkdir()    { Ftp().Mkdir(); }
 void FtpVM::Rmdir()    { Ftp().Rmdir(); }
+
+bool FtpVM::TransferBusy() const     { return Ftp().Busy(); }
+bool FtpVM::TransferStopping() const { return Ftp().Stopping(); }
+void FtpVM::Stop()                   { Ftp().Stop(); }
 
 FtpVM & FtpViewModel()
 {

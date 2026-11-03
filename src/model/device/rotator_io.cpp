@@ -230,7 +230,7 @@ void * RotatorReadInfo(void *)
             else if (byte < 1)
             {
                 console.AddLog("[ERROR]##Rotator Read Failed.");
-                sleep(30);
+                sleep(1);   // 누리호 5차 GS 와 같이 1 초 (30 초면 재연결/종료가 그만큼 늦어진다)
                 break;
             }
         }

@@ -1,5 +1,6 @@
 #include "svc_station.h"
 #include "svc_thread.h"
+#include "svc_ftp.h"
 
 #include <signal.h>
 #include <stdio.h>
@@ -111,6 +112,8 @@ void StopAllThreads()
 
     State.InitializeRequired = true;
     AutoPilotCfg.Autopilot = false;
+    // 진행 중인 FTP 를 멈춘다 (안 멈추면 TX 대기/전송 타임아웃 동안 SLOT_FTP join 이 끝나지 않는다)
+    FtpStop();
     printf("Joined thread : \n");
     for(int i = 0; i < SLOT_COUNT; i++)
     {

@@ -14,6 +14,8 @@
 #include "obc_ping.h"
 #include "command_queue.h"
 #include "track_target.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 
 extern StateCheckUnit State;
 extern Console console;
@@ -47,6 +49,30 @@ void ControlVM::PingObc()
     }
 }
 
+// UTRX 지상 와치독 클리어 CC (누리호 5차 GS 버튼 값. mission_defs.h UELYSYS_UTRX_GNDWDT_CLEAR_CC 와 같음)
+static const uint8_t UTRX_GNDWDT_CLEAR_CC = 6;
+
+// "UTRX WDT CLEAR" (누리호 5차 GS): 헤더만 있는 8바이트 명령. TC 기록은 업링크 스레드가 한다
+void ControlVM::ClearUtrxWdt()
+{
+    const uint16_t msgid = UTRX_CMD_ID;     // 0x1850
+    WriteSystemName(msgid);
+    uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
+    mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, UTRX_GNDWDT_CLEAR_CC);
+    mim::tc::SendTelecommand(cmd, sizeof(cmd));
+}
+
+// "EPS WDT CLEAR ALL" (누리호 5차 GS): EPS P80 GND WDT CLEAR ALL
+void ControlVM::ClearEpsWdtAll()
+{
+    const uint16_t msgid = EPS_CMD_ID;      // 0x1875
+    WriteSystemName(msgid);
+    EPS_P80_Gnd_Watchdog_Clear_All_Cmd_t cmd;
+    memset(&cmd, 0, sizeof(cmd));
+    mim::tc::EncodeCfeCommand(&cmd, sizeof(cmd), msgid, EPS_P80_GND_WDT_CLEAR_ALL_CC);
+    mim::tc::SendTelecommand(&cmd, sizeof(cmd));
+}
+
 // "Send Telecommand" (팝업을 열 때 함께)
 void ControlVM::PrintRoutingTable() { csp_rtable_print(); }
 
@@ -61,17 +87,17 @@ AmpButton ControlVM::Amp()
     {
         amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S", LinkFlags.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "Disabled  %M:%S###AmpButton", LinkFlags.AmpTM);
         else
-            sprintf(AmpTimeBuf, "AMP ON");
+            sprintf(AmpTimeBuf, "AMP ON###AmpButton");
     }
     else
     {
         amp.timer = LinkFlags.AmpTime > 0;
         if (amp.timer)
-            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S", LinkFlags.AmpTM);
+            strftime(AmpTimeBuf, sizeof(AmpTimeBuf), "AMP OFF %M:%S###AmpButton", LinkFlags.AmpTM);
         else
-            sprintf(AmpTimeBuf, "AMP OFF");
+            sprintf(AmpTimeBuf, "AMP OFF###AmpButton");
     }
     amp.label = AmpTimeBuf;
     return amp;
@@ -79,6 +105,17 @@ AmpButton ControlVM::Amp()
 
 void ControlVM::TurnAmpOn()  { mim::svc::AmpOn(); }
 void ControlVM::TurnAmpOff() { mim::svc::AmpOff(); }
+
+// AMP 버튼 클릭 (누리호 5차 GS 와 같이): 켜져 있으면 끄고, 꺼져 있으면 켠다.
+// "Disabled MM:SS" (꺼졌지만 타이머가 남음) 를 누르면 AmpOn 으로 다시 켜고 타이머를 새로 시작한다
+// (예전에는 ampoff 를 한 번 더 실행했다).
+void ControlVM::PressAmp(const AmpButton & amp)
+{
+    if (amp.on)
+        TurnAmpOff();
+    else
+        TurnAmpOn();
+}
 
 // "CMD Manager"
 void ControlVM::OpenCommandManager() { AppUi.Display_CMD = true; }

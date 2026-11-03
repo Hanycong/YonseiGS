@@ -59,6 +59,9 @@ SET(MIMAN_BIN ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 SET(MIMAN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 SET(MIMAN_LIB ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
+# Ryu FTP 엔진 (누리호 5차 GS, FTP_Ryu::client). lib/gscsp/build/libmimancsp.a 가 있어야 한다.
+# FTP 창에서 V3(Ryu) 를 고를 때만 쓴다 (기본은 V2 libftp_client)
+ADD_SUBDIRECTORY(${MIMAN_LIB}/libftp_client_ryu)
 
 INCLUDE_DIRECTORIES (/usr/local/include)
 INCLUDE_DIRECTORIES (/usr/include)
@@ -141,3 +144,4 @@ TARGET_SOURCES(BEE-1000 PRIVATE ${CMDGEN5_SRCS}
     ${MIMAN_SRC}/model/missions/bee1012/bee1012_commands.cpp ${MIMAN_SRC}/model/missions/uelysys/uelysys_commands.cpp ${MIMAN_SRC}/model/missions/sd1sat/sd1sat_commands.cpp ${MIMAN_SRC}/view/cmdgen/raw/forms_generic5.cpp ${MIMAN_SRC}/view/cmdgen/cmdgen5_common.cpp)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/imgui/libimgui.a)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/gscsp/build/libmimancsp.a)
+TARGET_LINK_LIBRARIES(BEE-1000 FTP_Ryu::client)

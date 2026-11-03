@@ -21,8 +21,16 @@ int StartSignalTest();
 void StopSignalTest();
 
 // 앰프: ../amp/ampcontrol, ../amp/ampoff 프로세스 실행 (+ AmpTimer, SLOT_AMP_TIMER)
+// AmpOn: 앰프를 켜고 14 분 타이머를 (다시) 시작. 타이머가 돌고 있으면 세우고(100 ms 안) 새로 띄운다.
+// GUI 와 AutoPilot 이 같이 쓰는 단일 진입점 (누리호 5차 GS AmpOn). AmpOff 는 타이머를 건드리지 않는다
+// (꺼진 뒤에도 남은 시간이 "Disabled MM:SS" 로 보인다).
 void AmpOn();
 void AmpOff();
+// AMP 타이머만 (다시) 시작 / 정지 (AmpOn 이 쓴다. 테스트용으로도 공개). 둘 다 100 ms 안에 돌아온다
+void RestartAmpTimer();
+void StopAmpTimer();
+// AMP 타이머 스레드가 돌고 있는지 (SLOT_AMP_TIMER 를 join 하지 않고 기다릴 때)
+bool AmpTimerRunning();
 // 앰프(Arduino, /dev/ttyACM0)와 제어 프로그램(../amp/<program>)을 쓸 수 있는지 확인.
 // 못 쓰면 이유를 콘솔에 남기고 false. 장치는 열지 않는다(열면 Arduino 가 리셋될 수 있음)
 bool AmpReady(const char * program);

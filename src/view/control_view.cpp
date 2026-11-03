@@ -59,6 +59,12 @@ void ImGui_ControlWindow_Body(float fontscale)
     if (GridButton("Clear CMD Queue", 1))
         vm.ClearCommandQueue();
 
+    SectionHeader("WATCHDOG");
+    if (GridButton("UTRX WDT CLEAR", 0))
+        vm.ClearUtrxWdt();
+    if (GridButton("EPS WDT CLEAR ALL", 1))
+        vm.ClearEpsWdtAll();
+
     SectionHeader("CALIBRATION");
     if (GridButton("Baud Rate", 0))
         vm.StartBaudCalibration();
@@ -68,12 +74,7 @@ void ImGui_ControlWindow_Body(float fontscale)
     SectionHeader("AMPLIFIER");
     mim::vm::AmpButton amp = vm.Amp();
     if (ToggleWideButton(amp.label, amp.on))
-    {
-        if (amp.on || amp.timer)
-            vm.TurnAmpOff();
-        else
-            vm.TurnAmpOn();
-    }
+        vm.PressAmp(amp);
 
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 popup_size(600.0f, 380.0f);

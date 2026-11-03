@@ -10,6 +10,7 @@
 #include "control_vm.h"       // AMP 버튼 (Control 창과 같은 버튼)
 #include "ftp_view.h"
 #include "ui_kit.h"
+#include "YonseiGS_theme.h"
 
 extern bool p_open;
 extern ImGuiWindowFlags mim_winflags;
@@ -17,7 +18,30 @@ extern ImGuiWindowFlags mim_winflags;
 
 using namespace mim::ui;
 
-// 파일 선택 콤보 + 실행 버튼 한 줄
+// 업/다운로드 진행 중 실행 버튼 자리에 그리는 Stop 버튼 (누리호 5차 GS draw_ftp_stop_button).
+// Stop 을 누른 뒤 워커가 정리될 때까지는 회색 "Stopping..." (누를 수 없음)
+static void FtpStopButton(mim::vm::FtpVM & vm)
+{
+    ImVec2 size(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight());
+    if (vm.TransferStopping())
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button,        mim::BG_PANEL2);
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, mim::BG_PANEL2);
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive,  mim::BG_PANEL2);
+        ImGui::PushStyleColor(ImGuiCol_Text,          mim::TEXT_DIM);
+        ImGui::Button("Stopping...##ftpstop", size);
+        ImGui::PopStyleColor(4);
+        return;
+    }
+    ImGui::PushStyleColor(ImGuiCol_Button,        mim::DANGER);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, mim::DANGER_HOV);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,  mim::DANGER_HOV);
+    if (ImGui::Button("Stop##ftpstop", size))
+        vm.Stop();
+    ImGui::PopStyleColor(3);
+}
+
+// 파일 선택 콤보 + 실행 버튼 한 줄 (업/다운로드 중이면 실행 버튼 대신 Stop)
 static bool FileComboWithButton(mim::vm::FtpVM & vm, const char * button)
 {
     RowLabel("File");
@@ -42,6 +66,11 @@ static bool FileComboWithButton(mim::vm::FtpVM & vm, const char * button)
         ImGui::EndCombo();
     }
     ImGui::SameLine();
+    if (vm.TransferBusy())
+    {
+        FtpStopButton(vm);
+        return false;
+    }
     return ImGui::Button(button, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetFrameHeight()));
 }
 
@@ -117,6 +146,8 @@ void ImGui_CommandWindow_Body(float fontscale)
     ImGui::SameLine();
     ImGui::RadioButton("V2##FTPVersionSelect2", vm.Version(), 2);
     ImGui::SameLine();
+    ImGui::RadioButton("Ryu##FTPVersionSelect3", vm.Version(), 3);
+    ImGui::SameLine();
     ImGui::TextUnformatted("  Chunk");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
@@ -129,8 +160,24 @@ void ImGui_CommandWindow_Body(float fontscale)
     ImGui::RadioButton("Download##FTPTaskSelect02", vm.Task(), FTP_DOWNLOAD_REQUEST);
     ImGui::SameLine();
     ImGui::RadioButton("Listup##FTPTaskSelect07", vm.Task(), FTP_LIST_REQUEST);
+    // FTP 목적지 노드 (누리호 5차 GS "Dest Node", 모든 작업 공통). Chunk 처럼 같은 줄 끝에 둔다
+    // (줄을 따로 쓰면 열이 넘쳐 스크롤바가 생기고, 아래 버튼 위치도 바뀐다)
+    ImGui::SameLine();
+    ImGui::TextUnformatted("  Dest Node");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+    ImGui::InputScalar("##ftp_dest_node", ImGuiDataType_U8, vm.DestNode());
+    if (*vm.Version() == 1)
+    {
+        // V1 force 반복 횟수 (V1 일 때만)
+        RowLabel("Iteration");
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+        ImGui::InputInt("##ftpforceiteration", vm.ForceIteration());
+        vm.ClampForceIteration();
+    }
     ImGui::Spacing();
 
+    vm.DefaultEmptyPaths();
     switch(*vm.Task())
     {
     case FTP_UPLOAD_REQUEST :{
@@ -228,12 +275,7 @@ void ImGui_CommandWindow_Body(float fontscale)
     mim::vm::ControlVM & amp_vm = mim::vm::ControlViewModel();
     mim::vm::AmpButton amp = amp_vm.Amp();
     if (ToggleWideButton(amp.label, amp.on))
-    {
-        if (amp.on || amp.timer)
-            amp_vm.TurnAmpOff();
-        else
-            amp_vm.TurnAmpOn();
-    }
+        amp_vm.PressAmp(amp);
 }
 
 void ImGui_CommandWindow(float fontscale)
