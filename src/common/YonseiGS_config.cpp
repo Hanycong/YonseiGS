@@ -27,12 +27,14 @@ void todaystr(char * str, int length)
 	memcpy(str, buf, length);
 }
 
+// AMP 14 분 타이머. LinkFlags.AmpTimerStop 이 서면 100 ms 안에 끝난다 (AmpOn 이 타이머를 다시 시작할 때).
+// 예전에는 쉬지 않고 돌아서(CPU 100%) 멈출 방법이 없었다 -> AmpOn 이 GUI 스레드에서 최대 14 분 join 했다.
 void * AmpTimer(void *)
 {
 	LinkFlags.AMPON = true;
     time_t targetTime = time(NULL) + 14 * 60; // Add 14 minutes in seconds
 	time_t currentTime;
-	while(!State.InitializeRequired)
+	while(!State.InitializeRequired && !LinkFlags.AmpTimerStop)
 	{
 		currentTime = time(NULL);
 		if(currentTime > targetTime)
@@ -43,8 +45,9 @@ void * AmpTimer(void *)
 			
 		LinkFlags.AmpTime = targetTime - currentTime;
 		LinkFlags.AmpTM = gmtime(&LinkFlags.AmpTime);
-
+		usleep(100000); // 100 ms
 	}
+	LinkFlags.AmpTime = 0;
 	LinkFlags.AMPON = false;
     return NULL;
 }

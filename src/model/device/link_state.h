@@ -16,6 +16,7 @@ struct LinkState {
     bool Doppler = false;
     bool Signaltest = false;
     bool AMPON = false;
+    bool AmpTimerStop = false;          // AmpTimer 를 멈춘다 (svc_radio 의 AmpOn 만 쓴다)
     time_t AmpTime;
     struct tm * AmpTM;
     bool Scheduled = false;

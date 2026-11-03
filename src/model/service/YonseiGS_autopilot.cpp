@@ -270,24 +270,8 @@ int AutoPilot_task()
             }
             }
                 
-            pid_t pid = mim::svc::AmpReady("ampcontrol") ? fork() : -2; // -2: 앰프 미연결 (로그는 AmpReady 가 남김)
-            if (pid == -2) {
-            }
-            else if (pid == -1) {
-                console.AddLog("[ERROR]##Failed to fork process");
-            }
-            else if (pid == 0) {
-                // Child process
-                execl("../amp/ampcontrol", "ampcontrol", NULL);
-                // exec 실패 시 자식이 GS 복제본으로 계속 돌면 X 연결이 깨져 본체까지 죽는다
-                perror("execl ../amp/ampcontrol");
-                _exit(127);
-            }
-            else
-            {
-                console.AddLog("[OK]##Forked Safe Amplifier Process.(ON, Timer)");
-                mim::svc::StartThread(mim::svc::SLOT_AMP_TIMER, AmpTimer, NULL);
-            }
+            // 누리호 5차 GS 와 같이 AmpOn() 단일 진입점 (GUI AMP 버튼과 같은 함수, 타이머 하나만 돈다)
+            mim::svc::AmpOn();
         }
         
         /*-----------------Calibration Code-------------------*/
@@ -580,7 +564,9 @@ if (wdt_notsent &&
         }
 
         //Wait Until LOS and return multhreads.
-        mim::svc::JoinThread(mim::svc::SLOT_AMP_TIMER);
+        // AMP 타이머가 끝날 때까지 (join 은 svc_radio 만 한다: GUI AmpOn 과 겹쳐도 타이머가 둘이 되지 않게)
+        while (mim::svc::AmpTimerRunning() && AutoPilotCfg.Autopilot)
+            usleep(100000);
         mim::svc::JoinThread(mim::svc::SLOT_FTP);
         mim::svc::WaitTx();
 

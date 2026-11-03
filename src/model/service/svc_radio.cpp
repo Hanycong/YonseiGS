@@ -12,6 +12,8 @@
 #include "tc_log.h"
 
 #include <atomic>
+#include <pthread.h>
+#include <time.h>
 #include <stdint.h>
 
 extern StateCheckUnit State;
@@ -136,11 +138,62 @@ bool AmpReady(const char * program)
     return true;
 }
 
+// ---- AMP 타이머 (SLOT_AMP_TIMER) ----
+// AmpOn 은 GUI(AMP 버튼)와 AutoPilot 이 같이 부른다. amp_mutex 로 한 번에 하나만 타이머를 바꾸고,
+// 이 슬롯은 여기서만 join 한다 (AutoPilot 은 AmpTimerRunning() 으로 기다린다).
+static pthread_mutex_t amp_mutex = PTHREAD_MUTEX_INITIALIZER;
+static std::atomic<bool> amp_timer_running(false);
+
+static void * AmpTimerTask(void *)
+{
+    AmpTimer(NULL);
+    amp_timer_running = false;
+    return NULL;
+}
+
+// amp_mutex 를 잡은 채로 부른다. 돌고 있는 타이머를 세우고(100 ms 안) join 한다
+static void StopAmpTimerLocked()
+{
+    LinkFlags.AmpTimerStop = true;
+    JoinThread(SLOT_AMP_TIMER);
+    LinkFlags.AmpTimerStop = false;
+}
+
+void RestartAmpTimer()
+{
+    pthread_mutex_lock(&amp_mutex);
+    StopAmpTimerLocked();
+    LinkFlags.AmpTime = 14 * 60;
+    LinkFlags.AmpTM = gmtime(&LinkFlags.AmpTime);
+    LinkFlags.AMPON = true;
+    amp_timer_running = true;
+    if (StartThread(SLOT_AMP_TIMER, AmpTimerTask, NULL) != 0)
+    {
+        amp_timer_running = false;
+        LinkFlags.AmpTime = 0;
+        console.AddLog("[ERROR]##Failed to create AMP timer thread");
+    }
+    pthread_mutex_unlock(&amp_mutex);
+}
+
+void StopAmpTimer()
+{
+    pthread_mutex_lock(&amp_mutex);
+    StopAmpTimerLocked();
+    pthread_mutex_unlock(&amp_mutex);
+}
+
+bool AmpTimerRunning()
+{
+    return amp_timer_running;
+}
+
+// 누리호 5차 GS 의 AmpOn(): GUI 와 AutoPilot 의 단일 진입점. 타이머가 돌고 있어도 바로 끝난다
+// (예전에는 JoinThread 로 남은 시간(최대 14 분) 동안 GUI 가 멈췄다)
 void AmpOn()
 {
     if (!AmpReady("ampcontrol"))
         return;
-    JoinThread(SLOT_AMP_TIMER);
     pid_t pid_on = fork();
 
     if (pid_on == -1) {
@@ -157,7 +210,7 @@ void AmpOn()
     else
     {
         console.AddLog("[OK]##Forked Safe Amplifier Process.(ON, Timer)");
-        StartThread(SLOT_AMP_TIMER, AmpTimer, NULL);
+        RestartAmpTimer();
     }
 }
 
