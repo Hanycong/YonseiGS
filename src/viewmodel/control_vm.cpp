@@ -14,6 +14,8 @@
 #include "obc_ping.h"
 #include "command_queue.h"
 #include "track_target.h"
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 
 extern StateCheckUnit State;
 extern Console console;
@@ -45,6 +47,30 @@ void ControlVM::PingObc()
         packetsign* TestPacket = mim::model::BuildObcPing(MIM_TLEinfo, NowPingInfo);
         mim::svc::SendUplink((void*)TestPacket);
     }
+}
+
+// UTRX 지상 와치독 클리어 CC (누리호 5차 GS 버튼 값. mission_defs.h UELYSYS_UTRX_GNDWDT_CLEAR_CC 와 같음)
+static const uint8_t UTRX_GNDWDT_CLEAR_CC = 6;
+
+// "UTRX WDT CLEAR" (누리호 5차 GS): 헤더만 있는 8바이트 명령. TC 기록은 업링크 스레드가 한다
+void ControlVM::ClearUtrxWdt()
+{
+    const uint16_t msgid = UTRX_CMD_ID;     // 0x1850
+    WriteSystemName(msgid);
+    uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
+    mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, UTRX_GNDWDT_CLEAR_CC);
+    mim::tc::SendTelecommand(cmd, sizeof(cmd));
+}
+
+// "EPS WDT CLEAR ALL" (누리호 5차 GS): EPS P80 GND WDT CLEAR ALL
+void ControlVM::ClearEpsWdtAll()
+{
+    const uint16_t msgid = EPS_CMD_ID;      // 0x1875
+    WriteSystemName(msgid);
+    EPS_P80_Gnd_Watchdog_Clear_All_Cmd_t cmd;
+    memset(&cmd, 0, sizeof(cmd));
+    mim::tc::EncodeCfeCommand(&cmd, sizeof(cmd), msgid, EPS_P80_GND_WDT_CLEAR_ALL_CC);
+    mim::tc::SendTelecommand(&cmd, sizeof(cmd));
 }
 
 // "Send Telecommand" (팝업을 열 때 함께)

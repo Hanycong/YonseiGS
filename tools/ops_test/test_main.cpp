@@ -5,6 +5,7 @@
 //  - FTP: 엔진(V1/V2/Ryu)별 워커가 TX 모드를 기다리는 동안 Stop 하면 바로 끝나는지, 중복 실행 차단,
 //         사용자 Stop 뒤에는 실패 쿨다운이 없는지, 실패 뒤에는 30 초 쿨다운, 워커 인자가 시작 순간 경로를 갖는지
 //         (CSP/무선 장치 없이: 실제 전송은 하지 않는다)
+//  - Control "UTRX WDT CLEAR" / "EPS WDT CLEAR ALL" 이 누리호 5차 GS 버튼과 같은 바이트를 보내는지
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
 // 빌드/실행: tools/ops_test.sh <OUT_DIR>   (실패가 있으면 종료 코드 1)
@@ -26,6 +27,7 @@
 #include "svc_ftp.h"
 #include "ftp_transfer.h"
 #include <gs/util/error.h>
+#include "control_vm.h"
 #include <csp/csp.h>
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
@@ -253,6 +255,45 @@ static void TestFtp()
     LinkFlags.uplink_mode = false;
 }
 
+// 누리호 5차 GS 버튼 코드와 같은 계산 (헤더 8바이트, 체크섬 = 0xFF ^ 모든 바이트, [7] 은 0 으로 두고 계산)
+static std::vector<uint8_t> Nuri5Cmd(uint16_t mid, uint8_t cc, size_t size)
+{
+    std::vector<uint8_t> c(size, 0);
+    c[0] = mid >> 8; c[1] = mid & 0xFF; c[2] = 0xC0; c[3] = 0x00;
+    c[4] = 0x00; c[5] = (uint8_t)(size - 7); c[6] = cc; c[7] = 0;
+    uint8_t cs = 0xFF;
+    for (uint8_t b : c) cs ^= b;
+    c[7] = cs;
+    return c;
+}
+
+static void TestWdtButtons()
+{
+    printf("# Control WDT buttons\n");
+    g_sent.clear();
+    g_head.clear();
+    mim::vm::ControlViewModel().ClearUtrxWdt();
+    mim::vm::ControlViewModel().ClearEpsWdtAll();
+    CHECK(g_sent.size() == 2);
+    if (g_sent.size() != 2)
+        return;
+    std::vector<uint8_t> utrx = {0x18, 0x50, 0xC0, 0x00, 0x00, 0x01, 0x06, 0x70};
+    CHECK(g_sent[0] == utrx);
+    CHECK(g_sent[0] == Nuri5Cmd(0x1850, 6, 8));
+    CHECK(g_sent[1] == Nuri5Cmd(0x1875, EPS_P80_GND_WDT_CLEAR_ALL_CC, sizeof(EPS_P80_Gnd_Watchdog_Clear_All_Cmd_t)));
+    CHECK(g_sent[1].size() == 8 && g_sent[1][6] == 31);
+    char head[48];
+    snprintf(head, sizeof(head), "id=%u type=%u len=%u", HVD_TEST, MIM_PT_TMTC_TEST, 8);
+    CHECK(g_head[0] == head);
+    CHECK(g_head[1] == head);
+    for (size_t i = 0; i < g_sent.size(); i++)
+    {
+        printf("     ");
+        for (uint8_t b : g_sent[i]) printf("%02X ", b);
+        printf("\n");
+    }
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -260,6 +301,7 @@ int main(int argc, char ** argv)
 
     TestAmpTimer();
     TestFtp();
+    TestWdtButtons();
 
     printf("%s: %d failure(s)\n", g_fail ? "FAILED" : "PASSED", g_fail);
     return g_fail ? 1 : 0;

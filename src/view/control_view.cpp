@@ -59,6 +59,12 @@ void ImGui_ControlWindow_Body(float fontscale)
     if (GridButton("Clear CMD Queue", 1))
         vm.ClearCommandQueue();
 
+    SectionHeader("WATCHDOG");
+    if (GridButton("UTRX WDT CLEAR", 0))
+        vm.ClearUtrxWdt();
+    if (GridButton("EPS WDT CLEAR ALL", 1))
+        vm.ClearEpsWdtAll();
+
     SectionHeader("CALIBRATION");
     if (GridButton("Baud Rate", 0))
         vm.StartBaudCalibration();

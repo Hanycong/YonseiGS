@@ -24,6 +24,10 @@ public:
     void PingAx100();
     void PingObc();                     // 추적 대상 위성의 TLE 를 실은 핑 패킷 업링크
     void PrintRoutingTable();           // "Send Telecommand" 를 열 때 CSP 라우팅 표를 표준출력에
+
+    // ---- 와치독 (누리호 5차 GS Control 버튼) ----
+    void ClearUtrxWdt();                // "UTRX WDT CLEAR": UTRX(MID 0x1850) CC 6, 페이로드 없음
+    void ClearEpsWdtAll();              // "EPS WDT CLEAR ALL": EPS P80 GND WDT CLEAR ALL (MID 0x1875)
     void StartBaudCalibration();
     void StartFreqCalibration();
 
