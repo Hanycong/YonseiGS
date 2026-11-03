@@ -47,8 +47,7 @@ public:
 
 private:
     uint8_t ping_node_ = 0;
-    int selected_sat_ = 0;              // 0: BEE1000, 1: BEE1012, 2: Uelysys
-    int switch_arg_ = 0;                // 전환 스레드에 넘기는 값 (스레드가 주소를 읽으므로 멤버로 유지)
+    int selected_sat_ = 0;              // mim::sat::SatMode (라디오 버튼 편집용 사본)
 };
 
 // "Custom RParam Get" 팝업: 임의 노드/테이블/주소의 원격 파라미터 읽기/쓰기

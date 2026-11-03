@@ -29,7 +29,7 @@
 #define B12_UL_AIOBC                11
 #define UEL_UL_PAYYONSEI_OBC        12
 #define UEL_UL_SDR_CONTROLLER       13
-#define BEE1000                     14
+#define MIM_PT_NODE_TC              14      // GS_nuri5 의 BEE1000: Data 앞 2바이트가 목적 CSP 노드 (포트 13)
 
 #define UELYSYS_PAYYONSEI_OBC_NODE  13
 #define UELYSYS_SDR_CONTROLLER_NODE 14

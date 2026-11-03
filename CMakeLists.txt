@@ -86,6 +86,7 @@ INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/device)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/orbit)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/telemetry)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/missions/cosmic)
+INCLUDE_DIRECTORIES (${MIMAN_SRC}/model/missions)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/beacon)
 INCLUDE_DIRECTORIES (${MIMAN_SRC}/view/beacon/report)
@@ -98,6 +99,7 @@ ADD_EXECUTABLE(BEE-1000 ${MIMAN_SRC}/common/YonseiGS_config.cpp ${MIMAN_SRC}/mod
 ${MIMAN_SRC}/app/YonseiGS_theme.cpp ${MIMAN_SRC}/app/main_menu.cpp ${MIMAN_SRC}/app/workspace.cpp ${MIMAN_SRC}/app/YonseiGS_satcontext.cpp
 ${MIMAN_SRC}/model/service/svc_thread.cpp ${MIMAN_SRC}/model/service/svc_tx.cpp ${MIMAN_SRC}/model/service/svc_tracking.cpp ${MIMAN_SRC}/model/service/svc_radio.cpp ${MIMAN_SRC}/model/service/svc_ftp.cpp ${MIMAN_SRC}/model/service/svc_station.cpp ${MIMAN_SRC}/model/service/pass_script.cpp
 ${MIMAN_SRC}/model/telecommand/command_catalog.cpp ${MIMAN_SRC}/model/telecommand/raw_commands.cpp
+${MIMAN_SRC}/model/missions/sat_mode.cpp ${MIMAN_SRC}/model/service/tc_log.cpp
 ${MIMAN_SRC}/model/missions/bee1000/bee1000_commands.cpp ${MIMAN_SRC}/model/missions/cosmic/cosmic_commands.cpp
 ${MIMAN_SRC}/view/frequency_view.cpp ${MIMAN_SRC}/view/rotator_view.cpp ${MIMAN_SRC}/view/track_view.cpp ${MIMAN_SRC}/view/beacon_view.cpp ${MIMAN_SRC}/view/control_view.cpp ${MIMAN_SRC}/view/ftp_view.cpp ${MIMAN_SRC}/view/ui_kit.cpp ${MIMAN_SRC}/view/file_dialog.cpp
 ${MIMAN_SRC}/view/popups/setup_popup.cpp ${MIMAN_SRC}/view/popups/param_table0_popup.cpp ${MIMAN_SRC}/view/popups/param_table1_popup.cpp ${MIMAN_SRC}/view/popups/param_table5_popup.cpp ${MIMAN_SRC}/view/popups/load_popup.cpp ${MIMAN_SRC}/view/popups/tle_popup.cpp ${MIMAN_SRC}/view/popups/fds_popup.cpp ${MIMAN_SRC}/view/popups/satinfo_popup.cpp ${MIMAN_SRC}/view/popups/s_band_popup.cpp

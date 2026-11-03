@@ -25,6 +25,8 @@
 #include "YonseiGS_ftp.h"
 #include "svc_station.h"
 #include "svc_tracking.h"
+#include "tc_log.h"
+#include "sat_mode.h"
 
 #undef CSP_USE_RDP
 
@@ -95,7 +97,7 @@ void Initialize_ConfigSettings()
     setup->Switch_baud = 115200; 
     setup->gs100_node = 20;
     setup->kiss_node = 8;
-    setup->obc_node = 3;
+    setup->obc_node = 10;
     setup->ax100_node = 5;
     setup->default_freq = 436500000; // UHF freq?
     setup->default_timeout = 1000;
@@ -232,12 +234,8 @@ int main(int, char**)
 
     csp_debug_hook_set((csp_debug_hook_func_t)csp_debug_callback);
 
-    char logfilename[128] ={0,};
-    time_t tmtime = time(0);
-    struct tm * local = localtime(&tmtime);
-    sprintf(logfilename, "../data/BEE_TC_Log/log--%04d-%02d-%02d-%02d-%02d-%02d--", local->tm_year+1900, local->tm_mon+1, local->tm_mday,local->tm_hour, local->tm_min, local->tm_sec);
-    log_ptr = fopen(logfilename, "wb");
-    if(log_ptr == NULL) {
+    // TC 로그: 시작 위성(BEE1000) 폴더 ../log/TC_Log. 위성을 바꾸면 그 위성 폴더로 바뀐다
+    if (!mim::svc::SwitchTcLogFile(mim::sat::SAT_BEE1000)) {
         printf("Invalid log file pointer.\n");
     }
     while(State.AllThread)
@@ -515,7 +513,7 @@ if (should_close) {
     if(sgs != NULL)
         sgs->finSband();
     sleep(0.5);
-fclose(log_ptr);
+mim::svc::CloseTcLogFile();
 system("../amp/ampoff");
 printf("[MAIN-DIAG] program exiting normally\n");
 

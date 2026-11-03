@@ -14,6 +14,7 @@ extern StateCheckUnit State;
 extern Console console;
 
 extern FILE *log_ptr;
+#include "tc_log.h"
 
 void todaystr(char * str, int length)
 {
@@ -138,7 +139,17 @@ uint32_t chksum_crc32(uint8_t *block, unsigned int length) {
 
 }
 
+static void WriteSystemNameLocked(uint16_t msgid);
+
+// TC 로그에 명령 대상 앱 이름을 적는다 (위성 전환 중 파일 교체와 겹치지 않게 잠근다)
 void WriteSystemName(uint16_t msgid) {
+	mim::svc::LockTcLog();
+	if (log_ptr != NULL)
+		WriteSystemNameLocked(msgid);
+	mim::svc::UnlockTcLog();
+}
+
+static void WriteSystemNameLocked(uint16_t msgid) {
 	if (msgid <= 6260 && 6257 <= msgid) {
 		fprintf(log_ptr, "IFC (%x)\n",msgid);
 	}

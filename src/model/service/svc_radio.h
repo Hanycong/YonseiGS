@@ -27,9 +27,10 @@ void AmpOff();
 // 못 쓰면 이유를 콘솔에 남기고 false. 장치는 열지 않는다(열면 Arduino 가 리셋될 수 있음)
 bool AmpReady(const char * program);
 
-// 위성 전환 (GS100 HMAC 키 변경, SLOT_SWITCH_SAT)
+// 위성 전환 (mim::sat 위성 모드 + GS100 HMAC 키 + TC 로그 폴더, SLOT_SWITCH_SAT)
+// 위성 모드는 바로 바뀌고, GS100 설정은 스레드에서 한다. 앞 전환이 진행 중이면 false
 const char * SwitchSatelliteName(int mode);
-void SwitchSatellite(int * mode_arg);
+bool SwitchSatellite(int mode);
 
 } // namespace svc
 } // namespace mim

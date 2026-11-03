@@ -42,7 +42,7 @@ RC=$?
 set -e
 # Console 객체가 data/BEE_Console_Log 에 남기는 로그는 저장소 밖으로 옮긴다
 mkdir -p "$OUT/applogs"
-find "$REPO/data" -type f -newer "$MARKER" -exec mv {} "$OUT/applogs/" \;
+find "$REPO/data" "$REPO/log" -type f -newer "$MARKER" -exec mv {} "$OUT/applogs/" \;
 echo "[golden] $(grep -c ' id=' "$OUT/golden.txt") packets -> $OUT/golden.txt"
 echo "[golden] $(grep -c '^form ' "$OUT/forms.txt") forms, $(grep -c '^picker ' "$OUT/forms.txt") picker lists -> $OUT/forms.txt"
 echo "[golden] catalog check: $(grep -c '^MISMATCH' "$OUT/catalog.txt") mismatches -> $OUT/catalog.txt"

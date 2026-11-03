@@ -8,6 +8,11 @@
 #include "YonseiGS_csp.h"
 #include "YonseiGS_coms.h"
 #include "YonseiGS_radial.h"
+#include "sat_mode.h"
+#include "tc_log.h"
+
+#include <atomic>
+#include <stdint.h>
 
 extern StateCheckUnit State;
 extern Console console;
@@ -16,37 +21,46 @@ extern Setup * setup;
 namespace mim {
 namespace svc {
 
-/********************************************5차 추가***************************************************/
-// (YonseiGS_imgui.cpp 에서 이동)
-
-static const char* sat_names[3] = { "BEE1000", "BEE1012", "Uelysys" };
-static const char* hmac_keys[3] = { "BEE1000", "BEE1012", "UELYSYS" };
-static bool is_switching = false; // 상태 체크를 위함
+// ---- 위성 전환 (GS100 HMAC 키 + TC 로그 폴더). 누리호 5차 GS 의 SwitchSatelliteTask ----
+// BEE1000 은 TX HMAC 을 끄고, 나머지는 위성 키(16바이트, 남는 자리는 0)를 TX 테이블(5)에 쓴다.
+// RX 테이블(1)은 건드리지 않는다.
+static std::atomic<bool> switching(false);
 
 static void* SwitchSatelliteTask(void* arg)
 {
-    int mode = *(int*)arg;
-    uint8_t target_node = setup->gs100_node; // 지상국의 gs100 노드
+    const int mode = (int)(intptr_t)arg;
+    const mim::sat::SatProfile & profile = mim::sat::Profile(mode);
+    const uint8_t node = setup->gs100_node;
 
-    char target_key[32] = { 0 };
+    console.AddLog("Changing GS HMAC Key for %s...", profile.name);
 
-    console.AddLog("Changing GS HMAC Key for %s...", sat_names[mode]); // 테스트 텍스트, 후에 수정가능
+    gs_error_t err;
+    if (!profile.hmac)
+    {
+        err = gs_rparam_set_int8(node, 5, 0x0010, 0xB00B, 100, 0);
+    }
+    else
+    {
+        uint8_t key[0x10] = { 0 };
+        size_t len = strlen(profile.key);
+        memcpy(key, profile.key, len > sizeof(key) ? sizeof(key) : len);
+        err = gs_rparam_set_int8(node, 5, 0x0010, 0xB00B, 100, 1);
+        if (err == GS_OK)
+            err = gs_rparam_set(node, 5, 0x0020, GS_PARAM_DATA, 0xB00B, 100, key, sizeof(key));
+    }
 
-    // RX 업데이트
-    gs_rparam_set_int8(target_node, 1, 0x0010, 0xB00B, 100, 1); //100은 수정 가능, 1은 테이블 번호 (rx table)
-    gs_rparam_set_string(target_node, 1, 0x0020, 0xB00B, 100, target_key, strlen(target_key) + 1);
+    if (!SwitchTcLogFile(mode))
+        console.AddLog("[ERROR]##Failed to switch TC log file for %s", profile.name);
 
-    // TX 업데이트
-    gs_rparam_set_int8(target_node, 5, 0x0010, 0xB00B, 100, 1);
-    gs_rparam_set_string(target_node, 5, 0x0020, 0xB00B, 100, target_key, strlen(target_key) + 1);
+    if (err == GS_OK)
+        console.AddLog("[OK]## Satellite Switched to: %s (TX HMAC %s)", profile.name, profile.hmac ? "enabled" : "disabled");
+    else
+        console.AddLog("[ERROR]##GS100 HMAC setting failed for %s (%s). Command list switched, but check the GS100 HMAC key.",
+                       profile.name, gs_error_string(err));
 
-    console.AddLog("[OK]## Satellite Switched to: %s", sat_names[mode]);
-
-    is_switching = false; // 통신이 끝나면 플래그 해제 (다시 버튼 클릭 가능)
+    switching = false;
     return NULL;
 }
-
-/***********************************************************************************************************/
 
 int LoadParamTable(int table)
 {
@@ -175,13 +189,28 @@ void AmpOff()
 
 const char * SwitchSatelliteName(int mode)
 {
-    return sat_names[mode];
+    return mim::sat::Profile(mode).name;
 }
 
-void SwitchSatellite(int * mode_arg)
+bool SwitchSatellite(int mode)
 {
-    JoinThread(SLOT_SWITCH_SAT);
-    StartThread(SLOT_SWITCH_SAT, SwitchSatelliteTask, (void*)mode_arg);
+    if (mode < 0 || mode >= mim::sat::SAT_MODE_COUNT)
+        return false;
+    // 앞 전환이 GS100 설정 중이면 기다리지 않고 거절한다 (GUI 스레드에서 join 하지 않기 위해)
+    if (switching.exchange(true))
+    {
+        console.AddLog("[ERROR]##Satellite switch is still in progress. Try again.");
+        return false;
+    }
+    mim::sat::SetCurrent(mode);
+    JoinThread(SLOT_SWITCH_SAT);        // 앞 작업은 끝났다 (switching 이 false 였음)
+    if (StartThread(SLOT_SWITCH_SAT, SwitchSatelliteTask, (void*)(intptr_t)mode) != 0)
+    {
+        switching = false;
+        console.AddLog("[ERROR]##Failed to start satellite switch task.");
+        return false;
+    }
+    return true;
 }
 
 } // namespace svc

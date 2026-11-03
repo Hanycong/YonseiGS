@@ -1,4 +1,5 @@
 #include "control_vm.h"
+#include "sat_mode.h"
 
 #include <inttypes.h>
 #include <stdlib.h>
@@ -101,14 +102,18 @@ void ControlVM::PingNode()
     mim::svc::StartPingEveryNode((void*)arg);
 }
 
-int ControlVM::SatelliteCount() const              { return 3; }
+int ControlVM::SatelliteCount() const              { return mim::sat::SAT_MODE_COUNT; }
 const char * ControlVM::SatelliteName(int i) const { return mim::svc::SwitchSatelliteName(i); }
-int * ControlVM::SelectedSatellite()               { return &selected_sat_; }
+
+int * ControlVM::SelectedSatellite()
+{
+    selected_sat_ = mim::sat::Current();      // 다른 곳(AutoPilot 등)에서 바뀌어도 라디오 버튼이 따라간다
+    return &selected_sat_;
+}
 
 void ControlVM::SwitchToSelectedSatellite()
 {
-    switch_arg_ = selected_sat_;
-    mim::svc::SwitchSatellite(&switch_arg_);
+    mim::svc::SwitchSatellite(selected_sat_);
 }
 
 uint8_t *  CustomRparamVM::Node()       { return &node; }

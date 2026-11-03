@@ -11,6 +11,7 @@
 
 extern StateCheckUnit State;
 extern FILE *log_ptr;
+#include "tc_log.h"
 
 int Console::Stricmp(const char* str1, const char* str2)
 {
@@ -115,10 +116,12 @@ void Console::AddLog(const char* fmt, ...) IM_FMTARGS(2)
 
     this->_history_fs.flush();
     this->_debug_fs.flush();
-   if (log_ptr) {
+    mim::svc::LockTcLog();
+    if (log_ptr) {
         fprintf(log_ptr, "%s\n", str);
         fflush(log_ptr);
     }
+    mim::svc::UnlockTcLog();
     
 }
 

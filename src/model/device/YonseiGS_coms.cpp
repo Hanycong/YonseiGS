@@ -24,6 +24,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 extern FILE *log_ptr;
+#include "tc_log.h"
+#include "sat_mode.h"
 extern bool raw_data;
 std::mutex g_report_view_mtx;
 ReportView_t g_report_view;
@@ -934,6 +936,19 @@ void * task_uplink_onorbit(void * sign_)
         filetype = ((dlreqdata *)(sign->Data))->target;
         filestatus = ((dlreqdata *)(sign->Data))->filestatus;
     }
+
+    // 목적 노드를 지정한 명령 (누리호 5차 GS 의 BEE1000 타입): Data = [노드 2바이트][명령 Length 바이트]
+    uint16_t tc_node = 0;
+    if(Ptype == MIM_PT_NODE_TC)
+    {
+        memcpy(&tc_node, sign->Data, sizeof(tc_node));
+        memmove(sign->Data, sign->Data + 2, (size_t)Plen);
+    }
+
+    // 위성으로 나가는 명령은 하나씩 위성 폴더에 기록한다 (../data/<위성>/tc_log/packet)
+    if(Ptype == MIM_PT_TMTC_TEST || Ptype == MIM_PT_NODE_TC || Ptype == B12_UL_AIOBC ||
+       Ptype == UEL_UL_PAYYONSEI_OBC || Ptype == UEL_UL_SDR_CONTROLLER)
+        mim::svc::RecordTcPacket(sign, mim::sat::CurrentKey());
     
     
     if(State.Debugmode)
@@ -1188,7 +1203,7 @@ void * task_uplink_onorbit(void * sign_)
             {
                 if(LinkFlags.Scheduled)
                 {
-                    if ((txconn = csp_connect(CSP_PRIO_HIGH, 3, 13, MIM_DEFAULT_TIMEOUT, 0)) == NULL) {
+                    if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, 13, MIM_DEFAULT_TIMEOUT, 0)) == NULL) {
                     /*!!!!!!!!!!!Revise setup->obc_node!!!!!!!!!!*/ //-> Change to 28.
                     /*!!!!!!!!!!!!Need to revise Port!!!!!!!!!!!*/
                         continue;
@@ -1198,7 +1213,7 @@ void * task_uplink_onorbit(void * sign_)
                 }
                 else
                 {
-                    if ((txconn = csp_connect(CSP_PRIO_HIGH, 3, 13, MIM_DEFAULT_TIMEOUT, 0)) == NULL) {
+                    if ((txconn = csp_connect(CSP_PRIO_HIGH, setup->obc_node, 13, MIM_DEFAULT_TIMEOUT, 0)) == NULL) {
                     /*!!!!!!!!!!!Revise setup->obc_node!!!!!!!!!!*/ //-> Change to 28.
                     /*!!!!!!!!!!!!Need to revise Port!!!!!!!!!!!*/
                         continue;
@@ -1212,6 +1227,8 @@ void * task_uplink_onorbit(void * sign_)
             {
                 console.AddLog("[OK]CMD Packet Header: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
                     packet->data[0],packet->data[1],packet->data[2],packet->data[3],packet->data[4],packet->data[5],packet->data[6],packet->data[7]);
+                mim::svc::LockTcLog();
+                if (log_ptr != NULL) {
                 fprintf(log_ptr, "|| Uplink || Length: %d\n",packet->length);
                     for(int i=0; i<packet->length; i++) {
                         if(!(i%10) && i !=0) {
@@ -1219,6 +1236,8 @@ void * task_uplink_onorbit(void * sign_)
                         }
                         fprintf(log_ptr, "%02hhx\t",packet->data[i]);
                     } fprintf(log_ptr,"\n\n");
+                }
+                mim::svc::UnlockTcLog();
                 if(csp_send(txconn, packet, setup->default_timeout)) // Success. then,
                 {   
                     packet = NULL; // discard packet and,
@@ -1257,6 +1276,53 @@ void * task_uplink_onorbit(void * sign_)
             // }
             // else
             //     console.AddLog("[ERROR]##No Command Reply.");
+            break;
+        }
+        // 누리호 5차 GS: 노드를 지정한 명령, BEE1012 AIOBC, UELYSYS 원격 TC (PAYYONSEI OBC / SDR 컨트롤러)
+        case MIM_PT_NODE_TC :
+        case B12_UL_AIOBC :
+        case UEL_UL_PAYYONSEI_OBC :
+        case UEL_UL_SDR_CONTROLLER : {
+            uint8_t target_node;
+            uint8_t target_port;
+            switch (Ptype)
+            {
+            case MIM_PT_NODE_TC:        target_node = (uint8_t)tc_node;              target_port = 13;                     break;
+            case B12_UL_AIOBC:          target_node = 14;                            target_port = 10;                     break;
+            case UEL_UL_PAYYONSEI_OBC:  target_node = UELYSYS_PAYYONSEI_OBC_NODE;    target_port = UELYSYS_REMOTE_TC_PORT; break;
+            default:                    target_node = UELYSYS_SDR_CONTROLLER_NODE;   target_port = UELYSYS_REMOTE_TC_PORT; break;
+            }
+            txconn = NULL;
+            while (LinkFlags.uplink_mode)
+            {
+                txconn = csp_connect(CSP_PRIO_HIGH, target_node, target_port, MIM_DEFAULT_TIMEOUT, 0);
+                if (txconn != NULL)
+                    break;
+            }
+            while (LinkFlags.uplink_mode && txconn != NULL)
+            {
+                console.AddLog("[OK]CMD Packet node=%u port=%u type=%u Header: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x",
+                    target_node, target_port, Ptype,
+                    packet->data[0],packet->data[1],packet->data[2],packet->data[3],packet->data[4],packet->data[5],packet->data[6],packet->data[7]);
+                mim::svc::LockTcLog();
+                if (log_ptr != NULL) {
+                    fprintf(log_ptr, "|| Uplink || Node: %u Port: %u Length: %d\n", target_node, target_port, packet->length);
+                    for(int i=0; i<packet->length; i++) {
+                        if(!(i%10) && i !=0)
+                            fprintf(log_ptr, "\n");
+                        fprintf(log_ptr, "%02hhx\t",packet->data[i]);
+                    }
+                    fprintf(log_ptr,"\n\n");
+                }
+                mim::svc::UnlockTcLog();
+                if(csp_send(txconn, packet, setup->default_timeout))
+                {
+                    packet = NULL;
+                    break;
+                }
+            }
+            if(txconn == NULL)
+                console.AddLog("[ERROR]##Connection failed: node=%u port=%u. Skip this command.", target_node, target_port);
             break;
         }
         case MIM_PT_STCMD : {

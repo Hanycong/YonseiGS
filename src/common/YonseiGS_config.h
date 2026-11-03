@@ -17,6 +17,7 @@
 #include <malloc.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <unistd.h>
 #include <cmath>
 #include <ctime>
@@ -191,7 +192,12 @@ Console()
     time_t t = time(NULL);
     struct tm* lt = localtime(&t);
 
-    sprintf(hist_name, "../data/BEE_Console_Log/console--%04d-%02d-%02d-%02d-%02d-%02d.log",
+    // 누리호 5차 GS 와 같은 로그 폴더 (bin/ 기준 ../log)
+    std::error_code dir_err;
+    std::filesystem::create_directories("../log/Console_Log", dir_err);
+    std::filesystem::create_directories("../log/Debug_Log", dir_err);
+
+    sprintf(hist_name, "../log/Console_Log/console--%04d-%02d-%02d-%02d-%02d-%02d.log",
             lt->tm_year + 1900,
             lt->tm_mon + 1,
             lt->tm_mday,
@@ -199,7 +205,7 @@ Console()
             lt->tm_min,
             lt->tm_sec);
 
-    sprintf(dbg_name, "../data/BEE_Debug_Log/debug--%04d-%02d-%02d-%02d-%02d-%02d.log",
+    sprintf(dbg_name, "../log/Debug_Log/debug--%04d-%02d-%02d-%02d-%02d-%02d.log",
             lt->tm_year + 1900,
             lt->tm_mon + 1,
             lt->tm_mday,
@@ -217,7 +223,7 @@ Console()
 
 
 
-    Console(float x_pos, float y_pos, float width, float height, const char * const log_name = "../data/BEE_Console_Log/console.log", const char * const debug_name = "../data/BEE_Debug_Log/debug.log")
+    Console(float x_pos, float y_pos, float width, float height, const char * const log_name = "../log/Console_Log/console.log", const char * const debug_name = "../log/Debug_Log/debug.log")
     : _x_pos(x_pos), _y_pos(y_pos), _width(width), _height(height), _push_to_bottom(false), _history_fs(log_name, std::fstream::in | std::fstream::out | std::fstream::app), _debug_fs(debug_name, std::fstream::in | std::fstream::out | std::fstream::app)
     {
         Initializer();
