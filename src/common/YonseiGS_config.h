@@ -278,8 +278,9 @@ public :
     int CrossPath = 0;
 
 
+    // 이름·use·cal 을 비워 둔다: main() 이 3만여 개를 이 생성자로 만들고, Track/TLE 목록이 이름과 use 로 판단한다
     SatelliteObject(Observer InputObserver)
-    :obs(InputObserver)
+    : _name(), use(false), cal(false), obs(InputObserver)
     {
         this->obs = Observer(InputObserver.GetLocation());
     };
