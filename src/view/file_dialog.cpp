@@ -532,7 +532,10 @@ bool FileDialog::Draw(const char * title, char * out, size_t out_size)
         ImGui::TextDisabled("%d items", n);
     }
     ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - btn_w * 2 - style.ItemSpacing.x);
-    if (ImGui::Button("Open##fd", ImVec2(btn_w, ButtonHeight())))
+    // Enter: 이름칸 밖(목록 등)에 포커스가 있어도 Open 과 같다
+    bool enter = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows) && !ImGui::IsAnyItemActive() &&
+                 ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter));
+    if (ImGui::Button("Open##fd", ImVec2(btn_w, ButtonHeight())) || enter)
         picked = picked || Accept(out, out_size);
     ImGui::SameLine();
     bool cancel = ImGui::Button("Cancel##fd", ImVec2(btn_w, ButtonHeight())) ||

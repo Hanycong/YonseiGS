@@ -106,7 +106,7 @@ ${MIMAN_SRC}/view/cmdgen/raw/forms_raw.cpp ${MIMAN_SRC}/view/cmdgen/bee1000/form
 ${MIMAN_SRC}/view/beacon/beacon_tabs.cpp ${MIMAN_SRC}/view/beacon/beacon_tab.cpp ${MIMAN_SRC}/view/beacon/mission_beacon_tab.cpp ${MIMAN_SRC}/view/beacon/report_tab.cpp ${MIMAN_SRC}/view/beacon/event_tab.cpp ${MIMAN_SRC}/view/beacon/response_tab.cpp ${MIMAN_SRC}/view/beacon/ax100_rparam_tab.cpp
 ${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${MIMAN_SRC}/viewmodel/track_vm.cpp ${MIMAN_SRC}/viewmodel/beacon_vm.cpp ${MIMAN_SRC}/viewmodel/ax100_vm.cpp ${MIMAN_SRC}/viewmodel/shell_vm.cpp ${MIMAN_SRC}/viewmodel/control_vm.cpp ${MIMAN_SRC}/viewmodel/ftp_vm.cpp ${MIMAN_SRC}/viewmodel/cmdgen_vm.cpp
 ${MIMAN_SRC}/model/device/gs100_radio.cpp ${MIMAN_SRC}/model/device/switch_box.cpp ${MIMAN_SRC}/model/device/gs_link.cpp ${MIMAN_SRC}/model/device/rotator.cpp
-${MIMAN_SRC}/model/orbit/track_target.cpp ${MIMAN_SRC}/model/orbit/pass_table.cpp
+${MIMAN_SRC}/model/orbit/track_target.cpp
 ${MIMAN_SRC}/model/device/ax100_radio.cpp ${MIMAN_SRC}/model/telemetry/telemetry_store.cpp ${MIMAN_SRC}/model/telecommand/direct_shell.cpp
 ${MIMAN_SRC}/model/device/csp_remote_param.cpp ${MIMAN_SRC}/model/telecommand/obc_ping.cpp ${MIMAN_SRC}/model/telecommand/command_queue.cpp ${MIMAN_SRC}/model/telecommand/ftp_client.cpp ${MIMAN_SRC}/model/telecommand/downlink_request.cpp
 ${MIMAN_SRC}/model/telecommand/ccsds_cmd.cpp ${MIMAN_SRC}/model/telecommand/telecommand_sender.cpp

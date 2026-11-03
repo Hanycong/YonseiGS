@@ -39,9 +39,9 @@ void ImGui_TrackWindow_Body(float fontscale)
     ImGui::InputTextWithHint("##search", "Search satellites...", vm.SearchBuffer(), vm.SearchBufferSize());
     ImGui::SameLine();
     if (ImGui::Button("TLE", ImVec2(btnW, 0)))
-    {
-        // TLE 업데이트
-    }
+        vm.OpenTleManager();
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("TLE Manager: choose satellites to show here");
 
     ImGui::Spacing();
 
@@ -49,6 +49,8 @@ void ImGui_TrackWindow_Body(float fontscale)
     if (tableH < 50.f) tableH = 50.f;
 
     // ── 테이블 ──
+    ImVec2 tmin = ImGui::GetCursorScreenPos();
+    ImVec2 tsz  = ImVec2(ImGui::GetContentRegionAvail().x, tableH);
     if (ImGui::BeginTable("##SatelliteListup", 6,
         ImGuiTableFlags_ScrollY       |
         ImGuiTableFlags_RowBg         |
@@ -73,7 +75,7 @@ void ImGui_TrackWindow_Body(float fontscale)
 
     
         // 이름 열만 늘어나고 나머지는 내용 폭에 맞춘다
-        float timeW = ImGui::CalcTextSize("6/3 00:00:00").x;
+        float timeW = ImGui::CalcTextSize("12/31 00:00:00").x;
         ImGui::TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed,   ImGui::CalcTextSize("00").x);
         ImGui::TableSetupColumn("NAME",     ImGuiTableColumnFlags_WidthStretch, 1.0f);
         ImGui::TableSetupColumn("NEXT AOS", ImGuiTableColumnFlags_WidthFixed,   timeW);
@@ -91,13 +93,10 @@ void ImGui_TrackWindow_Body(float fontscale)
             ImGui::TableHeader(headers[col]);
         }
 
-        // ── 예시 데이터 20개 출력 ──
+        // ── TLE Manager 에서 고른 위성 (검색 결과) ──
         for (int i = 0; i < vm.RowCount(); i++)
         {
             const mim::vm::TrackRow& d = vm.Row(i);
-
-            // 검색 필터
-            if (vm.HiddenBySearch(i)) continue;
 
             bool isSelected = vm.IsSelected(i);
 
@@ -118,13 +117,22 @@ void ImGui_TrackWindow_Body(float fontscale)
             }
 
             ImGui::TableNextColumn();
-            ImGui::Text("6/3 %02d:%02d:%02d", d.aos_h, d.aos_m, d.aos_s);
+            if (d.has_pass)
+                ImGui::Text("%d/%d %02d:%02d:%02d", d.aos_mon, d.aos_day, d.aos_h, d.aos_m, d.aos_s);
+            else
+                ImGui::TextDisabled("-");
 
             ImGui::TableNextColumn();
-            ImGui::Text("6/3 %02d:%02d:%02d", d.los_h, d.los_m, d.los_s);
+            if (d.has_pass)
+                ImGui::Text("%d/%d %02d:%02d:%02d", d.los_mon, d.los_day, d.los_h, d.los_m, d.los_s);
+            else
+                ImGui::TextDisabled("-");
 
             ImGui::TableNextColumn();
-            ImGui::Text("%.0f°", d.max_el);
+            if (d.has_pass)
+                ImGui::Text("%.0f°", d.max_el);
+            else
+                ImGui::TextDisabled("-");
 
             // ── Track 버튼 ──
             ImGui::TableNextColumn();
@@ -152,6 +160,22 @@ void ImGui_TrackWindow_Body(float fontscale)
         ImGui::EndTable();
     }
 
+    // 빈 표 안내 (표 위에 겹쳐 쓴다)
+    const char * empty_msg = nullptr;
+    if (vm.Loading())
+        empty_msg = "Loading TLE...";
+    else if (vm.SelectedCount() == 0)
+        empty_msg = "No satellites selected. Press TLE and choose satellites.";
+    else if (vm.RowCount() == 0)
+        empty_msg = "No satellites match the search.";
+    if (empty_msg)
+    {
+        ImVec2 msz  = ImGui::CalcTextSize(empty_msg);
+        ImGui::GetWindowDrawList()->AddText(
+            ImVec2(tmin.x + (tsz.x - msz.x) * 0.5f, tmin.y + (tsz.y - msz.y) * 0.5f),
+            mim::U32(mim::TEXT_MUTE), empty_msg);
+    }
+
     ImGui::EndChild(); // top panel
 
     // ════════════════════════════════════════════
@@ -163,8 +187,9 @@ void ImGui_TrackWindow_Body(float fontscale)
     // 선택된 위성 이름 - Track 버튼 기준 (추적 대상)
     const char* selName = vm.TrackedName();
 
-    float dummyAz = vm.TrackedAzimuth();
-    float dummyEl = vm.TrackedElevation();
+    // 추적 대상의 현재 방위각 / 앙각 [deg] (SGP4)
+    float trackAz = vm.TrackedAzimuth();
+    float trackEl = vm.TrackedElevation();
 
     // ── 하늘 지도 머리글 + 추적 대상 ──
     mim::ui::SectionHeader("SKY VIEW");
@@ -225,10 +250,15 @@ void ImGui_TrackWindow_Body(float fontscale)
     draw->AddText(ImVec2(ctr.x - fh*0.3f, ctr.y + lo),      mim::U32(mim::TEXT_DIM), "S");
     draw->AddText(ImVec2(ctr.x - lo - fh, ctr.y - fh*0.5f), mim::U32(mim::TEXT_DIM), "W");
 
-    // 위성 점
-    if (vm.HasTrackTarget()) {
-        float azRad = dummyAz * 3.14159f / 180.f;
-        float sr    = R * (1.f - ImClamp(dummyEl, 0.f, 90.f) / 90.f);
+    // 위성 점 (지평선 위일 때만. 아래면 안내 문구)
+    if (vm.HasTrackTarget() && trackEl < 0.f) {
+        const char * msg = "Below horizon";
+        draw->AddText(ImVec2(ctr.x - ImGui::CalcTextSize(msg).x * 0.5f, ctr.y + R * 0.5f),
+                      mim::U32(mim::TEXT_MUTE), msg);
+    }
+    else if (vm.HasTrackTarget()) {
+        float azRad = trackAz * 3.14159f / 180.f;
+        float sr    = R * (1.f - ImClamp(trackEl, 0.f, 90.f) / 90.f);
         float sx    = ctr.x + sr * sinf(azRad);
         float sy    = ctr.y - sr * cosf(azRad);
         draw->AddCircleFilled(ImVec2(sx,sy), 5.f, IM_COL32(50,220,100,255));
@@ -252,12 +282,12 @@ void ImGui_TrackWindow_Body(float fontscale)
         char buf[64];
         float rw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().WindowPadding.x;
 
-        sprintf(buf, "%.1f°", dummyAz);
+        if (vm.HasTrackTarget()) sprintf(buf, "%.1f°", trackAz); else sprintf(buf, "-");
         ImGui::TextDisabled("Azimuth");
         ImGui::SameLine(rw - ImGui::CalcTextSize(buf).x);
         ImGui::TextUnformatted(buf);
 
-        sprintf(buf, "%.1f°", dummyEl);
+        if (vm.HasTrackTarget()) sprintf(buf, "%.1f°", trackEl); else sprintf(buf, "-");
         ImGui::TextDisabled("Elevation");
         ImGui::SameLine(rw - ImGui::CalcTextSize(buf).x);
         ImGui::TextUnformatted(buf);

@@ -124,8 +124,10 @@ Window sequence: Frequency → Rotator → Track → Beacon → Control → Comm
 (`RotatorVM`) → `model/device/rotator.*` (`Gs232bRotator`, wraps miman_orbital for now).
 **Track is done**: `view/track_view.cpp` → `viewmodel/track_vm.*` (`TrackVM`; keeps the
 `Requested` selection and search text) → `model/orbit/track_target.*` (`TrackTarget`, wraps
-Get/SetNowTracking) + `model/orbit/pass_table.*` (`ExamplePassTable`: still the hardcoded
-20-satellite example data, not real SGP4 passes — wiring real passes is a feature change).
+Get/SetNowTracking). Rows = satellites with `use == true` (chosen with "Select" in TLE Manager),
+indexed by `OrbitData.Satellites` index (not row number); AOS/LOS/max El = `_nextaos[0]` etc.
+(UTC+9); search is case-insensitive; Sky View az/el = tracked satellite's `topo` (updated by
+the TrackingSatellites thread). The old hardcoded 20-satellite `pass_table` was removed.
 **Beacon is done**: `view/beacon_view.cpp` (tab bar only) + one file per tab in `view/beacon/`
 (`beacon_tab`, `mission_beacon_tab`, `report_tab`, `event_tab`, `response_tab`, `ax100_rparam_tab`)
 → `viewmodel/beacon_vm.*` (`BeaconVM`, telemetry display), `viewmodel/ax100_vm.*` (`Ax100VM`,
@@ -213,7 +215,9 @@ the *separation of concerns*, not the binding mechanism:
 - **Fonts (2026-11-02):** body = DroidSans 20 (font [0], used everywhere by default),
   `mim::font_title` DroidSans-Bold 36, `mim::font_subtitle` DroidSans 18,
   `mim::font_section` DroidSans-Bold 15 (section headers), `mim::font_mono` Inconsolata 18
-  (console only — log lines are aligned with dots). Do not scale windows with
+  (console only — log lines are aligned with dots). Hangul is merged in (MergeMode) from
+  NanumGothic 20 into font [0] and NanumGothicCoding 18 into font_mono (OFL, `bin/font`);
+  other fonts have no Hangul. Do not scale windows with
   `SetWindowFontScale(Rh * k)` any more; workspace bodies are called with `fontscale = 1.0`.
   Do not align labels with spaces (`"Name     : "`) — the body font is proportional; use
   `mim::ui::RowLabel()`.
@@ -227,7 +231,6 @@ the *separation of concerns*, not the binding mechanism:
   Name/Date/Type/Size, search, extension filter). Keep one static instance per caller; call
   `Open(start, ".txt;.tle")` on the button and `Draw(title, buf, size)` every frame inside the
   parent popup (returns true with an absolute path). Used by TLE Manager "Load from local...".
-  Non-ASCII (Korean) file names render as `?` — the bundled fonts have no Hangul glyphs.
 - Status bar: devices (GS100/Rotator/Switch/S-band) and modes (Engage/Doppler/AutoPilot/AMP)
   all use `StatusLamp`: green = connected / running, red = disconnected / stopped.
 - `mim_winflags` no longer includes `HorizontalScrollbar` (default = no scroll).
