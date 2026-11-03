@@ -511,7 +511,9 @@ int ftp_list_callback(uint16_t entries, const gs_ftp_list_entry_t * listent, voi
 
 void * ftp_downlink_onorbit(void * param){
 #define CSP_USE_RDP
-    // ftp_avail();
+    // libftp_client(누리호 5차 GS 판)는 ftpavailable 이 false 면 전송을 바로 멈춘다(GS_ERROR_BREAK).
+    // 처음 값이 false 라 시작할 때 세워야 한다 (안 세우면 다운로드는 데이터를 받기 전에 끝난다)
+    ftp_avail();
     ftp_worker_begin();
     bool dlstate = LinkFlags.downlink_mode;
     //This funcion must be on p_thread[4]
@@ -561,7 +563,9 @@ void * ftp_downlink_onorbit(void * param){
 
 void * ftp_uplink_onorbit(void * param){
 #define CSP_USE_RDP
-    // ftp_avail();
+    // libftp_client(누리호 5차 GS 판)는 ftpavailable 이 false 면 전송을 바로 멈춘다(GS_ERROR_BREAK).
+    // 처음 값이 false 라 시작할 때 세워야 한다 (안 세우면 다운로드는 데이터를 받기 전에 끝난다)
+    ftp_avail();
     ftp_worker_begin();
     bool dlstate = LinkFlags.downlink_mode;
     //This funcion must be on p_thread[4]
