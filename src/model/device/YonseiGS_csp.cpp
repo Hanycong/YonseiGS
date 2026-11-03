@@ -170,7 +170,7 @@ int init_transceiver()
 	// csp_debug_toggle_level(CSP_PROTOCOL);
 	// csp_debug_toggle_level(CSP_LOCK);
 	LinkFlags.GS100_Connection = true;
-	csp_buffer_init(400, 2048);
+	csp_buffer_init(2048, 2048);	// 버퍼 2048 개 (누리호 5차 GS 와 같음, FTP 청크가 몰려도 부족하지 않게)
 	csp_init((uint8_t)setup->kiss_node);
 	csp_route_set(CSP_DEFAULT_ROUTE, &csp_if_kiss, CSP_NODE_MAC);
 	// csp_route_set(setup->obc_node, &csp_if_kiss, setup->gs100_node);
