@@ -19,11 +19,6 @@
 #include "telemetry_files.h"
 
 
-#define a sizeof(Beacon);
-#define a sizeof(MissionBeacon);
-#define a sizeof(GETFILEINFO);
-#define a sizeof(Report)
-#define a sizeof(Event)
 
 #define _CRT_SECURE_NO_WARNINGS
 
