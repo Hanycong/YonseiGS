@@ -1,11 +1,14 @@
 // View - Beacon 창 "Beacon" 탭
 //
+// 위성 모드(model/missions/sat_mode.h)에 따라 표가 바뀐다: BEE-1000 은 이 파일의 표,
+// BEE1012 / UELYSYS / SD1-SAT 은 beacon_bee1012.cpp / beacon_uelysys.cpp / beacon_sd1sat.cpp.
 // ImGui 호출과 BeaconVM 호출만 있다. 표시 값은 viewmodel/beacon_vm.h 참고.
 #include <inttypes.h>
 
 #include "imgui.h"
 #include "beacon_vm.h"
 #include "beacon_tabs.h"
+#include "sat_mode.h"
 
 // 표 머리글 고정 행/열 수 (YonseiGS_imgui.cpp 의 같은 이름 static 과 같은 값)
 static int freeze_cols = 1;
@@ -28,7 +31,15 @@ void DrawBeaconTab(float fontscale)
     ImGui::TableHeadersRow();
 
 
-    if (!beacon)
+    // 5차 위성은 위성별 비콘 표 (view/beacon/beacon_<위성>.cpp), BEE-1000 은 아래 표 그대로
+    const int sat = mim::sat::Current();
+    if (sat == mim::sat::SAT_BEE1012)
+        DrawBEE1012Beacon(vm.LastBee1012Beacon());
+    else if (sat == mim::sat::SAT_UELYSYS)
+        DrawUELYSYSBeacon(vm.LastUelysysBeacon());
+    else if (sat == mim::sat::SAT_SD1SAT)
+        DrawSD1SATBeacon(vm.LastSd1satBeacon());
+    else if (!beacon)
     {
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);

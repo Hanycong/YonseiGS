@@ -119,6 +119,7 @@ ${MIMAN_SRC}/model/service/console_log.cpp ${MIMAN_SRC}/view/console_view.cpp ${
 ${MIMAN_SRC}/model/telemetry/report_parser.cpp ${MIMAN_SRC}/model/telemetry/telemetry_logger.cpp
 ${MIMAN_SRC}/model/telecommand/cmd_generator_gs.cpp ${MIMAN_SRC}/model/telecommand/packet_codec.cpp
 ${MIMAN_SRC}/view/beacon/report/report_eps.cpp ${MIMAN_SRC}/view/beacon/report/report_adcs.cpp ${MIMAN_SRC}/view/beacon/report/report_uant.cpp
+${MIMAN_SRC}/view/beacon/beacon_bee1012.cpp ${MIMAN_SRC}/view/beacon/beacon_uelysys.cpp ${MIMAN_SRC}/view/beacon/beacon_sd1sat.cpp ${MIMAN_SRC}/model/telemetry/telemetry_globals5.cpp
 ${MIMAN_SRC}/model/orbit/satellite_object.cpp ${MIMAN_SRC}/model/orbit/tle_loader.cpp ${MIMAN_SRC}/model/orbit/doppler.cpp ${MIMAN_SRC}/model/device/rotator_io.cpp ${MIMAN_SRC}/model/device/gs100_param_tables.cpp ${MIMAN_SRC}/model/device/csp_diagnostics.cpp
 ${MIMAN_SRC}/app/ui_state.cpp ${MIMAN_SRC}/model/service/ftp_state.cpp ${MIMAN_SRC}/model/service/autopilot_state.cpp ${MIMAN_SRC}/model/device/rotator_state.cpp ${MIMAN_SRC}/model/device/link_state.cpp ${MIMAN_SRC}/model/orbit/orbit_state.cpp)
 
