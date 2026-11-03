@@ -5,6 +5,8 @@
 #   결과: OUT_DIR/golden.txt  (명령별 3회 "Generate CMD" 결과 packetsign 바이트)
 #         OUT_DIR/forms.txt   (명령 선택 콤보 항목 목록 + 명령별 입력 폼 위젯 목록)
 #         OUT_DIR/catalog.txt (명령 카탈로그 덤프 + 기존 표/패킷 헤더와의 대조 결과)
+#         OUT_DIR/picker5.txt, golden5.txt (누리호 5차 위성 BEE1012/UELYSYS/SD1-SAT 의 콤보 목록과 패킷.
+#                                           GS_nuri5 에서 같은 형식으로 뽑은 기준값과 diff 한다)
 #
 # 두 커밋의 golden.txt 를 diff 해서 위성으로 나가는 패킷이 바뀌었는지 확인한다.
 #   diff A/golden.txt B/golden.txt
@@ -37,7 +39,7 @@ echo "[golden] run"
 MARKER="$OUT/.start_marker"
 touch "$MARKER"
 set +e
-( cd "$REPO/bin" && "$OUT/cmdgen_golden" "$OUT/forms.txt" "$OUT/catalog.txt" ) 2> "$OUT/golden.txt" > "$OUT/run.log"
+( cd "$REPO/bin" && "$OUT/cmdgen_golden" "$OUT/forms.txt" "$OUT/catalog.txt" "$OUT/picker5.txt" "$OUT/golden5.txt" ) 2> "$OUT/golden.txt" > "$OUT/run.log"
 RC=$?
 set -e
 # Console 객체가 data/BEE_Console_Log 에 남기는 로그는 저장소 밖으로 옮긴다

@@ -53,9 +53,16 @@ struct MissionCommands
     const CommandDef* commands;
     int               count;
     const int*        initial_ops;        // 초기 운용(LEOP) 명령 세트. 순서가 운용 순서. -1 로 끝남. 없으면 nullptr
+    // 누리호 5차 위성: 이 위성 전용 서브시스템 콤보 항목 ("All" 로 시작, "Generic / Manual" 로 끝남).
+    // nullptr 이면 BEE-1000 화면의 공용 콤보를 쓴다
+    const char * const * categories;
+    int               category_count;
 };
 
-// 등록된 모든 미션의 명령을 id 순으로 합친 목록
+// 아래 목록·콤보는 지금 위성 모드(mim::sat::Current())를 따른다.
+//   BEE1000 : 원시 명령 + BEE-1000 + COSMIC 명령, 공용 콤보 (예전 화면 그대로)
+//   BEE1012 / UELYSYS / SD1-SAT : 그 위성 명령 + 원시 명령(Generic / Manual), 위성 전용 콤보 (누리호 5차 GS 화면)
+// 등록된 미션의 명령을 id 순으로 합친 목록
 int               CommandCount();
 const CommandDef& CommandAt(int index);
 const CommandDef* FindCommand(int id);      // 없으면 nullptr

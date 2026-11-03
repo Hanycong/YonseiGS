@@ -121,7 +121,7 @@ bool DrawBee1000FmForms(uint16_t fnccode)
         ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
         ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
         ImGui::InputText("path", path_buf, sizeof(path_buf));
-        ImGui::InputScalar("padding u32",   ImGuiDataType_U32, &command->ftpfilenamecmd.padding);
+        ImGui::InputScalar("padding u32",   ImGuiDataType_U32, &command->ftpfilenamecmd.FileInfoCRC);
 
 
         if (ImGui::Button("Generate CMD")) {
@@ -143,7 +143,7 @@ bool DrawBee1000FmForms(uint16_t fnccode)
             command->ftpfilenamecmd.CmdHeader[7]);
 
         ImGui::Text("Params: path = %s", path_buf);
-        ImGui::Text("  padding    = %u", command->ftpfilenamecmd.padding);
+        ImGui::Text("  padding    = %u", command->ftpfilenamecmd.FileInfoCRC);
 
         break;
     }

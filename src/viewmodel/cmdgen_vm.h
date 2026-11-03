@@ -14,7 +14,7 @@ namespace vm {
 class CmdGeneratorVM
 {
 public:
-    // ---- 분류 콤보 (두 팝업이 같은 값을 쓴다: 원래 함수 static 하나) ----
+    // ---- 분류 콤보 (두 팝업이 같은 값을 쓴다: 원래 함수 static 하나). 항목은 위성 모드에 따라 바뀐다 ----
     int * SelectedCategory();
     int CategoryCount() const;
     const char * CategoryName(int i) const;
@@ -30,7 +30,9 @@ public:
     bool * RawData();                                 // "Write Raw Data"
 
 private:
+    void SyncSatellite();               // 위성 모드가 바뀌었으면 콤보/선택 초기화
     int selected_category_ = 0;
+    int last_sat_ = -1;
 };
 
 CmdGeneratorVM & CmdGeneratorViewModel();

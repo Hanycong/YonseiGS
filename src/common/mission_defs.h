@@ -4930,3 +4930,18 @@ typedef struct
     uint8_t CmdHeader[CFE_SB_CMD_HDR_SIZE];
     TO_LAB_EnableOutput_Payload_t Payload;
 } TO_LAB_EnableOutputIpCmd_t;
+
+// TO_LAB Add Packet (BEE1012/UELYSYS/SD1-SAT): GS_nuri5 는 이 구조체에 pack(1) 을 쓰지 않는다 (명령 16바이트).
+// BEE-1000 은 YonseiGS_config.h 의 TO_LAB_AddPacketCmd_t (pack(1), 15바이트)
+typedef struct
+{
+    CFE_SB_MsgId_t Stream;
+    CFE_SB_Qos_t   Flags;
+    uint8          BufLimit;
+} TO_LAB_AddPacket5_Payload_t;
+
+typedef struct
+{
+    uint8_t CmdHeader[CFE_SB_CMD_HDR_SIZE];
+    TO_LAB_AddPacket5_Payload_t Payload;
+} TO_LAB_AddPacket5Cmd_t;

@@ -1,4 +1,5 @@
 #include "cmdgen_vm.h"
+#include "sat_mode.h"
 
 extern uint16_t gen_fnccode;
 extern bool raw_data;
@@ -6,7 +7,28 @@ extern bool raw_data;
 namespace mim {
 namespace vm {
 
-int * CmdGeneratorVM::SelectedCategory()               { return &selected_category_; }
+// 위성을 바꾸면 콤보를 "All" 로, 선택 명령을 그 위성의 첫 명령으로 (누리호 5차 GS 와 같음).
+// BEE1000 으로 돌아올 때는 선택 명령을 비운다 (BEE-1000 폼에 없는 번호이므로)
+void CmdGeneratorVM::SyncSatellite()
+{
+    const int sat = mim::sat::Current();
+    if (sat == last_sat_)
+        return;
+    if (last_sat_ >= 0)
+    {
+        selected_category_ = 0;
+        switch (sat)
+        {
+        case mim::sat::SAT_BEE1012: gen_fnccode = 1000;  break;
+        case mim::sat::SAT_UELYSYS: gen_fnccode = 4000;  break;
+        case mim::sat::SAT_SD1SAT:  gen_fnccode = 10000; break;
+        default:                    gen_fnccode = 0xFFFF; break;
+        }
+    }
+    last_sat_ = sat;
+}
+
+int * CmdGeneratorVM::SelectedCategory()               { SyncSatellite(); return &selected_category_; }
 int CmdGeneratorVM::CategoryCount() const              { return mim::tc::CategoryCount(); }
 const char * CmdGeneratorVM::CategoryName(int i) const { return mim::tc::CategoryName(i); }
 

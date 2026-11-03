@@ -27,6 +27,8 @@
 #include <vector>
 #include <map>
 #include "command_catalog.h"
+#include "sat_mode.h"
+#include <algorithm>
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
 FILE *log_ptr;
@@ -66,7 +68,12 @@ namespace ImGui {
 bool Button(const char* label, const ImVec2&)
 {
     Rec("Button", label);
-    return g_press && strcmp(label, "Generate CMD") == 0;
+    if (!g_press)
+        return false;
+    // 5차 위성 폼은 "Generate CMD##<id>" 처럼 ID 를 붙인 버튼을 쓴다 (GS_nuri5 하네스와 같은 기준)
+    if (mim::sat::Current() != mim::sat::SAT_BEE1000)
+        return strncmp(label, "Generate CMD", 12) == 0;
+    return strcmp(label, "Generate CMD") == 0;
 }
 bool InputScalar(const char* label, ImGuiDataType data_type, void*, const void*, const void*, const char* format, ImGuiInputTextFlags)
 {
@@ -155,7 +162,9 @@ int SendUplink(void * packet)
     packetsign * ps = (packetsign *)packet;
     char head[64];
     snprintf(head, sizeof(head), "id=%u type=%u len=%u data=", ps->Identifier, ps->PacketType, ps->Length);
-    g_sent.push_back(std::string(head) + Hex(ps->Data, ps->Length));
+    // 노드 지정 명령(MIM_PT_NODE_TC)은 Data 앞 2바이트가 목적 노드
+    const size_t n = ps->Length + (ps->PacketType == MIM_PT_NODE_TC ? 2 : 0);
+    g_sent.push_back(std::string(head) + Hex(ps->Data, n));
     g_sent_bytes.push_back(std::vector<uint8_t>(ps->Data, ps->Data + ps->Length));
     return 0;
 }
@@ -301,6 +310,62 @@ static int CheckCatalog(FILE * out, const std::map<int, std::vector<uint8_t>> & 
     return bad;
 }
 
+// ---- 누리호 5차 위성 (BEE1012 / UELYSYS / SD1-SAT) ----
+// GS_nuri5 기준값 하네스와 같은 형식으로 쓴다 (diff 로 비교):
+//   picker sat=<위성> idx=<콤보 번호> name="<항목>": <명령 번호...>
+//   sat=<위성> cmd=<번호> press=<1|2> pkt=<k> label="..." id= type= len= data=...
+// 패킷은 GS_nuri5 하네스처럼 0~CMD_LABEL5_MAX 의 모든 명령 번호를 위성마다 순서대로 누른다
+// (폼끼리 공유하는 command 버퍼 상태까지 같은 순서로 만들기 위해)
+static void Frame5()
+{
+    ImGui::NewFrame();
+    ImGui::Begin("golden");
+    DrawCmdGeneratorBody(false);
+    ImGui::End();
+    ImGui::EndFrame();
+}
+
+static void DumpSat5(FILE * pick, FILE * pkts, const std::vector<int> & press_ids)
+{
+    using namespace mim::tc;
+    static const char * kSat[] = { "BEE1000", "BEE1012", "UELYSYS", "SD1SAT" };
+    for (int sat = 1; sat < 4; sat++)
+    {
+        mim::sat::SetCurrent(sat);
+        Frame5();
+        for (int idx = 0; idx < CategoryCount(); idx++)
+        {
+            fprintf(pick, "picker sat=%s idx=%d name=\"%s\":", kSat[sat], idx, CategoryName(idx));
+            for (int k = 0; k < CommandCount(); k++)
+                if (InCategory(CommandAt(k), idx))
+                    fprintf(pick, " %d", CommandAt(k).id);
+            fprintf(pick, "\n");
+        }
+    }
+    for (int sat = 1; sat < 4; sat++)
+    {
+        mim::sat::SetCurrent(sat);
+        Frame5();
+        for (int i : press_ids)
+        {
+            gen_fnccode = i;
+            Frame5();
+            const CommandDef * c = FindCommand(i);
+            const char * label = c ? c->label : "";
+            for (int p = 1; p <= 2; p++)
+            {
+                g_sent.clear();
+                g_press = true; Frame5(); g_press = false;
+                if (g_sent.empty())
+                    fprintf(pkts, "sat=%s cmd=%d press=%d label=\"%s\" (no packet)\n", kSat[sat], i, p, label);
+                for (size_t k = 0; k < g_sent.size(); k++)
+                    fprintf(pkts, "sat=%s cmd=%d press=%d pkt=%zu label=\"%s\" %s\n", kSat[sat], i, p, k, label, g_sent[k].c_str());
+            }
+        }
+    }
+    mim::sat::SetCurrent(mim::sat::SAT_BEE1000);
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -356,5 +421,25 @@ int main(int argc, char ** argv)
     fclose(forms);
     int bad = CheckCatalog(catalog, first_packet);
     fclose(catalog);
+
+    // 5차 위성: 누를 명령 번호 = 세 위성 카탈로그의 번호 + 원시 명령 (GS_nuri5 라벨이 있는 번호와 같아야 한다)
+    if (argc > 4)
+    {
+        std::vector<int> ids;
+        for (int sat = 1; sat < 4; sat++)
+        {
+            mim::sat::SetCurrent(sat);
+            for (int k = 0; k < mim::tc::CommandCount(); k++)
+                ids.push_back(mim::tc::CommandAt(k).id);
+        }
+        mim::sat::SetCurrent(mim::sat::SAT_BEE1000);
+        std::sort(ids.begin(), ids.end());
+        ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
+        FILE * pick5 = fopen(argv[3], "w");
+        FILE * pkts5 = fopen(argv[4], "w");
+        DumpSat5(pick5, pkts5, ids);
+        fclose(pick5);
+        fclose(pkts5);
+    }
     return bad ? 1 : 0;
 }

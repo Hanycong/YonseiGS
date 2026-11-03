@@ -965,7 +965,7 @@ static ReportKind_t DetermineReportKind(uint16_t reflected_mid, uint8_t reflecte
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_REFERENCE_LLH_TARGET_CC) return REPORT_KIND_ADCS_GET_REFERENCE_LLH_TARGET;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_ORBIT_MODE_CC) return REPORT_KIND_ADCS_GET_ORBIT_MODE;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_HEALTH_TLM_MMT_CC) return REPORT_KIND_ADCS_GET_HEALTH_TLM_MMT;
-    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_CUBESENSE_SUN_CC) return REPORT_KIND_ADCS_GET_RAW_CUBESENSE_SUN;
+    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_CALIBRATED_CUBESENSE_SUN_CC) return REPORT_KIND_ADCS_GET_RAW_CUBESENSE_SUN;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_REFERENCE_RPY_VALUES_CC) return REPORT_KIND_ADCS_GET_REFERENCE_RPY_VALUES;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_OPENLOOPCMD_MTQ_CC) return REPORT_KIND_ADCS_GET_OPENLOOPCMD_MTQ;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_POWER_STATE_CC) return REPORT_KIND_ADCS_GET_POWER_STATE;
@@ -975,8 +975,8 @@ static ReportKind_t DetermineReportKind(uint16_t reflected_mid, uint8_t reflecte
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_MAG1_MMT_CALIB_CONFIG_CC) return REPORT_KIND_ADCS_GET_MAG1_MMT_CALIB_CONFIG;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_ESTIMATION_MODE_CC) return REPORT_KIND_ADCS_GET_ESTIMATION_MODE;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_OPERATIONAL_STATE_CC) return REPORT_KIND_ADCS_GET_OPERATIONAL_STATE;
-    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_CSS_SENSOR_CC) return REPORT_KIND_ADCS_GET_RAW_CSS_SENSOR;
-    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_GYR_SENSOR_CC) return REPORT_KIND_ADCS_GET_RAW_GYR_SENSOR;
+    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_CALIBRATED_CSS_SENSOR_CC) return REPORT_KIND_ADCS_GET_RAW_CSS_SENSOR;
+    if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_RAW_CALIBRATED_GYR_SENSOR_CC) return REPORT_KIND_ADCS_GET_RAW_GYR_SENSOR;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_CALIBRATED_GYR_SENSOR_CC) return REPORT_KIND_ADCS_GET_CALIBRATED_GYR_SENSOR;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_MAG_SENSING_ELM_CONFIG_CC) return REPORT_KIND_ADCS_GET_MAG_SENSING_ELM_CONFIG;
     if ((reflected_mid == ADCS_CMD_ID || reflected_mid == 0x6518) && reflected_cc == ADCS_GET_TLM_LOG_INCLMASK_CC) return REPORT_KIND_ADCS_GET_TLM_LOG_INCLMASK;

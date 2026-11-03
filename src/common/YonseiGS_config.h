@@ -4670,7 +4670,7 @@ typedef struct {
 typedef struct {
     uint8_t                  CmdHeader[CFE_SB_CMD_HDR_SIZE];
     char                     path[64]; 
-    uint32_t                  padding;
+    uint32_t                  FileInfoCRC;              // 5차 GS 이름 (예전 이름 padding, 배치 같음)
 
 } __attribute__((packed)) FTP_filenameCmd_t;
 

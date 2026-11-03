@@ -130,5 +130,10 @@ TARGET_LINK_LIBRARIES(BEE-1000 curl pthread GL GLEW glut glbinding ssh)
 FILE(GLOB SGP4_SRCS ${MIMAN_LIB}/libsgp4/*.cc)
 ADD_LIBRARY(sgp4_src STATIC ${SGP4_SRCS})
 TARGET_LINK_LIBRARIES(BEE-1000 sgp4_src)
+
+# 누리호 5차 위성(BEE1012/UELYSYS/SD1-SAT) 명령 생성기 폼: 위성 폴더의 파일을 모두 빌드한다
+FILE(GLOB CMDGEN5_SRCS ${MIMAN_SRC}/view/cmdgen/bee1012/*.cpp ${MIMAN_SRC}/view/cmdgen/uelysys/*.cpp ${MIMAN_SRC}/view/cmdgen/sd1sat/*.cpp)
+TARGET_SOURCES(BEE-1000 PRIVATE ${CMDGEN5_SRCS}
+    ${MIMAN_SRC}/model/missions/bee1012/bee1012_commands.cpp ${MIMAN_SRC}/model/missions/uelysys/uelysys_commands.cpp ${MIMAN_SRC}/model/missions/sd1sat/sd1sat_commands.cpp ${MIMAN_SRC}/view/cmdgen/raw/forms_generic5.cpp ${MIMAN_SRC}/view/cmdgen/cmdgen5_common.cpp)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/imgui/libimgui.a)
 TARGET_LINK_LIBRARIES(BEE-1000 ${MIMAN_LIB}/gscsp/build/libmimancsp.a)
