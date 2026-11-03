@@ -287,8 +287,18 @@ structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](do
 - **Uplink types**: `MIM_PT_NODE_TC` (2-byte node prefix, port 13), `B12_UL_AIOBC` (node 14/port 10),
   `UEL_UL_PAYYONSEI_OBC` / `UEL_UL_SDR_CONTROLLER` (node 13/14, port 13). TMTC test commands go to `setup->obc_node` (default 10).
 - **CSP library**: `lib/gscsp` = GS_nuri5 version, `libmimancsp.a` (XTEA off, QoS on), rebuilt from source with waf.
+- **Downlink** (`model/telemetry/n5_*`): new ports BEE1012 17/15/16/18/29, UELYSYS 12/10/11/14, SD1-SAT 22/20/21.
+  Report kind = receive port first (`DetermineN5ReportKind`); BEE-1000 port 25 keeps `ParseReportWire540` +
+  `DetermineBee1000ReportKind`. 5th-gen beacons arriving during FTP are buffered and saved after FTP.
+  GUI reads beacons only through `CopyXXXBeacon` (lock `g_n5_beacon_mtx`) and `g_rpt_ops_data` under `g_report_view_mtx`.
+- **Views**: `view/beacon/beacon_{bee1012,uelysys,sd1sat}.cpp`, `view/beacon/report/report_*.cpp`; Beacon/Report tabs follow the satellite mode.
+- **FTP**: engines V1 force (port 15) / V2 (port 9, default) / Ryu (port 19, `lib/libftp_client_ryu`, upstream NO-GO → opt-in),
+  Stop + resume, Dest Node (`FtpShared.dest_node`) as FTP host. AMP: `AmpOn()` single entry, `AmpTimerStop` flag.
+  Control: WATCHDOG buttons (UTRX WDT CLEAR, EPS WDT CLEAR ALL). `csp_buffer_init(2048)`, rotator read-fail retry 1 s.
 - **Verification**: `tools/nuri5_reference.sh <GS_nuri5> <OUT>` dumps GS_nuri5's command menus/packets;
   `tools/cmdgen_golden.sh` now also writes `picker5.txt` / `golden5.txt` in the same format (must match).
+  `tools/n5_downlink_test.sh` (receive/parse/save vs GS_nuri5), `tools/beacon_report_golden.sh` (rendered text vs GS_nuri5),
+  `tools/ops_test.sh` (AMP timer, FTP stop/guards, WDT bytes).
 
 ## Known defects (write here, fix separately — do NOT fix mid-refactor)
 
@@ -351,9 +361,8 @@ See [docs/REFACTOR_SERVICE_LAYER.md](docs/REFACTOR_SERVICE_LAYER.md).
 - UI must not call `pthread_create/join` on `p_thread[]` directly — add or use a
   `mim::svc` function instead. `svc_thread.h` is the only place that knows slot numbers.
 - `JoinThread` joins a `StartThread` thread at most once (later calls return 0), so a Stop
-  button and `StopAllThreads()` can both join the same slot. Slots handed out through
-  `ThreadHandle()` (FTP) are created/joined outside and keep the old always-join behaviour —
-  so the FTP slot can still be double-joined (AutoPilot joins it after FTP, then StopAllThreads).
+  button and `StopAllThreads()` can both join the same slot. The FTP worker (slot 8) and the FTP
+  stop keeper (slot 9) also use `StartThread`/`JoinThread` now; nothing uses `ThreadHandle()`.
 - After Stop the AutoPilot thread cleans up on its own (Engage/Doppler off, rotator to 0,0);
   manual Start Engaging / Doppler are refused until it is idle, and `main` waits for it
   (`WaitAutoPilotStopped`) before `FinishHardware()`.
