@@ -230,7 +230,9 @@ int AutoPilot_task()
             else if (pid == 0) {
                 // Child process
                 execl("../amp/ampcontrol", "ampcontrol", NULL);
-                console.AddLog("[OK]##Forked Safe Amplifier Process.");
+                // exec 실패 시 자식이 GS 복제본으로 계속 돌면 X 연결이 깨져 본체까지 죽는다
+                perror("execl ../amp/ampcontrol");
+                _exit(127);
             }
             else
             {
@@ -735,6 +737,9 @@ for (int i = 0; i < 2 && AutoPilotCfg.Autopilot; i++)
         else if (pid_off == 0) {
             // Child process
             execl("../amp/ampoff", "ampoff", NULL);
+            // exec 실패 시 자식이 GS 복제본으로 계속 돌면 X 연결이 깨져 본체까지 죽는다
+            perror("execl ../amp/ampoff");
+            _exit(127);
         }
         else
         {

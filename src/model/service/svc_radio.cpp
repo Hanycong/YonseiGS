@@ -109,6 +109,9 @@ void AmpOn()
     else if (pid_on == 0) {
         // Child process
         execl("../amp/ampcontrol", "ampcontrol", NULL);
+        // exec 실패 시 자식이 GS 복제본으로 계속 돌면 X 연결이 깨져 본체까지 죽는다
+        perror("execl ../amp/ampcontrol");
+        _exit(127);
 
     }
     else
@@ -128,6 +131,9 @@ void AmpOff()
     else if (pid_off == 0) {
         // Child process
         execl("../amp/ampoff", "ampoff", NULL);
+        // exec 실패 시 자식이 GS 복제본으로 계속 돌면 X 연결이 깨져 본체까지 죽는다
+        perror("execl ../amp/ampoff");
+        _exit(127);
     }
     else
     {
