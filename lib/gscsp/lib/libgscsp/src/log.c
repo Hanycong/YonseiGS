@@ -1,6 +1,7 @@
 /* Copyright (c) 2013-2018 GomSpace A/S. All rights reserved. */
 
 #include <gs/csp/log.h>
+#include <gs/util/log/log.h>
 #include <csp/csp.h>
 #include "local.h"
 

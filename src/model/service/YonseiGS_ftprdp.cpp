@@ -457,15 +457,17 @@ static void ftp_info_print_callback(const gs_ftp_info_t * info)
 {
 
     switch (info->type) {
-        case GS_FTP_INFO_COMPLETED:
+        case GS_FTP_INFO_UL_COMPLETED:
+        case GS_FTP_INFO_DL_COMPLETED:
             {
                 const uint32_t complete = info->u.completed.completed_chunks;
                 const uint32_t total    = info->u.completed.total_chunks;
                 printftp("Transfer Status: %" PRIu32 " of %" PRIu32 " (%.1f%%)\r\n",
-                        complete, total, gs_ftp_percent_completed(complete, total));
+                        complete, total, total ? 100.0 * complete / total : 0.0);
             }
             break;
-        case GS_FTP_INFO_FILE:
+        case GS_FTP_INFO_UL_FILE:
+        case GS_FTP_INFO_DL_FILE:
             {
                 console.AddLog("[OK]##Received FTP file Spec.");
                 printftp("Received FTP File Spec. Filesize : %u, CRC : %u.", info->u.file.size, info->u.file.crc);
@@ -477,7 +479,8 @@ static void ftp_info_print_callback(const gs_ftp_info_t * info)
                 console.AddLog("Calculate FTP CRC %s. Remote : %u, Local : %u.", (info->u.crc.remote == info->u.crc.local) ? "OK" : "ERROR", info->u.crc.remote, info->u.crc.local);
             }
             break;
-        case GS_FTP_INFO_PROGRESS:
+        case GS_FTP_INFO_UL_PROGRESS:
+        case GS_FTP_INFO_DL_PROGRESS:
             printftp("Progress : %u/%u", info->u.progress.current_chunk, info->u.progress.total_chunks);
             // progress_bar(info->u.progress.current_chunk, info->u.progress.total_chunks, info->u.progress.chunk_size,
             //              info->user_data);

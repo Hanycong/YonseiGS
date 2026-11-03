@@ -3,6 +3,7 @@
 #ifndef W_INCLUDE_CONF_GSSB_H_WAF
 #define W_INCLUDE_CONF_GSSB_H_WAF
 
+#define HAVE_PYTHON2 1
 #define GSSB_TWI_HANDLER 0
 /* #undef GS_ISTAGE_ENABLED */
 /* #undef GS_MSP_ENABLED */

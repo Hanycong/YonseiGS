@@ -2,6 +2,7 @@
 
 #include <gs/util/test/log.h>
 #include <gs/util/test/cmocka.h>
+#include <gs/util/log/log.h>
 #include <gs/util/log/appender/appender.h>
 #include <gs/util/mutex.h>
 #include <gs/util/bytebuffer.h>

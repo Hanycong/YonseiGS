@@ -9,6 +9,7 @@
    Provides a simple way of veriyfing logs generated during unit-testing.
 */
 
+#include <gs/util/log/log.h>
 #include <gs/util/test/cmocka.h>
 
 #ifdef __cplusplus

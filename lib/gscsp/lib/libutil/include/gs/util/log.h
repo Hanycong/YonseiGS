@@ -10,5 +10,6 @@
 
    Logging is done through groups (domains), which can runtime be re-configured with level.
 */
+#include <gs/util/log/log.h>
 
 #endif
