@@ -7,6 +7,8 @@
 //         (CSP/무선 장치 없이: 실제 전송은 하지 않는다)
 //  - filelisthandler (V1 다운링크 파일 경로) 경로 모양 / 모르는 종류 거부, 빈 FTP 경로의 file:// 기본값
 //  - Control "UTRX WDT CLEAR" / "EPS WDT CLEAR ALL" 이 누리호 5차 GS 버튼과 같은 바이트를 보내는지
+//  - 상단 위성 탭 선택 → 위성 모드 전환 (TLE 이름 인식, 같은 모드면 GS100 설정 생략, 모르는 위성은 유지,
+//    GS100 설정 중 연달아 바꾸면 마지막 위성 키가 GS100 에 남는지). gs_rparam_set 은 아래 가짜로 대체
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
 // 빌드/실행: tools/ops_test.sh <OUT_DIR>   (실패가 있으면 종료 코드 1)
@@ -32,6 +34,9 @@
 #include "ftp_vm.h"
 #include "YonseiGS_ftp.h"
 #include <csp/csp.h>
+#include <gs/param/rparam.h>
+#include "sat_mode.h"
+#include "YonseiGS_satcontext.h"
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
 FILE *log_ptr;
@@ -69,6 +74,24 @@ int StartPingEveryNode(void *) { return 0; }
 int StartDirectShell(void *) { return 0; }
 } // namespace svc
 } // namespace mim
+
+// ---- 가짜 GS100 rparam: 쓰기를 기록하고 200 ms 걸린 것처럼 한다 ----
+struct RparamWrite { uint8_t table; uint16_t addr; std::vector<uint8_t> value; };
+static std::vector<RparamWrite> g_rparam;
+static pthread_mutex_t g_rparam_lock = PTHREAD_MUTEX_INITIALIZER;
+gs_error_t gs_rparam_set(uint8_t node, gs_param_table_id_t table_id, uint16_t addr, gs_param_type_t type,
+                         uint16_t checksum, uint32_t timeout_ms, const void * value, size_t value_size)
+{
+    usleep(200 * 1000);
+    RparamWrite w;
+    w.table = table_id;
+    w.addr = addr;
+    w.value.assign((const uint8_t *)value, (const uint8_t *)value + value_size);
+    pthread_mutex_lock(&g_rparam_lock);
+    g_rparam.push_back(w);
+    pthread_mutex_unlock(&g_rparam_lock);
+    return GS_OK;
+}
 
 static int g_fail = 0;
 #define CHECK(cond) do { if (cond) printf("ok   %s\n", #cond); else { printf("FAIL %s  (line %d)\n", #cond, __LINE__); g_fail++; } } while (0)
@@ -339,6 +362,105 @@ static void TestFtpPaths()
     CHECK(strcmp(vm.SelectedFile()->remote_path, "file://") == 0);
 }
 
+static size_t RparamCount()
+{
+    pthread_mutex_lock(&g_rparam_lock);
+    size_t n = g_rparam.size();
+    pthread_mutex_unlock(&g_rparam_lock);
+    return n;
+}
+
+// 마지막으로 GS100 TX 테이블(5)에 남은 HMAC 키 ("" = HMAC 끔)
+static std::string LastHmacKey()
+{
+    std::string key = "?";
+    pthread_mutex_lock(&g_rparam_lock);
+    for (const RparamWrite & w : g_rparam)
+    {
+        if (w.table != 5) continue;
+        if (w.addr == 0x0010 && w.value.size() == 1 && w.value[0] == 0) key = "";
+        if (w.addr == 0x0020) key = std::string((const char *)w.value.data(), strnlen((const char *)w.value.data(), w.value.size()));
+    }
+    pthread_mutex_unlock(&g_rparam_lock);
+    return key;
+}
+
+static bool SwitchIdle()
+{
+    // 전환 작업이 끝나면 rparam 쓰기가 더 늘지 않는다
+    size_t n = RparamCount();
+    usleep(500 * 1000);
+    return RparamCount() == n;
+}
+
+static void TestSatelliteTabs()
+{
+    using namespace mim::sat;
+    CHECK(ModeFromSatName("BEE-1000") == SAT_BEE1000);
+    CHECK(ModeFromSatName("BEE-1000                ") == SAT_BEE1000);
+    CHECK(ModeFromSatName("BEE-1012") == SAT_BEE1012);
+    CHECK(ModeFromSatName("UELYSYS") == SAT_UELYSYS);
+    CHECK(ModeFromSatName("SD-1") == SAT_SD1SAT);
+    CHECK(ModeFromSatName("sd1-sat") == SAT_SD1SAT);
+    CHECK(ModeFromSatName("MIMAN") == -1);
+    CHECK(ModeFromSatName("BEE-10120") == -1);
+    CHECK(ModeFromSatName("") == -1);
+    CHECK(ModeFromSatName(NULL) == -1);
+
+    // NORAD_TLE.txt 와 같은 이름의 위성 5개 (궤도 계산은 하지 않는다)
+    const char * tle[5][3] = {
+        { "MIMAN                   ", "1 52900U 22065G   26306.85362683  .00000297  00000+0  68851-4 0  9998", "2 52900  98.2465  88.8242 0006672 319.8906  40.1802 14.61964501230705" },
+        { "BEE-1000                ", "1 66650U 25274A   26306.79900039  .00001616  00000+0  15886-3 0  9991", "2 66650  97.7540 233.8282 0010018 252.2871 107.7255 14.93502136 50895" },
+        { "SD-1",                     "1 52900U 22065G   26306.85362683  .00000297  00000+0  68851-4 0  9998", "2 52900  98.2465  88.8242 0006672 319.8906  40.1802 14.61964501230705" },
+        { "BEE-1012",                 "1 52900U 22065G   26306.85362683  .00000297  00000+0  68851-4 0  9998", "2 52900  98.2465  88.8242 0006672 319.8906  40.1802 14.61964501230705" },
+        { "UELYSYS",                  "1 52900U 22065G   26306.85362683  .00000297  00000+0  68851-4 0  9998", "2 52900  98.2465  88.8242 0006672 319.8906  40.1802 14.61964501230705" },
+    };
+    Observer obs(37.56, 126.94, 0.05);
+    for (int i = 0; i < 5; i++)
+        OrbitData.Satellites[i] = new SatelliteObject(Tle(tle[i][0], tle[i][1], tle[i][2]), obs, true, false);
+
+    CHECK(Current() == SAT_BEE1000);
+    size_t n0 = RparamCount();
+    mim::SetActiveSat(1);                               // BEE-1000: 이미 BEE1000 → GS100 설정 안 함
+    CHECK(Current() == SAT_BEE1000);
+    CHECK(SwitchIdle() && RparamCount() == n0);
+
+    double t0 = Now();
+    mim::SetActiveSat(3);                               // BEE-1012
+    CHECK(Now() - t0 < 0.1);                            // GUI 스레드는 GS100 을 기다리지 않는다
+    CHECK(Current() == SAT_BEE1012);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+    CHECK(LastHmacKey() == "BEE1012");
+
+    mim::SetActiveSat(0);                               // MIMAN: 모르는 위성 → 그대로
+    CHECK(Current() == SAT_BEE1012);
+    size_t n1 = RparamCount();
+    CHECK(SwitchIdle() && RparamCount() == n1);
+
+    // GS100 설정 중에 연달아 바꾸면 마지막 탭(UELYSYS)이 남는다
+    mim::SetActiveSat(2);                               // SD-1
+    usleep(50 * 1000);
+    mim::SetActiveSat(1);                               // BEE-1000
+    usleep(50 * 1000);
+    mim::SetActiveSat(4);                               // UELYSYS
+    CHECK(Current() == SAT_UELYSYS);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+    CHECK(LastHmacKey() == "UELYSYS");
+
+    mim::SetActiveSat(1);                               // BEE-1000 → HMAC 끔
+    CHECK(Current() == SAT_BEE1000);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+    CHECK(LastHmacKey() == "");
+
+    // Switch Satellite 팝업도 그대로 동작
+    CHECK(mim::svc::SwitchSatellite(SAT_SD1SAT));
+    CHECK(Current() == SAT_SD1SAT);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+    CHECK(LastHmacKey() == "SD1SAT");
+    mim::svc::SwitchSatellite(SAT_BEE1000);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -348,6 +470,7 @@ int main(int argc, char ** argv)
     TestFtp();
     TestWdtButtons();
     TestFtpPaths();
+    TestSatelliteTabs();
 
     printf("%s: %d failure(s)\n", g_fail ? "FAILED" : "PASSED", g_fail);
     return g_fail ? 1 : 0;

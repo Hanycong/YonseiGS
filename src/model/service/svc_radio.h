@@ -39,6 +39,9 @@ bool AmpReady(const char * program);
 // 위성 모드는 바로 바뀌고, GS100 설정은 스레드에서 한다. 앞 전환이 진행 중이면 false
 const char * SwitchSatelliteName(int mode);
 bool SwitchSatellite(int mode);
+// 상단 위성 탭 선택: TLE 이름으로 위성 모드를 찾아 전환한다. 이미 그 모드면 아무것도 안 한다.
+// 모르는 이름(MIMAN 등)이면 지금 모드를 그대로 두고 false.
+bool SwitchSatelliteByName(const char * sat_name);
 
 } // namespace svc
 } // namespace mim

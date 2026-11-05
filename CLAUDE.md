@@ -272,6 +272,11 @@ structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](do
 
 - **Satellite mode**: `model/missions/sat_mode.*` — `mim::sat::Current()` = BEE1000 / BEE1012 / UELYSYS / SD1-SAT
   (atomic). "Switch Satellite" sets it + GS100 TX HMAC key (BEE1000: HMAC off) + TC log folder.
+  Selecting a top satellite tab (`mim::SetActiveSat`) also switches it by TLE name
+  (`ModeFromSatName`: BEE-1000 / BEE-1012 / UELYSYS / SD-1, ignoring case, `-`, spaces); unknown names
+  (e.g. MIMAN) keep the current mode, the same mode skips the GS100 write. Requests made while GS100 is
+  being set are not rejected: the switch task re-applies the latest one when it finishes.
+  AutoPilot (`SetNowTracking`) and the Track window do NOT switch it.
   BEE1000 mode keeps every pre-existing BEE-1000/COSMIC screen and command exactly as before.
 - **Definitions**: `common/mission_defs.h` = GS_nuri5 `miman_config.h` items missing from `YonseiGS_config.h`.
   Same-name/different-value items keep the BEE-1000 meaning; 5th-gen variants are renamed

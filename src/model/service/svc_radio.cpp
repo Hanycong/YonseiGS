@@ -27,10 +27,30 @@ namespace svc {
 // BEE1000 은 TX HMAC 을 끄고, 나머지는 위성 키(16바이트, 남는 자리는 0)를 TX 테이블(5)에 쓴다.
 // RX 테이블(1)은 건드리지 않는다.
 static std::atomic<bool> switching(false);
+static std::atomic<int>  requested_mode(-1);  // 마지막으로 요청된 모드 (GS100 설정 중에 들어온 요청 포함)
 
+static void ApplySatelliteSetting(int mode);
+
+// 전환 작업: 설정하는 동안 다른 위성이 요청되면 끝난 뒤 마지막 요청을 한 번 더 반영한다
 static void* SwitchSatelliteTask(void* arg)
 {
-    const int mode = (int)(intptr_t)arg;
+    (void)arg;
+    for (;;)
+    {
+        const int mode = requested_mode.load();
+        ApplySatelliteSetting(mode);
+        if (requested_mode.load() != mode)
+            continue;
+        switching = false;
+        // switching 을 내린 직후 들어온 요청: 그 호출이 새 작업을 띄우지 않았으면 여기서 이어서 처리
+        if (requested_mode.load() == mode || switching.exchange(true))
+            break;
+    }
+    return NULL;
+}
+
+static void ApplySatelliteSetting(int mode)
+{
     const mim::sat::SatProfile & profile = mim::sat::Profile(mode);
     const uint8_t node = setup->gs100_node;
 
@@ -59,9 +79,6 @@ static void* SwitchSatelliteTask(void* arg)
     else
         console.AddLog("[ERROR]##GS100 HMAC setting failed for %s (%s). Command list switched, but check the GS100 HMAC key.",
                        profile.name, gs_error_string(err));
-
-    switching = false;
-    return NULL;
 }
 
 int LoadParamTable(int table)
@@ -249,21 +266,34 @@ bool SwitchSatellite(int mode)
 {
     if (mode < 0 || mode >= mim::sat::SAT_MODE_COUNT)
         return false;
-    // 앞 전환이 GS100 설정 중이면 기다리지 않고 거절한다 (GUI 스레드에서 join 하지 않기 위해)
-    if (switching.exchange(true))
-    {
-        console.AddLog("[ERROR]##Satellite switch is still in progress. Try again.");
-        return false;
-    }
     mim::sat::SetCurrent(mode);
-    JoinThread(SLOT_SWITCH_SAT);        // 앞 작업은 끝났다 (switching 이 false 였음)
-    if (StartThread(SLOT_SWITCH_SAT, SwitchSatelliteTask, (void*)(intptr_t)mode) != 0)
+    requested_mode = mode;
+    // 앞 전환이 GS100 설정 중이면 기다리지 않는다: 그 작업이 끝날 때 이 요청을 이어서 반영한다
+    // (GUI 스레드에서 join 하지 않기 위해)
+    if (switching.exchange(true))
+        return true;
+    JoinThread(SLOT_SWITCH_SAT);        // 앞 작업은 끝났거나 끝나는 중이다 (switching 을 내린 뒤)
+    if (StartThread(SLOT_SWITCH_SAT, SwitchSatelliteTask, NULL) != 0)
     {
         switching = false;
         console.AddLog("[ERROR]##Failed to start satellite switch task.");
         return false;
     }
     return true;
+}
+
+bool SwitchSatelliteByName(const char * sat_name)
+{
+    const int mode = mim::sat::ModeFromSatName(sat_name);
+    if (mode < 0)
+    {
+        console.AddLog("[INFO]##%s has no satellite profile. Keeping %s settings.",
+                       sat_name ? sat_name : "(null)", mim::sat::Profile(mim::sat::Current()).name);
+        return false;
+    }
+    if (mode == mim::sat::Current())
+        return true;
+    return SwitchSatellite(mode);
 }
 
 } // namespace svc

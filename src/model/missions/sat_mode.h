@@ -27,5 +27,9 @@ int  Current();                          // 지금 위성 모드
 void SetCurrent(int mode);               // 범위 밖이면 무시
 const char * CurrentKey();               // Profile(Current()).key
 
+// TLE 위성 이름 -> 위성 모드. 대소문자, '-', 공백, '_' 는 무시한다.
+// "BEE-1000" / "BEE-1012" / "UELYSYS" / "SD-1"(SD1, SD1-SAT) 를 알아보고, 모르는 이름은 -1.
+int  ModeFromSatName(const char * name);
+
 } // namespace sat
 } // namespace mim

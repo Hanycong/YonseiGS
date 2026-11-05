@@ -4,6 +4,7 @@
 #include "YonseiGS_satcontext.h"
 #include "YonseiGS_theme.h"      /* SatColor */
 #include <cstring>
+#include "svc_radio.h"      /* SwitchSatelliteByName */
 
 extern StateCheckUnit State;
 
@@ -34,6 +35,8 @@ void SetActiveSat(int sat_idx)
     SatTabs.ActiveSatIndex = sat_idx;
     /* 기존 추적 시스템과 동기화 */
     SetNowTracking_impl(sat_idx, __FILE__, __LINE__);
+    /* 위성 모드(명령 목록, 비콘 화면, TC 로그, GS100 HMAC)도 탭 위성으로 */
+    mim::svc::SwitchSatelliteByName(OrbitData.Satellites[sat_idx]->Name());
 }
 
 /* =========================================================
