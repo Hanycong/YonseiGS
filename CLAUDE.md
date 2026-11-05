@@ -344,6 +344,12 @@ structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](do
   (e.g. GS100 via Ping Each Node) during a pass also counts as a "satellite reply".
 - Shared TX slot: UI `WaitTx(); SendUplink()` and AutoPilot `SendUplink(); WaitTx()` can interleave
   on `p_thread[4]`, so a `WaitTx` may return before its own uplink finished (pre-existing).
+- ~~Sending any satellite TC before the GS100 baud is known → SIGFPE~~ **fixed** (`fix:` commit
+  after the nuri5 port). libcsp `tx_delay()`/`rx_delay()` (`lib/gscsp/.../src/delay.c`) divided
+  `8000000 / tx_baud`; `tx_baud`/`rx_baud` stay 0 until GS100 table 1/5 is read, so with no GS100
+  (or a failed rparam read) e.g. **UTRX WDT CLEAR** killed the program. Old `libilovemozart.a` and
+  GS_nuri5 have the same code. Zero baud now counts as 0 us/byte. Rebuild `libmimancsp.a` from a
+  copy of GS_nuri5's `lib/gscsp` (an in-tree `waf build` also compiles `client_original.c` and fails).
 - AutoPilot **Check Beacon** loop (`AutoPilot_task`) spins without sleeping (100% CPU while it
   waits for `iteration` beacons).
 - After every pass AutoPilot sets `use = false` on all satellites and re-downloads the TLE, so

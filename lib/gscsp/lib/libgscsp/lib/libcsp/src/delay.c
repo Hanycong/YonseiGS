@@ -54,6 +54,15 @@ uint8_t now_gs_node()
     return gs100_node;
 }
 
+// 1바이트를 보내는 데 걸리는 시간(us). baud 가 아직 0 이면 (GS100 파라미터를 못 읽음) 0 으로 본다.
+// 원래는 8000000 / baud 를 그대로 계산해서, GS100 설정을 읽기 전에 위성으로 명령을 보내면 0 나누기(SIGFPE)로 프로그램이 죽었다.
+static uint32_t byte_time_us(uint32_t baud)
+{
+    if(baud == 0)
+        return 0;
+    return 8000000 / baud;
+}
+
 
 uint32_t tx_delay(uint16_t packetlength, uint8_t node)
 {
@@ -68,7 +77,7 @@ uint32_t tx_delay(uint16_t packetlength, uint8_t node)
 #ifdef CSP_USE_CRC32
 	real_length += crc_bytes;
 #endif
-    uint32_t result = real_length * (8000000 / kiss_baud + 8000000 / tx_baud) + queue_delay;
+    uint32_t result = real_length * (byte_time_us(kiss_baud) + byte_time_us(tx_baud)) + queue_delay;
     csp_log_lock("TX Delay : %u microsecond.", result);
 
     return result;
@@ -88,7 +97,7 @@ uint32_t rx_delay(uint16_t packetlength, uint8_t node)
 	real_length += crc_bytes;
 #endif
     
-    uint32_t result = real_length * (8000000 / kiss_baud + 8000000 / rx_baud) + queue_delay + rx_guard_sat + default_del;
+    uint32_t result = real_length * (byte_time_us(kiss_baud) + byte_time_us(rx_baud)) + queue_delay + rx_guard_sat + default_del;
     csp_log_info("RX Delay : %u microsecond.", result);
     return result;
 }
