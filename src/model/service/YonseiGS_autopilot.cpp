@@ -120,6 +120,17 @@ static bool WaitPassGate(int SatIndex, int NextValuablePath)
 
 
 
+// 추적 위성의 TLE 이름으로 위성 모드(명령 목록, HMAC 키, TC 로그 폴더)를 맞추고 GS100 설정이 끝날 때까지 기다린다.
+// 탭이 아니라 Track 창으로 고른 위성이어도, 패스 사이에 TLE 를 다시 읽은 뒤에도 맞춘다
+static void SyncSatelliteMode(int sat_index)
+{
+    if (sat_index < 0 || sat_index >= SAT_MAX_NUM || !OrbitData.Satellites[sat_index]) return;
+    if (!mim::svc::SwitchSatelliteByName(OrbitData.Satellites[sat_index]->Name()))
+        return;
+    if (!mim::svc::WaitSatelliteSwitch(10000))
+        console.AddLog("[ERROR]##[Auto]Satellite switch (GS100 HMAC) did not finish in 10 s.");
+}
+
 int AutoPilot_task()
 {
     bool BeaconAvailable = false;
@@ -135,6 +146,7 @@ int AutoPilot_task()
             OrbitData.Satellites[NowTracking]->Name());
     int SatIndex = GetNowTracking();
     if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !OrbitData.Satellites[SatIndex]) return -2;
+    SyncSatelliteMode(SatIndex);
 
     while(AutoPilotCfg.Autopilot)
     {
@@ -665,6 +677,7 @@ if (wdt_notsent &&
         SetNowTracking(NowTracking);
         SatIndex = GetNowTracking();
         if (SatIndex < 0 || SatIndex >= SAT_MAX_NUM || !OrbitData.Satellites[SatIndex]) return -2;
+        SyncSatelliteMode(SatIndex);
         // BEFORE calling PathGenerator()
         if (!AutoPilotCfg.Autopilot) {
             console.AddLog("[OK]##[Auto]Autopilot Stopped by User (before PathGenerator).");

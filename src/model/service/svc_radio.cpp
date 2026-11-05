@@ -282,6 +282,17 @@ bool SwitchSatellite(int mode)
     return true;
 }
 
+bool WaitSatelliteSwitch(int timeout_ms)
+{
+    for (int waited = 0; switching.load(); waited += 10)
+    {
+        if (waited >= timeout_ms)
+            return false;
+        usleep(10 * 1000);
+    }
+    return true;
+}
+
 bool SwitchSatelliteByName(const char * sat_name)
 {
     const int mode = mim::sat::ModeFromSatName(sat_name);

@@ -42,6 +42,9 @@ bool SwitchSatellite(int mode);
 // 상단 위성 탭 선택: TLE 이름으로 위성 모드를 찾아 전환한다. 이미 그 모드면 아무것도 안 한다.
 // 모르는 이름(MIMAN 등)이면 지금 모드를 그대로 두고 false.
 bool SwitchSatelliteByName(const char * sat_name);
+// 위성 전환 작업(GS100 HMAC 설정)이 끝날 때까지 기다린다 (GUI 스레드에서는 부르지 말 것).
+// timeout_ms 안에 끝나면 true
+bool WaitSatelliteSwitch(int timeout_ms);
 
 } // namespace svc
 } // namespace mim

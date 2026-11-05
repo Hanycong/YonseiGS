@@ -9,6 +9,7 @@
 //  - Control "UTRX WDT CLEAR" / "EPS WDT CLEAR ALL" 이 누리호 5차 GS 버튼과 같은 바이트를 보내는지
 //  - 상단 위성 탭 선택 → 위성 모드 전환 (TLE 이름 인식, 같은 모드면 GS100 설정 생략, 모르는 위성은 유지,
 //    GS100 설정 중 연달아 바꾸면 마지막 위성 키가 GS100 에 남는지). gs_rparam_set 은 아래 가짜로 대체
+//  - AutoPilot 시작 시 추적 위성(Track 창으로 고른 경우 포함)으로 위성 모드 전환
 //
 // svc_tx 대신 아래 가짜 SendUplink 로 패킷을 기록한다 (svc_tx.cpp.o 는 링크하지 않는다).
 // 빌드/실행: tools/ops_test.sh <OUT_DIR>   (실패가 있으면 종료 코드 1)
@@ -37,6 +38,8 @@
 #include <gs/param/rparam.h>
 #include "sat_mode.h"
 #include "YonseiGS_satcontext.h"
+#include "YonseiGS_autopilot.h"
+#include "YonseiGS_orbital.h"
 
 // ---- main.cpp 가 정의하던 전역 (main.cpp 는 링크하지 않는다) ----
 FILE *log_ptr;
@@ -407,7 +410,7 @@ static void TestSatelliteTabs()
     CHECK(ModeFromSatName("") == -1);
     CHECK(ModeFromSatName(NULL) == -1);
 
-    // NORAD_TLE.txt 와 같은 이름의 위성 5개 (궤도 계산은 하지 않는다)
+    // NORAD_TLE.txt 와 같은 이름의 위성 5개 (AutoPilot 테스트가 PathGenerator 를 부르므로 궤도도 계산한다)
     const char * tle[5][3] = {
         { "MIMAN                   ", "1 52900U 22065G   26306.85362683  .00000297  00000+0  68851-4 0  9998", "2 52900  98.2465  88.8242 0006672 319.8906  40.1802 14.61964501230705" },
         { "BEE-1000                ", "1 66650U 25274A   26306.79900039  .00001616  00000+0  15886-3 0  9991", "2 66650  97.7540 233.8282 0010018 252.2871 107.7255 14.93502136 50895" },
@@ -417,7 +420,7 @@ static void TestSatelliteTabs()
     };
     Observer obs(37.56, 126.94, 0.05);
     for (int i = 0; i < 5; i++)
-        OrbitData.Satellites[i] = new SatelliteObject(Tle(tle[i][0], tle[i][1], tle[i][2]), obs, true, false);
+        OrbitData.Satellites[i] = new SatelliteObject(Tle(tle[i][0], tle[i][1], tle[i][2]), obs, true, true);
 
     CHECK(Current() == SAT_BEE1000);
     size_t n0 = RparamCount();
@@ -461,6 +464,40 @@ static void TestSatelliteTabs()
     CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
 }
 
+static void * RunAutoPilotTask(void * done)
+{
+    AutoPilot_task();
+    *(volatile bool *)done = true;
+    return NULL;
+}
+
+// TestSatelliteTabs 의 위성 5개를 그대로 쓴다
+static void TestAutoPilotSatelliteMode()
+{
+    using namespace mim::sat;
+    CHECK(Current() == SAT_BEE1000);
+    CHECK(mim::svc::WaitSatelliteSwitch(100));          // 전환 중이 아니면 바로 true
+
+    // 탭이 아니라 Track 창처럼 추적 위성만 BEE-1012 로
+    SetNowTracking(3);
+    CHECK(Current() == SAT_BEE1000);
+
+    static volatile bool done = false;
+    pthread_t th;
+    AutoPilotCfg.Autopilot = true;
+    pthread_create(&th, NULL, RunAutoPilotTask, (void *)&done);
+    CHECK(WaitFor([] { return Current() == SAT_BEE1012; }, 2.0));
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+    CHECK(LastHmacKey() == "BEE1012");
+    AutoPilotCfg.Autopilot = false;                     // AOS 를 기다리는 중에 멈춘다
+    CHECK(WaitFor([] { return done; }, 10.0));
+    if (done)
+        pthread_join(th, NULL);
+
+    mim::svc::SwitchSatellite(SAT_BEE1000);
+    CHECK(WaitFor([] { return SwitchIdle(); }, 5.0));
+}
+
 int main(int argc, char ** argv)
 {
     log_ptr = fopen("/dev/null", "w");
@@ -471,6 +508,7 @@ int main(int argc, char ** argv)
     TestWdtButtons();
     TestFtpPaths();
     TestSatelliteTabs();
+    TestAutoPilotSatelliteMode();
 
     printf("%s: %d failure(s)\n", g_fail ? "FAILED" : "PASSED", g_fail);
     return g_fail ? 1 : 0;
