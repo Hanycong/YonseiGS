@@ -3,6 +3,7 @@
 // 화면 상태만 가진다 (현재 폴더, 방문 기록, 선택 항목). 파일을 읽지는 않고 고른 경로만 돌려준다.
 // 다른 팝업 모달 안에서 Draw 를 부르면 그 위에 겹쳐 열린다.
 #pragma once
+#include <cstdint>
 #include <ctime>
 #include <string>
 #include <vector>
