@@ -379,7 +379,7 @@ Duplicate code was folded into shared classes/functions (source 91k → 73k line
 - `sleep(0.1)` / `sleep(0.3)` (COSMIC dual emission, AX100 Load/Save buttons): `sleep` takes whole seconds, so these
   are `sleep(0)` — no pause at all.
 - AX100 tab logs: "rssi_busy" prints the CSP node instead of the value; rx/tx baud are printed with a 16-bit format.
-- ``Console::Draw` (view/console_view.cpp): when `ImGui::Begin` returns false (window collapsed)
+- `Console::Draw` (view/console_view.cpp): when `ImGui::Begin` returns false (window collapsed)
   it returns without `PopStyleColor(3)` — style stack leak. Fix: pop before that return.
 - S-band Manager popup shows garbage text (e.g. a window ID path) in its output box before any
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
