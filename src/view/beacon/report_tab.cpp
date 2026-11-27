@@ -71,15 +71,6 @@ void DrawReportTab(float fontscale)
                 ImGui::TableSetupColumn("Data",      ImGuiTableColumnFlags_NoHide, 0.0f);
                 ImGui::TableHeadersRow();
 
-                auto ReportRow = [](const char* label, const char* fmt, auto value)
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted(label);
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text(fmt, value);
-                };
-
                 if (!view.valid)
                 {
                     ImGui::TableNextRow();
@@ -94,9 +85,9 @@ void DrawReportTab(float fontscale)
 
                     BeaconSectionHeader("[CCSDS]");
 
-                    ReportRow("CCSDS_Message_ID", "0x%04X", (unsigned int)view.CCMessage_ID);
-                    ReportRow("CCSDS_Count",      "0x%04X", (unsigned int)view.CCCount);
-                    ReportRow("CCSDS_Length",     "0x%04X", (unsigned int)view.CCLength);
+                    rpt5::RowFmt("CCSDS_Message_ID", "0x%04X", (unsigned int)view.CCMessage_ID);
+                    rpt5::RowFmt("CCSDS_Count",      "0x%04X", (unsigned int)view.CCCount);
+                    rpt5::RowFmt("CCSDS_Length",     "0x%04X", (unsigned int)view.CCLength);
 
                     ImGui::TableNextRow();
                     ImGui::TableSetColumnIndex(0);
@@ -110,13 +101,13 @@ void DrawReportTab(float fontscale)
                     ImGui::TableNextRow();
                     BeaconSectionHeader("[Body]");
 
-                    ReportRow("Reflected Msg Id",       "0x%04X", (unsigned int)view.reflected_msg_id);
-                    ReportRow("Reflected Command Code",           "%u",     (unsigned int)view.reflected_cc);
-                    ReportRow("Return Type",     "0x%02X", (unsigned int)view.ret_type);
-                    ReportRow("Return Code",     "%d",     (int)view.ret_code);
-                    ReportRow("Return Value Size", "%u",     (unsigned int)view.ret_val_size);
+                    rpt5::RowFmt("Reflected Msg Id",       "0x%04X", (unsigned int)view.reflected_msg_id);
+                    rpt5::RowFmt("Reflected Command Code",           "%u",     (unsigned int)view.reflected_cc);
+                    rpt5::RowFmt("Return Type",     "0x%02X", (unsigned int)view.ret_type);
+                    rpt5::RowFmt("Return Code",     "%d",     (int)view.ret_code);
+                    rpt5::RowFmt("Return Value Size", "%u",     (unsigned int)view.ret_val_size);
                     if (!bee1000)
-                        ReportRow("Payload Decode", "%s", view.payload_valid ? "valid" : "INVALID / size mismatch");
+                        rpt5::RowFmt("Payload Decode", "%s", view.payload_valid ? "valid" : "INVALID / size mismatch");
 
                     // SD1-SAT CR 봉투: 모델이 CrSeq 를 crit_time_sec 에, IsRetransmit 을 is_critical 에 담아 준다
                     const bool is_sd1sat_kind = !bee1000 && (view.kind >= REPORT_KIND_SD1SAT_CR &&
@@ -125,16 +116,16 @@ void DrawReportTab(float fontscale)
                     {
                         ImGui::TableNextRow();
                         BeaconSectionHeader("[CR Envelope]");
-                        ReportRow("CrSeq", "%u", (unsigned)view.crit_time_sec);
-                        ReportRow("IsRetransmit", "%s", view.is_critical ? "1 (replay)" : "0 (first send)");
+                        rpt5::RowFmt("CrSeq", "%u", (unsigned)view.crit_time_sec);
+                        rpt5::RowFmt("IsRetransmit", "%s", view.is_critical ? "1 (replay)" : "0 (first send)");
                     }
                     else if (view.is_critical)
                     {
                         ImGui::TableNextRow();
                         BeaconSectionHeader("[Critical]");
-                        ReportRow("Source", "%s", "RPT_CRITICAL_TLM_MID (RPT_Data.CritPipe)");
-                        ReportRow("Report Time (sec)", "%u", (unsigned)view.crit_time_sec);
-                        ReportRow("Report Time (subsec)", "%u", (unsigned)view.crit_time_subsec);
+                        rpt5::RowFmt("Source", "%s", "RPT_CRITICAL_TLM_MID (RPT_Data.CritPipe)");
+                        rpt5::RowFmt("Report Time (sec)", "%u", (unsigned)view.crit_time_sec);
+                        rpt5::RowFmt("Report Time (subsec)", "%u", (unsigned)view.crit_time_subsec);
                     }
 
                     ImGui::TableNextRow();

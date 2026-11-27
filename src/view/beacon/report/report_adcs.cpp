@@ -8,18 +8,10 @@
 #include "beacon_vm.h"
 #include "beacon_tabs.h"
 #include "report_sections.h"
+#include "report_rows.h"
 
 bool DrawAdcsReport(ReportView_t & view)
 {
-                auto ReportRow = [](const char* label, const char* fmt, auto value)
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted(label);
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text(fmt, value);
-                };
-
                     switch (view.kind)
                     {
                     case REPORT_KIND_ADCS_LOG_MASK:

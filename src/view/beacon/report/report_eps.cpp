@@ -8,143 +8,58 @@
 #include "beacon_vm.h"
 #include "beacon_tabs.h"
 #include "report_sections.h"
+#include "report_rows.h"
+
+// 이 파일의 세 리포트(PDU / ACU / DOCK)가 같이 쓰는 행 도우미.
+// 소제목 / 이름-값 행은 report_rows.h 의 rpt5 것과 같아 그대로 쓴다.
+// 배열 행은 줄바꿈 규칙이 다르다: BEE-1000 화면은 (break_after + 1) 번째 값 앞에서 한 번만 줄을 바꾼다
+// (rpt5::RowArrFmt 는 break_after 개마다). 화면을 그대로 두려고 원래 규칙을 따로 둔다.
+namespace {
+
+using rpt5::HeaderRow;
+using rpt5::RowFmt;
+using rpt5::RowText;
+
+template <typename T>
+void RowArrBreakOnce(const char* label, const T* aa, int n, int break_after, const char* fmt)
+{
+    std::string s;
+    s.reserve(n * 8);
+    char tmp[32];
+
+    for (int i = 0; i < n; i++)
+    {
+        snprintf(tmp, sizeof(tmp), fmt, aa[i]);
+
+        if (i != 0)
+        {
+            if (break_after > 0 && i == break_after + 1) s.push_back('\n');
+            else s.push_back(' ');
+        }
+        s += tmp;
+    }
+
+    ImGui::TableNextRow();
+    ImGui::TableSetColumnIndex(0);
+    ImGui::TextUnformatted(label);
+    ImGui::TableSetColumnIndex(1);
+    ImGui::TextUnformatted(s.c_str());
+}
+
+void RowArr_i16(const char* label, const int16_t* aa, int n, int break_after)  { RowArrBreakOnce(label, aa, n, break_after, "%" PRIi16); }
+void RowArr_u16(const char* label, const uint16_t* aa, int n, int break_after) { RowArrBreakOnce(label, aa, n, break_after, "%" PRIu16); }
+void RowArr_u8 (const char* label, const uint8_t* aa, int n, int break_after)  { RowArrBreakOnce(label, aa, n, break_after, "%" PRIu8); }
+void RowArr_u32(const char* label, const uint32_t* aa, int n, int break_after) { RowArrBreakOnce(label, aa, n, break_after, "%" PRIu32); }
+
+} // namespace
 
 bool DrawEpsReport(ReportView_t & view)
 {
-                auto ReportRow = [](const char* label, const char* fmt, auto value)
-                {
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted(label);
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text(fmt, value);
-                };
-
                     switch (view.kind)
                     {
                         case REPORT_KIND_EPS_P60_PDU_GET_TABLE_HK:
                         {
                             auto &pl = view.u.eps_p60pdugettablehk;
-
-                            auto HeaderRow = [](const char* title)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.80f, 0.80f, 0.80f, 1.0f));
-                                ImGui::TextUnformatted(title);
-                                ImGui::PopStyleColor();
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted("");
-                            };
-
-                            auto RowFmt = [](const char* label, const char* fmt, auto v)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::Text(fmt, v);
-                            };
-
-                            auto RowArr_i16 = [](const char* label, const int16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIi16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u16 = [](const char* label, const uint16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u8 = [](const char* label, const uint8_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 4);
-                                char tmp[16];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu8, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u32 = [](const char* label, const uint32_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 12);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu32, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
 
                             ImGui::TableNextRow();
                             ImGui::TableSetColumnIndex(0);
@@ -199,126 +114,6 @@ bool DrawEpsReport(ReportView_t & view)
                         {
                             auto &pl = view.u.eps_p60acugettablehk;
 
-                            auto HeaderRow = [](const char* title)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.80f, 0.80f, 0.80f, 1.0f));
-                                ImGui::TextUnformatted(title);
-                                ImGui::PopStyleColor();
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted("");
-                            };
-
-                            auto RowFmt = [](const char* label, const char* fmt, auto v)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::Text(fmt, v);
-                            };
-
-                            auto RowArr_i16 = [](const char* label, const int16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIi16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u16 = [](const char* label, const uint16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u8 = [](const char* label, const uint8_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 4);
-                                char tmp[16];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu8, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u32 = [](const char* label, const uint32_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 12);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu32, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
                             ImGui::TableNextRow();
                             ImGui::TableSetColumnIndex(0);
                             ImGui::TextUnformatted("Type");
@@ -371,135 +166,6 @@ bool DrawEpsReport(ReportView_t & view)
                         case REPORT_KIND_EPS_P60_DOCK_GET_TABLE_HK:
                         {
                             auto &pl = view.u.eps_p60dockgettablehk;
-
-                            auto HeaderRow = [](const char* title)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.80f, 0.80f, 0.80f, 1.0f));
-                                ImGui::TextUnformatted(title);
-                                ImGui::PopStyleColor();
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted("");
-                            };
-
-                            auto RowFmt = [](const char* label, const char* fmt, auto v)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::Text(fmt, v);
-                            };
-
-                            auto RowText = [](const char* label, const char* text)
-                            {
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(text);
-                            };
-
-                            auto RowArr_i16 = [](const char* label, const int16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIi16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u16 = [](const char* label, const uint16_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 8);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu16, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u8 = [](const char* label, const uint8_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 4);
-                                char tmp[16];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu8, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
-
-                            auto RowArr_u32 = [](const char* label, const uint32_t* aa, int n, int break_after)
-                            {
-                                std::string s;
-                                s.reserve(n * 12);
-                                char tmp[32];
-
-                                for (int i = 0; i < n; i++)
-                                {
-                                    snprintf(tmp, sizeof(tmp), "%" PRIu32, aa[i]);
-
-                                    if (i != 0)
-                                    {
-                                        if (break_after > 0 && i == break_after + 1) s.push_back('\n');
-                                        else s.push_back(' ');
-                                    }
-                                    s += tmp;
-                                }
-
-                                ImGui::TableNextRow();
-                                ImGui::TableSetColumnIndex(0);
-                                ImGui::TextUnformatted(label);
-                                ImGui::TableSetColumnIndex(1);
-                                ImGui::TextUnformatted(s.c_str());
-                            };
 
                             ImGui::TableNextRow();
                             ImGui::TableSetColumnIndex(0);
