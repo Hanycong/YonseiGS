@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,52 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 10100, SD1SAT_CR_CMD_ID, SD1SAT_CR_NOOP_CC,              "##direct_10100" },   // cr NOOP
+    { 10101, SD1SAT_CR_CMD_ID, SD1SAT_CR_RESET_COUNTERS_CC,    "##direct_10101" },   // cr RESET_COUNTERS
+    { 10102, SD1SAT_CR_CMD_ID, SD1SAT_CR_RETRANSMIT_LATEST_CC, "##direct_10102" },   // cr RETRANSMIT_LATEST
+    { 10107, SD1SAT_CR_CMD_ID, SD1SAT_CR_GET_FULL_STATES_CC,   "##direct_10107" },
+};
+
 bool DrawSd1SatCrForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 10100: { // cr NOOP
-            static uint16_t msgid = SD1SAT_CR_CMD_ID;
-            static uint8_t fnccode = SD1SAT_CR_NOOP_CC;
-            ImGui::InputScalar("msgid##direct_10100", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10100", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10100")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10101: { // cr RESET_COUNTERS
-            static uint16_t msgid = SD1SAT_CR_CMD_ID;
-            static uint8_t fnccode = SD1SAT_CR_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_10101", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10101", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10101")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10102: { // cr RETRANSMIT_LATEST
-            static uint16_t msgid = SD1SAT_CR_CMD_ID;
-            static uint8_t fnccode = SD1SAT_CR_RETRANSMIT_LATEST_CC;
-            ImGui::InputScalar("msgid##direct_10102", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10102", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10102")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10103: { // cr RETRANSMIT_APP
             static uint16_t msgid = SD1SAT_CR_CMD_ID;
             static uint8_t fnccode = SD1SAT_CR_RETRANSMIT_APP_CC;
@@ -144,20 +114,6 @@ bool DrawSd1SatCrForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10107 : {
-            static uint16_t msgid = SD1SAT_CR_CMD_ID;
-            static uint8_t fnccode = SD1SAT_CR_GET_FULL_STATES_CC;
-            ImGui::InputScalar("msgid##direct_10107", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10107", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10107")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }

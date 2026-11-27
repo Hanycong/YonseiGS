@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,16 +36,20 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  8200, 0x1858, 0, "##direct_8200" },   // sp NOOP
+    {  8201, 0x1858, 1, "##direct_8201" },   // sp RESET_COUNTERS
+    {  8208, 0x1858, 8, "##direct_8208" },   // sp ALL_STOP_BURN
+};
+
 bool DrawUelysysSpForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 8200: { // sp NOOP
-            static uint16_t msgid=0x1858; static uint8_t fnccode=0; ImGui::InputScalar("msgid##direct_8200",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8200",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_8200")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 8201: { // sp RESET_COUNTERS
-            static uint16_t msgid=0x1858; static uint8_t fnccode=1; ImGui::InputScalar("msgid##direct_8201",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8201",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_8201")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
         case 8202: { // sp GET_AR6_STATUS
             static uint16_t msgid=0x1858; static uint8_t fnccode=2; static uint8_t Ar6Addr=0; ImGui::InputScalar("msgid##direct_8202",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8202",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("Ar6Addr##direct_8202",ImGuiDataType_U8,&Ar6Addr); if(ImGui::Button("Generate CMD##direct_8202")){ WriteSystemName(msgid); uint8_t cmd[9]={0}; cmd[8]=Ar6Addr; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode, (uint8_t)(2)); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
         }
@@ -62,9 +67,6 @@ bool DrawUelysysSpForms(uint16_t fnccode)
         }
         case 8207: { // sp SCAN_AR6
             static uint16_t msgid=0x1858; static uint8_t fnccode=7; struct __attribute__((packed)) Payload{uint8_t StartAddr;uint8_t StopAddr;}; static_assert(sizeof(Payload)==2,"sp SCAN_AR6 payload size"); static Payload payload{}; ImGui::InputScalar("msgid##direct_8207",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8207",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("StartAddr##direct_8207",ImGuiDataType_U8,&payload.StartAddr); ImGui::InputScalar("StopAddr##direct_8207",ImGuiDataType_U8,&payload.StopAddr); if(ImGui::Button("Generate CMD##direct_8207")){ WriteSystemName(msgid); uint8_t cmd[10]={0}; memcpy(cmd+8,&payload,2); mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode, (uint8_t)(3)); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 8208: { // sp ALL_STOP_BURN
-            static uint16_t msgid=0x1858; static uint8_t fnccode=8; ImGui::InputScalar("msgid##direct_8208",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8208",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_8208")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
         }
         case 8209: { // sp GET_AR6_STATUS
             static uint16_t msgid=0x1858; static uint8_t fnccode=9; static uint8_t Ar6Addr=0; ImGui::InputScalar("msgid##direct_8209",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8202",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("Ar6Addr##direct_8202",ImGuiDataType_U8,&Ar6Addr); if(ImGui::Button("Generate CMD##direct_8202")){ WriteSystemName(msgid); uint8_t cmd[9]={0}; cmd[8]=Ar6Addr; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode, (uint8_t)(2)); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;

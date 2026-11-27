@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,25 +36,13 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  8460, 0x1854, 60, "##direct_8460" },   // stx FILESYS_CC_QUICKFORMAT (CC60)
+    {  8461, 0x1854, 61, "##direct_8461" },   // stx FILESYS_CC_QUICKRESULT (CC61)
+};
+
 bool DrawUelysysStxForms(uint16_t fnccode)
 {
-    switch (fnccode)
-    {
-        case 8460: { // stx FILESYS_CC_QUICKFORMAT (CC60)
-            static uint16_t msgid=0x1854; static uint8_t fnccode=60;
-            ImGui::InputScalar("msgid##direct_8460",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8460",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_8460")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
-        case 8461: { // stx FILESYS_CC_QUICKRESULT (CC61)
-            static uint16_t msgid=0x1854; static uint8_t fnccode=61;
-            ImGui::InputScalar("msgid##direct_8461",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8461",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_8461")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
-
-    default:
-        return false;
-    }
-    return true;
+    return mim::ui::DrawNoArgForm(kNoArgForms, fnccode);
 }

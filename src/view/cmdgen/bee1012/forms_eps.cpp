@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,48 +36,22 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  2900, 0x1875, EPS_NOOP_CC,                  "" },
+    {  2901, 0x1875, EPS_RESET_COUNTERS_CC,        "" },
+    {  2921, 0x1875, EPS_GET_HK_ALL_CC,            "" },
+    {  2931, 0x1875, EPS_P80_GND_WDT_CLEAR_ALL_CC, "" },
+    {  2970, 0x1875, EPS_REPORT_BCN_CC,            "" },
+};
+
 bool DrawBee1012EpsForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-    case 2900: {
-        static uint16_t msgid = 0x1875;
-        static uint8_t fnccode = EPS_NOOP_CC;
-
-        ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-            mim::tc::EncodeCfeCommand(&command5->epsnoopcmd, sizeof(EPS_NoopCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->epsnoopcmd, sizeof(EPS_NoopCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
-    case 2901: {
-        static uint16_t msgid = 0x1875;
-        static uint8_t fnccode = EPS_RESET_COUNTERS_CC;
-
-        ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-            mim::tc::EncodeCfeCommand(&command5->epsresetcounterscmd, sizeof(EPS_ResetCountersCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->epsresetcounterscmd, sizeof(EPS_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
     case 2910: {
         static uint16_t msgid = 0x1875;
         static uint8_t fnccode = EPS_P80_POWER_IF_GET_CC;
@@ -166,25 +141,6 @@ bool DrawBee1012EpsForms(uint16_t fnccode)
         break;
     }
 
-    case 2921: {
-        static uint16_t msgid = 0x1875;
-        static uint8_t fnccode = EPS_GET_HK_ALL_CC;
-
-        ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-            mim::tc::EncodeCfeCommand(&command5->epsgethkallcmd, sizeof(EPS_Get_HK_All_Cmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->epsgethkallcmd, sizeof(EPS_Get_HK_All_Cmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
     case 2930: {
         static uint16_t msgid = 0x1875;  // 실제 msgid로 변경 필요
         static uint8_t fnccode = EPS_P80_GND_WDT_CLEAR_CC;  // 실제 function code로 변경 필요
@@ -202,25 +158,6 @@ bool DrawBee1012EpsForms(uint16_t fnccode)
 
 
             mim::tc::SendTelecommand(&command5->epsp80gndwatchdogclearcmd, sizeof(EPS_P80_Gnd_Watchdog_Clear_Cmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
-    case 2931: {
-        static uint16_t msgid = 0x1875;
-        static uint8_t fnccode = EPS_P80_GND_WDT_CLEAR_ALL_CC;
-
-        ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-            mim::tc::EncodeCfeCommand(&command5->epsp80gndwatchdogclearallcmd, sizeof(EPS_P80_Gnd_Watchdog_Clear_All_Cmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->epsp80gndwatchdogclearallcmd, sizeof(EPS_P80_Gnd_Watchdog_Clear_All_Cmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -411,26 +348,6 @@ bool DrawBee1012EpsForms(uint16_t fnccode)
         }
         break;
     }
-
-    case 2970: {
-        static uint16_t msgid = 0x1875;
-        static uint8_t fnccode = EPS_REPORT_BCN_CC;
-
-        ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-            mim::tc::EncodeCfeCommand(&command5->epsreportbcncmd, sizeof(EPS_ReportBcnCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->epsreportbcncmd, sizeof(EPS_ReportBcnCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
 
 
     //     /********************************************************************/

@@ -1,5 +1,8 @@
 #include "cmdgen_vm.h"
 #include "sat_mode.h"
+#include "YonseiGS_config.h"      // WriteSystemName, MIM_PT_TMTC_TEST
+#include "ccsds_cmd.h"
+#include "telecommand_sender.h"
 
 extern uint16_t gen_fnccode;
 extern bool raw_data;
@@ -77,6 +80,14 @@ void CmdGeneratorVM::Select(int command_id)
 
 uint16_t CmdGeneratorVM::SelectedCommand() const { return gen_fnccode; }
 bool * CmdGeneratorVM::RawData()                 { return &raw_data; }
+
+void CmdGeneratorVM::SendNoArgCommand(uint16_t msgid, uint8_t fnccode)
+{
+    WriteSystemName(msgid);
+    uint8_t cmd[8] = {0};       // CCSDS Primary 6 + cFE Secondary 2
+    mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+    mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
+}
 
 CmdGeneratorVM & CmdGeneratorViewModel()
 {

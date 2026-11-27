@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,19 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  3300, BEE1012_GPS_CMD_ID, BEE1012_GPS_NOOP_CC, "##direct_3300" },
+    {  3301, 0x1894,             1,                   "##direct_3301" },   // gps RESET_COUNTERS
+};
+
 bool DrawBee1012GpsForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 3300: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_GPS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_GPS_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3300", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3300")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-
-        case 3301: { // gps RESET_COUNTERS
-            static uint16_t msgid=0x1894;
-            static uint8_t fnccode=1;
-            ImGui::InputScalar("msgid##direct_3301",ImGuiDataType_U16,&msgid);
-            ImGui::InputScalar("fnccode##direct_3301",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_3301")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE]={0};
-                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 3312: { // gps OEM_CMD_LOG
             static uint16_t msgid=0x1894;
             static uint8_t fnccode=12;

@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,14 +36,20 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  9001, 0x1840,              1,                          "##direct_9001" },   // uant RESET_COUNTERS
+    {  9000, UELYSYS_UANT_CMD_ID, UELYSYS_UANT_NOOP_CC,       "##direct_9000" },
+    {  9011, UELYSYS_UANT_CMD_ID, UELYSYS_UANT_AUTODEPLOY_CC, "##direct_9011" },
+};
+
 bool DrawUelysysUantForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 9001: { // uant RESET_COUNTERS
-            static uint16_t msgid=0x1840; static uint8_t fnccode=1; ImGui::InputScalar("msgid##direct_9001",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_9001",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_9001")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
-        }
         case 9006: case 9008: case 9009: { // GET_BACKUP_STATUS / GET_TEMPERATURE / GET_SETTINGS
             const int selected_case=gen_fnccode; static uint16_t msgid=0x1840; static uint8_t fnccode_by_case[3]={6,8,9}; static uint8_t addr_by_case[3]={0,0,0}; const int slot=(selected_case==9006)?0:(selected_case==9008?1:2); uint8_t &fnccode=fnccode_by_case[slot]; uint8_t &addr=addr_by_case[slot];
             ImGui::InputScalar("msgid##direct_9006_9009",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_9006_9009",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("Addr##direct_9006_9009",ImGuiDataType_U8,&addr);
@@ -65,19 +72,6 @@ bool DrawUelysysUantForms(uint16_t fnccode)
         }
 
         // ==================== UELYSYS gpio ====================
-        case 9000: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_UANT_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_UANT_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_9000", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_9000", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_9000")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
         case 9002: {
             UELYSYS_UANT_AddrCmd_t &cmd = command5->uelysys_uant_addrcmd;
             static uint16_t msgid = (uint16_t)(UELYSYS_UANT_CMD_ID);
@@ -147,19 +141,6 @@ bool DrawUelysysUantForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 mim::tc::EncodeCfeCommand16(&cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(&cmd, (sizeof(cmd)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 9011: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_UANT_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_UANT_AUTODEPLOY_CC);
-            ImGui::InputScalar("msgid##direct_9011", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_9011", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_9011")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
             }
             break;
         }

@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,20 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 10200, SD1_EPS_CMD_ID, SD1_EPS_NOOP_CC,           "##direct_10200" },   // eps NOOP
+    { 10201, SD1_EPS_CMD_ID, SD1_EPS_RESET_COUNTERS_CC, "##direct_10201" },   // eps RESET_COUNTERS
+    { 10218, SD1_EPS_CMD_ID, SD1_EPS_HK_GET_MODE_CC,    "##direct_10218" },   // eps HK_GET_MODE
+};
+
 bool DrawSd1SatEpsForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 10200: { // eps NOOP
-            static uint16_t msgid = SD1_EPS_CMD_ID;
-            static uint8_t fnccode = SD1_EPS_NOOP_CC;
-            ImGui::InputScalar("msgid##direct_10200", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10200", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10200")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10201: { // eps RESET_COUNTERS
-            static uint16_t msgid = SD1_EPS_CMD_ID;
-            static uint8_t fnccode = SD1_EPS_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_10201", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10201", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10201")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10202: { // eps PING
             static uint16_t msgid = SD1_EPS_CMD_ID;
             static uint8_t fnccode = SD1_EPS_PING_CC;
@@ -359,20 +342,6 @@ bool DrawSd1SatEpsForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10218: { // eps HK_GET_MODE
-            static uint16_t msgid = SD1_EPS_CMD_ID;
-            static uint8_t fnccode = SD1_EPS_HK_GET_MODE_CC;
-            ImGui::InputScalar("msgid##direct_10218", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10218", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10218")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }

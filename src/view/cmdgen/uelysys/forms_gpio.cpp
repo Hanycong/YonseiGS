@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,44 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  5804, 0x182B, 4,  "##direct_5804" },   // gpio STX_PAY_HIGH
+    {  5805, 0x182B, 5,  "##direct_5805" },   // gpio STX_PAY_LOW
+    {  5806, 0x182B, 6,  "##direct_5806" },   // gpio LGE_MCU_RESET_HIGH
+    {  5807, 0x182B, 7,  "##direct_5807" },   // gpio LGE_MCU_RESET_LOW
+    {  5808, 0x182B, 8,  "##direct_5808" },   // gpio STX_BUS_HIGH
+    {  5809, 0x182B, 9,  "##direct_5809" },   // gpio STX_BUS_LOW
+    {  5810, 0x182B, 10, "##direct_5810" },   // gpio ADCS_EN_HIGH
+    {  5811, 0x182B, 11, "##direct_5811" },   // gpio ADCS_EN_LOW
+    {  5812, 0x182B, 12, "##direct_5812" },   // gpio ADCS_BOOT_HIGH
+    {  5813, 0x182B, 13, "##direct_5813" },   // gpio ADCS_BOOT_LOW
+};
+
 bool DrawUelysysGpioForms(uint16_t fnccode)
 {
-    switch (fnccode)
-    {
-        case 5804: { // gpio STX_PAY_HIGH
-            static uint16_t msgid=0x182B; static uint8_t fnccode=4; ImGui::InputScalar("msgid##direct_5804",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5804",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5804")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5805: { // gpio STX_PAY_LOW
-            static uint16_t msgid=0x182B; static uint8_t fnccode=5; ImGui::InputScalar("msgid##direct_5805",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5805",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5805")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5806: { // gpio LGE_MCU_RESET_HIGH
-            static uint16_t msgid=0x182B; static uint8_t fnccode=6; ImGui::InputScalar("msgid##direct_5806",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5806",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5806")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5807: { // gpio LGE_MCU_RESET_LOW
-            static uint16_t msgid=0x182B; static uint8_t fnccode=7; ImGui::InputScalar("msgid##direct_5807",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5807",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5807")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5808: { // gpio STX_BUS_HIGH
-            static uint16_t msgid=0x182B; static uint8_t fnccode=8; ImGui::InputScalar("msgid##direct_5808",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5808",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5808")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5809: { // gpio STX_BUS_LOW
-            static uint16_t msgid=0x182B; static uint8_t fnccode=9; ImGui::InputScalar("msgid##direct_5809",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5809",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5809")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5810: { // gpio ADCS_EN_HIGH
-            static uint16_t msgid=0x182B; static uint8_t fnccode=10; ImGui::InputScalar("msgid##direct_5810",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5810",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5810")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5811: { // gpio ADCS_EN_LOW
-            static uint16_t msgid=0x182B; static uint8_t fnccode=11; ImGui::InputScalar("msgid##direct_5811",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5811",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5811")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5812: { // gpio ADCS_BOOT_HIGH
-            static uint16_t msgid=0x182B; static uint8_t fnccode=12; ImGui::InputScalar("msgid##direct_5812",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5812",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5812")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-        case 5813: { // gpio ADCS_BOOT_LOW
-            static uint16_t msgid=0x182B; static uint8_t fnccode=13; ImGui::InputScalar("msgid##direct_5813",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_5813",ImGuiDataType_U8,&fnccode); if(ImGui::Button("Generate CMD##direct_5813")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);} break;
-        }
-
-        // ==================== UELYSYS sch_lab ====================
-    default:
-        return false;
-    }
-    return true;
+    return mim::ui::DrawNoArgForm(kNoArgForms, fnccode);
 }

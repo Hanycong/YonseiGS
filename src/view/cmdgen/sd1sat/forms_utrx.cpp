@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,94 +36,28 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 10700, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_NOOP_CC,               "##direct_10700" },   // utrx NOOP
+    { 10701, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_RESET_COUNTERS_CC,     "##direct_10701" },   // utrx RESET_COUNTERS
+    { 10710, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_PING_CC,         "##direct_10710" },   // utrx AX100_PING
+    { 10711, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_GNDWDT_CLEAR_CC, "##direct_10711" },   // SD1SAT_UTRX_AX100_GNDWDT_CLEAR_CC
+    { 10712, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_GNDWDT_GET_CC,   "##direct_10712" },   // SD1SAT_UTRX_AX100_GNDWDT_GET_CC
+    { 10713, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_GET_DIAG_CC,     "##direct_10713" },   // SD1SAT_UTRX_AX100_GET_DIAG_CC
+    { 10717, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_REBOOT_CC,       "##direct_10717" },   // SD1SAT_UTRX_AX100_REBOOT_CC
+    { 10720, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_IDENT_CC,        "##direct_10720" },   // SD1SAT_UTRX_AX100_IDENT_CC
+    { 10721, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_MEMFREE_CC,      "##direct_10721" },   // SD1SAT_UTRX_AX100_MEMFREE_CC
+    { 10722, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_BUFFREE_CC,      "##direct_10722" },   // SD1SAT_UTRX_AX100_BUFFREE_CC
+    { 10731, SD1SAT_UTRX_CMD_ID, SD1SAT_UTRX_AX100_HK_GET_MODE_CC,  "##direct_10731" },   // SD1SAT_UTRX_AX100_HK_GET_MODE_CC
+};
+
 bool DrawSd1SatUtrxForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 10700: { // utrx NOOP
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_NOOP_CC;
-            ImGui::InputScalar("msgid##direct_10700", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10700", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10700")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10701: { // utrx RESET_COUNTERS
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_10701", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10701", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10701")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10710: { // utrx AX100_PING
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_PING_CC;
-            ImGui::InputScalar("msgid##direct_10710", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10710", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10710")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10711: { //SD1SAT_UTRX_AX100_GNDWDT_CLEAR_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_GNDWDT_CLEAR_CC;
-            ImGui::InputScalar("msgid##direct_10711", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10711", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10711")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10712: { // SD1SAT_UTRX_AX100_GNDWDT_GET_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_GNDWDT_GET_CC;
-            ImGui::InputScalar("msgid##direct_10712", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10712", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10712")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10713: { // SD1SAT_UTRX_AX100_GET_DIAG_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_GET_DIAG_CC;
-            ImGui::InputScalar("msgid##direct_10713", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10713", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10713")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10714: { // SD1SAT_UTRX_AX100_TABLE_GET_CC
             static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
             static uint8_t fnccode = SD1SAT_UTRX_AX100_TABLE_GET_CC;
@@ -174,61 +109,6 @@ bool DrawSd1SatUtrxForms(uint16_t fnccode)
             break;
         }
         
-        case 10717: { // SD1SAT_UTRX_AX100_REBOOT_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_REBOOT_CC;
-            ImGui::InputScalar("msgid##direct_10717", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10717", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10717")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10720: { // SD1SAT_UTRX_AX100_IDENT_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_IDENT_CC;
-            ImGui::InputScalar("msgid##direct_10720", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10720", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10720")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10721: { // SD1SAT_UTRX_AX100_MEMFREE_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_MEMFREE_CC;
-            ImGui::InputScalar("msgid##direct_10721", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10721", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10721")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10722: { // SD1SAT_UTRX_AX100_BUFFREE_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_BUFFREE_CC;
-            ImGui::InputScalar("msgid##direct_10722", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10722", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10722")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
         case 10723: { // SD1SAT_UTRX_AX100_TABLE_SAVE_CC
             static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
@@ -362,20 +242,6 @@ bool DrawSd1SatUtrxForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10731: { // SD1SAT_UTRX_AX100_HK_GET_MODE_CC
-            static uint16_t msgid = SD1SAT_UTRX_CMD_ID;
-            static uint8_t fnccode = SD1SAT_UTRX_AX100_HK_GET_MODE_CC;
-            ImGui::InputScalar("msgid##direct_10731", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10731", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10731")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }

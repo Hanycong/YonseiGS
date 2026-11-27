@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,67 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 12000, SD1SAT_GPS_CMD_ID, SD1SAT_GPS_NOOP_CC,           "##direct_3300" },   // gps noop
+    { 12001, SD1SAT_GPS_CMD_ID, SD1SAT_GPS_RESET_COUNTERS_CC, "##direct_3300" },   // gps RESET_COUNTERS
+    { 12002, SD1SAT_GPS_CMD_ID, SD1SAT_GPS_GET_COUNTERS_CC,   "##direct_3300" },   // gps get counters
+    { 12003, SD1SAT_GPS_CMD_ID, SD1SAT_GPS_GET_APPDATA_CC,    "##direct_3300" },   // gps get app data
+};
+
 bool DrawSd1SatGpsForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 12000: { //gps noop
-            static uint16_t msgid = (uint16_t)(SD1SAT_GPS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(SD1SAT_GPS_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3300", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3300")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-
-        case 12001: { // gps RESET_COUNTERS
-            static uint16_t msgid = (uint16_t)(SD1SAT_GPS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(SD1SAT_GPS_RESET_COUNTERS_CC);
-            ImGui::InputScalar("msgid##direct_3300", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3300")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 12002: { // gps get counters
-            static uint16_t msgid = (uint16_t)(SD1SAT_GPS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(SD1SAT_GPS_GET_COUNTERS_CC);
-            ImGui::InputScalar("msgid##direct_3300", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3300")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 12003: { // gps get app data
-            static uint16_t msgid = (uint16_t)(SD1SAT_GPS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(SD1SAT_GPS_GET_APPDATA_CC);
-            ImGui::InputScalar("msgid##direct_3300", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3300")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 12010: { // gps oem cmd log
             static uint16_t msgid = SD1SAT_GPS_CMD_ID;
             static uint8_t fnccode = SD1SAT_GPS_GET_APPDATA_CC;

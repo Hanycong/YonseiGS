@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,26 +36,12 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  8829, UELYSYS_TTC_CMD_ID, UELYSYS_TTC_START_BEACON_BURST_CC, "##direct_8829" },   // ttc START_BEACON_BURST (UELYSYS CC29)
+};
+
 bool DrawUelysysTtcForms(uint16_t fnccode)
 {
-    switch (fnccode)
-    {
-        case 8829: { // ttc START_BEACON_BURST (UELYSYS CC29)
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_START_BEACON_BURST_CC);
-            ImGui::InputScalar("msgid##direct_8829", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_8829", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_8829")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-    default:
-        return false;
-    }
-    return true;
+    return mim::ui::DrawNoArgForm(kNoArgForms, fnccode);
 }

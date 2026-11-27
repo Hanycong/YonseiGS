@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,56 +36,14 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  3200, BEE1012_MISSION_CMD_ID, BEE1012_MISSION_NOOP_CC,          "##direct_3200" },
+    {  3201, BEE1012_MISSION_CMD_ID, BEE1012_MISSION_RESET_COUNTER_CC, "##direct_3201" },   // MISSION RESET_COUNTER
+    {  3202, BEE1012_MISSION_CMD_ID, BEE1012_MISSION_APPS_PERM_OFF_CC, "##direct_3202" },   // MISSION APPS_PERM_OFF
+};
+
 bool DrawBee1012MissionForms(uint16_t fnccode)
 {
-    switch (fnccode)
-    {
-        case 3200: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_MISSION_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_MISSION_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3200", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3200", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3200")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 3201: { // MISSION RESET_COUNTER
-            static uint16_t msgid = BEE1012_MISSION_CMD_ID;
-            static uint8_t fnccode = BEE1012_MISSION_RESET_COUNTER_CC;
-            ImGui::InputScalar("msgid##direct_3201", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3201", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3201")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 3202: { // MISSION APPS_PERM_OFF
-            static uint16_t msgid = BEE1012_MISSION_CMD_ID;
-            static uint8_t fnccode = BEE1012_MISSION_APPS_PERM_OFF_CC;
-            ImGui::InputScalar("msgid##direct_3202", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3202", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3202")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-
-        // ==================== gps ====================
-    default:
-        return false;
-    }
-    return true;
+    return mim::ui::DrawNoArgForm(kNoArgForms, fnccode);
 }

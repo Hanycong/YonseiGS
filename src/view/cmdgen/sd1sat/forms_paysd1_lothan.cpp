@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,25 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 10800, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_NOOP_CC,               "##direct_10800" },   // paysd1_lothan NOOP
+    { 10801, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_RESET_COUNTERS,        "##direct_10801" },   // paysd1_lothan RESET_COUNTERS
+    { 10807, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_STATUS,        "##direct_10807" },   // paysd1_lothan REQUEST_STATUS
+    { 10808, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_DIGEST,        "##direct_10808" },   // paysd1_lothan REQUEST_DIGEST
+    { 10815, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_UPDATE_STATUS, "##direct_10815" },   // paysd1_lothan REQUEST_UPDATE_STATUS
+    { 10819, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_SYNC_TIME_FROM_CFS,    "##direct_10819" },   // paysd1_lothan SYNC_TIME_FROM_CFS
+    { 10826, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_CAPTURE_STOP,          ""               },   // paysd1_lothan CaptureStop Cmd
+    { 10827, SD1SAT_PAYSD1_LOTHAN_CMD_ID, SD1SAT_PAYSD1_LOTHAN_FunctionCode_OTA_PATCH_TEST,        ""               },   // paysd1_lothan OTA Patch TEst Cmd
+};
+
 bool DrawSd1SatPaysd1LothanForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 10800: { // paysd1_lothan NOOP
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_NOOP_CC;
-            ImGui::InputScalar("msgid##direct_10800", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10800", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10800")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10801: { // paysd1_lothan RESET_COUNTERS
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_RESET_COUNTERS;
-            ImGui::InputScalar("msgid##direct_10801", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10801", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10801")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10802: { // paysd1_lothan TRIGGER_CAPTURE
             static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
             static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_TRIGGER_CAPTURE;
@@ -151,34 +139,6 @@ bool DrawSd1SatPaysd1LothanForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10807: { // paysd1_lothan REQUEST_STATUS
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_STATUS;
-            ImGui::InputScalar("msgid##direct_10807", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10807", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10807")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10808: { // paysd1_lothan REQUEST_DIGEST
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_DIGEST;
-            ImGui::InputScalar("msgid##direct_10808", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10808", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10808")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
@@ -287,20 +247,6 @@ bool DrawSd1SatPaysd1LothanForms(uint16_t fnccode)
             break;
         }
 
-        case 10815: { // paysd1_lothan REQUEST_UPDATE_STATUS
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_REQUEST_UPDATE_STATUS;
-            ImGui::InputScalar("msgid##direct_10815", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10815", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10815")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10816: { // paysd1_lothan SET_TIME
             static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
             static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_SET_TIME;
@@ -346,20 +292,6 @@ bool DrawSd1SatPaysd1LothanForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10819: { // paysd1_lothan SYNC_TIME_FROM_CFS
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_SYNC_TIME_FROM_CFS;
-            ImGui::InputScalar("msgid##direct_10819", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10819", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10819")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
@@ -473,34 +405,6 @@ bool DrawSd1SatPaysd1LothanForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        } 
-
-        case 10826: { // paysd1_lothan CaptureStop Cmd
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_CAPTURE_STOP;
-            ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        } 
-
-        case 10827: { // paysd1_lothan OTA Patch TEst Cmd
-            static uint16_t msgid = SD1SAT_PAYSD1_LOTHAN_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_LOTHAN_FunctionCode_OTA_PATCH_TEST;
-            ImGui::InputScalar("msgid", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }

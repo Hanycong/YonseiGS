@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,101 +36,33 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  4000, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_NOOP_CC,                       "##direct_3000" },
+    {  4001, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_RESET_COUNTERS_CC,             "##direct_3001" },
+    {  4010, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_GET_TIMELINE_HK_CC,            "##direct_3010" },
+    {  4011, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_RESET_TIMELINE_HK_CC,          "##direct_3011" },
+    {  4012, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_GET_PENDING_ENTRY_COUNT_CC,    "##direct_3012" },
+    {  4013, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_GET_NEXT_ENTRY_ID_CC,          "##direct_3013" },
+    {  4014, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_GET_NEXT_EXEC_TIME_CC,         "##direct_3014" },
+    {  4019, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_DELETE_ALL_ENTRIES_CC,         "##direct_3019" },
+    {  4022, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_PAUSE_TIMELINE_PROCESSING_CC,  "##direct_3022" },
+    {  4023, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_RESUME_TIMELINE_PROCESSING_CC, "##direct_3023" },
+    {  4027, SD1SAT_TTC_CMD_ID,  UELYSYS_TTC_PLUMB_PURGE_TIMELINE_CC,       "##direct_3027" },
+    {  4100, SD1SAT_MEOW_CMD_ID, UELYSYS_MEOW_NOOP_CC,                      "##direct_3100" },
+    {  4101, SD1SAT_MEOW_CMD_ID, UELYSYS_MEOW_RESET_COUNTERS_CC,            "##direct_3101" },
+    {  4141, SD1SAT_MEOW_CMD_ID, UELYSYS_MEOW_SYS_SYNC_CC,                  "##direct_3141" },
+    {  4142, SD1SAT_MEOW_CMD_ID, UELYSYS_MEOW_SYS_INFO_CC,                  "##direct_3142" },
+    {  4143, SD1SAT_MEOW_CMD_ID, UELYSYS_MEOW_SYS_TIME_GET_CC,              "##direct_3143" },
+};
+
 bool DrawUelysysMeowForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 4000: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3000", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3000", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3000")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4001: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_RESET_COUNTERS_CC);
-            ImGui::InputScalar("msgid##direct_3001", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3001", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3001")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4010: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_GET_TIMELINE_HK_CC);
-            ImGui::InputScalar("msgid##direct_3010", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3010", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3010")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4011: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_RESET_TIMELINE_HK_CC);
-            ImGui::InputScalar("msgid##direct_3011", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3011", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3011")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4012: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_GET_PENDING_ENTRY_COUNT_CC);
-            ImGui::InputScalar("msgid##direct_3012", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3012", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3012")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4013: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_GET_NEXT_ENTRY_ID_CC);
-            ImGui::InputScalar("msgid##direct_3013", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3013", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3013")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4014: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_GET_NEXT_EXEC_TIME_CC);
-            ImGui::InputScalar("msgid##direct_3014", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3014", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3014")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
         case 4015: {
             UELYSYS_TTC_InsertAbsCmdEntryCmd_t &cmd = command5->uelysys_ttc_insertabscmd;
             static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
@@ -205,19 +138,6 @@ bool DrawUelysysMeowForms(uint16_t fnccode)
             }
             break;
         }
-        case 4019: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_DELETE_ALL_ENTRIES_CC);
-            ImGui::InputScalar("msgid##direct_3019", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3019", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3019")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
         case 4020: {
             UELYSYS_TTC_ExecuteEntryCmd_t &cmd = command5->uelysys_ttc_executeentrycmd;
             static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
@@ -246,32 +166,6 @@ bool DrawUelysysMeowForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 mim::tc::EncodeCfeCommand16(&cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(&cmd, (sizeof(cmd)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4022: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_PAUSE_TIMELINE_PROCESSING_CC);
-            ImGui::InputScalar("msgid##direct_3022", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3022", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3022")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4023: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_RESUME_TIMELINE_PROCESSING_CC);
-            ImGui::InputScalar("msgid##direct_3023", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3023", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3023")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -331,19 +225,6 @@ bool DrawUelysysMeowForms(uint16_t fnccode)
             }
             break;
         }
-        case 4027: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_TTC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_TTC_PLUMB_PURGE_TIMELINE_CC);
-            ImGui::InputScalar("msgid##direct_3027", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3027", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3027")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
         case 4028: {
             UELYSYS_TTC_DeleteEntryCmd_t &cmd = command5->uelysys_ttc_deleteentrycmd;
@@ -361,32 +242,6 @@ bool DrawUelysysMeowForms(uint16_t fnccode)
             break;
         }
         // ==================== meow ====================
-        case 4100: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_MEOW_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3100", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3100", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3100")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4101: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_MEOW_RESET_COUNTERS_CC);
-            ImGui::InputScalar("msgid##direct_3101", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3101", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3101")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
         case 4110: {
             static SD1SAT_MEOW_ShellExecSyncCmd_t cmd{};
             static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
@@ -645,45 +500,6 @@ bool DrawUelysysMeowForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 mim::tc::EncodeCfeCommand16(&cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(&cmd, (sizeof(cmd)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4141: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_MEOW_SYS_SYNC_CC);
-            ImGui::InputScalar("msgid##direct_3141", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3141", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3141")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4142: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_MEOW_SYS_INFO_CC);
-            ImGui::InputScalar("msgid##direct_3142", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3142", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3142")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 4143: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_MEOW_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_MEOW_SYS_TIME_GET_CC);
-            ImGui::InputScalar("msgid##direct_3143", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3143", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3143")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
             }
             break;
         }

@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,20 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  2100, BEE1012_RPT_CMD_ID, BEE1012_RPT_NOOP_CC,          "##direct_2100" },
+    {  2101, BEE1012_RPT_CMD_ID, BEE1012_RPT_RESET_COUNTER_CC, "##direct_2101" },   // RPT RESET_COUNTER
+    {  2104, BEE1012_RPT_CMD_ID, BEE1012_RPT_GET_OPS_DATA_CC,  "##direct_2104" },   // RPT GET_OPS_DATA
+};
+
 bool DrawBee1012RptForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 2100: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_RPT_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_RPT_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_2100", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2100", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2100")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2101: { // RPT RESET_COUNTER
-            static uint16_t msgid = BEE1012_RPT_CMD_ID;
-            static uint8_t fnccode = BEE1012_RPT_RESET_COUNTER_CC;
-            ImGui::InputScalar("msgid##direct_2101", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2101", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2101")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 2102: { // rpt REPORT
             static uint16_t msgid=0x1825; static uint8_t fnccode=2;
             struct Payload { uint8_t StartIdx; uint8_t TotalNumber; uint8_t IsCritical; }; static_assert(sizeof(Payload)==3,"rpt REPORT payload size"); static Payload payload{};
@@ -84,20 +67,6 @@ bool DrawBee1012RptForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2103",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_2103",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("IsCritical##direct_2103",ImGuiDataType_U8,&payload.IsCritical);
             if(ImGui::Button("Generate CMD##direct_2103")){ WriteSystemName(msgid); uint8_t cmd[9]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
-
-        case 2104: { // RPT GET_OPS_DATA
-            static uint16_t msgid = BEE1012_RPT_CMD_ID;
-            static uint8_t fnccode = BEE1012_RPT_GET_OPS_DATA_CC;
-            ImGui::InputScalar("msgid##direct_2104", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2104", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2104")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
             break;
         }
 

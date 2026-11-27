@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,42 +36,13 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  1900, BEE1012_HK_CMD_ID, BEE1012_HK_NOOP_CC,           "##direct_1900" },
+    {  1901, BEE1012_HK_CMD_ID, BEE1012_HK_RESET_COUNTERS_CC, "##direct_1901" },   // HK RESET_COUNTERS
+};
+
 bool DrawBee1012HkForms(uint16_t fnccode)
 {
-    switch (fnccode)
-    {
-        case 1900: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_HK_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_HK_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_1900", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_1900", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_1900")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 1901: { // HK RESET_COUNTERS
-            static uint16_t msgid = BEE1012_HK_CMD_ID;
-            static uint8_t fnccode = BEE1012_HK_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_1901", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_1901", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_1901")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-
-        // ==================== to_lab ====================
-    default:
-        return false;
-    }
-    return true;
+    return mim::ui::DrawNoArgForm(kNoArgForms, fnccode);
 }

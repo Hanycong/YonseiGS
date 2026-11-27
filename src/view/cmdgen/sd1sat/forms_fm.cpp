@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 12200, SD1SAT_FM_CMD_ID, BEE1012_FM_NOOP_CC,                     "##direct_1800" },
+    { 12201, SD1SAT_FM_CMD_ID, BEE1012_FM_RESET_COUNTERS_CC,           "##direct_1801" },   // FM RESET_COUNTERS
+    { 12211, SD1SAT_FM_CMD_ID, BEE1012_FM_GET_OPEN_FILES_CC,           "##direct_1811" },   // FM GET_OPEN_FILES
+    { 12216, SD1SAT_FM_CMD_ID, BEE1012_FM_MONITOR_FILESYSTEM_SPACE_CC, "##direct_1816" },   // FM MONITOR_FILESYSTEM_SPACE
+};
+
 bool DrawSd1SatFmForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 12200: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(SD1SAT_FM_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_FM_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_1800", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_1800", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_1800")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 12201: { // FM RESET_COUNTERS
-            static uint16_t msgid = SD1SAT_FM_CMD_ID;
-            static uint8_t fnccode = BEE1012_FM_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_1801", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_1801", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_1801")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 12202: { // fm COPY_FILE
             static uint16_t msgid=SD1SAT_FM_CMD_ID;
             static uint8_t fnccode=2;
@@ -171,12 +155,6 @@ bool DrawSd1SatFmForms(uint16_t fnccode)
     }
 
 
-
-
-
-
-
-
     case 12205: { // ADDED FOR FTP TEST 1210, delete To_lab.so
         static uint16_t msgid = SD1SAT_FM_CMD_ID;
         static uint8_t fnccode = 5;
@@ -225,14 +203,6 @@ bool DrawSd1SatFmForms(uint16_t fnccode)
 
         break;
     }
-
-
-
-
-
-
-
-
 
 
         case 12207: { // fm DELETE_ALL_FILES
@@ -358,20 +328,6 @@ bool DrawSd1SatFmForms(uint16_t fnccode)
         break;
     }
 
-
-        case 12211: { // FM GET_OPEN_FILES
-            static uint16_t msgid = SD1SAT_FM_CMD_ID;
-            static uint8_t fnccode = BEE1012_FM_GET_OPEN_FILES_CC;
-            ImGui::InputScalar("msgid##direct_1811", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_1811", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_1811")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
         case 12212: { // fm CREATE_DIRECTORY
             static uint16_t msgid=SD1SAT_FM_CMD_ID;
@@ -506,19 +462,6 @@ bool DrawSd1SatFmForms(uint16_t fnccode)
                     command5->ftpdirlistpktcmd.Spare01_1,
                     command5->ftpdirlistpktcmd.Spare01_2);
 
-                break;
-            }
-            case 12216: { // FM MONITOR_FILESYSTEM_SPACE
-                static uint16_t msgid = SD1SAT_FM_CMD_ID;
-                static uint8_t fnccode = BEE1012_FM_MONITOR_FILESYSTEM_SPACE_CC;
-                ImGui::InputScalar("msgid##direct_1816", ImGuiDataType_U16, &msgid);
-                ImGui::InputScalar("fnccode##direct_1816", ImGuiDataType_U8, &fnccode);
-                if (ImGui::Button("Generate CMD##direct_1816")) {
-                    WriteSystemName(msgid);
-                    uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                    mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                    mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-                }
                 break;
             }
 

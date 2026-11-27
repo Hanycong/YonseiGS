@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,66 +36,36 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    { 10400, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_NOOP_CC,                "##direct_10400" },   // paysd1_roma NOOP
+    { 10401, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_RESET_COUNTERS_CC,      "##direct_10401" },   // paysd1_roma RESET_COUNTERS
+    { 10402, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_PING_CC,                "##direct_10402" },   // paysd1_roma PING
+    { 10403, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_CLOCK_SYNC_CC,          "##direct_10403" },   // paysd1_roma CLOCK_SYNC
+    { 10406, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_GET_LATEST_LINE_CC,     "##direct_10406" },   // paysd1_roma GET_LATEST_LINE
+    { 10413, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_GET_USED_SLOTS_CC,      "##direct_10413" },   // paysd1_roma GET_USED_SLOTS
+    { 10415, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SET_ROUTE_DEFAULT_CC,   "##direct_10415" },   // paysd1_roma SET_ROUTE_DEFAULT
+    { 10416, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_RESET_ROUTE_CC,         "##direct_10416" },   // paysd1_roma RESET_ROUTE
+    { 10417, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_LOAD_ROUTE_CC,          "##direct_10417" },   // paysd1_roma LOAD_ROUTE
+    { 10418, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SAVE_ROUTE_CC,          "##direct_10418" },   // paysd1_roma SAVE_ROUTE
+    { 10419, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SEND_ROUTE_CC,          "##direct_10419" },   // paysd1_roma SEND_ROUTE
+    { 10430, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SYNC_RX_CC,             "##direct_10430" },   // paysd1_roma SYNC_RX
+    { 10431, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SYNC_TX_CC,             "##direct_10431" },   // paysd1_roma SYNC_TX
+    { 10432, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_PAY_INIT_CC,            "##direct_10432" },   // paysd1_roma PAY_INIT
+    { 10433, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_LISTEN_START_CC,        "##direct_10433" },   // paysd1_roma LISTEN_START
+    { 10434, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_LISTEN_STOP_CC,         "##direct_10434" },   // paysd1_roma LISTEN_STOP
+    { 10437, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_SHOUT_STOP_CC,          "##direct_10437" },   // paysd1_roma SHOUT_STOP
+    { 10438, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_ISL_TEST_COUNT_UP_CC,   "##direct_10438" },   // paysd1_roma ISL_TEST_COUNT_UP
+    { 10439, SD1SAT_PAYSD1_ROMA_CMD_ID, SD1SAT_PAYSD1_ROMA_ISL_TEST_COUNT_LOAD_CC, "##direct_10439" },   // paysd1_roma ISL_TEST_COUNT_LOAD
+};
+
 bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 10400: { // paysd1_roma NOOP
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_NOOP_CC;
-            ImGui::InputScalar("msgid##direct_10400", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10400", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10400")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10401: { // paysd1_roma RESET_COUNTERS
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_RESET_COUNTERS_CC;
-            ImGui::InputScalar("msgid##direct_10401", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10401", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10401")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10402: { // paysd1_roma PING
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_PING_CC;
-            ImGui::InputScalar("msgid##direct_10402", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10402", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10402")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10403: { // paysd1_roma CLOCK_SYNC
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_CLOCK_SYNC_CC;
-            ImGui::InputScalar("msgid##direct_10403", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10403", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10403")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10404: { // paysd1_roma GET_SPECIFIC_LINE
             static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
             static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_GET_SPECIFIC_LINE_CC;
@@ -124,20 +95,6 @@ bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10406: { // paysd1_roma GET_LATEST_LINE
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_GET_LATEST_LINE_CC;
-            ImGui::InputScalar("msgid##direct_10406", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10406", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10406")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
@@ -252,20 +209,6 @@ bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
             break;
         }
 
-        case 10413: { // paysd1_roma GET_USED_SLOTS
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_GET_USED_SLOTS_CC;
-            ImGui::InputScalar("msgid##direct_10413", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10413", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10413")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10414: { // paysd1_roma ADD_RELATIVE_ENTRY
             static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
             static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_ADD_RELATIVE_ENTRY_CC;
@@ -282,76 +225,6 @@ bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
                 UelysysCopyHexBytes(payload.command, sizeof(payload.command), cmdhex);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10415: { // paysd1_roma SET_ROUTE_DEFAULT
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SET_ROUTE_DEFAULT_CC;
-            ImGui::InputScalar("msgid##direct_10415", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10415", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10415")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10416: { // paysd1_roma RESET_ROUTE
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_RESET_ROUTE_CC;
-            ImGui::InputScalar("msgid##direct_10416", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10416", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10416")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10417: { // paysd1_roma LOAD_ROUTE
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_LOAD_ROUTE_CC;
-            ImGui::InputScalar("msgid##direct_10417", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10417", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10417")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10418: { // paysd1_roma SAVE_ROUTE
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SAVE_ROUTE_CC;
-            ImGui::InputScalar("msgid##direct_10418", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10418", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10418")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10419: { // paysd1_roma SEND_ROUTE
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SEND_ROUTE_CC;
-            ImGui::InputScalar("msgid##direct_10419", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10419", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10419")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
@@ -535,76 +408,6 @@ bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
             break;
         }
 
-        case 10430: { // paysd1_roma SYNC_RX
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SYNC_RX_CC;
-            ImGui::InputScalar("msgid##direct_10430", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10430", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10430")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10431: { // paysd1_roma SYNC_TX
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SYNC_TX_CC;
-            ImGui::InputScalar("msgid##direct_10431", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10431", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10431")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10432: { // paysd1_roma PAY_INIT
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_PAY_INIT_CC;
-            ImGui::InputScalar("msgid##direct_10432", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10432", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10432")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10433: { // paysd1_roma LISTEN_START
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_LISTEN_START_CC;
-            ImGui::InputScalar("msgid##direct_10433", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10433", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10433")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10434: { // paysd1_roma LISTEN_STOP
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_LISTEN_STOP_CC;
-            ImGui::InputScalar("msgid##direct_10434", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10434", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10434")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 10435: { // paysd1_roma SHOUT_START
             static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
             static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SHOUT_START_CC;
@@ -645,48 +448,6 @@ bool DrawSd1SatPaysd1RomaForms(uint16_t fnccode)
                 payload.Length = (uint8_t)n;
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)] = {0};
                 memcpy(cmd + 8, &payload, sizeof(payload));
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10437: { // paysd1_roma SHOUT_STOP
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_SHOUT_STOP_CC;
-            ImGui::InputScalar("msgid##direct_10437", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10437", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10437")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10438: { // paysd1_roma ISL_TEST_COUNT_UP
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_ISL_TEST_COUNT_UP_CC;
-            ImGui::InputScalar("msgid##direct_10438", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10438", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10438")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 10439: { // paysd1_roma ISL_TEST_COUNT_LOAD
-            static uint16_t msgid = SD1SAT_PAYSD1_ROMA_CMD_ID;
-            static uint8_t fnccode = SD1SAT_PAYSD1_ROMA_ISL_TEST_COUNT_LOAD_CC;
-            ImGui::InputScalar("msgid##direct_10439", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_10439", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_10439")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }

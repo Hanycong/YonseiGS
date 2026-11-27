@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,8 +36,17 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  2007, 0x1823, 7,  "##direct_2007" },   // to_lab OUTPUT_DISABLE
+    {  2021, 0x1823, 21, "##direct_2021" },   // to_lab TO_CREATE_CHILD
+};
+
 bool DrawBee1012ToLabForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
         case 2000: { // TO_LAB NOOP
@@ -48,8 +58,6 @@ bool DrawBee1012ToLabForms(uint16_t fnccode)
 
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-
-
 
 
                 mim::tc::EncodeCfeCommand(&command5->tolabnoopcmd, sizeof(TO_LAB_NoopCmd_t), msgid, fnccode);
@@ -78,8 +86,6 @@ case 2001: { // TO_LAB Reset Status
 
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
-
-
 
 
         mim::tc::EncodeCfeCommand(&command5->tolabresetcounterscmd, sizeof(TO_LAB_ResetCountersCmd_t), msgid, fnccode);
@@ -139,9 +145,6 @@ case 2002: { // TO_LAB Add Packet
         WriteSystemName(msgid);
 
 
-
-
-
         mim::tc::EncodeCfeCommand(&command5->tolabaddpacketcmd, sizeof(TO_LAB_AddPacket5Cmd_t), msgid, fnccode);
 
 
@@ -165,9 +168,6 @@ case 2002: { // TO_LAB Add Packet
 }
 
 
-
-
-
         case 2003: { // TO_LAB Send Data Types
             static uint16_t msgid   = CFE_MISSION_TO_LAB_CMD_ID;
             static uint8_t  fnccode = TO_LAB_SEND_DATA_TYPES_CC;
@@ -177,9 +177,6 @@ case 2002: { // TO_LAB Add Packet
 
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-
-
-
 
 
                 mim::tc::EncodeCfeCommand(&command5->tolabsenddatatypescmd, sizeof(TO_LAB_SendDataTypesCmd_t), msgid, fnccode);
@@ -201,7 +198,6 @@ case 2002: { // TO_LAB Add Packet
         }
 
 
-
         case 2004: { // TO_LAB Remove Packet
             static uint16_t msgid   = CFE_MISSION_TO_LAB_CMD_ID;
             static uint8_t  fnccode = TO_LAB_REMOVE_PKT_CC;
@@ -217,8 +213,6 @@ case 2002: { // TO_LAB Add Packet
 
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-
-
 
 
                 mim::tc::EncodeCfeCommand(&command5->tolabremovepacketcmd, sizeof(TO_LAB_RemovePacketCmd_t), msgid, fnccode);
@@ -250,8 +244,6 @@ case 2002: { // TO_LAB Add Packet
 
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
-
-
 
 
                 mim::tc::EncodeCfeCommand(&command5->tolabremoveallcmd, sizeof(TO_LAB_RemoveAllCmd_t), msgid, fnccode);
@@ -290,8 +282,6 @@ case 2002: { // TO_LAB Add Packet
                         sizeof(command5->tolabenableoutputcmd.Payload.dest_IP) - 1);
 
 
-
-
                 mim::tc::EncodeCfeCommand(&command5->tolabenableoutputcmd, sizeof(TO_LAB_EnableOutputIpCmd_t), msgid, fnccode);
 
 
@@ -311,20 +301,6 @@ case 2002: { // TO_LAB Add Packet
             break;
         }
 
-
-        case 2007: { // to_lab OUTPUT_DISABLE
-            static uint16_t msgid=0x1823; static uint8_t fnccode=7;
-            ImGui::InputScalar("msgid##direct_2007",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_2007",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_2007")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
-
-        case 2021: { // to_lab TO_CREATE_CHILD
-            static uint16_t msgid=0x1823; static uint8_t fnccode=21;
-            ImGui::InputScalar("msgid##direct_2021",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_2021",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_2021")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
 
         // ==================== rpt ====================
     default:

@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,38 +36,23 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  6600, UELYSYS_PAYUEL_CAM_CMD_ID, UELYSYS_PAYUEL_CAM_NOOP_CC,           "##direct_6600" },
+    {  6601, UELYSYS_PAYUEL_CAM_CMD_ID, UELYSYS_PAYUEL_CAM_RESET_COUNTERS_CC, "##direct_6601" },   // payuel_cam RESET_COUNTERS
+    {  6603, UELYSYS_PAYUEL_CAM_CMD_ID, UELYSYS_PAYUEL_CAM_HEALTH_CHECK_CC,   "##direct_6603" },   // payuel_cam HEALTH_CHECK
+    {  6607, UELYSYS_PAYUEL_CAM_CMD_ID, UELYSYS_PAYUEL_CAM_SEND_BCN_CC,       "##direct_6607" },
+    {  6610, UELYSYS_PAYUEL_CAM_CMD_ID, UELYSYS_PAYUEL_CAM_REPORT_BCN_CC,     "##direct_6607" },
+};
+
 bool DrawUelysysPayuelCamForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 6600: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_CAM_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_CAM_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_6600", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_6600", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_6600")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         // ==================== UELYSYS payuel_cam ====================
-        case 6601: { // payuel_cam RESET_COUNTERS
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_CAM_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_CAM_RESET_COUNTERS_CC);
-            ImGui::InputScalar("msgid##direct_6601",ImGuiDataType_U16,&msgid); 
-            ImGui::InputScalar("fnccode##direct_6601",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_6601")){ 
-                WriteSystemName(msgid); 
-                uint8_t cmd[8]={0}; 
-                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); 
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
-            }
-            break;
-        }
         
         case 6602: {
             UELYSYS_PAYUEL_CAM_ShotCmd_t &cmd = command5->uelysys_cam_shotcmd;
@@ -80,20 +66,6 @@ bool DrawUelysysPayuelCamForms(uint16_t fnccode)
                 WriteSystemName(msgid);
                 mim::tc::EncodeCfeCommand16(&cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(&cmd, (sizeof(cmd)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 6603: { // payuel_cam HEALTH_CHECK
-            static uint16_t msgid=(uint16_t)(UELYSYS_PAYUEL_CAM_CMD_ID); 
-            static uint8_t fnccode=(uint8_t)(UELYSYS_PAYUEL_CAM_HEALTH_CHECK_CC);
-            ImGui::InputScalar("msgid##direct_6603",ImGuiDataType_U16,&msgid); 
-            ImGui::InputScalar("fnccode##direct_6603",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_6603")){ 
-                WriteSystemName(msgid); 
-                uint8_t cmd[8]={0}; 
-                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); 
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
             }
             break;
         }
@@ -145,19 +117,6 @@ bool DrawUelysysPayuelCamForms(uint16_t fnccode)
             }
             break;
         }
-        case 6607: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_CAM_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_CAM_SEND_BCN_CC);
-            ImGui::InputScalar("msgid##direct_6607", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_6607", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_6607")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
         case 6608: {
             UELYSYS_PAYUEL_CAM_ImageCmd_t &cmd = command5->uelysys_cam_imagecmd;
@@ -198,20 +157,6 @@ bool DrawUelysysPayuelCamForms(uint16_t fnccode)
                 memcpy(cmd+8,&payload,sizeof(payload)); 
                 mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); 
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
-            }
-            break;
-        }
-
-        case 6610 : {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_CAM_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_CAM_REPORT_BCN_CC);
-            ImGui::InputScalar("msgid##direct_6607", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_6607", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_6607")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
             }
             break;
         }

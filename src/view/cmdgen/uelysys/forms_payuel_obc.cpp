@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,52 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  7200, UELYSYS_PAYUEL_OBC_CMD_ID, UELYSYS_PAYUEL_OBC_NOOP_CC,           "##direct_7200" },
+    {  7201, UELYSYS_PAYUEL_OBC_CMD_ID, UELYSYS_PAYUEL_OBC_RESET_COUNTERS_CC, "##direct_7201" },   // payuel_obc RESET_COUNTERS
+    {  7202, UELYSYS_PAYUEL_OBC_CMD_ID, UELYSYS_PAYUEL_OBC_SEND_OBC_BCN_CC,   "##direct_7202" },
+    {  7211, UELYSYS_PAYUEL_OBC_CMD_ID, UELYSYS_PAYUEL_OBC_REPORT_BCN_CC,     "##direct_7211" },   // payuel_obc REPORT_OBC_BCN
+};
+
 bool DrawUelysysPayuelObcForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 7200: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_OBC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_OBC_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_7200", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_7200", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_7200")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 7201: { // payuel_obc RESET_COUNTERS
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_OBC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_OBC_RESET_COUNTERS_CC); 
-            ImGui::InputScalar("msgid##direct_7201",ImGuiDataType_U16,&msgid); 
-            ImGui::InputScalar("fnccode##direct_7201",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_7201")){ 
-                WriteSystemName(msgid); 
-                uint8_t cmd[8]={0}; 
-                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); 
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
-            } 
-            break;
-        }
-
-        case 7202: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_OBC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_OBC_SEND_OBC_BCN_CC);
-            ImGui::InputScalar("msgid##direct_7202", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_7202", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_7202")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, (sizeof(UELYSYS_NoArgCmd_t)), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
         case 7203: { // payuel_obc MOTOR_MODE
             static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_OBC_CMD_ID);
             static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_OBC_MOTOR_MODE_CC);
@@ -234,20 +204,6 @@ bool DrawUelysysPayuelObcForms(uint16_t fnccode)
                 uint8_t cmd[10]={0}; 
                 memcpy(cmd+8,&payload,sizeof(payload)); 
                 mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); 
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
-            } 
-            break;
-        }
-
-        case 7211: { // payuel_obc REPORT_OBC_BCN
-            static uint16_t msgid = (uint16_t)(UELYSYS_PAYUEL_OBC_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(UELYSYS_PAYUEL_OBC_REPORT_BCN_CC);
-            ImGui::InputScalar("msgid##direct_7211",ImGuiDataType_U16,&msgid); 
-            ImGui::InputScalar("fnccode##direct_7211",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_7211")){ 
-                WriteSystemName(msgid);
-                uint8_t cmd[8]={0}; 
-                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); 
             } 
             break;

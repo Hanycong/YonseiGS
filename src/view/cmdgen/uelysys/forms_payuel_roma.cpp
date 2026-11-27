@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,8 +36,21 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  7400, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_NOOP_CC,           "", mim::ui::NoArgCommandForm::kTitled },
+    {  7401, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_RESET_COUNTERS_CC, "", mim::ui::NoArgCommandForm::kTitled },
+    {  7402, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_COMM_TEST_CC,      "", mim::ui::NoArgCommandForm::kTitled },
+    {  7431, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_SYNC_RX_CC,        "", mim::ui::NoArgCommandForm::kTitled },   // ROMA SYNC_RX (CC 31)
+    {  7432, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_SYNC_TX_CC,        "", mim::ui::NoArgCommandForm::kTitled },   // ROMA SYNC_TX (CC 32)
+    {  7433, PAYUEL_ROMA_CMD_MID, PAYUEL_ROMA_PAY_INIT_CC,       "", mim::ui::NoArgCommandForm::kTitled },   // ROMA PAY_INIT (CC 33)
+};
+
 bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
         case 7403: case 7404: case 7405: { // CLOCK_SYNC / LOG_TEST / TRANS_TEST
@@ -72,71 +86,6 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
         }
 
         // ==================== UELYSYS uant ====================
-    case 7400 :
-    {
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_NOOP_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romanoopcmd, sizeof(PAYUEL_ROMA_NoopCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romanoopcmd, sizeof(PAYUEL_ROMA_NoopCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
-    case 7401 :
-    {
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_RESET_COUNTERS_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romaresetcountercmd, sizeof(PAYUEL_ROMA_ResetCountersCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romaresetcountercmd, sizeof(PAYUEL_ROMA_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
-       }
-       break;
-    }
-
-    case 7402 :
-    {
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_COMM_TEST_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romacommtestcmd, sizeof(PAYUEL_ROMA_CommTestCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romacommtestcmd, sizeof(PAYUEL_ROMA_CommTestCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     case 7406 :
     {
@@ -152,9 +101,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romagetspcificlinecmd, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romagetspcificlinecmd, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t), MIM_PT_TMTC_TEST);
@@ -177,9 +124,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romagetmultiplelinescmd, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romagetmultiplelinescmd, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t), MIM_PT_TMTC_TEST);
@@ -199,9 +144,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romagetlatestlinecmd, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romagetlatestlinecmd, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t), MIM_PT_TMTC_TEST);
@@ -222,9 +165,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romagetlatestNlinescmd, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romagetlatestNlinescmd, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t), MIM_PT_TMTC_TEST);
@@ -245,9 +186,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaclearalllinescmd, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaclearalllinescmd, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t), MIM_PT_TMTC_TEST);
@@ -267,9 +206,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasetroutedefaultcmd, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasetroutedefaultcmd, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t), MIM_PT_TMTC_TEST);
@@ -289,9 +226,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaresetroutecmd, sizeof(PAYUEL_ROMA_ResetRouteCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaresetroutecmd, sizeof(PAYUEL_ROMA_ResetRouteCmd_t), MIM_PT_TMTC_TEST);
@@ -311,9 +246,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaloadroutecmd, sizeof(PAYUEL_ROMA_LoadRouteCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaloadroutecmd, sizeof(PAYUEL_ROMA_LoadRouteCmd_t), MIM_PT_TMTC_TEST);
@@ -333,9 +266,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasaveroutecmd, sizeof(PAYUEL_ROMA_SaveRouteCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasaveroutecmd, sizeof(PAYUEL_ROMA_SaveRouteCmd_t), MIM_PT_TMTC_TEST);
@@ -355,9 +286,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasendroutecmd, sizeof(PAYUEL_ROMA_SendRouteCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasendroutecmd, sizeof(PAYUEL_ROMA_SendRouteCmd_t), MIM_PT_TMTC_TEST);
@@ -382,9 +311,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             strncpy(command5->romasetroutecmd.Payload.route, route_buf, sizeof(command5->romasetroutecmd.Payload.route) - 1);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasetroutecmd, sizeof(PAYUEL_ROMA_SetRouteCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasetroutecmd, sizeof(PAYUEL_ROMA_SetRouteCmd_t), MIM_PT_TMTC_TEST);
@@ -406,9 +333,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romapargetcmd, sizeof(PAYUEL_ROMA_ParGetCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romapargetcmd, sizeof(PAYUEL_ROMA_ParGetCmd_t), MIM_PT_TMTC_TEST);
@@ -431,9 +356,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaparsetcmd, sizeof(PAYUEL_ROMA_ParSetCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaparsetcmd, sizeof(PAYUEL_ROMA_ParSetCmd_t), MIM_PT_TMTC_TEST);
@@ -454,9 +377,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romapardefaultscmd, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romapardefaultscmd, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t), MIM_PT_TMTC_TEST);
@@ -477,9 +398,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaparsavecmd, sizeof(PAYUEL_ROMA_ParSaveCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaparsavecmd, sizeof(PAYUEL_ROMA_ParSaveCmd_t), MIM_PT_TMTC_TEST);
@@ -500,9 +419,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaparrestorecmd, sizeof(PAYUEL_ROMA_ParRestoreCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaparrestorecmd, sizeof(PAYUEL_ROMA_ParRestoreCmd_t), MIM_PT_TMTC_TEST);
@@ -523,9 +440,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaparloadcmd, sizeof(PAYUEL_ROMA_ParLoadCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaparloadcmd, sizeof(PAYUEL_ROMA_ParLoadCmd_t), MIM_PT_TMTC_TEST);
@@ -547,9 +462,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romaparsetOOBcmd, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romaparsetOOBcmd, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t), MIM_PT_TMTC_TEST);
@@ -573,9 +486,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             strncpy(command5->romasendcommandcmd.Payload.cmd, cmd_buf, sizeof(command5->romasendcommandcmd.Payload.cmd) - 1);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasendcommandcmd, sizeof(PAYUEL_ROMA_SendCommandCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasendcommandcmd, sizeof(PAYUEL_ROMA_SendCommandCmd_t), MIM_PT_TMTC_TEST);
@@ -599,78 +510,13 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             strncpy(command5->romasendmsgcmd.Payload.msg, msg_buf, sizeof(command5->romasendmsgcmd.Payload.msg) - 1);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->romasendmsgcmd, sizeof(PAYUEL_ROMA_SendMsgCmd_t), msgid, fnccode);
-
 
 
             mim::tc::SendTelecommand(&command5->romasendmsgcmd, sizeof(PAYUEL_ROMA_SendMsgCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
-
-    case 7431: { /* ROMA SYNC_RX (CC 31) */
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_SYNC_RX_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romasyncrxcmd, sizeof(PAYUEL_ROMA_SyncRxCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romasyncrxcmd, sizeof(PAYUEL_ROMA_SyncRxCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
-    case 7432: { /* ROMA SYNC_TX (CC 32) */
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_SYNC_TX_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romasynctxcmd, sizeof(PAYUEL_ROMA_SyncTxCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romasynctxcmd, sizeof(PAYUEL_ROMA_SyncTxCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
-    case 7433: { /* ROMA PAY_INIT (CC 33) */
-        static uint16_t msgid = PAYUEL_ROMA_CMD_MID;
-        static uint8_t fnccode = PAYUEL_ROMA_PAY_INIT_CC;
-
-        ImGui::InputScalar("Msg ID", ImGuiDataType_U16, &msgid, NULL, NULL, "0x%04X");
-        ImGui::InputScalar("Command Code(CC)", ImGuiDataType_U8, &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->romapayinitcmd, sizeof(PAYUEL_ROMA_PayInitCmd_t), msgid, fnccode);
-
-
-
-            mim::tc::SendTelecommand(&command5->romapayinitcmd, sizeof(PAYUEL_ROMA_PayInitCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-        }
 
         // ==================== SD1-SAT: ci ====================
     case 7434: /* ROMA ISL LISTEN_START (CC 34) */

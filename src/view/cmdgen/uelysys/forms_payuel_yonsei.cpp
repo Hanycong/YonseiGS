@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,18 +36,19 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  7600, 0x18CC, 0, "##direct_7600" },   // payuel_yonsei NOOP
+    {  7601, 0x18CC, 1, "##direct_7601" },   // payuel_yonsei RESET_COUNTERS
+};
+
 bool DrawUelysysPayuelYonseiForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 7600: { // payuel_yonsei NOOP
-            static uint16_t msgid=0x18CC; static uint8_t fnccode=0; ImGui::InputScalar("msgid##direct_7600",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7600",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_7600")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
-        }
-        case 7601: { // payuel_yonsei RESET_COUNTERS
-            static uint16_t msgid=0x18CC; static uint8_t fnccode=1; ImGui::InputScalar("msgid##direct_7601",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7601",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_7601")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
-        }
         case 7607: { // payuel_yonsei FORWARD_SB
             static uint16_t msgid=0x18CC; static uint8_t fnccode=7; struct Payload { uint16_t TargetMid; uint16_t PayloadLength; uint8_t TargetFcnCode; uint8_t TargetNode; uint8_t TargetPort; uint8_t Spare[1]; uint8_t PayloadBytes[192]; }; static_assert(sizeof(Payload)==200,"payuel_yonsei FORWARD_SB payload size"); static Payload payload{};
             ImGui::InputScalar("msgid##direct_7607",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7607",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("TargetMid##direct_7607",ImGuiDataType_U16,&payload.TargetMid); ImGui::InputScalar("PayloadLength##direct_7607",ImGuiDataType_U16,&payload.PayloadLength); ImGui::InputScalar("TargetFcnCode##direct_7607",ImGuiDataType_U8,&payload.TargetFcnCode); ImGui::InputScalar("TargetNode##direct_7607",ImGuiDataType_U8,&payload.TargetNode); ImGui::InputScalar("TargetPort##direct_7607",ImGuiDataType_U8,&payload.TargetPort); ImGui::InputText("Payload (ASCII, max 191)##direct_7607",reinterpret_cast<char*>(payload.PayloadBytes),sizeof(payload.PayloadBytes));

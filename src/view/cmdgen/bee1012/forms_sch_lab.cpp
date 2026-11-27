@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,32 +36,20 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  3500, BEE1012_SCH_LAB_CMD_ID, BEE1012_SCH_LAB_NOOP_CC, "##direct_3500" },
+    {  3501, 0x18A3,                 1,                       "##direct_3501" },   // sch_lab RESET_COUNTERS
+};
+
 bool DrawBee1012SchLabForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 3500: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_SCH_LAB_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_SCH_LAB_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_3500", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_3500", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_3500")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-
         // ==================== LEGACY / UNCLASSIFIED ====================
-        case 3501: { // sch_lab RESET_COUNTERS
-            static uint16_t msgid=0x18A3; static uint8_t fnccode=1;
-            ImGui::InputScalar("msgid##direct_3501",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_3501",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_3501")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
-            break;
-        }
 
         case 3502: { // sch_lab SET_ENTRY_STATE
             static uint16_t msgid=0x18A3; static uint8_t fnccode=2;

@@ -29,6 +29,10 @@ public:
 
     bool * RawData();                                 // "Write Raw Data"
 
+    // ---- 인자 없는 명령 (view/cmdgen/noarg_form) ----
+    // 머리 8바이트(MID, CC, 길이 1, 체크섬)만 있는 명령을 만들어 OBC 로 보낸다. TC 로그에 대상 앱 이름을 남긴다
+    void SendNoArgCommand(uint16_t msgid, uint8_t fnccode);
+
 private:
     void SyncSatellite();               // 위성 모드가 바뀌었으면 콤보/선택 초기화
     int selected_category_ = 0;

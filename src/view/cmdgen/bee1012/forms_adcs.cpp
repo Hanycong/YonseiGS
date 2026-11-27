@@ -25,6 +25,7 @@
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
+#include "noarg_form.h"
 
 using namespace std;
 
@@ -35,176 +36,79 @@ extern Setup * setup;
 extern uint16_t gen_fnccode;
 extern bool raw_data;
 
+// 인자 없는 명령 (머리 8바이트뿐): { 명령 번호, 기본 MID, 기본 CC, 위젯 ID 꼬리표 }. 폼은 noarg_form 이 그린다
+static mim::ui::NoArgCommandForm kNoArgForms[] = {
+    {  2700, BEE1012_ADCS2_CMD_ID, BEE1012_ADCS2_NOOP_CC,                    "##direct_2700" },
+    {  2701, ADCS_CMD_ID,          ADCS_RESET_COUNTERS_CC,                   ""              },
+    {  2705, ADCS_CMD_ID,          ADCS_GPIO_ENABLE_HIGH_CC,                 ""              },
+    {  2706, ADCS_CMD_ID,          ADCS_GPIO_ENABLE_LOW_CC,                  ""              },
+    {  2708, ADCS_CMD_ID,          ADCS_GPIO_BOOT_HIGH_CC,                   ""              },
+    {  2709, ADCS_CMD_ID,          ADCS_GPIO_BOOT_LOW_CC,                    ""              },
+    {  2710, ADCS_CMD_ID,          ADCS_EXIT_BOOTLOADER_CC,                  ""              },
+    {  2711, ADCS_CMD_ID,          ADCS_SET_RESET_CC,                        ""              },
+    {  2714, ADCS_CMD_ID,          ADCS_SET_PERSIST_CONFIG_CC,               ""              },
+    {  2751, ADCS_CMD_ID,          ADCS_GET_ERROR_LOG_SETTING_CC,            "##direct_2751" },   // ADCS GET_ERROR_LOG_SETTING
+    {  2752, ADCS_CMD_ID,          ADCS_GET_CURRENT_UNIX_TIME_CC,            "##direct_2752" },
+    {  2753, ADCS_CMD_ID,          ADCS_GET_PERSIST_CONFIG_DIAGNOSTIC_CC,    "##direct_2753" },   // ADCS GET_PERSIST_CONFIG_DIAGNOSTIC
+    {  2754, ADCS_CMD_ID,          ADCS_GET_COMMUNICATION_STATUS_CC,         "##direct_2754" },   // ADCS GET_COMMUNICATION_STATUS
+    {  2755, ADCS_CMD_ID,          ADCS_GET_CONTROL_ESTIMATION_MODE_CC,      "##direct_2755" },   // ADCS GET_CONTROL_ESTIMATION_MODE
+    {  2756, ADCS_CMD_ID,          ADCS_GET_REFERENCE_IRC_VECTOR_CC,         "##direct_2756" },   // ADCS GET_REFERENCE_IRC_VECTOR
+    {  2757, ADCS_CMD_ID,          ADCS_GET_REFERENCE_LLH_TARGET_CC,         "##direct_2757" },   // ADCS GET_REFERENCE_LLH_TARGET
+    {  2758, ADCS_CMD_ID,          ADCS_GET_ORBIT_MODE_CC,                   "##direct_2758" },   // ADCS GET_ORBIT_MODE
+    {  2759, ADCS_CMD_ID,          ADCS_GET_HEALTH_TLM_MMT_CC,               "##direct_2759" },   // ADCS GET_HEALTH_TLM_MMT
+    {  2760, ADCS_CMD_ID,          ADCS_GET_RAW_CALIBRATED_CUBESENSE_SUN_CC, "##direct_2760" },
+    {  2761, ADCS_CMD_ID,          ADCS_GET_REFERENCE_RPY_VALUES_CC,         "##direct_2761" },   // ADCS GET_REFERENCE_RPY_VALUES
+    {  2762, ADCS_CMD_ID,          ADCS_GET_OPENLOOPCMD_MTQ_CC,              "##direct_2762" },   // ADCS GET_OPENLOOPCMD_MTQ
+    {  2763, ADCS_CMD_ID,          ADCS_GET_POWER_STATE_CC,                  "##direct_2763" },   // ADCS GET_POWER_STATE
+    {  2764, ADCS_CMD_ID,          ADCS_GET_RUN_MODE_CC,                     "##direct_2764" },   // ADCS GET_RUN_MODE
+    {  2765, ADCS_CMD_ID,          ADCS_GET_CONTROL_MODE_CC,                 "##direct_2765" },   // ADCS GET_CONTROL_MODE
+    {  2766, ADCS_CMD_ID,          ADCS_GET_WHL_CONFIG_CC,                   "##direct_2766" },   // ADCS GET_WHL_CONFIG
+    {  2767, ADCS_CMD_ID,          ADCS_GET_SATELLITE_CONFIG_CC,             "##direct_2767" },   // ADCS GET_SATELLITE_CONFIG
+    {  2768, ADCS_CMD_ID,          ADCS_GET_CONTROLLER_CONFIG_CC,            "##direct_2768" },   // ADCS GET_CONTROLLER_CONFIG
+    {  2769, ADCS_CMD_ID,          ADCS_GET_MAG0_MMT_CALIB_CONFIG_CC,        "##direct_2769" },   // ADCS GET_MAG0_MMT_CALIB_CONFIG
+    {  2770, ADCS_CMD_ID,          ADCS_GET_DEFAULT_MODE_CONFIG_CC,          "##direct_2770" },   // ADCS GET_DEFAULT_MODE_CONFIG
+    {  2771, ADCS_CMD_ID,          ADCS_GET_MOUNTING_CONFIG_CC,              "##direct_2771" },   // ADCS GET_MOUNTING_CONFIG
+    {  2772, ADCS_CMD_ID,          ADCS_GET_MAG1_MMT_CALIB_CONFIG_CC,        "##direct_2772" },   // ADCS GET_MAG1_MMT_CALIB_CONFIG
+    {  2773, ADCS_CMD_ID,          ADCS_GET_ESTIMATOR_CONFIG_CC,             "##direct_2773" },   // ADCS GET_ESTIMATOR_CONFIG
+    {  2774, ADCS_CMD_ID,          ADCS_GET_SAT_ORBIT_PARAM_CONFIG_CC,       "##direct_2774" },   // ADCS GET_SAT_ORBIT_PARAM_CONFIG
+    {  2775, ADCS_CMD_ID,          ADCS_GET_NODE_SELECTION_CONFIG_CC,        "##direct_2775" },   // ADCS GET_NODE_SELECTION_CONFIG
+    {  2776, ADCS_CMD_ID,          ADCS_GET_MTQ_CONFIG_CC,                   "##direct_2776" },   // ADCS GET_MTQ_CONFIG
+    {  2777, ADCS_CMD_ID,          ADCS_GET_ESTIMATION_MODE_CC,              "##direct_2777" },   // ADCS GET_ESTIMATION_MODE
+    {  2778, ADCS_CMD_ID,          ADCS_GET_OPERATIONAL_STATE_CC,            "##direct_2778" },   // ADCS GET_OPERATIONAL_STATE
+    {  2779, ADCS_CMD_ID,          ADCS_GET_RAW_CALIBRATED_CSS_SENSOR_CC,    "##direct_2779" },   // ADCS GET_RAW_CALIBRATED_CSS_SENSOR
+    {  2780, ADCS_CMD_ID,          ADCS_GET_RAW_CALIBRATED_GYR_SENSOR_CC,    "##direct_2780" },
+    {  2781, ADCS_CMD_ID,          ADCS_GET_CALIBRATED_GYR_SENSOR_CC,        "##direct_2781" },   // ADCS GET_CALIBRATED_GYR_SENSOR
+    {  2782, ADCS_CMD_ID,          ADCS_GET_MAG_SENSING_ELM_CONFIG_CC,       "##direct_2782" },   // ADCS GET_MAG_SENSING_ELM_CONFIG
+    {  2783, ADCS_CMD_ID,          ADCS_GET_TLM_LOG_INCLMASK_CC,             "##direct_2783" },   // ADCS GET_TLM_LOG_INCLMASK
+    {  2784, ADCS_CMD_ID,          ADCS_GET_UNSOLICIT_TLM_MSG_SETUP_CC,      "##direct_2784" },   // ADCS GET_UNSOLICIT_TLM_MSG_SETUP
+    {  2785, ADCS_CMD_ID,          ADCS_GET_UNSOLICIT_EVENT_MSG_SETUP_CC,    "##direct_2785" },   // ADCS GET_UNSOLICIT_EVENT_MSG_SETUP
+    {  2786, ADCS_CMD_ID,          ADCS_GET_EVENT_LOG_STATUS_RESPONSE_CC,    "##direct_2786" },   // ADCS GET_EVENT_LOG_STATUS_RESPONSE
+    {  2787, ADCS_CMD_ID,          ADCS_GET_PORTMAP_CC,                      "##direct_2787" },   // ADCS GET_PORTMAP
+    {  2790, ADCS_CMD_ID,          ADCS_GET_RAW_CALIBRATED_RWL_SENSOR_CC,    "##direct_2790" },   // ADCS GET_RAW_CALIBRATED_RWL_SENSOR
+    {  2800, ADCS_CMD_ID,          ADCS_SEQ_DTUMB_CC,                        "##direct_2800" },   // ADCS SEQ_DTUMB
+    {  2802, ADCS_CMD_ID,          ADCS_SEQ_SUN_CC,                          "##direct_2802" },   // ADCS SEQ_SUN
+    {  2810, ADCS_CMD_ID,          ADCS_SET_ERROR_LOG_CLEAR_CC,              "##direct_2810" },   // ADCS SET_ERROR_LOG_CLEAR
+    {  2814, ADCS_CMD_ID,          ADCS_GET_CURRENT_UNIX_TIME_INTERNAL_CC,   "##direct_2814" },   // ADCS GET_CURRENT_UNIX_TIME_INTERNAL
+};
+
 bool DrawBee1012AdcsForms(uint16_t fnccode)
 {
+    if (mim::ui::DrawNoArgForm(kNoArgForms, fnccode))
+        return true;
+
     switch (fnccode)
     {
-        case 2700: {
-            UELYSYS_NoArgCmd_t &cmd = command5->uelysys_noargcmd;
-            static uint16_t msgid = (uint16_t)(BEE1012_ADCS2_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(BEE1012_ADCS2_NOOP_CC);
-            ImGui::InputScalar("msgid##direct_2700", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2700", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2700")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-    case 2701: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_RESET_COUNTERS_CC;   // 1
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsresetcounterscmd, sizeof(ADCS_ResetCountersCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsresetcounterscmd, sizeof(ADCS_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
-
     /* 51 : ADCS Set Interface Transport (CC 91) */
-    case 2705: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_GPIO_ENABLE_HIGH_CC;   // 5
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsgpioenhighcmd, sizeof(ADCS_GpioEnHighCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsgpioenhighcmd, sizeof(ADCS_GpioEnHighCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 53 : ADCS GPIO Enable Low (CC 6, no-arg) */
-    case 2706: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_GPIO_ENABLE_LOW_CC;   // 6
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsgpioenlowcmd, sizeof(ADCS_GpioEnLowCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsgpioenlowcmd, sizeof(ADCS_GpioEnLowCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 54 : ADCS GPIO Boot High (CC 8, no-arg) */
-    case 2708: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_GPIO_BOOT_HIGH_CC;   // 8
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsgioboothighcmd, sizeof(ADCS_GpioBootHighCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsgioboothighcmd, sizeof(ADCS_GpioBootHighCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 55 : ADCS GPIO Boot Low (CC 9, no-arg) */
-    case 2709: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_GPIO_BOOT_LOW_CC;   // 9
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsgiobootlowcmd, sizeof(ADCS_GpioBootLowCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsgiobootlowcmd, sizeof(ADCS_GpioBootLowCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 56 : ADCS Exit Bootloader (CC 10, no-arg) */
-    case 2710: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_EXIT_BOOTLOADER_CC;   // 10
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsexitbootloadercmd, sizeof(ADCS_ExitBootLoaderCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsexitbootloadercmd, sizeof(ADCS_ExitBootLoaderCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 57 : ADCS Reset (CC 11, no-arg) */
-    case 2711: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_SET_RESET_CC;   // 11
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcsresetcmd, sizeof(ADCS_ResetCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcsresetcmd, sizeof(ADCS_ResetCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 58 : ADCS Set Current Unix Time (CC 12, payload) */
     case 2712: {
@@ -222,7 +126,6 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcscurrentunixtimecmd, sizeof(ADCS_CurrentUnixTimeCmd_t), msgid, fnccode);
@@ -258,7 +161,6 @@ case 2713: {
         WriteSystemName(msgid);
 
 
-
         mim::tc::EncodeCfeCommand(&command5->adcserrorlogsettingcmd, sizeof(ADCS_ErrorLogSettingCmd_t), msgid, fnccode);
 
 
@@ -269,26 +171,6 @@ case 2713: {
 
 
     /* 60 : ADCS Persist Config (CC 14, no-arg) */
-    case 2714: {
-        static uint16_t msgid   = ADCS_CMD_ID;
-        static uint8_t  fnccode = ADCS_SET_PERSIST_CONFIG_CC;   // 14
-
-        ImGui::InputScalar("msgid",   ImGuiDataType_U16, &msgid);
-        ImGui::InputScalar("fnccode", ImGuiDataType_U8,  &fnccode);
-
-        if (ImGui::Button("Generate CMD")) {
-
-            WriteSystemName(msgid);
-
-
-
-            mim::tc::EncodeCfeCommand(&command5->adcspersistconfigcmd, sizeof(ADCS_PersistConfigCmd_t), msgid, fnccode);
-
-
-            mim::tc::SendTelecommand(&command5->adcspersistconfigcmd, sizeof(ADCS_PersistConfigCmd_t), MIM_PT_TMTC_TEST);
-        }
-        break;
-    }
 
     /* 61 : ADCS Set Control Estimation Mode (CC 15) */
     case 2715: {
@@ -310,7 +192,6 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcscontrolestimationmodecmd, sizeof(ADCS_ControlEstimationModeCmd_t), msgid, fnccode);
@@ -335,7 +216,6 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcsdisablemagrwlmntmngcmd, sizeof(ADCS_DisableMagRwlMntMngCmd_t), msgid, fnccode);
@@ -366,7 +246,6 @@ case 2713: {
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->adcsreferenceircvectorcmd, sizeof(ADCS_ReferenceIRCVectorCmd_t), msgid, fnccode);
 
 
@@ -395,7 +274,6 @@ case 2713: {
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->adcsreferencellhtargetcmd, sizeof(ADCS_ReferenceLLHTargetCmd_t), msgid, fnccode);
 
 
@@ -417,7 +295,6 @@ case 2713: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcsorbitmodecmd, sizeof(ADCS_OrbitModeCmd_t), msgid, fnccode);
@@ -454,7 +331,6 @@ case 2720: {
         WriteSystemName(msgid);
 
 
-
         mim::tc::EncodeCfeCommand(&command5->adcsmagdeploycmd, sizeof(ADCS_MagDeployCmd_t), msgid, fnccode);
 
 
@@ -482,7 +358,6 @@ case 2720: {
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->adcsreferencerpyvaluescmd, sizeof(ADCS_ReferenceRPYvaluesCmd_t), msgid, fnccode);
 
 
@@ -508,7 +383,6 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcsopenloopcmdmtqcmd, sizeof(ADCS_OpenLoopCmdMTQCmd_t), msgid, fnccode);
@@ -579,7 +453,6 @@ case 2720: {
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->adcspowerstatecmd, sizeof(ADCS_PowerStateCmd_t), msgid, fnccode);
 
 
@@ -599,7 +472,6 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-
 
 
             mim::tc::EncodeCfeCommand(&command5->adcsrunmodecmd, sizeof(ADCS_RunModeCmd_t), msgid, fnccode);
@@ -626,7 +498,6 @@ case 2720: {
             WriteSystemName(msgid);
 
 
-
             mim::tc::EncodeCfeCommand(&command5->adcscontrolmodecmd, sizeof(ADCS_ControlModeCmd_t), msgid, fnccode);
 
 
@@ -634,7 +505,6 @@ case 2720: {
         }
         break;
     }
-
 
 
     // case 72: {
@@ -797,8 +667,6 @@ case 2720: {
                 WriteSystemName(msgid);
 
 
-
-
                 mim::tc::EncodeCfeCommand(&command5->adcswhlconfigcmd, sizeof(ADCS_WhlConfigCmd_t), msgid, fnccode);
 
 
@@ -896,7 +764,6 @@ case 2720: {
                     crc ^= *(pp++);
                 }
                 memcpy(command5->adcssatconfigcmd.CmdHeader + 7, &crc, 1);
-
 
 
                 mim::tc::SendTelecommand(&command5->adcssatconfigcmd, sizeof(ADCS_SatConfigCmd_t), MIM_PT_TMTC_TEST);
@@ -1098,7 +965,6 @@ case 2720: {
                 pl->MMT_SensitivityMAT_S32 = MMT_SensitivityMAT_S32;
 
 
-
                 mim::tc::EncodeCfeCommand(&command5->adcsmag0mmtcalibconfigcmd, sizeof(ADCS_Mag0MMTCalibConfigCmd_t), msgid, fnccode);
 
 
@@ -1125,10 +991,6 @@ case 2720: {
                         (int)MMT_SensitivityMAT_S23, (int)MMT_SensitivityMAT_S31, (int)MMT_SensitivityMAT_S32);
             break;
         }
-
-
-
-
 
 
         case 2730: {
@@ -1169,12 +1031,7 @@ case 2720: {
                 WriteSystemName(msgid);
 
 
-
-
-
                 mim::tc::EncodeCfeCommand(&command5->adcsdefaultmodeconfigcmd, sizeof(ADCS_DefaultModeConfigCmd_t), msgid, fnccode);
-
-
 
 
                 mim::tc::SendTelecommand(&command5->adcsdefaultmodeconfigcmd, sizeof(ADCS_DefaultModeConfigCmd_t), MIM_PT_TMTC_TEST);
@@ -1322,10 +1179,7 @@ case 2720: {
                 WriteSystemName(msgid);
 
 
-
                 mim::tc::EncodeCfeCommand(&command5->adcsmountingconfigcmd, sizeof(ADCS_MountingConfigCmd_t), msgid, fnccode);
-
-
 
 
                 mim::tc::SendTelecommand(&command5->adcsmountingconfigcmd, sizeof(ADCS_MountingConfigCmd_t), MIM_PT_TMTC_TEST);
@@ -1501,12 +1355,7 @@ case 2720: {
                 WriteSystemName(msgid);
 
 
-
-
-
                 mim::tc::EncodeCfeCommand(&command5->adcsestimatorconfigcmd, sizeof(ADCS_EstimatorConfigCmd_t), msgid, fnccode);
-
-
 
 
                 mim::tc::SendTelecommand(&command5->adcsestimatorconfigcmd, sizeof(ADCS_EstimatorConfigCmd_t), MIM_PT_TMTC_TEST);
@@ -1557,14 +1406,11 @@ case 2734: {
         command5->adcssatorbitparamconfigcmd.CmdHeader[7] = crc;
 
 
-
         mim::tc::SendTelecommand(&command5->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t), MIM_PT_TMTC_TEST);
     }
 
     break;
 }
-
-
 
 
         case 2735: {
@@ -1635,14 +1481,11 @@ case 2734: {
                 memcpy(command5->adcsnodeselectionconfigcmd.CmdHeader + 7, &crc, 1);
 
 
-
-
                 mim::tc::SendTelecommand(&command5->adcsnodeselectionconfigcmd, sizeof(ADCS_NodeSelectionConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
         }
-
 
 
         case 2736: {
@@ -1717,8 +1560,6 @@ case 2734: {
                     crc ^= *(pp++);
                 }
                 memcpy(command5->adcsmtqconfigcmd.CmdHeader + 7, &crc, 1);
-
-
 
 
                 mim::tc::SendTelecommand(&command5->adcsmtqconfigcmd, sizeof(ADCS_MTQConfigCmd_t), MIM_PT_TMTC_TEST);
@@ -1811,11 +1652,7 @@ case 2734: {
                 // CCSDS Header (7바이트 + CRC)
 
 
-
                 mim::tc::EncodeCfeCommand(&command5->adcsmagsensingelmconfigcmd, sizeof(ADCS_MagSensingElmConfigCmd_t), msgid, fnccode);
-
-
-
 
 
                 // uplink thread 실행
@@ -1911,8 +1748,6 @@ case 2734: {
             }
             break;
         }
-
-
 
 
         case 2741: { // adcs SET_UNSOLICIT_EVENT_MSG_SETUP
@@ -2121,535 +1956,6 @@ case 2734: {
             break;
         }
 
-        case 2751: { // ADCS GET_ERROR_LOG_SETTING
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_ERROR_LOG_SETTING_CC;
-            ImGui::InputScalar("msgid##direct_2751", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2751", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2751")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2752: {
-            ADCS_GetCurrentUnixTimeCmd_t &cmd = command5->adcsgetcurrentunixtimecmd;
-            static uint16_t msgid = (uint16_t)(ADCS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(ADCS_GET_CURRENT_UNIX_TIME_CC);
-            ImGui::InputScalar("msgid##direct_2752", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2752", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2752")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetCurrentUnixTimeCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetCurrentUnixTimeCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 2753: { // ADCS GET_PERSIST_CONFIG_DIAGNOSTIC
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_PERSIST_CONFIG_DIAGNOSTIC_CC;
-            ImGui::InputScalar("msgid##direct_2753", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2753", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2753")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2754: { // ADCS GET_COMMUNICATION_STATUS
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_COMMUNICATION_STATUS_CC;
-            ImGui::InputScalar("msgid##direct_2754", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2754", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2754")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2755: { // ADCS GET_CONTROL_ESTIMATION_MODE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_CONTROL_ESTIMATION_MODE_CC;
-            ImGui::InputScalar("msgid##direct_2755", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2755", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2755")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2756: { // ADCS GET_REFERENCE_IRC_VECTOR
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_REFERENCE_IRC_VECTOR_CC;
-            ImGui::InputScalar("msgid##direct_2756", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2756", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2756")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2757: { // ADCS GET_REFERENCE_LLH_TARGET
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_REFERENCE_LLH_TARGET_CC;
-            ImGui::InputScalar("msgid##direct_2757", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2757", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2757")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2758: { // ADCS GET_ORBIT_MODE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_ORBIT_MODE_CC;
-            ImGui::InputScalar("msgid##direct_2758", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2758", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2758")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2759: { // ADCS GET_HEALTH_TLM_MMT
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_HEALTH_TLM_MMT_CC;
-            ImGui::InputScalar("msgid##direct_2759", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2759", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2759")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2760: {
-            ADCS_GetRawCubeSenseSunCmd_t &cmd = command5->adcsgetrawcubesensesuncmd;
-            static uint16_t msgid = (uint16_t)(ADCS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(ADCS_GET_RAW_CALIBRATED_CUBESENSE_SUN_CC);
-            ImGui::InputScalar("msgid##direct_2760", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2760", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2760")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetRawCubeSenseSunCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetRawCubeSenseSunCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-        case 2761: { // ADCS GET_REFERENCE_RPY_VALUES
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_REFERENCE_RPY_VALUES_CC;
-            ImGui::InputScalar("msgid##direct_2761", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2761", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2761")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2762: { // ADCS GET_OPENLOOPCMD_MTQ
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_OPENLOOPCMD_MTQ_CC;
-            ImGui::InputScalar("msgid##direct_2762", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2762", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2762")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2763: { // ADCS GET_POWER_STATE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_POWER_STATE_CC;
-            ImGui::InputScalar("msgid##direct_2763", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2763", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2763")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2764: { // ADCS GET_RUN_MODE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_RUN_MODE_CC;
-            ImGui::InputScalar("msgid##direct_2764", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2764", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2764")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2765: { // ADCS GET_CONTROL_MODE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_CONTROL_MODE_CC;
-            ImGui::InputScalar("msgid##direct_2765", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2765", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2765")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2766: { // ADCS GET_WHL_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_WHL_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2766", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2766", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2766")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2767: { // ADCS GET_SATELLITE_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_SATELLITE_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2767", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2767", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2767")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2768: { // ADCS GET_CONTROLLER_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_CONTROLLER_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2768", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2768", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2768")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2769: { // ADCS GET_MAG0_MMT_CALIB_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_MAG0_MMT_CALIB_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2769", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2769", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2769")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2770: { // ADCS GET_DEFAULT_MODE_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_DEFAULT_MODE_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2770", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2770", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2770")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2771: { // ADCS GET_MOUNTING_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_MOUNTING_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2771", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2771", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2771")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2772: { // ADCS GET_MAG1_MMT_CALIB_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_MAG1_MMT_CALIB_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2772", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2772", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2772")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2773: { // ADCS GET_ESTIMATOR_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_ESTIMATOR_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2773", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2773", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2773")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2774: { // ADCS GET_SAT_ORBIT_PARAM_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_SAT_ORBIT_PARAM_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2774", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2774", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2774")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2775: { // ADCS GET_NODE_SELECTION_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_NODE_SELECTION_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2775", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2775", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2775")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2776: { // ADCS GET_MTQ_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_MTQ_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2776", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2776", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2776")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2777: { // ADCS GET_ESTIMATION_MODE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_ESTIMATION_MODE_CC;
-            ImGui::InputScalar("msgid##direct_2777", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2777", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2777")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2778: { // ADCS GET_OPERATIONAL_STATE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_OPERATIONAL_STATE_CC;
-            ImGui::InputScalar("msgid##direct_2778", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2778", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2778")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2779: { // ADCS GET_RAW_CALIBRATED_CSS_SENSOR
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_RAW_CALIBRATED_CSS_SENSOR_CC;
-            ImGui::InputScalar("msgid##direct_2779", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2779", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2779")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2780: {
-            ADCS_GetRawGYRSensorCmd_t &cmd = command5->adcsgetrawgyrsensorcmd;
-            static uint16_t msgid = (uint16_t)(ADCS_CMD_ID);
-            static uint8_t fnccode = (uint8_t)(ADCS_GET_RAW_CALIBRATED_GYR_SENSOR_CC);
-            ImGui::InputScalar("msgid##direct_2780", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2780", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2780")) {
-                WriteSystemName(msgid);
-                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetRawGYRSensorCmd_t), msgid, fnccode);
-                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetRawGYRSensorCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2781: { // ADCS GET_CALIBRATED_GYR_SENSOR
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_CALIBRATED_GYR_SENSOR_CC;
-            ImGui::InputScalar("msgid##direct_2781", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2781", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2781")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2782: { // ADCS GET_MAG_SENSING_ELM_CONFIG
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_MAG_SENSING_ELM_CONFIG_CC;
-            ImGui::InputScalar("msgid##direct_2782", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2782", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2782")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2783: { // ADCS GET_TLM_LOG_INCLMASK
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_TLM_LOG_INCLMASK_CC;
-            ImGui::InputScalar("msgid##direct_2783", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2783", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2783")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2784: { // ADCS GET_UNSOLICIT_TLM_MSG_SETUP
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_UNSOLICIT_TLM_MSG_SETUP_CC;
-            ImGui::InputScalar("msgid##direct_2784", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2784", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2784")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2785: { // ADCS GET_UNSOLICIT_EVENT_MSG_SETUP
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_UNSOLICIT_EVENT_MSG_SETUP_CC;
-            ImGui::InputScalar("msgid##direct_2785", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2785", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2785")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2786: { // ADCS GET_EVENT_LOG_STATUS_RESPONSE
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_EVENT_LOG_STATUS_RESPONSE_CC;
-            ImGui::InputScalar("msgid##direct_2786", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2786", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2786")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2787: { // ADCS GET_PORTMAP
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_PORTMAP_CC;
-            ImGui::InputScalar("msgid##direct_2787", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2787", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2787")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2790: { // ADCS GET_RAW_CALIBRATED_RWL_SENSOR
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_RAW_CALIBRATED_RWL_SENSOR_CC;
-            ImGui::InputScalar("msgid##direct_2790", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2790", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2790")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
     case 2791: {
         static uint16_t msgid   = ADCS_CMD_ID;
@@ -2665,8 +1971,6 @@ case 2734: {
             WriteSystemName(msgid);
 
 
-
-
             mim::tc::EncodeCfeCommand(&command5->adcsinterfacetransportcmd, sizeof(ADCS_InterfaceTransportCmd_t), msgid, fnccode);
 
 
@@ -2676,19 +1980,6 @@ case 2734: {
     }
 
     /* 52 : ADCS GPIO Enable High (CC 5, no-arg) */
-        case 2800: { // ADCS SEQ_DTUMB
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_SEQ_DTUMB_CC;
-            ImGui::InputScalar("msgid##direct_2800", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2800", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2800")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
 
         case 2801: // ADCS_SEQ_GNDPT_CC
         {
@@ -2714,26 +2005,10 @@ case 2734: {
                        sizeof(payload));
 
 
-
-
                 mim::tc::EncodeCfeCommand(&command5->adcsseqgndpointingcmd, sizeof(ADCS_SequenceCmdGNDpointingCmd_t), msgid, fnccode);
 
 
                 mim::tc::SendTelecommand(&command5->adcsseqgndpointingcmd, sizeof(ADCS_SequenceCmdGNDpointingCmd_t), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2802: { // ADCS SEQ_SUN
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_SEQ_SUN_CC;
-            ImGui::InputScalar("msgid##direct_2802", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2802", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2802")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2808,35 +2083,6 @@ case 2734: {
             }
             break;
         }
-
-        case 2810: { // ADCS SET_ERROR_LOG_CLEAR
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_SET_ERROR_LOG_CLEAR_CC;
-            ImGui::InputScalar("msgid##direct_2810", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2810", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2810")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
-        case 2814: { // ADCS GET_CURRENT_UNIX_TIME_INTERNAL
-            static uint16_t msgid = ADCS_CMD_ID;
-            static uint8_t fnccode = ADCS_GET_CURRENT_UNIX_TIME_INTERNAL_CC;
-            ImGui::InputScalar("msgid##direct_2814", ImGuiDataType_U16, &msgid);
-            ImGui::InputScalar("fnccode##direct_2814", ImGuiDataType_U8, &fnccode);
-            if (ImGui::Button("Generate CMD##direct_2814")) {
-                WriteSystemName(msgid);
-                uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
-                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
-            }
-            break;
-        }
-
 
 
         case 2818: { // adcs COMM_01
