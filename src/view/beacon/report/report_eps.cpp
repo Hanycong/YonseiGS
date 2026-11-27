@@ -61,11 +61,7 @@ bool DrawEpsReport(ReportView_t & view)
                         {
                             auto &pl = view.u.eps_p60pdugettablehk;
 
-                            ImGui::TableNextRow();
-                            ImGui::TableSetColumnIndex(0);
-                            ImGui::TextUnformatted("Type");
-                            ImGui::TableSetColumnIndex(1);
-                            ImGui::TextUnformatted("EPS P60 PDU GET TABLE HK");
+                            rpt5::RowText("Type", "EPS P60 PDU GET TABLE HK");
 
                             HeaderRow("[Report Data]");
                             RowArr_i16("c_out[0..8]",  pl.c_out, 9, 4);
@@ -114,11 +110,7 @@ bool DrawEpsReport(ReportView_t & view)
                         {
                             auto &pl = view.u.eps_p60acugettablehk;
 
-                            ImGui::TableNextRow();
-                            ImGui::TableSetColumnIndex(0);
-                            ImGui::TextUnformatted("Type");
-                            ImGui::TableSetColumnIndex(1);
-                            ImGui::TextUnformatted("EPS P60 ACU GET TABLE HK");
+                            rpt5::RowText("Type", "EPS P60 ACU GET TABLE HK");
 
                             HeaderRow("[Inputs]");
                             RowArr_i16("c_in[0..5]", pl.c_in, 6, 2);
@@ -167,11 +159,7 @@ bool DrawEpsReport(ReportView_t & view)
                         {
                             auto &pl = view.u.eps_p60dockgettablehk;
 
-                            ImGui::TableNextRow();
-                            ImGui::TableSetColumnIndex(0);
-                            ImGui::TextUnformatted("Type");
-                            ImGui::TableSetColumnIndex(1);
-                            ImGui::TextUnformatted("EPS P60 DOCK GET TABLE HK");
+                            rpt5::RowText("Type", "EPS P60 DOCK GET TABLE HK");
 
                             HeaderRow("[Report Data]");
                             RowArr_i16("c_out[0..12]",  pl.c_out, 13, 6);

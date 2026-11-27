@@ -25,17 +25,6 @@ bool DrawBee1012AppBody(ReportCtx & c)
     (void)RowEPSHKAllSummary;
     const uint8_t *p = view.raw_bytes;
     const uint16_t n = view.raw_size;
-    auto CopyLocal = [&](void *dst, size_t size) {
-        if (n < size) return false;
-        memcpy(dst, p, size);
-        return true;
-    };
-    auto CopyExactLocal = [&](void *dst, size_t size) {
-        if (n != size) return false;
-        memcpy(dst, p, size);
-        return true;
-    };
-    (void)CopyLocal; (void)CopyExactLocal;
 
     if (view.kind == REPORT_KIND_BEE1012_LTRX)
     {

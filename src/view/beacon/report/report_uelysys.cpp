@@ -25,17 +25,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
     (void)RowEPSHKAllSummary;
     const uint8_t *p = view.raw_bytes;
     const uint16_t n = view.raw_size;
-    auto CopyLocal = [&](void *dst, size_t size) {
-        if (n < size) return false;
-        memcpy(dst, p, size);
-        return true;
-    };
-    auto CopyExactLocal = [&](void *dst, size_t size) {
-        if (n != size) return false;
-        memcpy(dst, p, size);
-        return true;
-    };
-    (void)CopyLocal; (void)CopyExactLocal;
+    const RawPayload raw(view);
 
     if (view.kind == REPORT_KIND_UELYSYS_TTC)
     {
@@ -48,7 +38,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             case UELYSYS_TTC_PAUSE_TIMELINE_PROCESSING_CC:
             case UELYSYS_TTC_RESUME_TIMELINE_PROCESSING_CC: {
                 UELYSYS_TTC_Counters_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("CommandCounter", "%" PRIu16, x.counters[0]);
                     RowFmt("ErrorCounter", "%" PRIu16, x.counters[1]);
                 }
@@ -56,7 +46,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_REPORT_CC: {
                 UELYSYS_TTC_ReportStatus_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("CommandCounter", "%" PRIu8, x.cmd_counter);
                     RowFmt("CommandErrorCounter", "%" PRIu8, x.cmd_error_counter);
                     RowFmt("PendingEntryCount", "%" PRIu16, x.pending_entry_count);
@@ -66,7 +56,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_START_BEACON_BURST_CC: {
                 UELYSYS_TTC_BeaconBurst_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("FirstEntryId", "%" PRIu16, x.first_entry_id);
                     RowFmt("ScheduledEntries", "%" PRIu16, x.scheduled_entries);
@@ -78,12 +68,12 @@ bool DrawUelysysAppBody(ReportCtx & c)
             case UELYSYS_TTC_DELETE_ALL_ENTRIES_CC:
             case UELYSYS_TTC_PLUMB_PURGE_TIMELINE_CC: {
                 uint16_t x = 0;
-                if (CopyExactLocal(&x, sizeof(x))) RowFmt("Count", "%" PRIu16, x);
+                if (raw.CopyExact(&x, sizeof(x))) RowFmt("Count", "%" PRIu16, x);
                 break;
             }
             case UELYSYS_TTC_GET_NEXT_ENTRY_ID_CC: {
                 UELYSYS_TTC_NextEntry_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("HasEntry", "%" PRIu8, x.has_entry);
@@ -92,7 +82,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_GET_NEXT_EXEC_TIME_CC: {
                 UELYSYS_TTC_NextExecution_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("NextExecutionTime", "%" PRIu32, x.next_execution_time);
                     RowFmt("HasEntry", "%" PRIu8, x.has_entry);
                 }
@@ -100,7 +90,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_INSERT_ABS_CMD_ENTRY_CC: {
                 UELYSYS_TTC_InsertAbs_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("ExecutionTimeAbsolute", "%" PRIu32, x.execution_time_absolute);
                     RowFmt("StalenessThreshold", "%" PRIu16, x.staleness_threshold);
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
@@ -112,7 +102,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_INSERT_REL_CMD_ENTRY_CC: {
                 UELYSYS_TTC_InsertRel_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("ExecutionTimeRelative", "%" PRIu16, x.execution_time_relative);
                     RowFmt("StalenessThreshold", "%" PRIu16, x.staleness_threshold);
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
@@ -126,7 +116,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             case UELYSYS_TTC_PLUMB_INIT_ENTRY_CC:
             case UELYSYS_TTC_PLUMB_DELETE_RESERVED_ENTRY_CC: {
                 UELYSYS_TTC_EntryGroup_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                 }
@@ -134,7 +124,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_DELETE_CMD_GROUP_CC: {
                 UELYSYS_TTC_DeleteGroup_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("DeleteCount", "%" PRIu16, x.delete_count);
                 }
@@ -142,7 +132,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_EXECUTE_CMD_ENTRY_CC: {
                 UELYSYS_TTC_ExecuteEntry_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
                     RowFmt("Persistent", "%" PRIu8, x.persistent);
@@ -151,7 +141,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_EXECUTE_CMD_GROUP_CC: {
                 UELYSYS_TTC_ExecuteGroup_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("Persistent", "%" PRIu8, x.persistent);
                 }
@@ -159,7 +149,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_PLUMB_WRITE_ENTRY_CC: {
                 UELYSYS_TTC_PlumbWrite_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("Offset", "%" PRIu16, x.offset);
@@ -171,7 +161,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
             }
             case UELYSYS_TTC_PLUMB_FINALIZE_ENTRY_CC: {
                 UELYSYS_TTC_PlumbFinalize_Report_t x{};
-                if (CopyExactLocal(&x, sizeof(x))) {
+                if (raw.CopyExact(&x, sizeof(x))) {
                     RowFmt("EntryId", "%" PRIu16, x.entry_id);
                     RowFmt("GroupId", "%" PRIu16, x.group_id);
                     RowFmt("TimeTag", "%" PRIu32, x.time_tag);
@@ -229,7 +219,7 @@ bool DrawUelysysAppBody(ReportCtx & c)
         } else if (view.reflected_cc == UELYSYS_MEOW_FILE_STAT_CC &&
                    n == sizeof(UELYSYS_MEOW_FileStat_Report_t)) {
             UELYSYS_MEOW_FileStat_Report_t x{};
-            if (CopyLocal(&x, sizeof(x))) {
+            if (raw.Copy(&x, sizeof(x))) {
                 RowFmt("size", "%" PRIu64, x.size);
                 RowFmt("mtime", "%" PRId64, x.mtime);
                 RowFmt("ctime", "%" PRId64, x.ctime);
@@ -242,14 +232,14 @@ bool DrawUelysysAppBody(ReportCtx & c)
         } else if (view.reflected_cc == UELYSYS_MEOW_DISK_STAT_CC &&
                    n == sizeof(UELYSYS_MEOW_DiskStat_Report_t)) {
             UELYSYS_MEOW_DiskStat_Report_t x{};
-            if (CopyLocal(&x, sizeof(x))) {
+            if (raw.Copy(&x, sizeof(x))) {
                 RowFmt("total_bytes", "%" PRIu64, x.total_bytes);
                 RowFmt("avail_bytes", "%" PRIu64, x.avail_bytes);
             }
         } else if (view.reflected_cc == UELYSYS_MEOW_SYS_INFO_CC &&
                    n == sizeof(UELYSYS_MEOW_SysInfo_Report_t)) {
             UELYSYS_MEOW_SysInfo_Report_t x{};
-            if (CopyLocal(&x, sizeof(x))) {
+            if (raw.Copy(&x, sizeof(x))) {
                 RowFmt("uptime", "%" PRIu32, x.uptime);
                 RowFmt("load1", "%" PRIu32, x.load1);
                 RowFmt("load5", "%" PRIu32, x.load5);
@@ -261,14 +251,14 @@ bool DrawUelysysAppBody(ReportCtx & c)
         } else if (view.reflected_cc == UELYSYS_MEOW_SYS_TIME_GET_CC &&
                    n == sizeof(UELYSYS_MEOW_SysTime_Report_t)) {
             UELYSYS_MEOW_SysTime_Report_t x{};
-            if (CopyLocal(&x, sizeof(x))) {
+            if (raw.Copy(&x, sizeof(x))) {
                 RowFmt("sec", "%" PRId64, x.sec);
                 RowFmt("nsec", "%" PRIu32, x.nsec);
             }
         } else if (view.reflected_cc == UELYSYS_MEOW_CSP_IFSTATS_CC &&
                    n == sizeof(UELYSYS_MEOW_CspIfStats_Report_t)) {
             UELYSYS_MEOW_CspIfStats_Report_t x{};
-            if (CopyLocal(&x, sizeof(x))) {
+            if (raw.Copy(&x, sizeof(x))) {
                 RowFmt("tx", "%" PRIu32, x.tx);
                 RowFmt("rx", "%" PRIu32, x.rx);
                 RowFmt("tx_error", "%" PRIu32, x.tx_error);

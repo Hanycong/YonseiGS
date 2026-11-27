@@ -54,6 +54,15 @@ EPS_Report_State_t g_eps_report_state;
 EPS_RParam_Reassembly_State_t g_eps_rparam_reassembly;
 int8_t g_roma_parget_requested_index = -1;
 
+// payload 길이가 dst 크기와 정확히 같을 때만 복사한다
+template <typename T>
+static bool CopyExact(T & dst, const uint8_t * payload, uint16_t payload_len)
+{
+    if (payload_len != sizeof(T)) return false;
+    memcpy(&dst, payload, sizeof(T));
+    return true;
+}
+
 static uint16_t be16(const uint8_t *p) {
     return (uint16_t(p[0]) << 8) | uint16_t(p[1]);
 }
@@ -465,8 +474,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
         return ValidateEPSCommandStatusSize(v.reflected_cc, payload_len);
 
     if (v.kind == REPORT_KIND_EPS_BCN_REPORT) {
-        if (payload_len != sizeof(v.u.eps_bcn)) return false;
-        memcpy(&v.u.eps_bcn, payload, sizeof(v.u.eps_bcn));
+        if (!CopyExact(v.u.eps_bcn, payload, payload_len)) return false;
         return true;
     }
 
@@ -761,8 +769,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             case UELYSYS_UTRX_RESET_COUNTERS_CC:
             case UELYSYS_UTRX_RESET_APP_COUNTERS_CC:
             case UELYSYS_UTRX_RESET_DEVICE_COUNTERS_CC:
-                if (payload_len != sizeof(v.u.utrx_noop)) return false;
-                memcpy(&v.u.utrx_noop, payload, sizeof(v.u.utrx_noop));
+                if (!CopyExact(v.u.utrx_noop, payload, payload_len)) return false;
                 break;
             case UELYSYS_UTRX_RXCONF_GET_BAUD_CC:
             case UELYSYS_UTRX_TXCONF_GET_BAUD_CC:
@@ -903,8 +910,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             if (payload_len != 0 && payload_len != sizeof(v.u.lgbat_all)) return false;
             if (payload_len) memcpy(&v.u.lgbat_all, payload, sizeof(v.u.lgbat_all));
         } else if (v.reflected_cc == UELYSYS_LGBAT_CRITICAL_ALERT_CC) {
-            if (payload_len != sizeof(v.u.lgbat_critical)) return false;
-            memcpy(&v.u.lgbat_critical, payload, sizeof(v.u.lgbat_critical));
+            if (!CopyExact(v.u.lgbat_critical, payload, payload_len)) return false;
         } else if (v.reflected_cc == UELYSYS_LGBAT_NOOP_CC ||
                    v.reflected_cc == UELYSYS_LGBAT_RESET_COUNTERS_CC ||
                    v.reflected_cc == UELYSYS_LGBAT_SEND_BCN_CC) {
@@ -920,14 +926,11 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
     if (v.kind == REPORT_KIND_UELYSYS_AOS) {
         if (v.reflected_cc == UELYSYS_PAYUEL_AOS_NOOP_CC ||
             v.reflected_cc == UELYSYS_PAYUEL_AOS_RESET_COUNTERS_CC) {
-            if (payload_len != sizeof(v.u.aos_noop)) return false;
-            memcpy(&v.u.aos_noop, payload, sizeof(v.u.aos_noop));
+            if (!CopyExact(v.u.aos_noop, payload, payload_len)) return false;
         } else if (v.reflected_cc == UELYSYS_PAYUEL_AOS_READ_REGISTER_CC) {
-            if (payload_len != sizeof(v.u.aos_read_register)) return false;
-            memcpy(&v.u.aos_read_register, payload, sizeof(v.u.aos_read_register));
+            if (!CopyExact(v.u.aos_read_register, payload, payload_len)) return false;
         } else if (v.reflected_cc == UELYSYS_PAYUEL_AOS_READ_ALL_CHANNELS_CC) {
-            if (payload_len != sizeof(v.u.aos_read_all)) return false;
-            memcpy(&v.u.aos_read_all, payload, sizeof(v.u.aos_read_all));
+            if (!CopyExact(v.u.aos_read_all, payload, payload_len)) return false;
         } else if (v.ret_type != 0 && (payload_len == 1 || payload_len == 8)) {
             return true;
         } else if (payload_len != 0) {
@@ -946,8 +949,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             return true;
         }
         if (v.reflected_cc == UELYSYS_PAYUEL_YONSEI_FORWARD_SB_CC) {
-            if (payload_len != sizeof(v.u.yonsei_forward)) return false;
-            memcpy(&v.u.yonsei_forward, payload, sizeof(v.u.yonsei_forward));
+            if (!CopyExact(v.u.yonsei_forward, payload, payload_len)) return false;
             return true;
         }
         return v.ret_type != 0 && (payload_len == 1 || payload_len == 8);
@@ -975,8 +977,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             case UELYSYS_EO_FINISH_PHASE_CC:
                 return payload_len == 0 || payload_len == 1;
             case UELYSYS_EO_SEND_STATE_CC:
-                if (payload_len != sizeof(v.u.eo_state)) return false;
-                memcpy(&v.u.eo_state, payload, sizeof(v.u.eo_state));
+                if (!CopyExact(v.u.eo_state, payload, payload_len)) return false;
                 return true;
             case UELYSYS_EO_START_CHILD_TASK_CC:
                 return payload_len == 0;
@@ -1325,8 +1326,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             case UELYSYS_SCH_LAB_SET_ENTRY_STATE_CC:
             case UELYSYS_SCH_LAB_SET_ENTRY_CONFIG_CC:
                 if (payload_len == 0 && v.ret_type != 0) return true;
-                if (payload_len != sizeof(v.u.sch_entry)) return false;
-                memcpy(&v.u.sch_entry, payload, sizeof(v.u.sch_entry));
+                if (!CopyExact(v.u.sch_entry, payload, payload_len)) return false;
                 return true;
             default:
                 return false;
@@ -1344,8 +1344,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
                 /* SP_ResetAr6CountersCmd() re-queries status after the reset and
                  * reports back the same SP_AR6_Readback_Payload_t as GET_AR6_STATUS. */
                 if (payload_len == 0 && v.ret_type != 0) return true;
-                if (payload_len != sizeof(v.u.sp_readback)) return false;
-                memcpy(&v.u.sp_readback, payload, sizeof(v.u.sp_readback));
+                if (!CopyExact(v.u.sp_readback, payload, payload_len)) return false;
                 return true;
             case UELYSYS_SP_DEPLOY_CC:
             case UELYSYS_SP_STOP_BURN_CC:
@@ -1478,15 +1477,13 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
 
     if (v.kind == REPORT_KIND_ADCS_INTERFACE_TRANSPORT_REPORT)
     {
-        if (payload_len != sizeof(v.u.adcs_interface_transport)) return false;
-        memcpy(&v.u.adcs_interface_transport, payload, sizeof(v.u.adcs_interface_transport));
+        if (!CopyExact(v.u.adcs_interface_transport, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GYRO_LOG_REPORT)
     {
-        if (payload_len != sizeof(v.u.adcs_gyro_log)) return false;
-        memcpy(&v.u.adcs_gyro_log, payload, sizeof(v.u.adcs_gyro_log));
+        if (!CopyExact(v.u.adcs_gyro_log, payload, payload_len)) return false;
         return true;
     }
 
@@ -1851,64 +1848,55 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
 
     if (v.kind == REPORT_KIND_ADCS_GET_WHL_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_whlconfig)) return false;
-        memcpy(&v.u.adcs_whlconfig, payload, sizeof(v.u.adcs_whlconfig));
+        if (!CopyExact(v.u.adcs_whlconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_SATELLITE_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_satelliteconfig)) return false;
-        memcpy(&v.u.adcs_satelliteconfig, payload, sizeof(v.u.adcs_satelliteconfig));
+        if (!CopyExact(v.u.adcs_satelliteconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_CONTROLLER_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_controllerconfig)) return false;
-        memcpy(&v.u.adcs_controllerconfig, payload, sizeof(v.u.adcs_controllerconfig));
+        if (!CopyExact(v.u.adcs_controllerconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_DEFAULT_MODE_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_defaultmodeconfig)) return false;
-        memcpy(&v.u.adcs_defaultmodeconfig, payload, sizeof(v.u.adcs_defaultmodeconfig));
+        if (!CopyExact(v.u.adcs_defaultmodeconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_MOUNTING_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_mountingconfig)) return false;
-        memcpy(&v.u.adcs_mountingconfig, payload, sizeof(v.u.adcs_mountingconfig));
+        if (!CopyExact(v.u.adcs_mountingconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_ESTIMATOR_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_estimatorconfig)) return false;
-        memcpy(&v.u.adcs_estimatorconfig, payload, sizeof(v.u.adcs_estimatorconfig));
+        if (!CopyExact(v.u.adcs_estimatorconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_SAT_ORBIT_PARAM_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_satorbitparamconfig)) return false;
-        memcpy(&v.u.adcs_satorbitparamconfig, payload, sizeof(v.u.adcs_satorbitparamconfig));
+        if (!CopyExact(v.u.adcs_satorbitparamconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_NODE_SELECTION_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_nodeselectionconfig)) return false;
-        memcpy(&v.u.adcs_nodeselectionconfig, payload, sizeof(v.u.adcs_nodeselectionconfig));
+        if (!CopyExact(v.u.adcs_nodeselectionconfig, payload, payload_len)) return false;
         return true;
     }
 
     if (v.kind == REPORT_KIND_ADCS_GET_MTQ_CONFIG)
     {
-        if (payload_len != sizeof(v.u.adcs_mtqconfig)) return false;
-        memcpy(&v.u.adcs_mtqconfig, payload, sizeof(v.u.adcs_mtqconfig));
+        if (!CopyExact(v.u.adcs_mtqconfig, payload, payload_len)) return false;
         return true;
     }
 
@@ -1920,8 +1908,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
             memcpy(&v.u.adcs_rawcalibratedrwl, payload, sizeof(v.u.adcs_rawcalibratedrwl));
             return true;
         }
-        if (payload_len != sizeof(v.u.adcs_rawrwlsensor)) return false;
-        memcpy(&v.u.adcs_rawrwlsensor, payload, sizeof(v.u.adcs_rawrwlsensor));
+        if (!CopyExact(v.u.adcs_rawrwlsensor, payload, payload_len)) return false;
         return true;
     }
 /**************************************************************************************************************************************************** */
@@ -2162,8 +2149,7 @@ bool DecodeN5PayloadToView(ReportView_t &v, const uint8_t *payload, uint16_t pay
         return payload_len == 0;
 
     if (v.kind == REPORT_KIND_PAYUEL_ROMA_ISL_TEST_COUNT) {
-        if (payload_len != sizeof(v.u.roma_isl_count)) return false;
-        memcpy(&v.u.roma_isl_count, payload, sizeof(v.u.roma_isl_count));
+        if (!CopyExact(v.u.roma_isl_count, payload, payload_len)) return false;
         return true;
     }
 

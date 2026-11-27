@@ -15,6 +15,18 @@
 
 using namespace rpt5;
 
+// 이 파일의 ADCS GET 리포트들이 같이 쓰는 한 줄 행 (예전에는 리포트 블록마다 같은 람다를 다시 정의했다)
+namespace {
+
+void row_i16 (const char* label, int16_t v)  { rpt5::RowFmt(label, "%d", v); }
+void row_u8  (const char* label, uint8_t v)  { rpt5::RowFmt(label, "%u", v); }
+void row_u16 (const char* label, uint16_t v) { rpt5::RowFmt(label, "%u", v); }
+void row_u32 (const char* label, uint32_t v) { rpt5::RowFmt(label, "%u", v); }
+void row_flag(const char* label, uint8_t v)  { rpt5::RowFmt(label, "%u", v); }
+void row_f32 (const char* label, float v)    { rpt5::RowFmt(label, "%.6f", v); }
+
+} // namespace
+
 bool DrawAdcsGetReport(ReportCtx & c)
 {
     ReportView_t & view = c.view;
@@ -36,23 +48,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Settings]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Active State");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.ActiveState);
+        rpt5::RowFmt("Active State", "%u", pl.ActiveState);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Buffer Full Action");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.BufferFullAction);   // GS_nuri5 는 "%u (%s)" 에 문자열 인자가 없어 죽었다
+        rpt5::RowFmt("Buffer Full Action", "%u", pl.BufferFullAction);   // GS_nuri5 는 "%u (%s)" 에 문자열 인자가 없어 죽었다
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Reserved");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.Reserved);
+        rpt5::RowFmt("Reserved", "%u", pl.Reserved);
 
         break;
     }
@@ -66,17 +66,9 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Time]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Current Unix Seconds [s]");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CurrentUnixseconds);
+        rpt5::RowFmt("Current Unix Seconds [s]", "%u", pl.CurrentUnixseconds);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Current Unix Nanoseconds [ns]");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CurrentUnixNanoseconds);
+        rpt5::RowFmt("Current Unix Nanoseconds [ns]", "%u", pl.CurrentUnixNanoseconds);
 
         // UTC 변환 표시
         time_t t = static_cast<time_t>(pl.CurrentUnixseconds);
@@ -85,11 +77,7 @@ bool DrawAdcsGetReport(ReportCtx & c)
         char utc_str[64];
         strftime(utc_str, sizeof(utc_str), "%Y-%m-%d %H:%M:%S UTC", &tm_utc);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UTC Time");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%s.%09u", utc_str, pl.CurrentUnixNanoseconds);
+        rpt5::RowFmt("UTC Time", "%s.%09u", utc_str, pl.CurrentUnixNanoseconds);
 
         break;
     }
@@ -103,23 +91,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Diagnostic]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("State");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.State);
+        rpt5::RowFmt("State", "%u", pl.State);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Last Result");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.LastResult);
+        rpt5::RowFmt("Last Result", "%u", pl.LastResult);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Timestamp [s]");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.Timestamp);
+        rpt5::RowFmt("Timestamp [s]", "%u", pl.Timestamp);
 
         break;
     }
@@ -133,110 +109,46 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[UART]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART TC Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART_TcCnt);
+        rpt5::RowFmt("UART TC Count", "%u", pl.UART_TcCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART TLM Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART_TlmCnt);
+        rpt5::RowFmt("UART TLM Count", "%u", pl.UART_TlmCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART SW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART_ErrSW);
+        rpt5::RowFmt("UART SW Error", "%u", pl.UART_ErrSW);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART HW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART_ErrHW);
+        rpt5::RowFmt("UART HW Error", "%u", pl.UART_ErrHW);
 
         ImGui::Separator();
         ImGui::Text("[UART2]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART2 TC Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART2_TcCnt);
+        rpt5::RowFmt("UART2 TC Count", "%u", pl.UART2_TcCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART2 TLM Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART2_TlmCnt);
+        rpt5::RowFmt("UART2 TLM Count", "%u", pl.UART2_TlmCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART2 SW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART2_ErrSW);
+        rpt5::RowFmt("UART2 SW Error", "%u", pl.UART2_ErrSW);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART2 HW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART2_ErrHW);
+        rpt5::RowFmt("UART2 HW Error", "%u", pl.UART2_ErrHW);
 
         ImGui::Separator();
         ImGui::Text("[CAN]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("CAN TC Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CAN_TcCnt);
+        rpt5::RowFmt("CAN TC Count", "%u", pl.CAN_TcCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("CAN TLM Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CAN_TlmCnt);
+        rpt5::RowFmt("CAN TLM Count", "%u", pl.CAN_TlmCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("CAN SW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CAN_ErrSW);
+        rpt5::RowFmt("CAN SW Error", "%u", pl.CAN_ErrSW);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("CAN HW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CAN_ErrHW);
+        rpt5::RowFmt("CAN HW Error", "%u", pl.CAN_ErrHW);
 
         ImGui::Separator();
         ImGui::Text("[I2C]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("I2C TC Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.I2C_TcCnt);
+        rpt5::RowFmt("I2C TC Count", "%u", pl.I2C_TcCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("I2C TLM Count");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.I2C_TlmCnt);
+        rpt5::RowFmt("I2C TLM Count", "%u", pl.I2C_TlmCnt);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("I2C SW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.I2C_ErrSW);
+        rpt5::RowFmt("I2C SW Error", "%u", pl.I2C_ErrSW);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("I2C HW Error");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.I2C_ErrHW);
+        rpt5::RowFmt("I2C HW Error", "%u", pl.I2C_ErrHW);
 
         break;
     }
@@ -250,29 +162,13 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Mode]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Control Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.ControlMode);
+        rpt5::RowFmt("Control Mode", "%u", pl.ControlMode);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Main Estimator Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.MainEstimatorMode);
+        rpt5::RowFmt("Main Estimator Mode", "%u", pl.MainEstimatorMode);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Backup Estimator Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.BackupEstimatorMode);
+        rpt5::RowFmt("Backup Estimator Mode", "%u", pl.BackupEstimatorMode);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Control Timeout [s]");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.ControlTimeout);
+        rpt5::RowFmt("Control Timeout [s]", "%u", pl.ControlTimeout);
 
         break;
     }
@@ -286,23 +182,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[ECI Pointing Vector]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("ECI Pointing Vector X");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.ECIPointingVectorX);
+        rpt5::RowFmt("ECI Pointing Vector X", "%.6f", pl.ECIPointingVectorX);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("ECI Pointing Vector Y");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.ECIPointingVectorY);
+        rpt5::RowFmt("ECI Pointing Vector Y", "%.6f", pl.ECIPointingVectorY);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("ECI Pointing Vector Z");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.ECIPointingVectorZ);
+        rpt5::RowFmt("ECI Pointing Vector Z", "%.6f", pl.ECIPointingVectorZ);
 
         break;
     }
@@ -316,23 +200,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[LLH Target]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Latitude");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.Latitude);
+        rpt5::RowFmt("Latitude", "%.6f", pl.Latitude);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Longitude");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.Longitude);
+        rpt5::RowFmt("Longitude", "%.6f", pl.Longitude);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Altitude");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.3f", pl.Altitude);
+        rpt5::RowFmt("Altitude", "%.3f", pl.Altitude);
 
         break;
     }
@@ -346,11 +218,7 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Otbit Mode]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("OrbitMode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.OrbitMode);
+        rpt5::RowFmt("OrbitMode", "%u", pl.OrbitMode);
 
         break;
     }
@@ -362,36 +230,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::TextUnformatted("ADCS Health TLM MMT");
 
         // 일반 행 헬퍼
-        auto row_i16 = [](const char* label, int16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%d", v);
-        };
-        auto row_u16 = [](const char* label, uint16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-
-        auto row_flag = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-
         ImGui::Separator();
         ImGui::Text("[Mag0 MCU]");
         row_i16("Mag0 MCU Temperature", pl.Mag0MCUTemperature);
@@ -442,28 +280,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::TextUnformatted("ADCS Raw CubeSense Sun");
 
         // 헬퍼 람다들
-        auto row_i16 = [](const char* label, int16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%d", v);
-        };
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-
         ImGui::Separator();
         ImGui::Text("[Timestamp]");
         row_u32("Time Second [s]",      pl.TimeSecond);
@@ -513,23 +329,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Reference RPY]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Roll");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.Roll);
+        rpt5::RowFmt("Roll", "%.6f", pl.Roll);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Pitch");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.Pitch);
+        rpt5::RowFmt("Pitch", "%.6f", pl.Pitch);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Yaw");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%.6f", pl.Yaw);
+        rpt5::RowFmt("Yaw", "%.6f", pl.Yaw);
 
         break;
     }
@@ -543,23 +347,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[MTQ Command]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("MTQ0 Open Loop Cmd");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%d", pl.MTQ0_OpenLoopCmd);
+        rpt5::RowFmt("MTQ0 Open Loop Cmd", "%d", pl.MTQ0_OpenLoopCmd);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("MTQ1 Open Loop Cmd");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%d", pl.MTQ1_OpenLoopCmd);
+        rpt5::RowFmt("MTQ1 Open Loop Cmd", "%d", pl.MTQ1_OpenLoopCmd);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("MTQ2 Open Loop Cmd");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%d", pl.MTQ2_OpenLoopCmd);
+        rpt5::RowFmt("MTQ2 Open Loop Cmd", "%d", pl.MTQ2_OpenLoopCmd);
 
         break;
     }
@@ -569,14 +361,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_powerstate;
 
         ImGui::TextUnformatted("ADCS Power State");
-
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Reaction Wheels]");
@@ -631,11 +415,7 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Run Mode]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Run Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.RunMode);
+        rpt5::RowFmt("Run Mode", "%u", pl.RunMode);
 
         break;
     }
@@ -649,17 +429,9 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Control Mode]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Control Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.ControlMode);
+        rpt5::RowFmt("Control Mode", "%u", pl.ControlMode);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Control Timeout");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.ControlTimeout);
+        rpt5::RowFmt("Control Timeout", "%u", pl.ControlTimeout);
 
         break;
     }
@@ -669,14 +441,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_mag0mmtcalibconfig;
 
         ImGui::TextUnformatted("ADCS Mag0 MMT Calibration Config");
-
-        auto row_i16 = [](const char* label, int16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%d", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Channel Offsets]");
@@ -707,14 +471,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_mag1mmtcalibconfig;
 
         ImGui::TextUnformatted("ADCS Mag1 MMT Calibration Config");
-
-        auto row_i16 = [](const char* label, int16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%d", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Channel Offsets]");
@@ -749,17 +505,9 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Mode]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Main Estimator Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.MainEstimatorMode);
+        rpt5::RowFmt("Main Estimator Mode", "%u", pl.MainEstimatorMode);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Backup Estimator Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.BackupEstimatorMode);
+        rpt5::RowFmt("Backup Estimator Mode", "%u", pl.BackupEstimatorMode);
 
         break;
     }
@@ -773,11 +521,7 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[State]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Operational Mode");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.OperationalMode);
+        rpt5::RowFmt("Operational Mode", "%u", pl.OperationalMode);
 
         break;
     }
@@ -787,21 +531,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_rawcsssensor;
 
         ImGui::TextUnformatted("ADCS Raw CSS Sensor");
-
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Timestamp]");
@@ -834,28 +563,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
 
         ImGui::TextUnformatted("ADCS Raw GYR Sensor");
 
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_f32 = [](const char* label, float v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%.6f", v);
-        };
-
         ImGui::Separator();
         ImGui::Text("[Timestamp]");
         row_u32("Time Seconds",     pl.TimeSeconds);
@@ -886,28 +593,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_calibratedgyrsensor;
 
         ImGui::TextUnformatted("ADCS Calibrated GYR Sensor");
-
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_f32 = [](const char* label, float v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%.6f", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Timestamp]");
@@ -957,17 +642,9 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Sensing Element]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Mag0 Sensing Element");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.Mag0SensingElement);
+        rpt5::RowFmt("Mag0 Sensing Element", "%u", pl.Mag0SensingElement);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Mag1 Sensing Element");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.Mag1SensingElement);
+        rpt5::RowFmt("Mag1 Sensing Element", "%u", pl.Mag1SensingElement);
 
         break;
     }
@@ -1010,23 +687,11 @@ bool DrawAdcsGetReport(ReportCtx & c)
         ImGui::Separator();
         ImGui::Text("[Return Intervals]");
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART TLM Return Interval");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UARTTlmReturnInterval);
+        rpt5::RowFmt("UART TLM Return Interval", "%u", pl.UARTTlmReturnInterval);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("UART2 TLM Return Interval");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.UART2TlmReturnInterval);
+        rpt5::RowFmt("UART2 TLM Return Interval", "%u", pl.UART2TlmReturnInterval);
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("CAN TLM Return Interval");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("%u", pl.CANTlmRetrunInterval);
+        rpt5::RowFmt("CAN TLM Return Interval", "%u", pl.CANTlmRetrunInterval);
 
         ImGui::Separator();
         ImGui::Text("[UART TLM ID Inclusion Bitmask]");
@@ -1067,14 +732,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
 
         ImGui::TextUnformatted("ADCS Unsolicited Event Msg Setup");
 
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-
         ImGui::Separator();
         ImGui::Text("[UART Event Filter]");
         row_u8("Info UART",     pl.InfoUART);
@@ -1104,28 +761,6 @@ bool DrawAdcsGetReport(ReportCtx & c)
         auto &pl = view.u.adcs_eventlogstatusresponse;
 
         ImGui::TextUnformatted("ADCS Event Log Status Response");
-
-        auto row_u8 = [](const char* label, uint8_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u16 = [](const char* label, uint16_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
-        auto row_u32 = [](const char* label, uint32_t v) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted(label);
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", v);
-        };
 
         ImGui::Separator();
         ImGui::Text("[Entry Counts]");
@@ -1167,29 +802,13 @@ bool DrawAdcsGetReport(ReportCtx & c)
             ImGui::Separator();
             ImGui::Text("[%s]", group_label);
 
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted("Node Type");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", node_type);
+            rpt5::RowFmt("Node Type", "%u", node_type);
 
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted("Abstract Node Type");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", abst_node_type);
+            rpt5::RowFmt("Abstract Node Type", "%u", abst_node_type);
 
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted("Serial Number");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("%u", serial_num);
+            rpt5::RowFmt("Serial Number", "%u", serial_num);
 
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::TextUnformatted("Address");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::Text("0x%08X", address);
+            rpt5::RowFmt("Address", "0x%08X", address);
         };
 
         node_group("Sensor1", pl.NodeType_Sensor1, pl.AbstNodeType_Sensor1, pl.SerialNum_Sensor1, pl.Address_Sensor1);

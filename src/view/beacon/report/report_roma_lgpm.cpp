@@ -31,11 +31,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_noop;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA NOOP (CC 0)");
+        rpt5::RowText("Type", "PAYUEL ROMA NOOP (CC 0)");
 
         HeaderRow("[Counters Information]");
         RowFmt("Command Counter", "%" PRIu8, pl.CmdCounter);
@@ -47,11 +43,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_resetcounters;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA RESET COUNTERS (CC 1)");
+        rpt5::RowText("Type", "PAYUEL ROMA RESET COUNTERS (CC 1)");
 
         HeaderRow("[Counters Information]");
         RowFmt("Command Counter", "%" PRIu8, pl.CmdCounter);
@@ -63,11 +55,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_commtest;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA COMM TEST (CC 2)");
+        rpt5::RowText("Type", "PAYUEL ROMA COMM TEST (CC 2)");
 
         HeaderRow("[Comm Test Result]");
         RowArr_Hex("RxBuf [16 Bytes]", pl.RxBuf, 16, 8);
@@ -79,11 +67,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_getspecificline;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA GET SPECIFIC LINE (CC 6)");
+        rpt5::RowText("Type", "PAYUEL ROMA GET SPECIFIC LINE (CC 6)");
 
         HeaderRow("[Line Information]");
         RowFmt("Line Number", "%" PRIu16, pl.line_no);
@@ -104,11 +88,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_getmultiplelines;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA GET MULTIPLE LINES (CC 7)");
+        rpt5::RowText("Type", "PAYUEL ROMA GET MULTIPLE LINES (CC 7)");
 
         HeaderRow("[Log Accumulator Data]");
         RowFmt("Buffer Data", "%.*s", (int)sizeof(pl.buffer), (const char*)pl.buffer);
@@ -119,11 +99,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_getlatestline;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA GET LATEST LINE (CC 8)");
+        rpt5::RowText("Type", "PAYUEL ROMA GET LATEST LINE (CC 8)");
 
         HeaderRow("[Line Information]");
         RowFmt("Line Number", "%" PRIu16, pl.line_no);
@@ -144,11 +120,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_getlatestNlines;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA GET MULTIPLE LINES (CC 9)");
+        rpt5::RowText("Type", "PAYUEL ROMA GET MULTIPLE LINES (CC 9)");
 
         HeaderRow("[Log Accumulator Data]");
         RowFmt("Buffer Data", "%.*s", (int)sizeof(pl.buffer), (const char*)pl.buffer);
@@ -159,11 +131,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_setroutedefault;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -174,11 +142,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_resetroute;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -189,11 +153,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_loadroute;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -204,11 +164,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_saveroute;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA SAVE ROUTE (CC 19)");
+        rpt5::RowText("Type", "PAYUEL ROMA SAVE ROUTE (CC 19)");
 
         HeaderRow("[Route Information]");
         RowFmt("Route Data", "%.*s", (int)sizeof(pl.route), pl.route);
@@ -219,11 +175,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_sendroute;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -234,11 +186,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_setroute;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -249,11 +197,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parget;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("PAYUEL ROMA PAR GET (CC 22)");
+        rpt5::RowText("Type", "PAYUEL ROMA PAR GET (CC 22)");
 
         HeaderRow("[Parameter Information]");
         RowFmt("Value", "%" PRId32, pl.value);
@@ -268,11 +212,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parset;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -283,11 +223,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_pardefaults;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -298,11 +234,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parsave;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -313,11 +245,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parrestore;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -328,11 +256,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parload;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -343,11 +267,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_parsetOOB;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -358,11 +278,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     {
         auto &pl = view.u.roma_sendcommand;
 
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
+        rpt5::RowFmt("Type", "PAYUEL ROMA COMMAND RESULT (CC %d)", view.reflected_cc);
 
         HeaderRow("[Result Information]");
         RowFmt("Result", "%" PRIu8, pl.result);
@@ -395,11 +311,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_NOOP: // CC 0
     {
         auto &pl = view.u.lgpm_noop;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM NOOP (CC 0)");
+        rpt5::RowText("Type", "LGPM NOOP (CC 0)");
 
         HeaderRow("[Counters Information]");
         RowFmt("Command Counter", "%" PRIu8, pl.CmdCounter);
@@ -410,11 +322,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RESETCOUNTERS: // CC 1
     {
         auto &pl = view.u.lgpm_resetcounters;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RESET COUNTERS (CC 1)");
+        rpt5::RowText("Type", "LGPM RESET COUNTERS (CC 1)");
 
         HeaderRow("[Counters Information]");
         RowFmt("Command Counter", "%" PRIu8, pl.CmdCounter);
@@ -425,11 +333,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_MCU_ALIVE: // CC 2
     {
         auto &pl = view.u.lgpm_mcualivecheck;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM MCU ALIVE CHECK (CC 2)");
+        rpt5::RowText("Type", "LGPM MCU ALIVE CHECK (CC 2)");
 
         HeaderRow("[Payload Info]");
         RowFmt("MCU_ALIVE_CHECK", "%" PRIu8, pl.MCU_ALIVE_CHECK);
@@ -442,11 +346,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_3V3_PWR_ON: // CC 3
     {
         auto &pl = view.u.lgpm_3v3pwron;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM 3V3 PWR ON (CC 3)");
+        rpt5::RowText("Type", "LGPM 3V3 PWR ON (CC 3)");
 
         HeaderRow("[Payload Info]");
         RowFmt("PWR_ON_3V3", "%" PRIu8, pl.PWR_ON_3V3);
@@ -459,11 +359,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_3V3_PWR_OFF: // CC 4
     {
         auto &pl = view.u.lgpm_3v3pwroff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM 3V3 PWR OFF (CC 4)");
+        rpt5::RowText("Type", "LGPM 3V3 PWR OFF (CC 4)");
 
         HeaderRow("[Payload Info]");
         RowFmt("PWR_OFF_3V3", "%" PRIu8, pl.PWR_OFF_3V3);
@@ -476,11 +372,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_MAIN_BOOST_SW_ON: // CC 5
     {
         auto &pl = view.u.lgpm_mainboostswon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM MAIN BOOST SW ON (CC 5)");
+        rpt5::RowText("Type", "LGPM MAIN BOOST SW ON (CC 5)");
 
         HeaderRow("[Payload Info]");
         RowFmt("MAIN_BOOST_SW_ON", "%" PRIu8, pl.MAIN_BOOST_SW_ON);
@@ -493,11 +385,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_MAIN_BOOST_SW_OFF: // CC 6
     {
         auto &pl = view.u.lgpm_mainboostswoff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM MAIN BOOST SW OFF (CC 6)");
+        rpt5::RowText("Type", "LGPM MAIN BOOST SW OFF (CC 6)");
 
         HeaderRow("[Payload Info]");
         RowFmt("MAIN_BOOST_SW_OFF", "%" PRIu8, pl.MAIN_BOOST_SW_OFF);
@@ -510,11 +398,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_SUB_BOOST_SW_ON: // CC 7
     {
         auto &pl = view.u.lgpm_subboostswon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM SUB BOOST SW ON (CC 7)");
+        rpt5::RowText("Type", "LGPM SUB BOOST SW ON (CC 7)");
 
         HeaderRow("[Payload Info]");
         RowFmt("SUB_BOOST_SW_ON", "%" PRIu8, pl.SUB_BOOST_SW_ON);
@@ -527,11 +411,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_SUB_BOOST_SW_OFF: // CC 8
     {
         auto &pl = view.u.lgpm_subboostswoff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM SUB BOOST SW OFF (CC 8)");
+        rpt5::RowText("Type", "LGPM SUB BOOST SW OFF (CC 8)");
 
         HeaderRow("[Payload Info]");
         RowFmt("SUB_BOOST_SW_OFF", "%" PRIu8, pl.SUB_BOOST_SW_OFF);
@@ -544,11 +424,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V28_MAIN_ON: // CC 9
     {
         auto &pl = view.u.lgpm_v28mainon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V28 MAIN ON (CC 9)");
+        rpt5::RowText("Type", "LGPM V28 MAIN ON (CC 9)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V28_MAIN_ON", "%" PRIu8, pl.V28_MAIN_ON);
@@ -561,11 +437,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V28_MAIN_OFF: // CC 10
     {
         auto &pl = view.u.lgpm_v28mainoff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V28 MAIN OFF (CC 10)");
+        rpt5::RowText("Type", "LGPM V28 MAIN OFF (CC 10)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V28_MAIN_OFF", "%" PRIu8, pl.V28_MAIN_OFF);
@@ -578,11 +450,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V28_SUB_ON: // CC 11
     {
         auto &pl = view.u.lgpm_v28subon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V28 SUB ON (CC 11)");
+        rpt5::RowText("Type", "LGPM V28 SUB ON (CC 11)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V28_SUB_ON", "%" PRIu8, pl.V28_SUB_ON);
@@ -595,11 +463,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V28_SUB_OFF: // CC 12
     {
         auto &pl = view.u.lgpm_v28suboff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V28 SUB OFF (CC 12)");
+        rpt5::RowText("Type", "LGPM V28 SUB OFF (CC 12)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V28_SUB_OFF", "%" PRIu8, pl.V28_SUB_OFF);
@@ -612,11 +476,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V12_MAIN_ON: // CC 13
     {
         auto &pl = view.u.lgpm_v12mainon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V12 MAIN ON (CC 13)");
+        rpt5::RowText("Type", "LGPM V12 MAIN ON (CC 13)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V12_MAIN_ON", "%" PRIu8, pl.V12_MAIN_ON);
@@ -629,11 +489,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_V12_MAIN_OFF: // CC 14
     {
         auto &pl = view.u.lgpm_v12mainoff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM V12 MAIN OFF (CC 14)");
+        rpt5::RowText("Type", "LGPM V12 MAIN OFF (CC 14)");
 
         HeaderRow("[Payload Info]");
         RowFmt("V12_MAIN_OFF", "%" PRIu8, pl.V12_MAIN_OFF);
@@ -646,11 +502,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_PWR_SENSE_INFO: // CC 15
     {
         auto &pl = view.u.lgpm_pwrsenseinfo;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM PWR SENSE INFO (CC 15)");
+        rpt5::RowText("Type", "LGPM PWR SENSE INFO (CC 15)");
 
         HeaderRow("[Payload Info]");
         RowFmt("PWR_SENSE_INFO", "%" PRIu8, pl.PWR_SENSE_INFO);
@@ -663,11 +515,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_PWR_SEQ_ON: // CC 16
     {
         auto &pl = view.u.lgpm_pwrseqon;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM PWR SEQ ON (CC 16)");
+        rpt5::RowText("Type", "LGPM PWR SEQ ON (CC 16)");
 
         HeaderRow("[Payload Info]");
         RowFmt("PWR_SEQ_ON", "%" PRIu8, pl.PWR_SEQ_ON);
@@ -680,11 +528,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_PWR_SEQ_OFF: // CC 17
     {
         auto &pl = view.u.lgpm_pwrseqoff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM PWR SEQ OFF (CC 17)");
+        rpt5::RowText("Type", "LGPM PWR SEQ OFF (CC 17)");
 
         HeaderRow("[Payload Info]");
         RowFmt("PWR_SEQ_OFF", "%" PRIu8, pl.PWR_SEQ_OFF);
@@ -697,11 +541,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_CONTROL_IDX1: // CC 18
     {
         auto &pl = view.u.lgpm_rwacontrol_idx1;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA CONTROL idx1 (CC 18)");
+        rpt5::RowText("Type", "LGPM RWA CONTROL idx1 (CC 18)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_CONTROL", "%" PRIu8, pl.RWA_CONTROL);
@@ -714,11 +554,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_CONTROL_IDX2: // CC 19
     {
         auto &pl = view.u.lgpm_rwacontrol_idx2;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA CONTROL idx2 (CC 19)");
+        rpt5::RowText("Type", "LGPM RWA CONTROL idx2 (CC 19)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_CONTROL", "%" PRIu8, pl.RWA_CONTROL);
@@ -731,11 +567,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_CONTROL_IDX3: // CC 20
     {
         auto &pl = view.u.lgpm_rwacontrol_idx3;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA CONTROL idx3 (CC 20)");
+        rpt5::RowText("Type", "LGPM RWA CONTROL idx3 (CC 20)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_CONTROL", "%" PRIu8, pl.RWA_CONTROL);
@@ -748,11 +580,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_PWR_ON: // CC 21
     {
         auto &pl = view.u.lgpm_rwapwron;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA PWR ON (CC 21)");
+        rpt5::RowText("Type", "LGPM RWA PWR ON (CC 21)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_PWR_ON", "%" PRIu8, pl.RWA_PWR_ON);
@@ -765,11 +593,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_PWR_OFF: // CC 22
     {
         auto &pl = view.u.lgpm_rwapwroff;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA PWR OFF (CC 22)");
+        rpt5::RowText("Type", "LGPM RWA PWR OFF (CC 22)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_PWR_OFF", "%" PRIu8, pl.RWA_PWR_OFF);
@@ -782,11 +606,7 @@ bool DrawRomaLgpmReport(ReportCtx & c)
     case REPORT_KIND_PAYUEL_LGPM_RWA_SENSE_INFO: // CC 23
     {
         auto &pl = view.u.lgpm_rwasenseinfo;
-        ImGui::TableNextRow();
-        ImGui::TableSetColumnIndex(0);
-        ImGui::TextUnformatted("Type");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::TextUnformatted("LGPM RWA SENSE INFO (CC 23)");
+        rpt5::RowText("Type", "LGPM RWA SENSE INFO (CC 23)");
 
         HeaderRow("[Payload Info]");
         RowFmt("RWA_SENSE_INFO", "%" PRIu8, pl.RWA_SENSE_INFO);

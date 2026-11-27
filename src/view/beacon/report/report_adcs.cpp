@@ -56,29 +56,13 @@ bool DrawAdcsReport(ReportView_t & view)
 
                         ImGui::Separator();
                         ImGui::Text("[Return Interval Settings]");
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("UART Return Interval");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.UARTTlmReturnInterval);
+                        rpt5::RowFmt("UART Return Interval", "%u", pl.UARTTlmReturnInterval);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("UART2 Return Interval");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.UART2TlmReturnInterval);
+                        rpt5::RowFmt("UART2 Return Interval", "%u", pl.UART2TlmReturnInterval);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("CAN Return Interval");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.CANTlmRetrunInterval);
+                        rpt5::RowFmt("CAN Return Interval", "%u", pl.CANTlmRetrunInterval);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("Reserved");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.Reserved);
+                        rpt5::RowFmt("Reserved", "%u", pl.Reserved);
 
                         ImGui::Separator();
 
@@ -128,79 +112,37 @@ bool DrawAdcsReport(ReportView_t & view)
                         ImGui::Separator();
                         ImGui::Text("[Time]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("Time Seconds");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.TimeSeconds);
+                        rpt5::RowFmt("Time Seconds", "%u", pl.TimeSeconds);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("Time Nanoseconds");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.TimeNanoSeconds);
+                        rpt5::RowFmt("Time Nanoseconds", "%u", pl.TimeNanoSeconds);
 
                         // ========================
                         ImGui::Separator();
                         ImGui::Text("[GYR0 Raw Rate]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR0 X");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR0RawRateX);
+                        rpt5::RowFmt("GYR0 X", "%.6f", pl.GYR0RawRateX);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR0 Y");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR0RawRateY);
+                        rpt5::RowFmt("GYR0 Y", "%.6f", pl.GYR0RawRateY);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR0 Z");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR0RawRateZ);
+                        rpt5::RowFmt("GYR0 Z", "%.6f", pl.GYR0RawRateZ);
 
                         // ========================
                         ImGui::Separator();
                         ImGui::Text("[GYR1 Raw Rate]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR1 X");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR1RawRateX);
+                        rpt5::RowFmt("GYR1 X", "%.6f", pl.GYR1RawRateX);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR1 Y");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR1RawRateY);
+                        rpt5::RowFmt("GYR1 Y", "%.6f", pl.GYR1RawRateY);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR1 Z");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.GYR1RawRateZ);
+                        rpt5::RowFmt("GYR1 Z", "%.6f", pl.GYR1RawRateZ);
 
                         // ========================
                         ImGui::Separator();
                         ImGui::Text("[Valid Flags]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR0 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.GYR0ValidFlag,
-                                    pl.GYR0ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("GYR0 Valid", "%u (%s)", pl.GYR0ValidFlag, pl.GYR0ValidFlag ? "Valid" : "Invalid");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("GYR1 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.GYR1ValidFlag,
-                                    pl.GYR1ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("GYR1 Valid", "%u (%s)", pl.GYR1ValidFlag, pl.GYR1ValidFlag ? "Valid" : "Invalid");
 
                         break;
                     }
@@ -215,77 +157,33 @@ bool DrawAdcsReport(ReportView_t & view)
                         ImGui::Separator();
                         ImGui::Text("[Time]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("Time Seconds");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.TimeSeconds);
+                        rpt5::RowFmt("Time Seconds", "%u", pl.TimeSeconds);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("Time Nanoseconds");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u", pl.TimeNanoSeconds);
+                        rpt5::RowFmt("Time Nanoseconds", "%u", pl.TimeNanoSeconds);
 
                         // ========================
                         ImGui::Separator();
                         ImGui::Text("[Reaction Wheel Speed]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL0 Speed");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.RWL0MeasSpeed);
+                        rpt5::RowFmt("RWL0 Speed", "%.6f", pl.RWL0MeasSpeed);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL1 Speed");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.RWL1MeasSpeed);
+                        rpt5::RowFmt("RWL1 Speed", "%.6f", pl.RWL1MeasSpeed);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL2 Speed");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.RWL2MeasSpeed);
+                        rpt5::RowFmt("RWL2 Speed", "%.6f", pl.RWL2MeasSpeed);
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL3 Speed");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%.6f", pl.RWL3MeasSpeed);
+                        rpt5::RowFmt("RWL3 Speed", "%.6f", pl.RWL3MeasSpeed);
 
                         // ========================
                         ImGui::Separator();
                         ImGui::Text("[Valid Flags]");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL0 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.RWL0ValidFlag,
-                                    pl.RWL0ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("RWL0 Valid", "%u (%s)", pl.RWL0ValidFlag, pl.RWL0ValidFlag ? "Valid" : "Invalid");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL1 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.RWL1ValidFlag,
-                                    pl.RWL1ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("RWL1 Valid", "%u (%s)", pl.RWL1ValidFlag, pl.RWL1ValidFlag ? "Valid" : "Invalid");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL2 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.RWL2ValidFlag,
-                                    pl.RWL2ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("RWL2 Valid", "%u (%s)", pl.RWL2ValidFlag, pl.RWL2ValidFlag ? "Valid" : "Invalid");
 
-                        ImGui::TableNextRow();
-                        ImGui::TableSetColumnIndex(0);
-                        ImGui::TextUnformatted("RWL3 Valid");
-                        ImGui::TableSetColumnIndex(1);
-                        ImGui::Text("%u (%s)", pl.RWL3ValidFlag,
-                                    pl.RWL3ValidFlag ? "Valid" : "Invalid");
+                        rpt5::RowFmt("RWL3 Valid", "%u (%s)", pl.RWL3ValidFlag, pl.RWL3ValidFlag ? "Valid" : "Invalid");
 
                         break;
                     }
@@ -302,121 +200,53 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Rwl0]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl0 Inertia");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl0Inertia);
+                    rpt5::RowFmt("Rwl0 Inertia", "%f", pl.Rwl0Inertia);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl0 Max Momentum");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl0MaxMomentum);
+                    rpt5::RowFmt("Rwl0 Max Momentum", "%f", pl.Rwl0MaxMomentum);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl0 Max Torque");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl0MaxToque);
+                    rpt5::RowFmt("Rwl0 Max Torque", "%f", pl.Rwl0MaxToque);
 
                     //============================================================
                     ImGui::Separator();
                     ImGui::Text("[RWl1]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl1 Inertia");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl1Inertia);
+                    rpt5::RowFmt("Rwl1 Inertia", "%f", pl.Rwl1Inertia);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl1 Max Momentum");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl1MaxMomentum);
+                    rpt5::RowFmt("Rwl1 Max Momentum", "%f", pl.Rwl1MaxMomentum);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl1 Max Torque");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl1MaxToque);
+                    rpt5::RowFmt("Rwl1 Max Torque", "%f", pl.Rwl1MaxToque);
 
                     //============================================================
                     ImGui::Separator();
                     ImGui::Text("[RWl2]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl2 Inertia");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl2Inertia);
+                    rpt5::RowFmt("Rwl2 Inertia", "%f", pl.Rwl2Inertia);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl2 Max Momentum");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl2MaxMomentum);
+                    rpt5::RowFmt("Rwl2 Max Momentum", "%f", pl.Rwl2MaxMomentum);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl2 Max Torque");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl2MaxToque);
+                    rpt5::RowFmt("Rwl2 Max Torque", "%f", pl.Rwl2MaxToque);
 
                     //============================================================
                     ImGui::Separator();
                     ImGui::Text("[RWl3]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl3 Inertia");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl3Inertia);
+                    rpt5::RowFmt("Rwl3 Inertia", "%f", pl.Rwl3Inertia);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl3 Max Momentum");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl3MaxMomentum);
+                    rpt5::RowFmt("Rwl3 Max Momentum", "%f", pl.Rwl3MaxMomentum);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Rwl3 Max Torque");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Rwl3MaxToque);
+                    rpt5::RowFmt("Rwl3 Max Torque", "%f", pl.Rwl3MaxToque);
 
                     //============================================================
                     ImGui::Separator();
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel Ramp Torque");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.WheelRampTorque);
+                    rpt5::RowFmt("Wheel Ramp Torque", "%f", pl.WheelRampTorque);
                     
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel Scheme");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.WheelScheme);
+                    rpt5::RowFmt("Wheel Scheme", "%u", pl.WheelScheme);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Failed Wheel ID");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.FailedWheelID);
+                    rpt5::RowFmt("Failed Wheel ID", "%u", pl.FailedWheelID);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Pyramid Nominal Momentum");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.PyramidNominalMomentum);
+                    rpt5::RowFmt("Pyramid Nominal Momentum", "%f", pl.PyramidNominalMomentum);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Pyramid Tilt Angle");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.PyramidTiltAngle);
+                    rpt5::RowFmt("Pyramid Tilt Angle", "%f", pl.PyramidTiltAngle);
 
                     break;
                 }
@@ -431,107 +261,47 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Inertia]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ixx");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Ixx);
+                    rpt5::RowFmt("Ixx", "%f", pl.Ixx);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Iyy");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Iyy);
+                    rpt5::RowFmt("Iyy", "%f", pl.Iyy);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Izz");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Izz);
+                    rpt5::RowFmt("Izz", "%f", pl.Izz);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ixy");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Ixy);
+                    rpt5::RowFmt("Ixy", "%f", pl.Ixy);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ixz");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Ixz);
+                    rpt5::RowFmt("Ixz", "%f", pl.Ixz);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Iyz");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.Iyz);
+                    rpt5::RowFmt("Iyz", "%f", pl.Iyz);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Sun Pointing Body Vector]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Pointing Body Vector X");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SunPointingBodyVectorX);
+                    rpt5::RowFmt("Sun Pointing Body Vector X", "%d", pl.SunPointingBodyVectorX);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Pointing Body Vector Y");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SunPointingBodyVectorY);
+                    rpt5::RowFmt("Sun Pointing Body Vector Y", "%d", pl.SunPointingBodyVectorY);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Pointing Body Vector Z");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SunPointingBodyVectorZ);
+                    rpt5::RowFmt("Sun Pointing Body Vector Z", "%d", pl.SunPointingBodyVectorZ);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Target Tracking Body Vector]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Target Tracking Body Vector X");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.TargetTrackingBodyVectorX);
+                    rpt5::RowFmt("Target Tracking Body Vector X", "%d", pl.TargetTrackingBodyVectorX);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Target Tracking Body Vector Y");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.TargetTrackingBodyVectorY);
+                    rpt5::RowFmt("Target Tracking Body Vector Y", "%d", pl.TargetTrackingBodyVectorY);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Target Tracking Body Vector Z");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.TargetTrackingBodyVectorZ);
+                    rpt5::RowFmt("Target Tracking Body Vector Z", "%d", pl.TargetTrackingBodyVectorZ);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Sat Tracking Body Vector]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sat Tracking Body Vector X");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SatTrackingBodyVectorX);
+                    rpt5::RowFmt("Sat Tracking Body Vector X", "%d", pl.SatTrackingBodyVectorX);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sat Tracking Body Vector Y");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SatTrackingBodyVectorY);
+                    rpt5::RowFmt("Sat Tracking Body Vector Y", "%d", pl.SatTrackingBodyVectorY);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sat Tracking Body Vector Z");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.SatTrackingBodyVectorZ);
+                    rpt5::RowFmt("Sat Tracking Body Vector Z", "%d", pl.SatTrackingBodyVectorZ);
 
                     break;
                 }
@@ -546,203 +316,87 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Control Mode]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Control Mode");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultControlMode);
+                    rpt5::RowFmt("Default Control Mode", "%u", pl.DefaultControlMode);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Gains]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Detumbling Damping Gain (Kd)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.DetumblingDampingGain);
+                    rpt5::RowFmt("Detumbling Damping Gain (Kd)", "%f", pl.DetumblingDampingGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Spin Gain Sunlit (KDSun)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.SunSpinGain_Sunlit);
+                    rpt5::RowFmt("Sun Spin Gain Sunlit (KDSun)", "%f", pl.SunSpinGain_Sunlit);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Spin Gain Eclipse (KDecel)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.SunSpinGain_Eclipse);
+                    rpt5::RowFmt("Sun Spin Gain Eclipse (KDecel)", "%f", pl.SunSpinGain_Eclipse);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Detumbling Spin Gain (Ks)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.DetumblingSpinGain);
+                    rpt5::RowFmt("Detumbling Spin Gain (Ks)", "%f", pl.DetumblingSpinGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Fast BD Gain (Kdf)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.FastBDotGain);
+                    rpt5::RowFmt("Fast BD Gain (Kdf)", "%f", pl.FastBDotGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Y Mom Nutation Damping Gain (Kn)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YMomNutationDampingGain);
+                    rpt5::RowFmt("Y Mom Nutation Damping Gain (Kn)", "%f", pl.YMomNutationDampingGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Y Mom Nutation Damping Quat Gain (Kq)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YMomNutationDampingQuatGain);
+                    rpt5::RowFmt("Y Mom Nutation Damping Quat Gain (Kq)", "%f", pl.YMomNutationDampingQuatGain);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Quat Gains]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("XGG Quat Gain (Kqx)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.XGGQuatGain);
+                    rpt5::RowFmt("XGG Quat Gain (Kqx)", "%f", pl.XGGQuatGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("YGG Quat Gain (Kqy)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YGGQuatGain);
+                    rpt5::RowFmt("YGG Quat Gain (Kqy)", "%f", pl.YGGQuatGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("ZGG Quat Gain (Kqz)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.ZGGQuatGain);
+                    rpt5::RowFmt("ZGG Quat Gain (Kqz)", "%f", pl.ZGGQuatGain);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Control Gains]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel Desat Control Gain (Kh)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.WheelDesatControlGain);
+                    rpt5::RowFmt("Wheel Desat Control Gain (Kh)", "%f", pl.WheelDesatControlGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Y Mom Proportional Gain (Kp1)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YMomProportionalGain);
+                    rpt5::RowFmt("Y Mom Proportional Gain (Kp1)", "%f", pl.YMomProportionalGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Y Mom Derivative Gain (Kd1)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YMomDerivativeGain);
+                    rpt5::RowFmt("Y Mom Derivative Gain (Kd1)", "%f", pl.YMomDerivativeGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("R Wheel Proportional Gain (Kp2)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.RWheelProportionalGain);
+                    rpt5::RowFmt("R Wheel Proportional Gain (Kp2)", "%f", pl.RWheelProportionalGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("R Wheel Derivative Gain (Kd2)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.RWheelDerivativeGain);
+                    rpt5::RowFmt("R Wheel Derivative Gain (Kd2)", "%f", pl.RWheelDerivativeGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Tracking Proportional Gain (Kp3)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.TrackingProportionalGain);
+                    rpt5::RowFmt("Tracking Proportional Gain (Kp3)", "%f", pl.TrackingProportionalGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Tracking Derivative Gain (Kd3)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.TrackingDerivativeGain);
+                    rpt5::RowFmt("Tracking Derivative Gain (Kd3)", "%f", pl.TrackingDerivativeGain);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Tracking Integral Gain (Ki3)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.TrackingIntegralGain);
+                    rpt5::RowFmt("Tracking Integral Gain (Ki3)", "%f", pl.TrackingIntegralGain);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Reference]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Reference Spin Rate (deg/s)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.ReferenceSpinRate_degps);
+                    rpt5::RowFmt("Reference Spin Rate (deg/s)", "%f", pl.ReferenceSpinRate_degps);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Reference Wheel Momentum (Nms)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.ReferenceWheelMomentum_Nms);
+                    rpt5::RowFmt("Reference Wheel Momentum (Nms)", "%f", pl.ReferenceWheelMomentum_Nms);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Y Wheel Bias Momentum (Nms)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.YWheelBiasMomentum_Nms);
+                    rpt5::RowFmt("Y Wheel Bias Momentum (Nms)", "%f", pl.YWheelBiasMomentum_Nms);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ref Spin Rate RW (deg/s)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.RefSpinRate_RW_degps);
+                    rpt5::RowFmt("Ref Spin Rate RW (deg/s)", "%f", pl.RefSpinRate_RW_degps);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Angle]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Sun Keep Out Angle (deg)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.SunKeepOutAngle_deg);
+                    rpt5::RowFmt("Sun Keep Out Angle (deg)", "%f", pl.SunKeepOutAngle_deg);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Roll Limit Angle (deg)");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.RollLimitAngle_deg);
+                    rpt5::RowFmt("Roll Limit Angle (deg)", "%f", pl.RollLimitAngle_deg);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Flags]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Yaw Compensation For Earth Rotation");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.flags.YawCompensationForEarthRotation);
+                    rpt5::RowFmt("Yaw Compensation For Earth Rotation", "%u", pl.flags.YawCompensationForEarthRotation);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Enable Sun Tracking In Eclipse");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.flags.EnableSunTrackingInEclipse);
+                    rpt5::RowFmt("Enable Sun Tracking In Eclipse", "%u", pl.flags.EnableSunTrackingInEclipse);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Enable Sun Avoidance");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.flags.EnableSunAvoidance);
+                    rpt5::RowFmt("Enable Sun Avoidance", "%u", pl.flags.EnableSunAvoidance);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Reserved");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.flags.Reserved);
+                    rpt5::RowFmt("Reserved", "%u", pl.flags.Reserved);
 
                     break;
 
@@ -758,29 +412,13 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Default Mode]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Run Mode");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultRunMode);
+                    rpt5::RowFmt("Default Run Mode", "%u", pl.DefaultRunMode);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Operational State");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultOperationalState);
+                    rpt5::RowFmt("Default Operational State", "%u", pl.DefaultOperationalState);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Control Mode In Op State Safe");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultControlModeInOpStateSafe);
+                    rpt5::RowFmt("Default Control Mode In Op State Safe", "%u", pl.DefaultControlModeInOpStateSafe);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Control Mode In Op State Auto");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultControlModeInOpStateAuto);
+                    rpt5::RowFmt("Default Control Mode In Op State Auto", "%u", pl.DefaultControlModeInOpStateAuto);
 
                     break;
                 }
@@ -795,435 +433,175 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Stack Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Stack X Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.StackX_mounting);
+                    rpt5::RowFmt("Stack X Mounting", "%u", pl.StackX_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Stack Y Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.StackY_mounting);
+                    rpt5::RowFmt("Stack Y Mounting", "%u", pl.StackY_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Stack Z Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.StackZ_mounting);
+                    rpt5::RowFmt("Stack Z Mounting", "%u", pl.StackZ_mounting);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[MTQ Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ0 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.MTQ0_mounting);
+                    rpt5::RowFmt("MTQ0 Mounting", "%u", pl.MTQ0_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ1 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.MTQ1_mounting);
+                    rpt5::RowFmt("MTQ1 Mounting", "%u", pl.MTQ1_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ2 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.MTQ2_mounting);
+                    rpt5::RowFmt("MTQ2 Mounting", "%u", pl.MTQ2_mounting);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Wheel Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel0 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Wheel0_mounting);
+                    rpt5::RowFmt("Wheel0 Mounting", "%u", pl.Wheel0_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel1 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Wheel1_mounting);
+                    rpt5::RowFmt("Wheel1 Mounting", "%u", pl.Wheel1_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel2 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Wheel2_mounting);
+                    rpt5::RowFmt("Wheel2 Mounting", "%u", pl.Wheel2_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Wheel3 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Wheel3_mounting);
+                    rpt5::RowFmt("Wheel3 Mounting", "%u", pl.Wheel3_mounting);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Pyramid RWL]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Pyramid RWL Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.PyramidRWL_alpha);
+                    rpt5::RowFmt("Pyramid RWL Alpha", "%d", pl.PyramidRWL_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Pyramid RWL Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.PyramidRWL_beta);
+                    rpt5::RowFmt("Pyramid RWL Beta", "%d", pl.PyramidRWL_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Pyramid RWL Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.PyramidRWL_gamma);
+                    rpt5::RowFmt("Pyramid RWL Gamma", "%d", pl.PyramidRWL_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[CSS Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS0 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS0_mounting);
+                    rpt5::RowFmt("CSS0 Mounting", "%u", pl.CSS0_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS1 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS1_mounting);
+                    rpt5::RowFmt("CSS1 Mounting", "%u", pl.CSS1_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS2 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS2_mounting);
+                    rpt5::RowFmt("CSS2 Mounting", "%u", pl.CSS2_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS3 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS3_mounting);
+                    rpt5::RowFmt("CSS3 Mounting", "%u", pl.CSS3_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS4 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS4_mounting);
+                    rpt5::RowFmt("CSS4 Mounting", "%u", pl.CSS4_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS5 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS5_mounting);
+                    rpt5::RowFmt("CSS5 Mounting", "%u", pl.CSS5_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS6 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS6_mounting);
+                    rpt5::RowFmt("CSS6 Mounting", "%u", pl.CSS6_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS7 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS7_mounting);
+                    rpt5::RowFmt("CSS7 Mounting", "%u", pl.CSS7_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS8 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS8_mounting);
+                    rpt5::RowFmt("CSS8 Mounting", "%u", pl.CSS8_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS9 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.CSS9_mounting);
+                    rpt5::RowFmt("CSS9 Mounting", "%u", pl.CSS9_mounting);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[FSS Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS0 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS0_alpha);
+                    rpt5::RowFmt("FSS0 Alpha", "%d", pl.FSS0_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS0 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS0_beta);
+                    rpt5::RowFmt("FSS0 Beta", "%d", pl.FSS0_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS0 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS0_gamma);
+                    rpt5::RowFmt("FSS0 Gamma", "%d", pl.FSS0_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS1 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS1_alpha);
+                    rpt5::RowFmt("FSS1 Alpha", "%d", pl.FSS1_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS1 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS1_beta);
+                    rpt5::RowFmt("FSS1 Beta", "%d", pl.FSS1_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS1 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS1_gamma);
+                    rpt5::RowFmt("FSS1 Gamma", "%d", pl.FSS1_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS2 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS2_alpha);
+                    rpt5::RowFmt("FSS2 Alpha", "%d", pl.FSS2_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS2 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS2_beta);
+                    rpt5::RowFmt("FSS2 Beta", "%d", pl.FSS2_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS2 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS2_gamma);
+                    rpt5::RowFmt("FSS2 Gamma", "%d", pl.FSS2_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS3 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS3_alpha);
+                    rpt5::RowFmt("FSS3 Alpha", "%d", pl.FSS3_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS3 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS3_beta);
+                    rpt5::RowFmt("FSS3 Beta", "%d", pl.FSS3_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS3 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.FSS3_gamma);
+                    rpt5::RowFmt("FSS3 Gamma", "%d", pl.FSS3_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[HSS Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS0 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS0_alpha);
+                    rpt5::RowFmt("HSS0 Alpha", "%d", pl.HSS0_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS0 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS0_beta);
+                    rpt5::RowFmt("HSS0 Beta", "%d", pl.HSS0_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS0 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS0_gamma);
+                    rpt5::RowFmt("HSS0 Gamma", "%d", pl.HSS0_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS1 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS1_alpha);
+                    rpt5::RowFmt("HSS1 Alpha", "%d", pl.HSS1_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS1 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS1_beta);
+                    rpt5::RowFmt("HSS1 Beta", "%d", pl.HSS1_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS1 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.HSS1_gamma);
+                    rpt5::RowFmt("HSS1 Gamma", "%d", pl.HSS1_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[MAG Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG0 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG0_alpha);
+                    rpt5::RowFmt("MAG0 Alpha", "%d", pl.MAG0_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG0 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG0_beta);
+                    rpt5::RowFmt("MAG0 Beta", "%d", pl.MAG0_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG0 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG0_gamma);
+                    rpt5::RowFmt("MAG0 Gamma", "%d", pl.MAG0_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG1 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG1_alpha);
+                    rpt5::RowFmt("MAG1 Alpha", "%d", pl.MAG1_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG1 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG1_beta);
+                    rpt5::RowFmt("MAG1 Beta", "%d", pl.MAG1_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG1 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MAG1_gamma);
+                    rpt5::RowFmt("MAG1 Gamma", "%d", pl.MAG1_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[STR Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR0 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR0_alpha);
+                    rpt5::RowFmt("STR0 Alpha", "%d", pl.STR0_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR0 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR0_beta);
+                    rpt5::RowFmt("STR0 Beta", "%d", pl.STR0_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR0 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR0_gamma);
+                    rpt5::RowFmt("STR0 Gamma", "%d", pl.STR0_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR1 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR1_alpha);
+                    rpt5::RowFmt("STR1 Alpha", "%d", pl.STR1_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR1 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR1_beta);
+                    rpt5::RowFmt("STR1 Beta", "%d", pl.STR1_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR1 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.STR1_gamma);
+                    rpt5::RowFmt("STR1 Gamma", "%d", pl.STR1_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Ext Sensor Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor0 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor0_alpha);
+                    rpt5::RowFmt("Ext Sensor0 Alpha", "%d", pl.ExtSensor0_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor0 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor0_beta);
+                    rpt5::RowFmt("Ext Sensor0 Beta", "%d", pl.ExtSensor0_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor0 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor0_gamma);
+                    rpt5::RowFmt("Ext Sensor0 Gamma", "%d", pl.ExtSensor0_gamma);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor1 Alpha");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor1_alpha);
+                    rpt5::RowFmt("Ext Sensor1 Alpha", "%d", pl.ExtSensor1_alpha);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor1 Beta");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor1_beta);
+                    rpt5::RowFmt("Ext Sensor1 Beta", "%d", pl.ExtSensor1_beta);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor1 Gamma");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.ExtSensor1_gamma);
+                    rpt5::RowFmt("Ext Sensor1 Gamma", "%d", pl.ExtSensor1_gamma);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Ext Gyro Mounting]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro0 Axis1 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro0_axis1_mounting);
+                    rpt5::RowFmt("Ext Gyro0 Axis1 Mounting", "%u", pl.ExtGyro0_axis1_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro0 Axis2 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro0_axis2_mounting);
+                    rpt5::RowFmt("Ext Gyro0 Axis2 Mounting", "%u", pl.ExtGyro0_axis2_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro0 Axis3 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro0_axis3_mounting);
+                    rpt5::RowFmt("Ext Gyro0 Axis3 Mounting", "%u", pl.ExtGyro0_axis3_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro1 Axis1 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro1_axis1_mounting);
+                    rpt5::RowFmt("Ext Gyro1 Axis1 Mounting", "%u", pl.ExtGyro1_axis1_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro1 Axis2 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro1_axis2_mounting);
+                    rpt5::RowFmt("Ext Gyro1 Axis2 Mounting", "%u", pl.ExtGyro1_axis2_mounting);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Gyro1 Axis3 Mounting");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtGyro1_axis3_mounting);
+                    rpt5::RowFmt("Ext Gyro1 Axis3 Mounting", "%u", pl.ExtGyro1_axis3_mounting);
 
                     break;
                 }
@@ -1238,129 +616,57 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Estimator Mode]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Main Estimator Mode");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultMainEstimatorMode);
+                    rpt5::RowFmt("Default Main Estimator Mode", "%u", pl.DefaultMainEstimatorMode);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Default Backup Estimator Mode");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.DefaultBackupEstimatorMode);
+                    rpt5::RowFmt("Default Backup Estimator Mode", "%u", pl.DefaultBackupEstimatorMode);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Measurement Noise]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG Measurement Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MAGMeasurementNoise);
+                    rpt5::RowFmt("MAG Measurement Noise", "%f", pl.MAGMeasurementNoise);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CSS Measurement Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.CSSMeasurementNoise);
+                    rpt5::RowFmt("CSS Measurement Noise", "%f", pl.CSSMeasurementNoise);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS Measurement Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.FSSMeasurementNoise);
+                    rpt5::RowFmt("FSS Measurement Noise", "%f", pl.FSSMeasurementNoise);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS Measurement Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.HSSMeasurementNoise);
+                    rpt5::RowFmt("HSS Measurement Noise", "%f", pl.HSSMeasurementNoise);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR Measurement Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.STRMeasurementNoise);
+                    rpt5::RowFmt("STR Measurement Noise", "%f", pl.STRMeasurementNoise);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[System Noise]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MMTRKF System Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MMTRKFSystemNoise);
+                    rpt5::RowFmt("MMTRKF System Noise", "%f", pl.MMTRKFSystemNoise);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("EKF System Noise");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.EKFSystemNoise);
+                    rpt5::RowFmt("EKF System Noise", "%f", pl.EKFSystemNoise);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Nutation Correction]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Nutation Epsilon Correction");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.NutationEpsilonCorrection);
+                    rpt5::RowFmt("Nutation Epsilon Correction", "%f", pl.NutationEpsilonCorrection);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Nutation Psi Correction");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.NutationPsiCorrection);
+                    rpt5::RowFmt("Nutation Psi Correction", "%f", pl.NutationPsiCorrection);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Flags]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Use FSS in EKF");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.UseFSSinEKF);
+                    rpt5::RowFmt("Use FSS in EKF", "%u", pl.UseFSSinEKF);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Use CSS in EKF");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.UseCSSinEKF);
+                    rpt5::RowFmt("Use CSS in EKF", "%u", pl.UseCSSinEKF);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Use HSS in EKF");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.UseHSSinEKF);
+                    rpt5::RowFmt("Use HSS in EKF", "%u", pl.UseHSSinEKF);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Use STR in EKF");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.UseSTRinEKF);
+                    rpt5::RowFmt("Use STR in EKF", "%u", pl.UseSTRinEKF);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Triad Vector1");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.TriadVector1);
+                    rpt5::RowFmt("Triad Vector1", "%u", pl.TriadVector1);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Triad Vector2");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.TriadVector2);
+                    rpt5::RowFmt("Triad Vector2", "%u", pl.TriadVector2);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Spare");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Spare);
+                    rpt5::RowFmt("Spare", "%u", pl.Spare);
 
                     break;
                 }
@@ -1375,53 +681,21 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Selection Flags]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("RWL Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.RWLSelectionFlags);
+                    rpt5::RowFmt("RWL Selection Flags", "%u", pl.RWLSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MAG Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.MAGSelectionFlags);
+                    rpt5::RowFmt("MAG Selection Flags", "%u", pl.MAGSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("FSS Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.FSSSelectionFlags);
+                    rpt5::RowFmt("FSS Selection Flags", "%u", pl.FSSSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("HSS Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.HSSSelectionFlags);
+                    rpt5::RowFmt("HSS Selection Flags", "%u", pl.HSSSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("GYR Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.GYRSelectionFlags);
+                    rpt5::RowFmt("GYR Selection Flags", "%u", pl.GYRSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("STR Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.STRSelectionFlags);
+                    rpt5::RowFmt("STR Selection Flags", "%u", pl.STRSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("GNSS Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.GNSSSelectionFlags);
+                    rpt5::RowFmt("GNSS Selection Flags", "%u", pl.GNSSSelectionFlags);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Ext Sensor Selection Flags");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.ExtSensorSelectionFlags);
+                    rpt5::RowFmt("Ext Sensor Selection Flags", "%u", pl.ExtSensorSelectionFlags);
 
                     break;
                 }
@@ -1436,49 +710,25 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[MTQ Max Dipole Moment]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ0 Max Dipole Moment");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MTQ0MaxDipoleMoment);
+                    rpt5::RowFmt("MTQ0 Max Dipole Moment", "%f", pl.MTQ0MaxDipoleMoment);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ1 Max Dipole Moment");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MTQ1MaxDipoleMoment);
+                    rpt5::RowFmt("MTQ1 Max Dipole Moment", "%f", pl.MTQ1MaxDipoleMoment);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("MTQ2 Max Dipole Moment");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MTQ2MaxDipoleMoment);
+                    rpt5::RowFmt("MTQ2 Max Dipole Moment", "%f", pl.MTQ2MaxDipoleMoment);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[MTQ On Time]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Max MTQ On Time");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MaxMTQOnTime);
+                    rpt5::RowFmt("Max MTQ On Time", "%d", pl.MaxMTQOnTime);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Min MTQ On Time");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%d", pl.MinMTQOnTime);
+                    rpt5::RowFmt("Min MTQ On Time", "%d", pl.MinMTQOnTime);
 
                     //=========================================================
                     ImGui::Separator();
                     ImGui::Text("[Filter]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Magnetic Control Filter Factor");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%f", pl.MagneticControlFilterFactor);
+                    rpt5::RowFmt("Magnetic Control Filter Factor", "%f", pl.MagneticControlFilterFactor);
 
                     break;
                 }
@@ -1493,23 +743,11 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Mag Sensing Element]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Mag0 Sensing Element");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Mag0SensingElement);
+                    rpt5::RowFmt("Mag0 Sensing Element", "%u", pl.Mag0SensingElement);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Mag1 Sensing Element");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Mag1SensingElement);
+                    rpt5::RowFmt("Mag1 Sensing Element", "%u", pl.Mag1SensingElement);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Spare");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.Spare);
+                    rpt5::RowFmt("Spare", "%u", pl.Spare);
 
                     break;
                 }
@@ -1524,53 +762,21 @@ bool DrawAdcsReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Orbit Parameters]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Epoch");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.Epoch);
+                    rpt5::RowFmt("Epoch", "%lf", pl.Epoch);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Inclination");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.Inclination);
+                    rpt5::RowFmt("Inclination", "%lf", pl.Inclination);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("RAAN");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.RAAN);
+                    rpt5::RowFmt("RAAN", "%lf", pl.RAAN);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Eccentricity");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.Eccentricity);
+                    rpt5::RowFmt("Eccentricity", "%lf", pl.Eccentricity);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("AOP");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.AOP);
+                    rpt5::RowFmt("AOP", "%lf", pl.AOP);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Mean Anomaly");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.MeanAnomaly);
+                    rpt5::RowFmt("Mean Anomaly", "%lf", pl.MeanAnomaly);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Mean Motion");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.MeanMotion);
+                    rpt5::RowFmt("Mean Motion", "%lf", pl.MeanMotion);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("B Star Drag");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%lf", pl.B_StarDrag);
+                    rpt5::RowFmt("B Star Drag", "%lf", pl.B_StarDrag);
 
                     break;
                 }

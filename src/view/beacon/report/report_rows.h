@@ -114,6 +114,32 @@ inline void RowEPSMeta(const EPS_Report_Metadata_t &meta)
 // EPS HK ALL: 장치별 마지막으로 받은 HK 의 주요 값
 void RowEPSHKAllSummary(const EPS_Report_State_t & eps_state);
 
+// 리포트의 원시 payload (view.raw_bytes) 에서 구조체를 꺼낸다
+class RawPayload
+{
+public:
+    explicit RawPayload(const ReportView_t & view) : bytes_(view.raw_bytes), size_(view.raw_size) {}
+
+    // 앞에서부터 size 바이트를 복사한다 (payload 가 더 길어도 된다). 모자라면 false
+    bool Copy(void * dst, size_t size) const
+    {
+        if (size_ < size) return false;
+        memcpy(dst, bytes_, size);
+        return true;
+    }
+    // payload 길이가 정확히 size 일 때만 복사한다
+    bool CopyExact(void * dst, size_t size) const
+    {
+        if (size_ != size) return false;
+        memcpy(dst, bytes_, size);
+        return true;
+    }
+
+private:
+    const uint8_t * bytes_;
+    uint16_t        size_;
+};
+
 // 8바이트 이름(널 종료 없음)을 문자열로
 inline void CopyName8(char (&dst)[9], const char src[8])
 {

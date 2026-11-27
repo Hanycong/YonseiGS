@@ -23,60 +23,24 @@ bool DrawUantReport(ReportView_t & view)
                     ImGui::Separator();
                     ImGui::Text("[Channel 0]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 0 State");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u (%s)", pl.channel_0_state,
-                                 pl.channel_0_state ? "Burning" : "Idle");
+                    rpt5::RowFmt("Channel 0 State", "%u (%s)", pl.channel_0_state, pl.channel_0_state ? "Burning" : "Idle");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 0 Status");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u (%s)", pl.channel_0_status,
-                                 pl.channel_0_status ? "Released" : "Not released");
+                    rpt5::RowFmt("Channel 0 Status", "%u (%s)", pl.channel_0_status, pl.channel_0_status ? "Released" : "Not released");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 0 Burn Time Left [s]");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.channel_0_burn_time_left);
+                    rpt5::RowFmt("Channel 0 Burn Time Left [s]", "%u", pl.channel_0_burn_time_left);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 0 Burn Tries");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.channel_0_burn_tries);
+                    rpt5::RowFmt("Channel 0 Burn Tries", "%u", pl.channel_0_burn_tries);
 
                     ImGui::Separator();
                     ImGui::Text("[Channel 1]");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 1 State");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u (%s)", pl.channel_1_state,
-                                 pl.channel_1_state ? "Burning" : "Idle");
+                    rpt5::RowFmt("Channel 1 State", "%u (%s)", pl.channel_1_state, pl.channel_1_state ? "Burning" : "Idle");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 1 Status");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u (%s)", pl.channel_1_status,
-                                 pl.channel_1_status ? "Released" : "Not released");
+                    rpt5::RowFmt("Channel 1 Status", "%u (%s)", pl.channel_1_status, pl.channel_1_status ? "Released" : "Not released");
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 1 Burn Time Left [s]");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.channel_1_burn_time_left);
+                    rpt5::RowFmt("Channel 1 Burn Time Left [s]", "%u", pl.channel_1_burn_time_left);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("Channel 1 Burn Tries");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%u", pl.channel_1_burn_tries);
+                    rpt5::RowFmt("Channel 1 Burn Tries", "%u", pl.channel_1_burn_tries);
 
                     break;
                 }

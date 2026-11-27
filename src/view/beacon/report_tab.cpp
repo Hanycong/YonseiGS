@@ -89,14 +89,7 @@ void DrawReportTab(float fontscale)
                     rpt5::RowFmt("CCSDS_Count",      "0x%04X", (unsigned int)view.CCCount);
                     rpt5::RowFmt("CCSDS_Length",     "0x%04X", (unsigned int)view.CCLength);
 
-                    ImGui::TableNextRow();
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted("CCTime Code");
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::Text("%02X %02X %02X %02X %02X %02X",
-                                view.CCTime_code[0], view.CCTime_code[1],
-                                view.CCTime_code[2], view.CCTime_code[3],
-                                view.CCTime_code[4], view.CCTime_code[5]);
+                    rpt5::RowFmt("CCTime Code", "%02X %02X %02X %02X %02X %02X", view.CCTime_code[0], view.CCTime_code[1], view.CCTime_code[2], view.CCTime_code[3], view.CCTime_code[4], view.CCTime_code[5]);
 
                     ImGui::TableNextRow();
                     BeaconSectionHeader("[Body]");
