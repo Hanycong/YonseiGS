@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -40,33 +42,33 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
         case 7403: case 7404: case 7405: { // CLOCK_SYNC / LOG_TEST / TRANS_TEST
             static uint16_t msgid=0x1830; const int selected_case=gen_fnccode; static uint8_t fnccode_by_case[3]={3,4,5}; uint8_t &fnccode=fnccode_by_case[selected_case-7403];
             ImGui::InputScalar("msgid##direct_7403_7405",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7403_7405",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_7403_7405")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_7403_7405")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 7411: { // payuel_roma GET_SINGLE_ENTRY
             static uint16_t msgid=0x1830; static uint8_t fnccode=11; struct __attribute__((packed)) Payload { uint8_t type; uint16_t entry_index; }; static_assert(sizeof(Payload)==3,"payuel_roma GET_SINGLE_ENTRY payload size"); static Payload payload{0,0};
             ImGui::InputScalar("msgid##direct_7411",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7411",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("type##direct_7411",ImGuiDataType_U8,&payload.type); ImGui::InputScalar("entry_index##direct_7411",ImGuiDataType_U16,&payload.entry_index);
-            if(ImGui::Button("Generate CMD##direct_7411")){ WriteSystemName(msgid); uint8_t cmd[11]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=sizeof(cmd)-7; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); } break;
+            if(ImGui::Button("Generate CMD##direct_7411")){ WriteSystemName(msgid); uint8_t cmd[11]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
         }
         case 7412: { // payuel_roma GET_MULTIPLE_ENTRIES
             static uint16_t msgid=0x1830; static uint8_t fnccode=12; struct __attribute__((packed)) Payload { uint8_t type; uint16_t start_index; uint16_t end_index; }; static_assert(sizeof(Payload)==5,"payuel_roma GET_MULTIPLE_ENTRIES payload size"); static Payload payload{1,0,0};
             ImGui::InputScalar("msgid##direct_7412",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7412",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("type##direct_7412",ImGuiDataType_U8,&payload.type); ImGui::InputScalar("start_index##direct_7412",ImGuiDataType_U16,&payload.start_index); ImGui::InputScalar("end_index##direct_7412",ImGuiDataType_U16,&payload.end_index);
-            if(ImGui::Button("Generate CMD##direct_7412")){ WriteSystemName(msgid); uint8_t cmd[13]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=sizeof(cmd)-7; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); } break;
+            if(ImGui::Button("Generate CMD##direct_7412")){ WriteSystemName(msgid); uint8_t cmd[13]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
         }
         case 7413: { // payuel_roma ADD_ENTRY
             static uint16_t msgid=0x1830; static uint8_t fnccode=13; struct __attribute__((packed)) Payload { uint8_t type; uint64_t time_ms; uint32_t repeat_every_ms; int8_t repeat_max; uint8_t command[64]; }; static_assert(sizeof(Payload)==78,"payuel_roma ADD_ENTRY payload size"); static Payload payload{3,0,0,0,{0}};
             ImGui::InputScalar("msgid##direct_7413",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7413",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("type##direct_7413",ImGuiDataType_U8,&payload.type); ImGui::InputScalar("time_ms##direct_7413",ImGuiDataType_U64,&payload.time_ms); ImGui::InputScalar("repeat_every_ms##direct_7413",ImGuiDataType_U32,&payload.repeat_every_ms); ImGui::InputScalar("repeat_max##direct_7413",ImGuiDataType_S8,&payload.repeat_max); ImGui::InputText("command (ASCII, max 63)##direct_7413",reinterpret_cast<char*>(payload.command),sizeof(payload.command));
-            if(ImGui::Button("Generate CMD##direct_7413")){ WriteSystemName(msgid); uint8_t cmd[86]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; const uint16_t wl=sizeof(cmd)-7; cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); } break;
+            if(ImGui::Button("Generate CMD##direct_7413")){ WriteSystemName(msgid); uint8_t cmd[86]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
         }
         case 7414: { // payuel_roma REMOVE_ENTRY
             static uint16_t msgid=0x1830; static uint8_t fnccode=14; struct __attribute__((packed)) Payload { uint8_t type; uint16_t entry_index; }; static_assert(sizeof(Payload)==3,"payuel_roma REMOVE_ENTRY payload size"); static Payload payload{4,0};
             ImGui::InputScalar("msgid##direct_7414",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7414",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("type##direct_7414",ImGuiDataType_U8,&payload.type); ImGui::InputScalar("entry_index##direct_7414",ImGuiDataType_U16,&payload.entry_index);
-            if(ImGui::Button("Generate CMD##direct_7414")){ WriteSystemName(msgid); uint8_t cmd[11]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=sizeof(cmd)-7; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); } break;
+            if(ImGui::Button("Generate CMD##direct_7414")){ WriteSystemName(msgid); uint8_t cmd[11]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
         }
         case 7415: { // payuel_roma GET_USED_SLOTS
             static uint16_t msgid=0x1830; static uint8_t fnccode=15; static uint8_t type=5;
             ImGui::InputScalar("msgid##direct_7415",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_7415",ImGuiDataType_U8,&fnccode); ImGui::InputScalar("type##direct_7415",ImGuiDataType_U8,&type);
-            if(ImGui::Button("Generate CMD##direct_7415")){ WriteSystemName(msgid); uint8_t cmd[9]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=sizeof(cmd)-7; cmd[6]=fnccode; cmd[8]=type; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(8+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); } break;
+            if(ImGui::Button("Generate CMD##direct_7415")){ WriteSystemName(msgid); uint8_t cmd[9]={0}; cmd[8]=type; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); } break;
         }
 
         // ==================== UELYSYS uant ====================
@@ -80,32 +82,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_NoopCmd_t) - 7 };
 
-            memcpy(command5->romanoopcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romanoopcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romanoopcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romanoopcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romanoopcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_NoopCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romanoopcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romanoopcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romanoopcmd, sizeof(PAYUEL_ROMA_NoopCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_NoopCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_NoopCmd_t);
 
-            memcpy(pkt->Data, &command5->romanoopcmd, sizeof(PAYUEL_ROMA_NoopCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romanoopcmd, sizeof(PAYUEL_ROMA_NoopCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -120,32 +104,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ResetCountersCmd_t) - 7 };
 
-            memcpy(command5->romaresetcountercmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaresetcountercmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaresetcountercmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaresetcountercmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaresetcountercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ResetCountersCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaresetcountercmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaresetcountercmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaresetcountercmd, sizeof(PAYUEL_ROMA_ResetCountersCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ResetCountersCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ResetCountersCmd_t);
 
-            memcpy(pkt->Data, &command5->romaresetcountercmd, sizeof(PAYUEL_ROMA_ResetCountersCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaresetcountercmd, sizeof(PAYUEL_ROMA_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
        }
        break;
     }
@@ -160,32 +126,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_CommTestCmd_t) - 7 };
 
-            memcpy(command5->romacommtestcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romacommtestcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romacommtestcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romacommtestcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romacommtestcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_CommTestCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romacommtestcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romacommtestcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romacommtestcmd, sizeof(PAYUEL_ROMA_CommTestCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_CommTestCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_CommTestCmd_t);
 
-            memcpy(pkt->Data, &command5->romacommtestcmd, sizeof(PAYUEL_ROMA_CommTestCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romacommtestcmd, sizeof(PAYUEL_ROMA_CommTestCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -202,32 +150,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t) - 7 };
 
-            memcpy(command5->romagetspcificlinecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romagetspcificlinecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romagetspcificlinecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romagetspcificlinecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romagetspcificlinecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romagetspcificlinecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romagetspcificlinecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romagetspcificlinecmd, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t);
 
-            memcpy(pkt->Data, &command5->romagetspcificlinecmd, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romagetspcificlinecmd, sizeof(PAYUEL_ROMA_GetSpecificLineCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -245,32 +175,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t) - 7 };
 
-            memcpy(command5->romagetmultiplelinescmd.CmdHeader, &mid, 2);
-            memcpy(command5->romagetmultiplelinescmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romagetmultiplelinescmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romagetmultiplelinescmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romagetmultiplelinescmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romagetmultiplelinescmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romagetmultiplelinescmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romagetmultiplelinescmd, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t);
 
-            memcpy(pkt->Data, &command5->romagetmultiplelinescmd, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romagetmultiplelinescmd, sizeof(PAYUEL_ROMA_GetMultipleLinesCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -285,32 +197,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t) - 7 };
 
-            memcpy(command5->romagetlatestlinecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romagetlatestlinecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romagetlatestlinecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romagetlatestlinecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romagetlatestlinecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_GetLatestLineCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romagetlatestlinecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romagetlatestlinecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romagetlatestlinecmd, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_GetLatestLineCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_GetLatestLineCmd_t);
 
-            memcpy(pkt->Data, &command5->romagetlatestlinecmd, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romagetlatestlinecmd, sizeof(PAYUEL_ROMA_GetLatestLineCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -326,32 +220,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t) - 7 };
 
-            memcpy(command5->romagetlatestNlinescmd.CmdHeader, &mid, 2);
-            memcpy(command5->romagetlatestNlinescmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romagetlatestNlinescmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romagetlatestNlinescmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romagetlatestNlinescmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romagetlatestNlinescmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romagetlatestNlinescmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romagetlatestNlinescmd, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t);
 
-            memcpy(pkt->Data, &command5->romagetlatestNlinescmd, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romagetlatestNlinescmd, sizeof(PAYUEL_ROMA_GetLatestNLinesCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -367,32 +243,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t) - 7 };
 
-            memcpy(command5->romaclearalllinescmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaclearalllinescmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaclearalllinescmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaclearalllinescmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaclearalllinescmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaclearalllinescmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaclearalllinescmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaclearalllinescmd, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t);
 
-            memcpy(pkt->Data, &command5->romaclearalllinescmd, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaclearalllinescmd, sizeof(PAYUEL_ROMA_ClearAllLinesCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -407,32 +265,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t) - 7 };
 
-            memcpy(command5->romasetroutedefaultcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasetroutedefaultcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasetroutedefaultcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasetroutedefaultcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasetroutedefaultcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasetroutedefaultcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasetroutedefaultcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasetroutedefaultcmd, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t);
 
-            memcpy(pkt->Data, &command5->romasetroutedefaultcmd, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasetroutedefaultcmd, sizeof(PAYUEL_ROMA_SetRouteDefaultCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -447,32 +287,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ResetRouteCmd_t) - 7 };
 
-            memcpy(command5->romaresetroutecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaresetroutecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaresetroutecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaresetroutecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaresetroutecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ResetRouteCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaresetroutecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaresetroutecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaresetroutecmd, sizeof(PAYUEL_ROMA_ResetRouteCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ResetRouteCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ResetRouteCmd_t);
 
-            memcpy(pkt->Data, &command5->romaresetroutecmd, sizeof(PAYUEL_ROMA_ResetRouteCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaresetroutecmd, sizeof(PAYUEL_ROMA_ResetRouteCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -487,32 +309,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_LoadRouteCmd_t) - 7 };
 
-            memcpy(command5->romaloadroutecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaloadroutecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaloadroutecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaloadroutecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaloadroutecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_LoadRouteCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaloadroutecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaloadroutecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaloadroutecmd, sizeof(PAYUEL_ROMA_LoadRouteCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_LoadRouteCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_LoadRouteCmd_t);
 
-            memcpy(pkt->Data, &command5->romaloadroutecmd, sizeof(PAYUEL_ROMA_LoadRouteCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaloadroutecmd, sizeof(PAYUEL_ROMA_LoadRouteCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -527,32 +331,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SaveRouteCmd_t) - 7 };
 
-            memcpy(command5->romasaveroutecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasaveroutecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasaveroutecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasaveroutecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasaveroutecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SaveRouteCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasaveroutecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasaveroutecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasaveroutecmd, sizeof(PAYUEL_ROMA_SaveRouteCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SaveRouteCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SaveRouteCmd_t);
 
-            memcpy(pkt->Data, &command5->romasaveroutecmd, sizeof(PAYUEL_ROMA_SaveRouteCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasaveroutecmd, sizeof(PAYUEL_ROMA_SaveRouteCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -567,32 +353,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SendRouteCmd_t) - 7 };
 
-            memcpy(command5->romasendroutecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasendroutecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasendroutecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasendroutecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasendroutecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SendRouteCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasendroutecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasendroutecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasendroutecmd, sizeof(PAYUEL_ROMA_SendRouteCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SendRouteCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SendRouteCmd_t);
 
-            memcpy(pkt->Data, &command5->romasendroutecmd, sizeof(PAYUEL_ROMA_SendRouteCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasendroutecmd, sizeof(PAYUEL_ROMA_SendRouteCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -609,35 +377,17 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SetRouteCmd_t) - 7 };
 
             memset(command5->romasetroutecmd.Payload.route, 0, sizeof(command5->romasetroutecmd.Payload.route));
             strncpy(command5->romasetroutecmd.Payload.route, route_buf, sizeof(command5->romasetroutecmd.Payload.route) - 1);
 
-            memcpy(command5->romasetroutecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasetroutecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasetroutecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasetroutecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasetroutecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SetRouteCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasetroutecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasetroutecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasetroutecmd, sizeof(PAYUEL_ROMA_SetRouteCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SetRouteCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SetRouteCmd_t);
 
-            memcpy(pkt->Data, &command5->romasetroutecmd, sizeof(PAYUEL_ROMA_SetRouteCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasetroutecmd, sizeof(PAYUEL_ROMA_SetRouteCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -654,32 +404,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParGetCmd_t) - 7 };
 
-            memcpy(command5->romapargetcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romapargetcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romapargetcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romapargetcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romapargetcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParGetCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romapargetcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romapargetcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romapargetcmd, sizeof(PAYUEL_ROMA_ParGetCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParGetCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParGetCmd_t);
 
-            memcpy(pkt->Data, &command5->romapargetcmd, sizeof(PAYUEL_ROMA_ParGetCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romapargetcmd, sizeof(PAYUEL_ROMA_ParGetCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -697,32 +429,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParSetCmd_t) - 7 };
 
-            memcpy(command5->romaparsetcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaparsetcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaparsetcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaparsetcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaparsetcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParSetCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaparsetcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaparsetcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaparsetcmd, sizeof(PAYUEL_ROMA_ParSetCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParSetCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParSetCmd_t);
 
-            memcpy(pkt->Data, &command5->romaparsetcmd, sizeof(PAYUEL_ROMA_ParSetCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaparsetcmd, sizeof(PAYUEL_ROMA_ParSetCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -738,32 +452,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t) - 7 };
 
-            memcpy(command5->romapardefaultscmd.CmdHeader, &mid, 2);
-            memcpy(command5->romapardefaultscmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romapardefaultscmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romapardefaultscmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romapardefaultscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParDefaultsCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romapardefaultscmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romapardefaultscmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romapardefaultscmd, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParDefaultsCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParDefaultsCmd_t);
 
-            memcpy(pkt->Data, &command5->romapardefaultscmd, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romapardefaultscmd, sizeof(PAYUEL_ROMA_ParDefaultsCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -779,32 +475,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParSaveCmd_t) - 7 };
 
-            memcpy(command5->romaparsavecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaparsavecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaparsavecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaparsavecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaparsavecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParSaveCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaparsavecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaparsavecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaparsavecmd, sizeof(PAYUEL_ROMA_ParSaveCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParSaveCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParSaveCmd_t);
 
-            memcpy(pkt->Data, &command5->romaparsavecmd, sizeof(PAYUEL_ROMA_ParSaveCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaparsavecmd, sizeof(PAYUEL_ROMA_ParSaveCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -820,32 +498,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParRestoreCmd_t) - 7 };
 
-            memcpy(command5->romaparrestorecmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaparrestorecmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaparrestorecmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaparrestorecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaparrestorecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParRestoreCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaparrestorecmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaparrestorecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaparrestorecmd, sizeof(PAYUEL_ROMA_ParRestoreCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParRestoreCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParRestoreCmd_t);
 
-            memcpy(pkt->Data, &command5->romaparrestorecmd, sizeof(PAYUEL_ROMA_ParRestoreCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaparrestorecmd, sizeof(PAYUEL_ROMA_ParRestoreCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -861,32 +521,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParLoadCmd_t) - 7 };
 
-            memcpy(command5->romaparloadcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaparloadcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaparloadcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaparloadcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaparloadcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParLoadCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaparloadcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaparloadcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaparloadcmd, sizeof(PAYUEL_ROMA_ParLoadCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParLoadCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParLoadCmd_t);
 
-            memcpy(pkt->Data, &command5->romaparloadcmd, sizeof(PAYUEL_ROMA_ParLoadCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaparloadcmd, sizeof(PAYUEL_ROMA_ParLoadCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -903,32 +545,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t) - 7 };
 
-            memcpy(command5->romaparsetOOBcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romaparsetOOBcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romaparsetOOBcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romaparsetOOBcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romaparsetOOBcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_ParSetOOBCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romaparsetOOBcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romaparsetOOBcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romaparsetOOBcmd, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_ParSetOOBCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_ParSetOOBCmd_t);
 
-            memcpy(pkt->Data, &command5->romaparsetOOBcmd, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romaparsetOOBcmd, sizeof(PAYUEL_ROMA_ParSetOOBCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -944,35 +568,17 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SendCommandCmd_t) - 7 };
 
             memset(command5->romasendcommandcmd.Payload.cmd, 0, sizeof(command5->romasendcommandcmd.Payload.cmd));
             strncpy(command5->romasendcommandcmd.Payload.cmd, cmd_buf, sizeof(command5->romasendcommandcmd.Payload.cmd) - 1);
 
-            memcpy(command5->romasendcommandcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasendcommandcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasendcommandcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasendcommandcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasendcommandcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SendCommandCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasendcommandcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasendcommandcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasendcommandcmd, sizeof(PAYUEL_ROMA_SendCommandCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SendCommandCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SendCommandCmd_t);
 
-            memcpy(pkt->Data, &command5->romasendcommandcmd, sizeof(PAYUEL_ROMA_SendCommandCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasendcommandcmd, sizeof(PAYUEL_ROMA_SendCommandCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -988,35 +594,17 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SendMsgCmd_t) - 7 };
 
             memset(command5->romasendmsgcmd.Payload.msg, 0, sizeof(command5->romasendmsgcmd.Payload.msg));
             strncpy(command5->romasendmsgcmd.Payload.msg, msg_buf, sizeof(command5->romasendmsgcmd.Payload.msg) - 1);
 
-            memcpy(command5->romasendmsgcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasendmsgcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasendmsgcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasendmsgcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasendmsgcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SendMsgCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasendmsgcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasendmsgcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasendmsgcmd, sizeof(PAYUEL_ROMA_SendMsgCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SendMsgCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SendMsgCmd_t);
 
-            memcpy(pkt->Data, &command5->romasendmsgcmd, sizeof(PAYUEL_ROMA_SendMsgCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasendmsgcmd, sizeof(PAYUEL_ROMA_SendMsgCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1030,32 +618,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SyncRxCmd_t) - 7 };
 
-            memcpy(command5->romasyncrxcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasyncrxcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasyncrxcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasyncrxcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasyncrxcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SyncRxCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasyncrxcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasyncrxcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasyncrxcmd, sizeof(PAYUEL_ROMA_SyncRxCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SyncRxCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SyncRxCmd_t);
 
-            memcpy(pkt->Data, &command5->romasyncrxcmd, sizeof(PAYUEL_ROMA_SyncRxCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasyncrxcmd, sizeof(PAYUEL_ROMA_SyncRxCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1069,32 +639,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_SyncTxCmd_t) - 7 };
 
-            memcpy(command5->romasynctxcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romasynctxcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romasynctxcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romasynctxcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romasynctxcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_SyncTxCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romasynctxcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romasynctxcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romasynctxcmd, sizeof(PAYUEL_ROMA_SyncTxCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_SyncTxCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_SyncTxCmd_t);
 
-            memcpy(pkt->Data, &command5->romasynctxcmd, sizeof(PAYUEL_ROMA_SyncTxCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romasynctxcmd, sizeof(PAYUEL_ROMA_SyncTxCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1108,32 +660,14 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = { 0xC0, 0x00 };
-            uint8_t  len[2] = { 0x00, sizeof(PAYUEL_ROMA_PayInitCmd_t) - 7 };
 
-            memcpy(command5->romapayinitcmd.CmdHeader, &mid, 2);
-            memcpy(command5->romapayinitcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->romapayinitcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->romapayinitcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->romapayinitcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYUEL_ROMA_PayInitCmd_t);
-            const uint8_t* p = (const uint8_t*)&command5->romapayinitcmd;
-            uint8_t crc = 0xFF;
 
-            while (total--) crc ^= *(p++);
-            command5->romapayinitcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->romapayinitcmd, sizeof(PAYUEL_ROMA_PayInitCmd_t), msgid, fnccode);
 
-            packetsign* pkt = (packetsign*)malloc(2 + 2 + 4 + sizeof(PAYUEL_ROMA_PayInitCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(PAYUEL_ROMA_PayInitCmd_t);
 
-            memcpy(pkt->Data, &command5->romapayinitcmd, sizeof(PAYUEL_ROMA_PayInitCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void*)pkt);
+            mim::tc::SendTelecommand(&command5->romapayinitcmd, sizeof(PAYUEL_ROMA_PayInitCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
         }
@@ -1162,26 +696,8 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD##roma_isl_noarg")) {
             WriteSystemName(msgid);
             uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-            uint16_t mid = htons(msgid);
-            memcpy(cmd, &mid, sizeof(mid));
-            cmd[2] = 0xC0;
-            cmd[3] = 0x00;
-            const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7U);
-            cmd[4] = (uint8_t)(wire_length >> 8);
-            cmd[5] = (uint8_t)(wire_length & 0xFFU);
-            cmd[6] = fnccode;
-            cmd[7] = 0;
-            uint8_t checksum = 0xFF;
-            for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-            cmd[7] = checksum;
-
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = (uint16_t)sizeof(cmd);
-            memcpy(pkt->Data, cmd, sizeof(cmd));
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+            mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1229,13 +745,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             for (size_t i = 0; i < command_size; ++i) checksum ^= cmd[i];
             cmd[7] = checksum;
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + command_size);
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = (uint16_t)command_size;
-            memcpy(pkt->Data, cmd, command_size);
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(cmd, command_size, MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1283,13 +793,7 @@ bool DrawUelysysPayuelRomaForms(uint16_t fnccode)
             for (size_t i = 0; i < command_size; ++i) checksum ^= cmd[i];
             cmd[7] = checksum;
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + command_size);
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = (uint16_t)command_size;
-            memcpy(pkt->Data, cmd, command_size);
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(cmd, command_size, MIM_PT_TMTC_TEST);
         }
         break;
     }

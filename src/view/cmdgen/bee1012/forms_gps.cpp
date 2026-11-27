@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -45,27 +47,8 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3300", ImGuiDataType_U8, &fnccode);
             if (ImGui::Button("Generate CMD##direct_3300")) {
                 WriteSystemName(msgid);
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                const uint16_t wire_length = (uint16_t)(sizeof(UELYSYS_NoArgCmd_t) - 7);
-                uint8_t len[2] = {(uint8_t)(wire_length >> 8), (uint8_t)(wire_length & 0xFF)};
-                memcpy(cmd.CmdHeader, &mid, 2);
-                memcpy(cmd.CmdHeader + 2, seq, 2);
-                memcpy(cmd.CmdHeader + 4, len, 2);
-                memcpy(cmd.CmdHeader + 6, &fnccode, 1);
-                cmd.CmdHeader[7] = 0;
-                uint16_t total = (uint16_t)sizeof(UELYSYS_NoArgCmd_t);
-                const uint8_t *bytes = (const uint8_t *)&cmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(bytes++);
-                cmd.CmdHeader[7] = crc;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(UELYSYS_NoArgCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(UELYSYS_NoArgCmd_t);
-                memcpy(pkt->Data, &cmd, sizeof(UELYSYS_NoArgCmd_t));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -77,11 +60,9 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_3301",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_3301",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_3301")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -113,12 +94,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputDouble("period##direct_3312",&payload.period);
             ImGui::InputDouble("offset##direct_3312",&payload.offset);
             if(ImGui::Button("Generate CMD##direct_3312")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -138,12 +117,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgId##direct_3313",ImGuiDataType_U16,&payload.msgId);
             ImGui::InputScalar("port##direct_3313",ImGuiDataType_U32,&payload.port);
             if(ImGui::Button("Generate CMD##direct_3313")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -167,12 +144,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputDouble("period##direct_3314",&payload.period);
             ImGui::InputDouble("offset##direct_3314",&payload.offset);
             if(ImGui::Button("Generate CMD##direct_3314")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -192,12 +167,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgId##direct_3315",ImGuiDataType_U16,&payload.msgId);
             ImGui::InputScalar("port##direct_3315",ImGuiDataType_U32,&payload.port);
             if(ImGui::Button("Generate CMD##direct_3315")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -217,12 +190,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgId##direct_3316",ImGuiDataType_U16,&payload.msgId);
             ImGui::InputScalar("port##direct_3316",ImGuiDataType_U32,&payload.port);
             if(ImGui::Button("Generate CMD##direct_3316")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -244,12 +215,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("type##direct_3317",ImGuiDataType_U8,&payload.type);
             ImGui::InputScalar("port##direct_3317",ImGuiDataType_U32,&payload.port);
             if(ImGui::Button("Generate CMD##direct_3317")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -269,12 +238,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("port##direct_3318",ImGuiDataType_U32,&payload.port);
             ImGui::Checkbox("held##direct_3318",&payload.held);
             if(ImGui::Button("Generate CMD##direct_3318")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -294,12 +261,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("constellation##direct_3319",ImGuiDataType_U32,&payload.constellation);
             ImGui::InputFloat("cutoff##direct_3319",&payload.cutoff);
             if(ImGui::Button("Generate CMD##direct_3319")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -323,12 +288,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("txType##direct_3320",ImGuiDataType_U32,&payload.txType);
             ImGui::InputScalar("responses##direct_3320",ImGuiDataType_U32,&payload.responses);
             if(ImGui::Button("Generate CMD##direct_3320")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -358,12 +321,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("handshake##direct_3321",ImGuiDataType_U32,&payload.handshake);
             ImGui::InputScalar("breakValue##direct_3321",ImGuiDataType_U32,&payload.breakValue);
             if(ImGui::Button("Generate CMD##direct_3321")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -385,12 +346,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("bodylength##direct_3322",ImGuiDataType_U16,&payload.bodylength);
             ImGui::InputText("body (ASCII)##direct_3322",reinterpret_cast<char*>(payload.body),sizeof(payload.body));
             if(ImGui::Button("Generate CMD##direct_3322")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -407,12 +366,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3330",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3330",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3330")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -429,12 +386,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3331",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3331",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3331")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -455,12 +410,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("status##direct_3332",ImGuiDataType_U8,&payload.status);
             ImGui::Checkbox("override##direct_3332",&payload.overrideValue);
             if(ImGui::Button("Generate CMD##direct_3332")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -477,12 +430,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3333",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3333",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3333")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -499,12 +450,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3334",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3334",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3334")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -521,12 +470,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3335",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3335",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3335")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -543,12 +490,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3336",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3336",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3336")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -565,12 +510,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3337",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3337",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3337")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -587,12 +530,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3338",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3338",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3338")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -609,12 +550,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3339",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3339",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3339")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -635,12 +574,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgId##direct_3350",ImGuiDataType_U16,&payload.msgId);
             ImGui::InputScalar("msgLength##direct_3350",ImGuiDataType_U16,&payload.msgLength);
             if(ImGui::Button("Generate CMD##direct_3350")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -657,12 +594,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3351",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3351",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3351")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -686,12 +621,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputText("libpath##direct_3352",payload.libpath,sizeof(payload.libpath));
             ImGui::InputText("funcName##direct_3352",payload.funcName,sizeof(payload.funcName));
             if(ImGui::Button("Generate CMD##direct_3352")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -708,12 +641,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3353",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3353",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3353")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -730,12 +661,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3354",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3354",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3354")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -752,12 +681,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3355",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3355",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3355")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -774,12 +701,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3356",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3356",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3356")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -796,12 +721,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3357",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3357",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3357")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -819,12 +742,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("msgId##direct_3358",ImGuiDataType_U16,&payload.msgId);
             ImGui::InputScalar("offset##direct_3358",ImGuiDataType_U32,&payload.offset);
             if(ImGui::Button("Generate CMD##direct_3358")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -841,12 +762,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3359",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3359",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3359")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -863,12 +782,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_3360",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("msgId##direct_3360",ImGuiDataType_U16,&payload.msgId);
             if(ImGui::Button("Generate CMD##direct_3360")){
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -886,12 +803,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("Magic##direct_3398",ImGuiDataType_U32,&payload.Magic);
             if(ImGui::Button("Generate CMD##direct_3398")){
                 if(payload.Magic==0) payload.Magic=0xC01DCAFEu;
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -909,12 +824,10 @@ bool DrawBee1012GpsForms(uint16_t fnccode)
             ImGui::InputScalar("Magic##direct_3399",ImGuiDataType_U32,&payload.Magic);
             if(ImGui::Button("Generate CMD##direct_3399")){
                 if(payload.Magic==0) payload.Magic=0xA7EDECAFu;
-                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(payload)]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }

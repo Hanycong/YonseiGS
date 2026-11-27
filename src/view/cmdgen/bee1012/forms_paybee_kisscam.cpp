@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -47,35 +49,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_NoopCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamnoopcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamnoopcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamnoopcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamnoopcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamnoopcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_NoopCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamnoopcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamnoopcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamnoopcmd, sizeof(PAYBEE_KISSCAM_NoopCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_NoopCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_NoopCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamnoopcmd,
-                   sizeof(PAYBEE_KISSCAM_NoopCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamnoopcmd, sizeof(PAYBEE_KISSCAM_NoopCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -100,35 +79,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamresetcounterscmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamresetcounterscmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamresetcounterscmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamresetcounterscmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamresetcounterscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamresetcounterscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamresetcounterscmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamresetcounterscmd, sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamresetcounterscmd,
-                   sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamresetcounterscmd, sizeof(PAYBEE_KISSCAM_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -160,35 +116,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_PingCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscampingcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscampingcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscampingcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscampingcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscampingcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_PingCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscampingcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscampingcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscampingcmd, sizeof(PAYBEE_KISSCAM_PingCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_PingCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_PingCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscampingcmd,
-                   sizeof(PAYBEE_KISSCAM_PingCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscampingcmd, sizeof(PAYBEE_KISSCAM_PingCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -221,35 +154,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_SetModeCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamsetmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamsetmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamsetmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamsetmodecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamsetmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_SetModeCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamsetmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamsetmodecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamsetmodecmd, sizeof(PAYBEE_KISSCAM_SetModeCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_SetModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_SetModeCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamsetmodecmd,
-                   sizeof(PAYBEE_KISSCAM_SetModeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamsetmodecmd, sizeof(PAYBEE_KISSCAM_SetModeCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -275,35 +185,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscammemorystatuscmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscammemorystatuscmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscammemorystatuscmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscammemorystatuscmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscammemorystatuscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscammemorystatuscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscammemorystatuscmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscammemorystatuscmd, sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscammemorystatuscmd,
-                   sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscammemorystatuscmd, sizeof(PAYBEE_KISSCAM_MemoryStatusCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -335,35 +222,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_SetExposureCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamsetexposurecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamsetexposurecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamsetexposurecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamsetexposurecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamsetexposurecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_SetExposureCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamsetexposurecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamsetexposurecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamsetexposurecmd, sizeof(PAYBEE_KISSCAM_SetExposureCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_SetExposureCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_SetExposureCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamsetexposurecmd,
-                   sizeof(PAYBEE_KISSCAM_SetExposureCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamsetexposurecmd, sizeof(PAYBEE_KISSCAM_SetExposureCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -396,35 +260,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_CaptureCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamcapturecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamcapturecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamcapturecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamcapturecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamcapturecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_CaptureCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamcapturecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamcapturecmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamcapturecmd, sizeof(PAYBEE_KISSCAM_CaptureCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_CaptureCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_CaptureCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamcapturecmd,
-                   sizeof(PAYBEE_KISSCAM_CaptureCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamcapturecmd, sizeof(PAYBEE_KISSCAM_CaptureCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -459,35 +300,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_DownloadCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamdownloadcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamdownloadcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamdownloadcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamdownloadcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamdownloadcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_DownloadCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamdownloadcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamdownloadcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamdownloadcmd, sizeof(PAYBEE_KISSCAM_DownloadCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_DownloadCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_DownloadCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamdownloadcmd,
-                   sizeof(PAYBEE_KISSCAM_DownloadCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamdownloadcmd, sizeof(PAYBEE_KISSCAM_DownloadCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -521,35 +339,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamreadregistercmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamreadregistercmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamreadregistercmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamreadregistercmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamreadregistercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamreadregistercmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamreadregistercmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamreadregistercmd, sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamreadregistercmd,
-                   sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamreadregistercmd, sizeof(PAYBEE_KISSCAM_ReadRegisterCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -584,35 +379,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamwriteregistercmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamwriteregistercmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamwriteregistercmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamwriteregistercmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamwriteregistercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamwriteregistercmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamwriteregistercmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamwriteregistercmd, sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamwriteregistercmd,
-                   sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamwriteregistercmd, sizeof(PAYBEE_KISSCAM_WriteRegisterCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -648,35 +420,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamdownloadallcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamdownloadallcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamdownloadallcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamdownloadallcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamdownloadallcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamdownloadallcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamdownloadallcmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamdownloadallcmd, sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamdownloadallcmd,
-                   sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamdownloadallcmd, sizeof(PAYBEE_KISSCAM_DownloadAllCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -711,35 +460,12 @@ bool DrawBee1012PaybeeKisscamForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
 
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00,
-                (uint8_t)(sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t) - 7)
-            };
 
-            memcpy(command5->paybee_kisscamimagecompresscmd.CmdHeader,     &mid, 2);
-            memcpy(command5->paybee_kisscamimagecompresscmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->paybee_kisscamimagecompresscmd.CmdHeader + 4, len,  2);
-            memcpy(command5->paybee_kisscamimagecompresscmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->paybee_kisscamimagecompresscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->paybee_kisscamimagecompresscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            command5->paybee_kisscamimagecompresscmd.CmdHeader[7] = crc;
+            mim::tc::EncodeCfeCommand(&command5->paybee_kisscamimagecompresscmd, sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t);
-            memcpy(pkt->Data, &command5->paybee_kisscamimagecompresscmd,
-                   sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->paybee_kisscamimagecompresscmd, sizeof(PAYBEE_KISSCAM_ImageCompressCmd_t), MIM_PT_TMTC_TEST);
         }
 
         ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",

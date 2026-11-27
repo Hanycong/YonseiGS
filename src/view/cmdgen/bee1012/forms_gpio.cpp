@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -43,11 +45,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2200",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2200",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2200")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -58,11 +58,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2201",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2201",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2201")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -73,11 +71,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2202",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2202",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2202")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -94,12 +90,10 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("ValI16##direct_2203",ImGuiDataType_S16,&payload.ValI16);
             ImGui::InputText("ValStr##direct_2203",payload.ValStr,sizeof(payload.ValStr));
             if(ImGui::Button("Generate CMD##direct_2203")){
-                WriteSystemName(msgid); uint8_t cmd[24]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[24]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -110,11 +104,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2204",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2204",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2204")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -125,11 +117,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2205",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2205",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2205")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -143,30 +133,12 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t seq[2] = {0xC0, 0x00};
-            uint8_t len[2] = {0x00, sizeof(GPIO_Dep1EnOnCmd_t) - 7};
 
-            memcpy(command5->gpiodep1enoncmd.CmdHeader, &mid, 2);
-            memcpy(command5->gpiodep1enoncmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->gpiodep1enoncmd.CmdHeader + 4, len, 2);
-            memcpy(command5->gpiodep1enoncmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->gpiodep1enoncmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(GPIO_Dep1EnOnCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->gpiodep1enoncmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            memcpy(command5->gpiodep1enoncmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->gpiodep1enoncmd, sizeof(GPIO_Dep1EnOnCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(GPIO_Dep1EnOnCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(GPIO_Dep1EnOnCmd_t);
-            memcpy(pkt->Data, &command5->gpiodep1enoncmd, sizeof(GPIO_Dep1EnOnCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->gpiodep1enoncmd, sizeof(GPIO_Dep1EnOnCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -180,30 +152,12 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t seq[2] = {0xC0, 0x00};
-            uint8_t len[2] = {0x00, sizeof(GPIO_Dep1EnOffCmd_t) - 7};
 
-            memcpy(command5->gpiodep1enoffcmd.CmdHeader, &mid, 2);
-            memcpy(command5->gpiodep1enoffcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->gpiodep1enoffcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->gpiodep1enoffcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->gpiodep1enoffcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(GPIO_Dep1EnOffCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->gpiodep1enoffcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            memcpy(command5->gpiodep1enoffcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->gpiodep1enoffcmd, sizeof(GPIO_Dep1EnOffCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(GPIO_Dep1EnOffCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(GPIO_Dep1EnOffCmd_t);
-            memcpy(pkt->Data, &command5->gpiodep1enoffcmd, sizeof(GPIO_Dep1EnOffCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->gpiodep1enoffcmd, sizeof(GPIO_Dep1EnOffCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -217,30 +171,12 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t seq[2] = {0xC0, 0x00};
-            uint8_t len[2] = {0x00, sizeof(GPIO_Dep2EnOnCmd_t) - 7};
 
-            memcpy(command5->gpiodep2enoncmd.CmdHeader, &mid, 2);
-            memcpy(command5->gpiodep2enoncmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->gpiodep2enoncmd.CmdHeader + 4, len, 2);
-            memcpy(command5->gpiodep2enoncmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->gpiodep2enoncmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(GPIO_Dep2EnOnCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->gpiodep2enoncmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            memcpy(command5->gpiodep2enoncmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->gpiodep2enoncmd, sizeof(GPIO_Dep2EnOnCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(GPIO_Dep2EnOnCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(GPIO_Dep2EnOnCmd_t);
-            memcpy(pkt->Data, &command5->gpiodep2enoncmd, sizeof(GPIO_Dep2EnOnCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->gpiodep2enoncmd, sizeof(GPIO_Dep2EnOnCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -254,30 +190,12 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t seq[2] = {0xC0, 0x00};
-            uint8_t len[2] = {0x00, sizeof(GPIO_Dep2EnOffCmd_t) - 7};
 
-            memcpy(command5->gpiodep2enoffcmd.CmdHeader, &mid, 2);
-            memcpy(command5->gpiodep2enoffcmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->gpiodep2enoffcmd.CmdHeader + 4, len, 2);
-            memcpy(command5->gpiodep2enoffcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->gpiodep2enoffcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(GPIO_Dep2EnOffCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->gpiodep2enoffcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            memcpy(command5->gpiodep2enoffcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->gpiodep2enoffcmd, sizeof(GPIO_Dep2EnOffCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(GPIO_Dep2EnOffCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(GPIO_Dep2EnOffCmd_t);
-            memcpy(pkt->Data, &command5->gpiodep2enoffcmd, sizeof(GPIO_Dep2EnOffCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->gpiodep2enoffcmd, sizeof(GPIO_Dep2EnOffCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -291,30 +209,12 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t seq[2] = {0xC0, 0x00};
-            uint8_t len[2] = {0x00, sizeof(GPIO_SpInRead5sCmd_t) - 7};
 
-            memcpy(command5->gpiospinread5scmd.CmdHeader, &mid, 2);
-            memcpy(command5->gpiospinread5scmd.CmdHeader + 2, seq, 2);
-            memcpy(command5->gpiospinread5scmd.CmdHeader + 4, len, 2);
-            memcpy(command5->gpiospinread5scmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->gpiospinread5scmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(GPIO_SpInRead5sCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->gpiospinread5scmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
-            memcpy(command5->gpiospinread5scmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->gpiospinread5scmd, sizeof(GPIO_SpInRead5sCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(GPIO_SpInRead5sCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length = sizeof(GPIO_SpInRead5sCmd_t);
-            memcpy(pkt->Data, &command5->gpiospinread5scmd, sizeof(GPIO_SpInRead5sCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->gpiospinread5scmd, sizeof(GPIO_SpInRead5sCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -326,11 +226,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2211",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2211",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2211")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -341,11 +239,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2212",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2212",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2212")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -356,11 +252,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2213",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2213",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2213")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -371,11 +265,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2214",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2214",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2214")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -386,11 +278,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2215",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2215",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2215")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -401,11 +291,9 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_2216",ImGuiDataType_U16,&msgid);
             ImGui::InputScalar("fnccode##direct_2216",ImGuiDataType_U8,&fnccode);
             if(ImGui::Button("Generate CMD##direct_2216")){
-                WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                WriteSystemName(msgid); uint8_t cmd[8]={0};
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -421,12 +309,10 @@ bool DrawBee1012GpioForms(uint16_t fnccode)
             ImGui::InputScalar("Channel##direct_2217",ImGuiDataType_U8,&payload.Channel);
             ImGui::InputScalar("BurnTimeSeconds##direct_2217",ImGuiDataType_U32,&payload.BurnTimeSeconds);
             if(ImGui::Button("Generate CMD##direct_2217")){
-                WriteSystemName(msgid); uint8_t cmd[16]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2);
-                cmd[2]=0xC0; cmd[3]=0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode;
+                WriteSystemName(msgid); uint8_t cmd[16]={0};
                 memcpy(cmd+8,&payload,sizeof(payload));
-                cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum;
-                packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd));
-                mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt);
+                   mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                 mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }

@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -47,35 +49,13 @@ bool DrawBee1012ToLabForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(TO_LAB_NoopCmd_t) - 7)
-                };
 
-                memcpy(command5->tolabnoopcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->tolabnoopcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->tolabnoopcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->tolabnoopcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->tolabnoopcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(TO_LAB_NoopCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->tolabnoopcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->tolabnoopcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->tolabnoopcmd, sizeof(TO_LAB_NoopCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_NoopCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(TO_LAB_NoopCmd_t);
-                memcpy(pkt->Data, &command5->tolabnoopcmd, sizeof(TO_LAB_NoopCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->tolabnoopcmd, sizeof(TO_LAB_NoopCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -99,36 +79,13 @@ case 2001: { // TO_LAB Reset Status
     if (ImGui::Button("Generate CMD")) {
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {
-            0x00,
-            (uint8_t)(sizeof(TO_LAB_ResetCountersCmd_t) - 7)
-        };
 
-        memcpy(command5->tolabresetcounterscmd.CmdHeader,     &mid, 2);
-        memcpy(command5->tolabresetcounterscmd.CmdHeader + 2, seq,  2);
-        memcpy(command5->tolabresetcounterscmd.CmdHeader + 4, len,  2);
-        memcpy(command5->tolabresetcounterscmd.CmdHeader + 6, &fnccode, 1);
 
-        command5->tolabresetcounterscmd.CmdHeader[7] = 0;
-        uint16_t total = sizeof(TO_LAB_ResetCountersCmd_t);
-        const uint8_t *p = (const uint8_t *)&command5->tolabresetcounterscmd;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
 
-        memcpy(command5->tolabresetcounterscmd.CmdHeader + 7, &crc, 1);
+        mim::tc::EncodeCfeCommand(&command5->tolabresetcounterscmd, sizeof(TO_LAB_ResetCountersCmd_t), msgid, fnccode);
 
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_ResetCountersCmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(TO_LAB_ResetCountersCmd_t);
-        memcpy(pkt->Data, &command5->tolabresetcounterscmd,
-               sizeof(TO_LAB_ResetCountersCmd_t));
 
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::SendTelecommand(&command5->tolabresetcounterscmd, sizeof(TO_LAB_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -181,37 +138,14 @@ case 2002: { // TO_LAB Add Packet
 
         WriteSystemName(msgid);
 
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {
-            0x00,
-            (uint8_t)(sizeof(TO_LAB_AddPacket5Cmd_t) - 7)
-        };
-
-        memcpy(command5->tolabaddpacketcmd.CmdHeader,     &mid, 2);
-        memcpy(command5->tolabaddpacketcmd.CmdHeader + 2, seq,  2);
-        memcpy(command5->tolabaddpacketcmd.CmdHeader + 4, len,  2);
-        memcpy(command5->tolabaddpacketcmd.CmdHeader + 6, &fnccode, 1);
 
 
-        command5->tolabaddpacketcmd.CmdHeader[7] = 0;
-        uint16_t total = sizeof(TO_LAB_AddPacket5Cmd_t);
-        const uint8_t *p = (const uint8_t *)&command5->tolabaddpacketcmd;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
 
-        memcpy(command5->tolabaddpacketcmd.CmdHeader + 7, &crc, 1);
 
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_AddPacket5Cmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(TO_LAB_AddPacket5Cmd_t);
-        memcpy(pkt->Data, &command5->tolabaddpacketcmd,
-               sizeof(TO_LAB_AddPacket5Cmd_t));
+        mim::tc::EncodeCfeCommand(&command5->tolabaddpacketcmd, sizeof(TO_LAB_AddPacket5Cmd_t), msgid, fnccode);
 
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+
+        mim::tc::SendTelecommand(&command5->tolabaddpacketcmd, sizeof(TO_LAB_AddPacket5Cmd_t), MIM_PT_TMTC_TEST);
     }
 
     ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -244,37 +178,14 @@ case 2002: { // TO_LAB Add Packet
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(TO_LAB_SendDataTypesCmd_t) - 7)
-                };
-
-                memcpy(command5->tolabsenddatatypescmd.CmdHeader,     &mid, 2);
-                memcpy(command5->tolabsenddatatypescmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->tolabsenddatatypescmd.CmdHeader + 4, len,  2);
-                memcpy(command5->tolabsenddatatypescmd.CmdHeader + 6, &fnccode, 1);
 
 
-                command5->tolabsenddatatypescmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(TO_LAB_SendDataTypesCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->tolabsenddatatypescmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->tolabsenddatatypescmd.CmdHeader + 7, &crc, 1);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_SendDataTypesCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(TO_LAB_SendDataTypesCmd_t);
-                memcpy(pkt->Data, &command5->tolabsenddatatypescmd,
-                    sizeof(TO_LAB_SendDataTypesCmd_t));
+                mim::tc::EncodeCfeCommand(&command5->tolabsenddatatypescmd, sizeof(TO_LAB_SendDataTypesCmd_t), msgid, fnccode);
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+
+                mim::tc::SendTelecommand(&command5->tolabsenddatatypescmd, sizeof(TO_LAB_SendDataTypesCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -307,36 +218,13 @@ case 2002: { // TO_LAB Add Packet
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(TO_LAB_RemovePacketCmd_t) - 7)
-                };
 
-                memcpy(command5->tolabremovepacketcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->tolabremovepacketcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->tolabremovepacketcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->tolabremovepacketcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->tolabremovepacketcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(TO_LAB_RemovePacketCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->tolabremovepacketcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->tolabremovepacketcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->tolabremovepacketcmd, sizeof(TO_LAB_RemovePacketCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_RemovePacketCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(TO_LAB_RemovePacketCmd_t);
-                memcpy(pkt->Data, &command5->tolabremovepacketcmd,
-                    sizeof(TO_LAB_RemovePacketCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->tolabremovepacketcmd, sizeof(TO_LAB_RemovePacketCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -363,36 +251,13 @@ case 2002: { // TO_LAB Add Packet
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(TO_LAB_RemoveAllCmd_t) - 7)
-                };
 
-                memcpy(command5->tolabremoveallcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->tolabremoveallcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->tolabremoveallcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->tolabremoveallcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->tolabremoveallcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(TO_LAB_RemoveAllCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->tolabremoveallcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->tolabremoveallcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->tolabremoveallcmd, sizeof(TO_LAB_RemoveAllCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_RemoveAllCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(TO_LAB_RemoveAllCmd_t);
-                memcpy(pkt->Data, &command5->tolabremoveallcmd,
-                    sizeof(TO_LAB_RemoveAllCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->tolabremoveallcmd, sizeof(TO_LAB_RemoveAllCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -424,36 +289,13 @@ case 2002: { // TO_LAB Add Packet
                 strncpy(command5->tolabenableoutputcmd.Payload.dest_IP, dest_ip,
                         sizeof(command5->tolabenableoutputcmd.Payload.dest_IP) - 1);
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(TO_LAB_EnableOutputIpCmd_t) - 7)
-                };
 
-                memcpy(command5->tolabenableoutputcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->tolabenableoutputcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->tolabenableoutputcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->tolabenableoutputcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->tolabenableoutputcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(TO_LAB_EnableOutputIpCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->tolabenableoutputcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->tolabenableoutputcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->tolabenableoutputcmd, sizeof(TO_LAB_EnableOutputIpCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(TO_LAB_EnableOutputIpCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(TO_LAB_EnableOutputIpCmd_t);
-                memcpy(pkt->Data, &command5->tolabenableoutputcmd,
-                    sizeof(TO_LAB_EnableOutputIpCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->tolabenableoutputcmd, sizeof(TO_LAB_EnableOutputIpCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -473,14 +315,14 @@ case 2002: { // TO_LAB Add Packet
         case 2007: { // to_lab OUTPUT_DISABLE
             static uint16_t msgid=0x1823; static uint8_t fnccode=7;
             ImGui::InputScalar("msgid##direct_2007",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_2007",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_2007")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[4]=0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_2007")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
 
         case 2021: { // to_lab TO_CREATE_CHILD
             static uint16_t msgid=0x1823; static uint8_t fnccode=21;
             ImGui::InputScalar("msgid##direct_2021",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_2021",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_2021")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[4]=0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_2021")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
 

@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -40,31 +42,31 @@ bool DrawUelysysEoForms(uint16_t fnccode)
         case 4800: { // eo NOOP (CC0)
             static uint16_t msgid=0x1890; static uint8_t fnccode=0;
             ImGui::InputScalar("msgid##direct_4800",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4800",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_4800")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4800")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 4801: { // eo RESET_COUNTER (CC1)
             static uint16_t msgid=0x1890; static uint8_t fnccode=1;
             ImGui::InputScalar("msgid##direct_4801",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4801",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_4801")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4801")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 4802: { // eo RESET_PHASE (CC2)
             static uint16_t msgid=0x1890; static uint8_t fnccode=2;
             ImGui::InputScalar("msgid##direct_4802",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4802",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_4802")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4802")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 4803: { // eo SEND_STATE (CC3)
             static uint16_t msgid=0x1890; static uint8_t fnccode=3;
             ImGui::InputScalar("msgid##direct_4803",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4803",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_4803")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4803")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 4804: { // eo FINISH_PHASE (CC4)
             static uint16_t msgid=0x1890; static uint8_t fnccode=4;
             ImGui::InputScalar("msgid##direct_4804",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4804",ImGuiDataType_U8,&fnccode);
-            if(ImGui::Button("Generate CMD##direct_4804")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; cmd[5]=1; cmd[6]=fnccode; cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4804")){ WriteSystemName(msgid); uint8_t cmd[8]={0}; mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
         case 4806: { // eo START_CHILD_TASK (CC6)
@@ -74,7 +76,7 @@ bool DrawUelysysEoForms(uint16_t fnccode)
             static Payload payload{0x454F4152u,1u,0u};
             ImGui::InputScalar("msgid##direct_4806",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_4806",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("ArmMagic##direct_4806",ImGuiDataType_U32,&payload.ArmMagic); ImGui::InputScalar("SequenceId##direct_4806",ImGuiDataType_U16,&payload.SequenceId);
-            if(ImGui::Button("Generate CMD##direct_4806")){ WriteSystemName(msgid); uint8_t cmd[16]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_4806")){ WriteSystemName(msgid); uint8_t cmd[16]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
 

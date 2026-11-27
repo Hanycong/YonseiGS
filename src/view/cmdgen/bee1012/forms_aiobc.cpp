@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -46,14 +48,7 @@ bool DrawBee1012AiobcForms(uint16_t fnccode)
             if (ImGui::Button("Generate CMD##aiobc_health")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[5] = 0x01;
-                cmd[6] = fnccode;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
+                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
                 packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
                 if (!pkt) {
@@ -270,14 +265,7 @@ bool DrawBee1012AiobcForms(uint16_t fnccode)
             if (ImGui::Button(data_end ? "Generate CMD##aiobc_data_end" : "Generate CMD##aiobc_report_check")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[5] = 0x01;
-                cmd[6] = fnccode;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
+                mim::tc::EncodeCfeCommand(cmd, sizeof(cmd), msgid, fnccode);
 
                 packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
                 if (!pkt) {

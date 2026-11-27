@@ -28,6 +28,24 @@ void EncodeCfeCommand(void * cmd, uint16_t size, uint16_t msgid, uint8_t fnccode
     header[7] = checksum;
 }
 
+void EncodeCfeCommand16(void * cmd, size_t size, uint16_t msgid, uint8_t fnccode)
+{
+    uint8_t * header = (uint8_t *)cmd;
+    const uint16_t length = (uint16_t)(size - 7);
+    header[0] = (uint8_t)(msgid >> 8);
+    header[1] = (uint8_t)(msgid & 0xFF);
+    header[2] = 0xC0;
+    header[3] = 0x00;
+    header[4] = (uint8_t)(length >> 8);
+    header[5] = (uint8_t)(length & 0xFF);
+    header[6] = fnccode;
+    header[7] = 0x00;
+
+    uint8_t checksum = 0xFF;
+    for (size_t i = 0; i < size; i++) checksum ^= header[i];
+    header[7] = checksum;
+}
+
 void EncodeCfeCommandFcAt7(void * cmd, uint16_t size, uint16_t msgid, uint8_t fnccode)
 {
     uint8_t * header = (uint8_t *)cmd;

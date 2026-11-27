@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -45,27 +47,8 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
             ImGui::InputScalar("fnccode##direct_2700", ImGuiDataType_U8, &fnccode);
             if (ImGui::Button("Generate CMD##direct_2700")) {
                 WriteSystemName(msgid);
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                const uint16_t wire_length = (uint16_t)(sizeof(UELYSYS_NoArgCmd_t) - 7);
-                uint8_t len[2] = {(uint8_t)(wire_length >> 8), (uint8_t)(wire_length & 0xFF)};
-                memcpy(cmd.CmdHeader, &mid, 2);
-                memcpy(cmd.CmdHeader + 2, seq, 2);
-                memcpy(cmd.CmdHeader + 4, len, 2);
-                memcpy(cmd.CmdHeader + 6, &fnccode, 1);
-                cmd.CmdHeader[7] = 0;
-                uint16_t total = (uint16_t)sizeof(UELYSYS_NoArgCmd_t);
-                const uint8_t *bytes = (const uint8_t *)&cmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(bytes++);
-                cmd.CmdHeader[7] = crc;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(UELYSYS_NoArgCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(UELYSYS_NoArgCmd_t);
-                memcpy(pkt->Data, &cmd, sizeof(UELYSYS_NoArgCmd_t));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(&cmd, sizeof(UELYSYS_NoArgCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&cmd, sizeof(UELYSYS_NoArgCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -80,33 +63,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_ResetCountersCmd_t) - 7};
 
-            memcpy(command5->adcsresetcounterscmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsresetcounterscmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsresetcounterscmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsresetcounterscmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsresetcounterscmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ResetCountersCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsresetcounterscmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsresetcounterscmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsresetcounterscmd, sizeof(ADCS_ResetCountersCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_ResetCountersCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ResetCountersCmd_t);
-            memcpy(pkt->Data, &command5->adcsresetcounterscmd,
-                   sizeof(ADCS_ResetCountersCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsresetcounterscmd, sizeof(ADCS_ResetCountersCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -122,34 +85,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_GpioEnHighCmd_t) - 7};
 
-            memcpy(command5->adcsgpioenhighcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsgpioenhighcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsgpioenhighcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsgpioenhighcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsgpioenhighcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_GpioEnHighCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsgpioenhighcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsgpioenhighcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsgpioenhighcmd, sizeof(ADCS_GpioEnHighCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_GpioEnHighCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_GpioEnHighCmd_t);
-            memcpy(pkt->Data, &command5->adcsgpioenhighcmd,
-                   sizeof(ADCS_GpioEnHighCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsgpioenhighcmd, sizeof(ADCS_GpioEnHighCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -165,34 +107,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_GpioEnLowCmd_t) - 7};
 
-            memcpy(command5->adcsgpioenlowcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsgpioenlowcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsgpioenlowcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsgpioenlowcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsgpioenlowcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_GpioEnLowCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsgpioenlowcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsgpioenlowcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsgpioenlowcmd, sizeof(ADCS_GpioEnLowCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_GpioEnLowCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_GpioEnLowCmd_t);
-            memcpy(pkt->Data, &command5->adcsgpioenlowcmd,
-                   sizeof(ADCS_GpioEnLowCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsgpioenlowcmd, sizeof(ADCS_GpioEnLowCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -208,34 +129,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_GpioBootHighCmd_t) - 7};
 
-            memcpy(command5->adcsgioboothighcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsgioboothighcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsgioboothighcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsgioboothighcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsgioboothighcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_GpioBootHighCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsgioboothighcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsgioboothighcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsgioboothighcmd, sizeof(ADCS_GpioBootHighCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_GpioBootHighCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_GpioBootHighCmd_t);
-            memcpy(pkt->Data, &command5->adcsgioboothighcmd,
-                   sizeof(ADCS_GpioBootHighCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsgioboothighcmd, sizeof(ADCS_GpioBootHighCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -251,34 +151,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_GpioBootLowCmd_t) - 7};
 
-            memcpy(command5->adcsgiobootlowcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsgiobootlowcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsgiobootlowcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsgiobootlowcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsgiobootlowcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_GpioBootLowCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsgiobootlowcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsgiobootlowcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsgiobootlowcmd, sizeof(ADCS_GpioBootLowCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_GpioBootLowCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_GpioBootLowCmd_t);
-            memcpy(pkt->Data, &command5->adcsgiobootlowcmd,
-                   sizeof(ADCS_GpioBootLowCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsgiobootlowcmd, sizeof(ADCS_GpioBootLowCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -294,34 +173,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_ExitBootLoaderCmd_t) - 7};
 
-            memcpy(command5->adcsexitbootloadercmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsexitbootloadercmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsexitbootloadercmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsexitbootloadercmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsexitbootloadercmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ExitBootLoaderCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsexitbootloadercmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsexitbootloadercmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsexitbootloadercmd, sizeof(ADCS_ExitBootLoaderCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_ExitBootLoaderCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ExitBootLoaderCmd_t);
-            memcpy(pkt->Data, &command5->adcsexitbootloadercmd,
-                   sizeof(ADCS_ExitBootLoaderCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsexitbootloadercmd, sizeof(ADCS_ExitBootLoaderCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -337,34 +195,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00, sizeof(ADCS_ResetCmd_t) - 7};
 
-            memcpy(command5->adcsresetcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsresetcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsresetcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsresetcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsresetcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ResetCmd_t);
-            const uint8_t *p = (const uint8_t *)&command5->adcsresetcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsresetcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsresetcmd, sizeof(ADCS_ResetCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_ResetCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ResetCmd_t);
-            memcpy(pkt->Data, &command5->adcsresetcmd,
-                   sizeof(ADCS_ResetCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsresetcmd, sizeof(ADCS_ResetCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -385,36 +222,13 @@ bool DrawBee1012AdcsForms(uint16_t fnccode)
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00,
-                               sizeof(ADCS_CurrentUnixTimeCmd_t) - 7};
 
-            memcpy(command5->adcscurrentunixtimecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcscurrentunixtimecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcscurrentunixtimecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcscurrentunixtimecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcscurrentunixtimecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_CurrentUnixTimeCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcscurrentunixtimecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcscurrentunixtimecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcscurrentunixtimecmd, sizeof(ADCS_CurrentUnixTimeCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_CurrentUnixTimeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_CurrentUnixTimeCmd_t);
-            memcpy(pkt->Data, &command5->adcscurrentunixtimecmd,
-                   sizeof(ADCS_CurrentUnixTimeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcscurrentunixtimecmd, sizeof(ADCS_CurrentUnixTimeCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -442,36 +256,13 @@ case 2713: {
     if (ImGui::Button("Generate CMD")) {
 
         WriteSystemName(msgid);
-        uint16_t mid = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {0x00,
-                           sizeof(ADCS_ErrorLogSettingCmd_t) - 7};
 
-        memcpy(command5->adcserrorlogsettingcmd.CmdHeader,     &mid, 2);
-        memcpy(command5->adcserrorlogsettingcmd.CmdHeader + 2, seq,  2);
-        memcpy(command5->adcserrorlogsettingcmd.CmdHeader + 4, len,  2);
-        memcpy(command5->adcserrorlogsettingcmd.CmdHeader + 6, &fnccode, 1);
 
-        command5->adcserrorlogsettingcmd.CmdHeader[7] = 0;
-        uint16_t total = sizeof(ADCS_ErrorLogSettingCmd_t);
-        const uint8_t *p =
-            (const uint8_t *)&command5->adcserrorlogsettingcmd;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
 
-        memcpy(command5->adcserrorlogsettingcmd.CmdHeader + 7, &crc, 1);
+        mim::tc::EncodeCfeCommand(&command5->adcserrorlogsettingcmd, sizeof(ADCS_ErrorLogSettingCmd_t), msgid, fnccode);
 
-        packetsign *pkt =
-            (packetsign *)malloc(2 + 2 + 4 +
-                                 sizeof(ADCS_ErrorLogSettingCmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(ADCS_ErrorLogSettingCmd_t);
-        memcpy(pkt->Data, &command5->adcserrorlogsettingcmd,
-               sizeof(ADCS_ErrorLogSettingCmd_t));
 
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::SendTelecommand(&command5->adcserrorlogsettingcmd, sizeof(ADCS_ErrorLogSettingCmd_t), MIM_PT_TMTC_TEST);
     }
     break;
 }
@@ -488,36 +279,13 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {0x00,
-                               sizeof(ADCS_PersistConfigCmd_t) - 7};
 
-            memcpy(command5->adcspersistconfigcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcspersistconfigcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcspersistconfigcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcspersistconfigcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcspersistconfigcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_PersistConfigCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcspersistconfigcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcspersistconfigcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcspersistconfigcmd, sizeof(ADCS_PersistConfigCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_PersistConfigCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_PersistConfigCmd_t);
-            memcpy(pkt->Data, &command5->adcspersistconfigcmd,
-                   sizeof(ADCS_PersistConfigCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcspersistconfigcmd, sizeof(ADCS_PersistConfigCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -542,36 +310,13 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_ControlEstimationModeCmd_t) - 7)
-            };
 
-            memcpy(command5->adcscontrolestimationmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcscontrolestimationmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcscontrolestimationmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcscontrolestimationmodecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcscontrolestimationmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ControlEstimationModeCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcscontrolestimationmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcscontrolestimationmodecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcscontrolestimationmodecmd, sizeof(ADCS_ControlEstimationModeCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_ControlEstimationModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ControlEstimationModeCmd_t);
-            memcpy(pkt->Data, &command5->adcscontrolestimationmodecmd,
-                   sizeof(ADCS_ControlEstimationModeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcscontrolestimationmodecmd, sizeof(ADCS_ControlEstimationModeCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -590,36 +335,13 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_DisableMagRwlMntMngCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsdisablemagrwlmntmngcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsdisablemagrwlmntmngcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsdisablemagrwlmntmngcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsdisablemagrwlmntmngcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsdisablemagrwlmntmngcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_DisableMagRwlMntMngCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsdisablemagrwlmntmngcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsdisablemagrwlmntmngcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsdisablemagrwlmntmngcmd, sizeof(ADCS_DisableMagRwlMntMngCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_DisableMagRwlMntMngCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_DisableMagRwlMntMngCmd_t);
-            memcpy(pkt->Data, &command5->adcsdisablemagrwlmntmngcmd,
-                   sizeof(ADCS_DisableMagRwlMntMngCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsdisablemagrwlmntmngcmd, sizeof(ADCS_DisableMagRwlMntMngCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -642,36 +364,13 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_ReferenceIRCVectorCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsreferenceircvectorcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsreferenceircvectorcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsreferenceircvectorcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsreferenceircvectorcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsreferenceircvectorcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ReferenceIRCVectorCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsreferenceircvectorcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsreferenceircvectorcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsreferenceircvectorcmd, sizeof(ADCS_ReferenceIRCVectorCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_ReferenceIRCVectorCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ReferenceIRCVectorCmd_t);
-            memcpy(pkt->Data, &command5->adcsreferenceircvectorcmd,
-                   sizeof(ADCS_ReferenceIRCVectorCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsreferenceircvectorcmd, sizeof(ADCS_ReferenceIRCVectorCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -694,36 +393,13 @@ case 2713: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_ReferenceLLHTargetCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsreferencellhtargetcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsreferencellhtargetcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsreferencellhtargetcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsreferencellhtargetcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsreferencellhtargetcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ReferenceLLHTargetCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsreferencellhtargetcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsreferencellhtargetcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsreferencellhtargetcmd, sizeof(ADCS_ReferenceLLHTargetCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_ReferenceLLHTargetCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ReferenceLLHTargetCmd_t);
-            memcpy(pkt->Data, &command5->adcsreferencellhtargetcmd,
-                   sizeof(ADCS_ReferenceLLHTargetCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsreferencellhtargetcmd, sizeof(ADCS_ReferenceLLHTargetCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -741,36 +417,13 @@ case 2713: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_OrbitModeCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsorbitmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsorbitmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsorbitmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsorbitmodecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsorbitmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_OrbitModeCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsorbitmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsorbitmodecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsorbitmodecmd, sizeof(ADCS_OrbitModeCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_OrbitModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_OrbitModeCmd_t);
-            memcpy(pkt->Data, &command5->adcsorbitmodecmd,
-                   sizeof(ADCS_OrbitModeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsorbitmodecmd, sizeof(ADCS_OrbitModeCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -799,36 +452,13 @@ case 2720: {
         command5->adcsmagdeploycmd.Payload.DeployMAG1 = deploy1 & 0x1;
 
         WriteSystemName(msgid);
-        uint16_t mid  = htons(msgid);
-        uint8_t  seq[2] = {0xC0, 0x00};
-        uint8_t  len[2] = {
-            0x00, (uint8_t)(sizeof(ADCS_MagDeployCmd_t) - 7)
-        };
 
-        memcpy(command5->adcsmagdeploycmd.CmdHeader,     &mid, 2);
-        memcpy(command5->adcsmagdeploycmd.CmdHeader + 2, seq,  2);
-        memcpy(command5->adcsmagdeploycmd.CmdHeader + 4, len,  2);
-        memcpy(command5->adcsmagdeploycmd.CmdHeader + 6, &fnccode, 1);
 
-        command5->adcsmagdeploycmd.CmdHeader[7] = 0;
-        uint16_t total = sizeof(ADCS_MagDeployCmd_t);
-        const uint8_t *p =
-            (const uint8_t *)&command5->adcsmagdeploycmd;
-        uint8_t crc = 0xFF;
-        while (total--) crc ^= *(p++);
 
-        memcpy(command5->adcsmagdeploycmd.CmdHeader + 7, &crc, 1);
+        mim::tc::EncodeCfeCommand(&command5->adcsmagdeploycmd, sizeof(ADCS_MagDeployCmd_t), msgid, fnccode);
 
-        packetsign *pkt = (packetsign *)malloc(
-            2 + 2 + 4 + sizeof(ADCS_MagDeployCmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(ADCS_MagDeployCmd_t);
-        memcpy(pkt->Data, &command5->adcsmagdeploycmd,
-               sizeof(ADCS_MagDeployCmd_t));
 
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::SendTelecommand(&command5->adcsmagdeploycmd, sizeof(ADCS_MagDeployCmd_t), MIM_PT_TMTC_TEST);
     }
     break;
 }
@@ -850,36 +480,13 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_ReferenceRPYvaluesCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsreferencerpyvaluescmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsreferencerpyvaluescmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsreferencerpyvaluescmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsreferencerpyvaluescmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsreferencerpyvaluescmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ReferenceRPYvaluesCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsreferencerpyvaluescmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsreferencerpyvaluescmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsreferencerpyvaluescmd, sizeof(ADCS_ReferenceRPYvaluesCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_ReferenceRPYvaluesCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ReferenceRPYvaluesCmd_t);
-            memcpy(pkt->Data, &command5->adcsreferencerpyvaluescmd,
-                   sizeof(ADCS_ReferenceRPYvaluesCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsreferencerpyvaluescmd, sizeof(ADCS_ReferenceRPYvaluesCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -901,36 +508,13 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_OpenLoopCmdMTQCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsopenloopcmdmtqcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsopenloopcmdmtqcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsopenloopcmdmtqcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsopenloopcmdmtqcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsopenloopcmdmtqcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_OpenLoopCmdMTQCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsopenloopcmdmtqcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsopenloopcmdmtqcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsopenloopcmdmtqcmd, sizeof(ADCS_OpenLoopCmdMTQCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_OpenLoopCmdMTQCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_OpenLoopCmdMTQCmd_t);
-            memcpy(pkt->Data, &command5->adcsopenloopcmdmtqcmd,
-                   sizeof(ADCS_OpenLoopCmdMTQCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsopenloopcmdmtqcmd, sizeof(ADCS_OpenLoopCmdMTQCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -993,36 +577,13 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_PowerStateCmd_t) - 7)
-            };
 
-            memcpy(command5->adcspowerstatecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcspowerstatecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcspowerstatecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcspowerstatecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcspowerstatecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_PowerStateCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcspowerstatecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcspowerstatecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcspowerstatecmd, sizeof(ADCS_PowerStateCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_PowerStateCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_PowerStateCmd_t);
-            memcpy(pkt->Data, &command5->adcspowerstatecmd,
-                   sizeof(ADCS_PowerStateCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcspowerstatecmd, sizeof(ADCS_PowerStateCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1038,36 +599,13 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_RunModeCmd_t) - 7)
-            };
 
-            memcpy(command5->adcsrunmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsrunmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsrunmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsrunmodecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsrunmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_RunModeCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsrunmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsrunmodecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsrunmodecmd, sizeof(ADCS_RunModeCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_RunModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_RunModeCmd_t);
-            memcpy(pkt->Data, &command5->adcsrunmodecmd,
-                   sizeof(ADCS_RunModeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsrunmodecmd, sizeof(ADCS_RunModeCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1086,36 +624,13 @@ case 2720: {
 
         if (ImGui::Button("Generate CMD")) {
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
-            uint8_t  len[2] = {
-                0x00, (uint8_t)(sizeof(ADCS_ControlModeCmd_t) - 7)
-            };
 
-            memcpy(command5->adcscontrolmodecmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcscontrolmodecmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcscontrolmodecmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcscontrolmodecmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcscontrolmodecmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_ControlModeCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcscontrolmodecmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcscontrolmodecmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcscontrolmodecmd, sizeof(ADCS_ControlModeCmd_t), msgid, fnccode);
 
-            packetsign *pkt = (packetsign *)malloc(
-                2 + 2 + 4 + sizeof(ADCS_ControlModeCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_ControlModeCmd_t);
-            memcpy(pkt->Data, &command5->adcscontrolmodecmd,
-                   sizeof(ADCS_ControlModeCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcscontrolmodecmd, sizeof(ADCS_ControlModeCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -1281,36 +796,13 @@ case 2720: {
             if (ImGui::Button("Generate CMD")) {
                 WriteSystemName(msgid);
 
-                uint16_t mid  = htons(msgid);
-                uint8_t  seq[2] = { 0xC0, 0x00 };
-                uint8_t  len[2] = {
-                    0x00, (uint8_t)(sizeof(ADCS_WhlConfigCmd_t) - 7)
-                };
 
-                memcpy(command5->adcswhlconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcswhlconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcswhlconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcswhlconfigcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->adcswhlconfigcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(ADCS_WhlConfigCmd_t);
-                const uint8_t *p =
-                    (const uint8_t *)&command5->adcswhlconfigcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->adcswhlconfigcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->adcswhlconfigcmd, sizeof(ADCS_WhlConfigCmd_t), msgid, fnccode);
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_WhlConfigCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_WhlConfigCmd_t);
-                memcpy(pkt->Data, &command5->adcswhlconfigcmd,
-                    sizeof(ADCS_WhlConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcswhlconfigcmd, sizeof(ADCS_WhlConfigCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -1406,17 +898,8 @@ case 2720: {
                 memcpy(command5->adcssatconfigcmd.CmdHeader + 7, &crc, 1);
 
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_SatConfigCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_SatConfigCmd_t);
-                memcpy(pkt->Data,
-                    &command5->adcssatconfigcmd,
-                    sizeof(ADCS_SatConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcssatconfigcmd, sizeof(ADCS_SatConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -1543,17 +1026,8 @@ case 2720: {
                 }
                 memcpy(command5->adcscontrollerconfigcmd.CmdHeader + 7, &crc, 1);
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_ControllerConfig_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_ControllerConfig_t);
-                memcpy(pkt->Data,
-                    &command5->adcscontrollerconfigcmd,
-                    sizeof(ADCS_ControllerConfig_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcscontrollerconfigcmd, sizeof(ADCS_ControllerConfig_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -1623,35 +1097,12 @@ case 2720: {
                 pl->MMT_SensitivityMAT_S31 = MMT_SensitivityMAT_S31;
                 pl->MMT_SensitivityMAT_S32 = MMT_SensitivityMAT_S32;
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_Mag0MMTCalibConfigCmd_t) - 7)
-                };
 
-                memcpy(command5->adcsmag0mmtcalibconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsmag0mmtcalibconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsmag0mmtcalibconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsmag0mmtcalibconfigcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->adcsmag0mmtcalibconfigcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(ADCS_Mag0MMTCalibConfigCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->adcsmag0mmtcalibconfigcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
-                command5->adcsmag0mmtcalibconfigcmd.CmdHeader[7] = crc;
+                mim::tc::EncodeCfeCommand(&command5->adcsmag0mmtcalibconfigcmd, sizeof(ADCS_Mag0MMTCalibConfigCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_Mag0MMTCalibConfigCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_Mag0MMTCalibConfigCmd_t);
-                memcpy(pkt->Data, &command5->adcsmag0mmtcalibconfigcmd,
-                    sizeof(ADCS_Mag0MMTCalibConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsmag0mmtcalibconfigcmd, sizeof(ADCS_Mag0MMTCalibConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             ImGui::Text("Header: %02X %02X %02X %02X %02X %02X %02X %02X",
@@ -1717,41 +1168,16 @@ case 2720: {
 
                 WriteSystemName(msgid);
 
-                uint16_t mid    = htons(msgid);
-                uint8_t  seq[2] = { 0xC0, 0x00 };
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_DefaultModeConfigCmd_t) - 7)
-                };
-
-                memcpy(command5->adcsdefaultmodeconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsdefaultmodeconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsdefaultmodeconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsdefaultmodeconfigcmd.CmdHeader + 6, &fnccode, 1);
 
 
-                            command5->adcsdefaultmodeconfigcmd.CmdHeader[7] = 0x00;
-
-                uint16_t total = sizeof(ADCS_DefaultModeConfigCmd_t);
-                const uint8_t *pp =
-                    (const uint8_t *)&command5->adcsdefaultmodeconfigcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(pp++);
-                memcpy(command5->adcsdefaultmodeconfigcmd.CmdHeader + 7, &crc, 1);
 
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_DefaultModeConfigCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_DefaultModeConfigCmd_t);
+                mim::tc::EncodeCfeCommand(&command5->adcsdefaultmodeconfigcmd, sizeof(ADCS_DefaultModeConfigCmd_t), msgid, fnccode);
 
-                memcpy(pkt->Data,
-                    &command5->adcsdefaultmodeconfigcmd,
-                    sizeof(ADCS_DefaultModeConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+
+
+                mim::tc::SendTelecommand(&command5->adcsdefaultmodeconfigcmd, sizeof(ADCS_DefaultModeConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -1895,39 +1321,14 @@ case 2720: {
 
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                uint8_t len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_MountingConfigCmd_t) - 7)
-                };
 
-                memcpy(command5->adcsmountingconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsmountingconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsmountingconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsmountingconfigcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->adcsmountingconfigcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(ADCS_MountingConfigCmd_t);
-                const uint8_t *pp =
-                    (const uint8_t *)&command5->adcsmountingconfigcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(pp++);
-                memcpy(command5->adcsmountingconfigcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->adcsmountingconfigcmd, sizeof(ADCS_MountingConfigCmd_t), msgid, fnccode);
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_MountingConfigCmd_t));
 
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_MountingConfigCmd_t);
 
-                memcpy(pkt->Data,
-                    &command5->adcsmountingconfigcmd,
-                    sizeof(ADCS_MountingConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsmountingconfigcmd, sizeof(ADCS_MountingConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -1970,26 +1371,9 @@ case 2720: {
             if (ImGui::Button("Generate CMD##direct_2732")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[32] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2116,41 +1500,16 @@ case 2720: {
 
                 WriteSystemName(msgid);
 
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                uint8_t len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_EstimatorConfigCmd_t) - 7)
-                };
-
-                memcpy(command5->adcsestimatorconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsestimatorconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsestimatorconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsestimatorconfigcmd.CmdHeader + 6, &fnccode, 1);
 
 
-                command5->adcsestimatorconfigcmd.CmdHeader[7] = 0x00;
-                uint16_t total = sizeof(ADCS_EstimatorConfigCmd_t);
-                const uint8_t *pp =
-                    (const uint8_t *)&command5->adcsestimatorconfigcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(pp++);
 
-                memcpy(command5->adcsestimatorconfigcmd.CmdHeader + 7, &crc, 1);
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_EstimatorConfigCmd_t));
+                mim::tc::EncodeCfeCommand(&command5->adcsestimatorconfigcmd, sizeof(ADCS_EstimatorConfigCmd_t), msgid, fnccode);
 
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_EstimatorConfigCmd_t);
 
-                memcpy(pkt->Data,
-                    &command5->adcsestimatorconfigcmd,
-                    sizeof(ADCS_EstimatorConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+
+                mim::tc::SendTelecommand(&command5->adcsestimatorconfigcmd, sizeof(ADCS_EstimatorConfigCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2197,15 +1556,9 @@ case 2734: {
         while (total--) crc ^= *(pp++);
         command5->adcssatorbitparamconfigcmd.CmdHeader[7] = crc;
 
-        packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_SatOrbitParamConfigCmd_t));
-        pkt->Identifier = HVD_TEST;
-        pkt->PacketType = MIM_PT_TMTC_TEST;
-        pkt->Length     = sizeof(ADCS_SatOrbitParamConfigCmd_t);
 
-        memcpy(pkt->Data, &command5->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t));
 
-        mim::svc::WaitTx();
-        mim::svc::SendUplink((void *)pkt);
+        mim::tc::SendTelecommand(&command5->adcssatorbitparamconfigcmd, sizeof(ADCS_SatOrbitParamConfigCmd_t), MIM_PT_TMTC_TEST);
     }
 
     break;
@@ -2282,18 +1635,9 @@ case 2734: {
                 memcpy(command5->adcsnodeselectionconfigcmd.CmdHeader + 7, &crc, 1);
 
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_NodeSelectionConfigCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_NodeSelectionConfigCmd_t);
 
-                memcpy(pkt->Data,
-                    &command5->adcsnodeselectionconfigcmd,
-                    sizeof(ADCS_NodeSelectionConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsnodeselectionconfigcmd, sizeof(ADCS_NodeSelectionConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -2374,19 +1718,10 @@ case 2734: {
                 }
                 memcpy(command5->adcsmtqconfigcmd.CmdHeader + 7, &crc, 1);
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_MTQConfigCmd_t));
 
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_MTQConfigCmd_t);
 
-                memcpy(pkt->Data,
-                    &command5->adcsmtqconfigcmd,
-                    sizeof(ADCS_MTQConfigCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsmtqconfigcmd, sizeof(ADCS_MTQConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -2408,26 +1743,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2737")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[10] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2446,26 +1764,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2738")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[9] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2508,43 +1809,17 @@ case 2734: {
                 WriteSystemName(msgid);
 
                 // CCSDS Header (7바이트 + CRC)
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                uint8_t len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_MagSensingElmConfigCmd_t) - 7)
-                };
-
-                memcpy(command5->adcsmagsensingelmconfigcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsmagsensingelmconfigcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsmagsensingelmconfigcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsmagsensingelmconfigcmd.CmdHeader + 6, &fnccode, 1);
-        command5->adcsmagsensingelmconfigcmd.CmdHeader[7] = 0x00;
-
-                uint16_t total = sizeof(ADCS_MagSensingElmConfigCmd_t);
-                const uint8_t *pp =
-                    (const uint8_t *)&command5->adcsmagsensingelmconfigcmd;
-
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(pp++);
-                memcpy(command5->adcsmagsensingelmconfigcmd.CmdHeader + 7, &crc, 1);
 
 
-                packetsign *pkt = (packetsign *)malloc(
-                    2 + 2 + 4 + sizeof(ADCS_MagSensingElmConfigCmd_t));
 
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_MagSensingElmConfigCmd_t);
+                mim::tc::EncodeCfeCommand(&command5->adcsmagsensingelmconfigcmd, sizeof(ADCS_MagSensingElmConfigCmd_t), msgid, fnccode);
 
-                memcpy(pkt->Data,
-                    &command5->adcsmagsensingelmconfigcmd,
-                    sizeof(ADCS_MagSensingElmConfigCmd_t));
+
+
+
 
                 // uplink thread 실행
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt
-                );
+                mim::tc::SendTelecommand(&command5->adcsmagsensingelmconfigcmd, sizeof(ADCS_MagSensingElmConfigCmd_t), MIM_PT_TMTC_TEST);
             }
 
             break;
@@ -2631,17 +1906,8 @@ case 2734: {
 
                 memcpy(command5->adcsunsolicittlmmsgsetupcmd.CmdHeader + 7, &crc, 1);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 +
-                                        sizeof(ADCS_UnsolicitTlmMsgSetupCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_UnsolicitTlmMsgSetupCmd_t);
-                memcpy(pkt->Data, &command5->adcsunsolicittlmmsgsetupcmd,
-                    sizeof(ADCS_UnsolicitTlmMsgSetupCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsunsolicittlmmsgsetupcmd, sizeof(ADCS_UnsolicitTlmMsgSetupCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2663,26 +1929,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2741")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[9] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2776,26 +2025,9 @@ case 2734: {
                 if (IncludeExt1) payload.Flags[2] |= (uint8_t)(1u << 4);
                 WriteSystemName(msgid);
                 uint8_t cmd[28] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2830,26 +2062,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2743")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[41] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2874,26 +2089,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2744")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[24] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2916,26 +2114,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2745")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[20] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2948,25 +2129,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2751")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -2979,27 +2143,8 @@ case 2734: {
             ImGui::InputScalar("fnccode##direct_2752", ImGuiDataType_U8, &fnccode);
             if (ImGui::Button("Generate CMD##direct_2752")) {
                 WriteSystemName(msgid);
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                const uint16_t wire_length = (uint16_t)(sizeof(ADCS_GetCurrentUnixTimeCmd_t) - 7);
-                uint8_t len[2] = {(uint8_t)(wire_length >> 8), (uint8_t)(wire_length & 0xFF)};
-                memcpy(cmd.CmdHeader, &mid, 2);
-                memcpy(cmd.CmdHeader + 2, seq, 2);
-                memcpy(cmd.CmdHeader + 4, len, 2);
-                memcpy(cmd.CmdHeader + 6, &fnccode, 1);
-                cmd.CmdHeader[7] = 0;
-                uint16_t total = (uint16_t)sizeof(ADCS_GetCurrentUnixTimeCmd_t);
-                const uint8_t *bytes = (const uint8_t *)&cmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(bytes++);
-                cmd.CmdHeader[7] = crc;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_GetCurrentUnixTimeCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(ADCS_GetCurrentUnixTimeCmd_t);
-                memcpy(pkt->Data, &cmd, sizeof(ADCS_GetCurrentUnixTimeCmd_t));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetCurrentUnixTimeCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetCurrentUnixTimeCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3011,25 +2156,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2753")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3042,25 +2170,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2754")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3073,25 +2184,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2755")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3104,25 +2198,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2756")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3135,25 +2212,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2757")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3166,25 +2226,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2758")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3197,25 +2240,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2759")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3228,27 +2254,8 @@ case 2734: {
             ImGui::InputScalar("fnccode##direct_2760", ImGuiDataType_U8, &fnccode);
             if (ImGui::Button("Generate CMD##direct_2760")) {
                 WriteSystemName(msgid);
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                const uint16_t wire_length = (uint16_t)(sizeof(ADCS_GetRawCubeSenseSunCmd_t) - 7);
-                uint8_t len[2] = {(uint8_t)(wire_length >> 8), (uint8_t)(wire_length & 0xFF)};
-                memcpy(cmd.CmdHeader, &mid, 2);
-                memcpy(cmd.CmdHeader + 2, seq, 2);
-                memcpy(cmd.CmdHeader + 4, len, 2);
-                memcpy(cmd.CmdHeader + 6, &fnccode, 1);
-                cmd.CmdHeader[7] = 0;
-                uint16_t total = (uint16_t)sizeof(ADCS_GetRawCubeSenseSunCmd_t);
-                const uint8_t *bytes = (const uint8_t *)&cmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(bytes++);
-                cmd.CmdHeader[7] = crc;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_GetRawCubeSenseSunCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(ADCS_GetRawCubeSenseSunCmd_t);
-                memcpy(pkt->Data, &cmd, sizeof(ADCS_GetRawCubeSenseSunCmd_t));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetRawCubeSenseSunCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetRawCubeSenseSunCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3260,25 +2267,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2761")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3291,25 +2281,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2762")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3322,25 +2295,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2763")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3353,25 +2309,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2764")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3384,25 +2323,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2765")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3415,25 +2337,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2766")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3446,25 +2351,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2767")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3477,25 +2365,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2768")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3508,25 +2379,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2769")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3539,25 +2393,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2770")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3570,25 +2407,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2771")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3601,25 +2421,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2772")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3632,25 +2435,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2773")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3663,25 +2449,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2774")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3694,25 +2463,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2775")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3725,25 +2477,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2776")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3756,25 +2491,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2777")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3787,25 +2505,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2778")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3818,25 +2519,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2779")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3849,27 +2533,8 @@ case 2734: {
             ImGui::InputScalar("fnccode##direct_2780", ImGuiDataType_U8, &fnccode);
             if (ImGui::Button("Generate CMD##direct_2780")) {
                 WriteSystemName(msgid);
-                uint16_t mid = htons(msgid);
-                uint8_t seq[2] = {0xC0, 0x00};
-                const uint16_t wire_length = (uint16_t)(sizeof(ADCS_GetRawGYRSensorCmd_t) - 7);
-                uint8_t len[2] = {(uint8_t)(wire_length >> 8), (uint8_t)(wire_length & 0xFF)};
-                memcpy(cmd.CmdHeader, &mid, 2);
-                memcpy(cmd.CmdHeader + 2, seq, 2);
-                memcpy(cmd.CmdHeader + 4, len, 2);
-                memcpy(cmd.CmdHeader + 6, &fnccode, 1);
-                cmd.CmdHeader[7] = 0;
-                uint16_t total = (uint16_t)sizeof(ADCS_GetRawGYRSensorCmd_t);
-                const uint8_t *bytes = (const uint8_t *)&cmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(bytes++);
-                cmd.CmdHeader[7] = crc;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_GetRawGYRSensorCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(ADCS_GetRawGYRSensorCmd_t);
-                memcpy(pkt->Data, &cmd, sizeof(ADCS_GetRawGYRSensorCmd_t));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(&cmd, sizeof(ADCS_GetRawGYRSensorCmd_t), msgid, fnccode);
+                mim::tc::SendTelecommand(&cmd, sizeof(ADCS_GetRawGYRSensorCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3882,25 +2547,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2781")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3913,25 +2561,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2782")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3944,25 +2575,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2783")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -3975,25 +2589,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2784")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4006,25 +2603,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2785")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4037,25 +2617,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2786")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4068,25 +2631,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2787")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4099,25 +2645,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2790")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4134,36 +2663,14 @@ case 2734: {
         if (ImGui::Button("Generate CMD")) {
 
             WriteSystemName(msgid);
-            uint16_t mid  = htons(msgid);
-            uint8_t  seq[2] = {0xC0, 0x00};
 
-            uint8_t  len[2] = {0x00, sizeof(ADCS_InterfaceTransportCmd_t) - 7};
 
-            memcpy(command5->adcsinterfacetransportcmd.CmdHeader,     &mid, 2);
-            memcpy(command5->adcsinterfacetransportcmd.CmdHeader + 2, seq,  2);
-            memcpy(command5->adcsinterfacetransportcmd.CmdHeader + 4, len,  2);
-            memcpy(command5->adcsinterfacetransportcmd.CmdHeader + 6, &fnccode, 1);
 
-            command5->adcsinterfacetransportcmd.CmdHeader[7] = 0;
-            uint16_t total = sizeof(ADCS_InterfaceTransportCmd_t);
-            const uint8_t *p =
-                (const uint8_t *)&command5->adcsinterfacetransportcmd;
-            uint8_t crc = 0xFF;
-            while (total--) crc ^= *(p++);
 
-            memcpy(command5->adcsinterfacetransportcmd.CmdHeader + 7, &crc, 1);
+            mim::tc::EncodeCfeCommand(&command5->adcsinterfacetransportcmd, sizeof(ADCS_InterfaceTransportCmd_t), msgid, fnccode);
 
-            packetsign *pkt =
-                (packetsign *)malloc(2 + 2 + 4 +
-                                     sizeof(ADCS_InterfaceTransportCmd_t));
-            pkt->Identifier = HVD_TEST;
-            pkt->PacketType = MIM_PT_TMTC_TEST;
-            pkt->Length     = sizeof(ADCS_InterfaceTransportCmd_t);
-            memcpy(pkt->Data, &command5->adcsinterfacetransportcmd,
-                   sizeof(ADCS_InterfaceTransportCmd_t));
 
-            mim::svc::WaitTx();
-            mim::svc::SendUplink((void *)pkt);
+            mim::tc::SendTelecommand(&command5->adcsinterfacetransportcmd, sizeof(ADCS_InterfaceTransportCmd_t), MIM_PT_TMTC_TEST);
         }
         break;
     }
@@ -4177,25 +2684,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2800")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4223,36 +2713,13 @@ case 2734: {
                 memcpy(&command5->adcsseqgndpointingcmd.Payload, &payload,
                        sizeof(payload));
 
-                uint16_t mid = htons(msgid);
-                uint8_t  seq[2] = {0xC0, 0x00};
-                uint8_t  len[2] = {
-                    0x00,
-                    (uint8_t)(sizeof(ADCS_SequenceCmdGNDpointingCmd_t) - 7)
-                };
 
-                memcpy(command5->adcsseqgndpointingcmd.CmdHeader,     &mid, 2);
-                memcpy(command5->adcsseqgndpointingcmd.CmdHeader + 2, seq,  2);
-                memcpy(command5->adcsseqgndpointingcmd.CmdHeader + 4, len,  2);
-                memcpy(command5->adcsseqgndpointingcmd.CmdHeader + 6, &fnccode, 1);
 
-                command5->adcsseqgndpointingcmd.CmdHeader[7] = 0;
-                uint16_t total = sizeof(ADCS_SequenceCmdGNDpointingCmd_t);
-                const uint8_t *p = (const uint8_t *)&command5->adcsseqgndpointingcmd;
-                uint8_t crc = 0xFF;
-                while (total--) crc ^= *(p++);
 
-                memcpy(command5->adcsseqgndpointingcmd.CmdHeader + 7, &crc, 1);
+                mim::tc::EncodeCfeCommand(&command5->adcsseqgndpointingcmd, sizeof(ADCS_SequenceCmdGNDpointingCmd_t), msgid, fnccode);
 
-                packetsign *pkt =
-                    (packetsign *)malloc(2 + 2 + 4 + sizeof(ADCS_SequenceCmdGNDpointingCmd_t));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length     = sizeof(ADCS_SequenceCmdGNDpointingCmd_t);
-                memcpy(pkt->Data, &command5->adcsseqgndpointingcmd,
-                    sizeof(ADCS_SequenceCmdGNDpointingCmd_t));
 
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::SendTelecommand(&command5->adcsseqgndpointingcmd, sizeof(ADCS_SequenceCmdGNDpointingCmd_t), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4265,25 +2732,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2802")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4304,26 +2754,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2803")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(Payload)] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
                 memcpy(cmd + CFE_SB_CMD_HDR_SIZE, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4344,26 +2777,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2804")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE + sizeof(Payload)] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
                 memcpy(cmd + CFE_SB_CMD_HDR_SIZE, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4386,26 +2802,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2805")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[20] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4418,25 +2817,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2810")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4449,25 +2831,8 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2814")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[CFE_SB_CMD_HDR_SIZE] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4492,26 +2857,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2818")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4534,26 +2882,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2819")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4576,26 +2907,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2820")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4618,26 +2932,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2821")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4660,26 +2957,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2822")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4702,26 +2982,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2823")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4744,26 +3007,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2824")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4786,26 +3032,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2825")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4826,26 +3055,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2826")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }
@@ -4866,26 +3078,9 @@ case 2734: {
             if (ImGui::Button("Generate CMD##direct_2827")) {
                 WriteSystemName(msgid);
                 uint8_t cmd[11] = {0};
-                uint16_t mid = htons(msgid);
-                memcpy(cmd, &mid, sizeof(mid));
-                cmd[2] = 0xC0;
-                cmd[3] = 0x00;
-                const uint16_t wire_length = (uint16_t)(sizeof(cmd) - 7);
-                cmd[4] = (uint8_t)(wire_length >> 8);
-                cmd[5] = (uint8_t)(wire_length & 0xFF);
-                cmd[6] = fnccode;
             memcpy(cmd + 8, &payload, sizeof(payload));
-                cmd[7] = 0;
-                uint8_t checksum = 0xFF;
-                for (size_t i = 0; i < sizeof(cmd); ++i) checksum ^= cmd[i];
-                cmd[7] = checksum;
-                packetsign *pkt = (packetsign *)malloc(2 + 2 + 4 + sizeof(cmd));
-                pkt->Identifier = HVD_TEST;
-                pkt->PacketType = MIM_PT_TMTC_TEST;
-                pkt->Length = (uint16_t)sizeof(cmd);
-                memcpy(pkt->Data, cmd, sizeof(cmd));
-                mim::svc::WaitTx();
-                mim::svc::SendUplink((void *)pkt);
+                mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode);
+                mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST);
             }
             break;
         }

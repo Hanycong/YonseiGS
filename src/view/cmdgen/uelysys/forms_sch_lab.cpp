@@ -20,6 +20,8 @@
 #include "YonseiGS_imgui.h"
 #include "YonseiGS_coms.h"
 #include "svc_tx.h"
+#include "telecommand_sender.h"
+#include "ccsds_cmd.h"
 #include "sat_mode.h"
 #include "cmdgen5_common.h"
 #include "cmdgen_forms.h"
@@ -45,7 +47,7 @@ bool DrawUelysysSchLabForms(uint16_t fnccode)
             ImGui::InputScalar("msgid##direct_8003",ImGuiDataType_U16,&msgid); ImGui::InputScalar("fnccode##direct_8003",ImGuiDataType_U8,&fnccode);
             ImGui::InputScalar("EntryIndex##direct_8003",ImGuiDataType_U16,&payload.EntryIndex); ImGui::InputScalar("Enabled##direct_8003",ImGuiDataType_U16,&payload.Enabled);
             ImGui::InputScalar("PacketRate##direct_8003",ImGuiDataType_U32,&payload.PacketRate); ImGui::InputScalar("PhaseTicks##direct_8003",ImGuiDataType_U32,&payload.PhaseTicks);
-            if(ImGui::Button("Generate CMD##direct_8003")){ WriteSystemName(msgid); uint8_t cmd[20]={0}; uint16_t mid=htons(msgid); memcpy(cmd,&mid,2); cmd[2]=0xC0; const uint16_t wl=(uint16_t)(sizeof(cmd)-7); cmd[4]=(uint8_t)(wl>>8); cmd[5]=(uint8_t)wl; cmd[6]=fnccode; memcpy(cmd+8,&payload,sizeof(payload)); cmd[7]=0; uint8_t checksum=0xFF; for(size_t i=0;i<sizeof(cmd);++i)checksum^=cmd[i]; cmd[7]=checksum; packetsign *pkt=(packetsign*)malloc(2+2+4+sizeof(cmd)); pkt->Identifier=HVD_TEST; pkt->PacketType=MIM_PT_TMTC_TEST; pkt->Length=(uint16_t)sizeof(cmd); memcpy(pkt->Data,cmd,sizeof(cmd)); mim::svc::WaitTx(); mim::svc::SendUplink((void*)pkt); }
+            if(ImGui::Button("Generate CMD##direct_8003")){ WriteSystemName(msgid); uint8_t cmd[20]={0}; memcpy(cmd+8,&payload,sizeof(payload)); mim::tc::EncodeCfeCommand16(cmd, sizeof(cmd), msgid, fnccode); mim::tc::SendTelecommand(cmd, sizeof(cmd), MIM_PT_TMTC_TEST); }
             break;
         }
 
