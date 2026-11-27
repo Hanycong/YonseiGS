@@ -14,46 +14,10 @@
 #include "n5_report_decoder.h"
 #include "n5_report_logger.h"
 #include "telemetry_files.h"
+#include "telemetry_dump.h"
 
 extern Console console;
 extern int ReportCounter;
-
-static void DumpHex(FILE *fp, const uint8_t *p, size_t n)
-{
-    for (size_t i = 0; i < n; i++) {
-        fprintf(fp, "%02X ", p[i]);
-        if ((i + 1) % 16 == 0) fprintf(fp, "\n");
-    }
-    if (n % 16 != 0) fprintf(fp, "\n");
-}
-
-static void DumpArr_i16(FILE *fp, const char *label, const int16_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIi16 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u16(FILE *fp, const char *label, const uint16_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu16 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u8(FILE *fp, const char *label, const uint8_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu8 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u32(FILE *fp, const char *label, const uint32_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu32 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
 
 static void DumpFixedName8(FILE *fp, const char *label, const char name[8])
 {

@@ -59,6 +59,66 @@ static void WriteBinaryDump(FILE* fp, const void* data, size_t len)
     if (len % 16 != 0) fprintf(fp, "\n");
 }
 
+// BEE1012 / UELYSYS 비콘이 같이 가진 구간 (구조체 타입은 위성별로 따로지만 멤버 이름과 저장 형식이 같다)
+template <typename EpsT>
+static void WriteEpsP80Sections(FILE* fp, const EpsT& eps)
+{
+    fprintf(fp, "\n[EPS - PMU]\n");
+    fprintf(fp, "bootcause               : %" PRIu32 "\n", eps.pmu.bootcause);
+    fprintf(fp, "resetcause              : %" PRIu16 "\n", eps.pmu.resetcause);
+    fprintf(fp, "bootcount               : %" PRIu16 "\n", eps.pmu.bootcount);
+    fprintf(fp, "out_en                  : ");
+    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", eps.pmu.out_en[i]);
+    fprintf(fp, "\ntemp                    : %" PRId16 " %" PRId16 "\n", eps.pmu.temp[0], eps.pmu.temp[1]);
+    fprintf(fp, "batt_mode               : %" PRIu8 "\n", eps.pmu.batt_mode);
+    fprintf(fp, "batt_i                  : %" PRId16 "\n", eps.pmu.batt_i);
+    fprintf(fp, "batt_v                  : %" PRIu16 "\n", eps.pmu.batt_v);
+    fprintf(fp, "sm_en                   : %" PRIu8 "\n", eps.pmu.sm_en);
+    fprintf(fp, "gnd_wdt_cnt             : %" PRIu16 "\n", eps.pmu.gnd_wdt_cnt);
+    fprintf(fp, "bus_wdt_cnt             : %" PRIu16 "\n", eps.pmu.bus_wdt_cnt);
+    fprintf(fp, "gnd_wdt_left            : %" PRIu32 "\n", eps.pmu.gnd_wdt_left);
+    fprintf(fp, "bus_wdt_left            : %" PRIu32 "\n", eps.pmu.bus_wdt_left);
+
+    fprintf(fp, "\n[EPS - PDU]\nout_i                   : ");
+    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRId16 " ", eps.pdu.out_i[i]);
+    fprintf(fp, "\nout_en                  : ");
+    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRIu8 " ", eps.pdu.out_en[i]);
+    fprintf(fp, "\n");
+
+    fprintf(fp, "\n[EPS - ACU]\n");
+    for (int unit = 0; unit < 2; unit++) {
+        fprintf(fp, "ACU %d input_i           : ", unit);
+        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRId16 " ", eps.acu.acu[unit].input_i[i]);
+        fprintf(fp, "\nACU %d input_v           : ", unit);
+        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu16 " ", eps.acu.acu[unit].input_v[i]);
+        fprintf(fp, "\nACU %d mppt_mode         : %" PRIu8 "\n", unit, eps.acu.acu[unit].mppt_mode);
+    }
+
+    fprintf(fp, "\n[EPS - BP8]\n");
+    fprintf(fp, "bootcount               : %" PRIu16 "\n", eps.bp8.bootcount);
+    fprintf(fp, "bootcause               : %" PRIu16 "\n", eps.bp8.bootcause);
+    fprintf(fp, "resetcause              : %" PRIu16 "\n", eps.bp8.resetcause);
+    fprintf(fp, "soc                     : %f\n", eps.bp8.soc);
+    fprintf(fp, "bat_avr_temp            : %f\n", eps.bp8.bat_avr_temp);
+    fprintf(fp, "vbat                    : %" PRIu16 "\n", eps.bp8.vbat);
+    fprintf(fp, "i                       : %f\n", eps.bp8.i);
+    fprintf(fp, "heater_i                : %" PRIu16 "\n", eps.bp8.heater_i);
+}
+
+template <typename AdcsT>
+static void WriteAdcsSection(FILE* fp, const AdcsT& adcs)
+{
+    fprintf(fp, "\n[ADCS]\n");
+    fprintf(fp, "power_state             : %" PRIu8 "\n", adcs.power_state);
+    fprintf(fp, "control_mode            : %" PRIu8 "\n", adcs.control_mode);
+    fprintf(fp, "gyro0_rate_x            : %f\n", adcs.gyro0_calibrated_rate_x);
+    fprintf(fp, "gyro0_rate_y            : %f\n", adcs.gyro0_calibrated_rate_y);
+    fprintf(fp, "gyro0_rate_z            : %f\n", adcs.gyro0_calibrated_rate_z);
+    fprintf(fp, "css                     : ");
+    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", adcs.css[i]);
+    fprintf(fp, "\n");
+}
+
 int BEE1012BeaconSaver(BEE1012_Beacon_t* bec, const struct timeval* rx_time)  /* [FTP-BEACON-BUFFER] rx_time */
 {
 if (!bec) return -1;
@@ -93,58 +153,12 @@ if (!fp) {
     fprintf(fp, "LTRX connection_quality : %" PRId8 "\n", bec->coms.ltrx.connection_quality);
     fprintf(fp, "LTRX battery_capacity   : %" PRIu16 "\n", bec->coms.ltrx.battery_capacity);
 
-    fprintf(fp, "\n[EPS - PMU]\n");
-    fprintf(fp, "bootcause               : %" PRIu32 "\n", bec->eps.pmu.bootcause);
-    fprintf(fp, "resetcause              : %" PRIu16 "\n", bec->eps.pmu.resetcause);
-    fprintf(fp, "bootcount               : %" PRIu16 "\n", bec->eps.pmu.bootcount);
-    fprintf(fp, "out_en                  : ");
-    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", bec->eps.pmu.out_en[i]);
-    fprintf(fp, "\ntemp                    : %" PRId16 " %" PRId16 "\n", bec->eps.pmu.temp[0], bec->eps.pmu.temp[1]);
-    fprintf(fp, "batt_mode               : %" PRIu8 "\n", bec->eps.pmu.batt_mode);
-    fprintf(fp, "batt_i                  : %" PRId16 "\n", bec->eps.pmu.batt_i);
-    fprintf(fp, "batt_v                  : %" PRIu16 "\n", bec->eps.pmu.batt_v);
-    fprintf(fp, "sm_en                   : %" PRIu8 "\n", bec->eps.pmu.sm_en);
-    fprintf(fp, "gnd_wdt_cnt             : %" PRIu16 "\n", bec->eps.pmu.gnd_wdt_cnt);
-    fprintf(fp, "bus_wdt_cnt             : %" PRIu16 "\n", bec->eps.pmu.bus_wdt_cnt);
-    fprintf(fp, "gnd_wdt_left            : %" PRIu32 "\n", bec->eps.pmu.gnd_wdt_left);
-    fprintf(fp, "bus_wdt_left            : %" PRIu32 "\n", bec->eps.pmu.bus_wdt_left);
+    WriteEpsP80Sections(fp, bec->eps);
 
-    fprintf(fp, "\n[EPS - PDU]\nout_i                   : ");
-    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRId16 " ", bec->eps.pdu.out_i[i]);
-    fprintf(fp, "\nout_en                  : ");
-    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRIu8 " ", bec->eps.pdu.out_en[i]);
-    fprintf(fp, "\n");
-
-    fprintf(fp, "\n[EPS - ACU]\n");
-    for (int unit = 0; unit < 2; unit++) {
-        fprintf(fp, "ACU %d input_i           : ", unit);
-        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRId16 " ", bec->eps.acu.acu[unit].input_i[i]);
-        fprintf(fp, "\nACU %d input_v           : ", unit);
-        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu16 " ", bec->eps.acu.acu[unit].input_v[i]);
-        fprintf(fp, "\nACU %d mppt_mode         : %" PRIu8 "\n", unit, bec->eps.acu.acu[unit].mppt_mode);
-    }
-
-    fprintf(fp, "\n[EPS - BP8]\n");
-    fprintf(fp, "bootcount               : %" PRIu16 "\n", bec->eps.bp8.bootcount);
-    fprintf(fp, "bootcause               : %" PRIu16 "\n", bec->eps.bp8.bootcause);
-    fprintf(fp, "resetcause              : %" PRIu16 "\n", bec->eps.bp8.resetcause);
-    fprintf(fp, "soc                     : %f\n", bec->eps.bp8.soc);
-    fprintf(fp, "bat_avr_temp            : %f\n", bec->eps.bp8.bat_avr_temp);
-    fprintf(fp, "vbat                    : %" PRIu16 "\n", bec->eps.bp8.vbat);
-    fprintf(fp, "i                       : %f\n", bec->eps.bp8.i);
-    fprintf(fp, "heater_i                : %" PRIu16 "\n", bec->eps.bp8.heater_i);
     fprintf(fp, "\n[EPS - GPIO]\ngpio_status             : 0x%04X\n", bec->eps.gpio.gpio_status);
     fprintf(fp, "sp_deploy_status        : %" PRIu8 "\n", bec->eps.gpio.sp_deploy_status);
 
-    fprintf(fp, "\n[ADCS]\n");
-    fprintf(fp, "power_state             : %" PRIu8 "\n", bec->adcs.power_state);
-    fprintf(fp, "control_mode            : %" PRIu8 "\n", bec->adcs.control_mode);
-    fprintf(fp, "gyro0_rate_x            : %f\n", bec->adcs.gyro0_calibrated_rate_x);
-    fprintf(fp, "gyro0_rate_y            : %f\n", bec->adcs.gyro0_calibrated_rate_y);
-    fprintf(fp, "gyro0_rate_z            : %f\n", bec->adcs.gyro0_calibrated_rate_z);
-    fprintf(fp, "css                     : ");
-    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", bec->adcs.css[i]);
-    fprintf(fp, "\n");
+    WriteAdcsSection(fp, bec->adcs);
 
     WriteBinaryDump(fp, bec, sizeof(*bec));
     fclose(fp);
@@ -185,46 +199,8 @@ if (!fp) {
     fprintf(fp, "AX100 boot_cause        : %" PRIu32 "\n", bec->coms.ax100_boot_cause);
     fprintf(fp, "AX100 temp_board        : %" PRId16 "\n", bec->coms.ax100_temp_board);
 
-    fprintf(fp, "\n[EPS - PMU]\n");
-    fprintf(fp, "bootcause               : %" PRIu32 "\n", bec->eps.pmu.bootcause);
-    fprintf(fp, "resetcause              : %" PRIu16 "\n", bec->eps.pmu.resetcause);
-    fprintf(fp, "bootcount               : %" PRIu16 "\n", bec->eps.pmu.bootcount);
-    fprintf(fp, "out_en                  : ");
-    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", bec->eps.pmu.out_en[i]);
-    fprintf(fp, "\ntemp                    : %" PRId16 " %" PRId16 "\n", bec->eps.pmu.temp[0], bec->eps.pmu.temp[1]);
-    fprintf(fp, "batt_mode               : %" PRIu8 "\n", bec->eps.pmu.batt_mode);
-    fprintf(fp, "batt_i                  : %" PRId16 "\n", bec->eps.pmu.batt_i);
-    fprintf(fp, "batt_v                  : %" PRIu16 "\n", bec->eps.pmu.batt_v);
-    fprintf(fp, "sm_en                   : %" PRIu8 "\n", bec->eps.pmu.sm_en);
-    fprintf(fp, "gnd_wdt_cnt             : %" PRIu16 "\n", bec->eps.pmu.gnd_wdt_cnt);
-    fprintf(fp, "bus_wdt_cnt             : %" PRIu16 "\n", bec->eps.pmu.bus_wdt_cnt);
-    fprintf(fp, "gnd_wdt_left            : %" PRIu32 "\n", bec->eps.pmu.gnd_wdt_left);
-    fprintf(fp, "bus_wdt_left            : %" PRIu32 "\n", bec->eps.pmu.bus_wdt_left);
+    WriteEpsP80Sections(fp, bec->eps);
 
-    fprintf(fp, "\n[EPS - PDU]\nout_i                   : ");
-    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRId16 " ", bec->eps.pdu.out_i[i]);
-    fprintf(fp, "\nout_en                  : ");
-    for (int i = 0; i < 13; i++) fprintf(fp, "%" PRIu8 " ", bec->eps.pdu.out_en[i]);
-    fprintf(fp, "\n");
-
-    fprintf(fp, "\n[EPS - ACU]\n");
-    for (int unit = 0; unit < 2; unit++) {
-        fprintf(fp, "ACU %d input_i           : ", unit);
-        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRId16 " ", bec->eps.acu.acu[unit].input_i[i]);
-        fprintf(fp, "\nACU %d input_v           : ", unit);
-        for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu16 " ", bec->eps.acu.acu[unit].input_v[i]);
-        fprintf(fp, "\nACU %d mppt_mode         : %" PRIu8 "\n", unit, bec->eps.acu.acu[unit].mppt_mode);
-    }
-
-    fprintf(fp, "\n[EPS - BP8]\n");
-    fprintf(fp, "bootcount               : %" PRIu16 "\n", bec->eps.bp8.bootcount);
-    fprintf(fp, "bootcause               : %" PRIu16 "\n", bec->eps.bp8.bootcause);
-    fprintf(fp, "resetcause              : %" PRIu16 "\n", bec->eps.bp8.resetcause);
-    fprintf(fp, "soc                     : %f\n", bec->eps.bp8.soc);
-    fprintf(fp, "bat_avr_temp            : %f\n", bec->eps.bp8.bat_avr_temp);
-    fprintf(fp, "vbat                    : %" PRIu16 "\n", bec->eps.bp8.vbat);
-    fprintf(fp, "i                       : %f\n", bec->eps.bp8.i);
-    fprintf(fp, "heater_i                : %" PRIu16 "\n", bec->eps.bp8.heater_i);
     fprintf(fp, "\n[EPS - DSP]\n");
     fprintf(fp, "dsp_i2c1_0x07_status    : %" PRIu8 "\n", bec->eps.dsp.dsp_i2c1_0x07_status);
     fprintf(fp, "dsp_i2c1_0x08_status    : %" PRIu8 "\n", bec->eps.dsp.dsp_i2c1_0x08_status);
@@ -232,15 +208,7 @@ if (!fp) {
     fprintf(fp, "dsp_i2c1_0x10_status    : %" PRIu8 "\n", bec->eps.dsp.dsp_i2c1_0x10_status);
     fprintf(fp, "dsp_GPIO_status    : %" PRIu8 "\n", bec->eps.dsp.dsp_GPIO_status);
 
-    fprintf(fp, "\n[ADCS]\n");
-    fprintf(fp, "power_state             : %" PRIu8 "\n", bec->adcs.power_state);
-    fprintf(fp, "control_mode            : %" PRIu8 "\n", bec->adcs.control_mode);
-    fprintf(fp, "gyro0_rate_x            : %f\n", bec->adcs.gyro0_calibrated_rate_x);
-    fprintf(fp, "gyro0_rate_y            : %f\n", bec->adcs.gyro0_calibrated_rate_y);
-    fprintf(fp, "gyro0_rate_z            : %f\n", bec->adcs.gyro0_calibrated_rate_z);
-    fprintf(fp, "css                     : ");
-    for (int i = 0; i < 6; i++) fprintf(fp, "%" PRIu8 " ", bec->adcs.css[i]);
-    fprintf(fp, "\n");
+    WriteAdcsSection(fp, bec->adcs);
 
     WriteBinaryDump(fp, bec, sizeof(*bec));
     fclose(fp);
@@ -313,247 +281,143 @@ if (!fp) {
 }
 
 
-static void DumpBeaconPacketToFile(FILE* fp, const csp_packet_t* packet)
-{
-    for (int i = 0; i < packet->length; i++) {
-        if (!(i % 10) && i != 0) {
-            printf("\n");
-            if (fp) fprintf(fp, "\n");
-        }
-        printf("0x%x ", packet->data[i]);
-        if (fp) fprintf(fp, "%02hhx\t", packet->data[i]);
-    }
-}
-static void HandleBEE1012BeaconPacket(const csp_packet_t* packet, int dport,
-                                       const struct timeval* rx_time = NULL)  /* [FTP-BEACON-BUFFER] rx_time */
-{
-    console.AddLog("Received BEE1012 Beacon from port : %d.", dport);
-
-    std::string bcnpktfilename;
-    FILE* bcn_fp = OpenTelemetryFile("../data/BEE1012/beacon/beacon_raw", "BEE1012BeaconPkt--", "--", rx_time, "wb", &bcnpktfilename);
-
-    if (!bcn_fp) {
-        console.AddLog("[ERROR] Failed to open BEE1012 beacon file: %s",
-                       bcnpktfilename.c_str());
-    }
-
-    printf("\nBEE1012 Beacon Length: %u", packet->length);
-
-    if (bcn_fp)
-        DumpBeaconPacketToFile(bcn_fp, packet);
-
-    if (packet->length == BEE1012_LEN_BEACON) {
-        BEE1012_Beacon_t bcn;
-        memcpy(&bcn, packet->data, BEE1012_LEN_BEACON);
-        {
-            std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);   // 화면 스레드가 읽는 버퍼
-            *bee1012_beacon = bcn;
-            g_have_bee1012_beacon = true;
-        }
-
-        BEE1012BeaconSaver(&bcn, rx_time);  /* [FTP-BEACON-BUFFER] */
-    }
-    else {
-        console.AddLog(
-            "Received BEE1012 Beacon length mismatch. expected=%zu actual=%u",
-            (size_t)BEE1012_LEN_BEACON,
-            packet->length);
-    }
-
-    if (bcn_fp)
-        fclose(bcn_fp);
-}
-
-
-static void HandleUELYSYSBeaconPacket(const csp_packet_t* packet, int dport,
-                                       const struct timeval* rx_time = NULL)  /* [FTP-BEACON-BUFFER] rx_time */
-{
-    console.AddLog("Received UELYSYS Beacon from port : %d.", dport);
-
-    std::string bcnpktfilename;
-    FILE* bcn_fp = OpenTelemetryFile("../data/UELYSYS/beacon/beacon_raw", "UELYSYSBeaconPkt--", "--", rx_time, "wb", &bcnpktfilename);
-
-    if (!bcn_fp) {
-        console.AddLog("[ERROR] Failed to open UELYSYS beacon file: %s",
-                       bcnpktfilename.c_str());
-    }
-
-    printf("\nUELYSYS Beacon Length: %u", packet->length);
-
-    if (bcn_fp)
-        DumpBeaconPacketToFile(bcn_fp, packet);
-
-    if (packet->length == UELYSYS_LEN_BEACON) {
-        UELYSYS_Beacon_t bcn;
-        memcpy(&bcn, packet->data, UELYSYS_LEN_BEACON);
-        {
-            std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);   // 화면 스레드가 읽는 버퍼
-            *uelysys_beacon = bcn;
-            g_have_uelysys_beacon = true;
-        }
-
-        UELYSYSBeaconSaver(&bcn, rx_time);  /* [FTP-BEACON-BUFFER] */
-    }
-    else {
-        console.AddLog(
-            "Received UELYSYS Beacon length mismatch. expected=%zu actual=%u",
-            (size_t)UELYSYS_LEN_BEACON,
-            packet->length);
-    }
-
-    if (bcn_fp)
-        fclose(bcn_fp);
-}
-
-
-static void HandleSD1SATBeaconPacket(const csp_packet_t* packet, int dport,
-                                       const struct timeval* rx_time = NULL)  /* [FTP-BEACON-BUFFER] rx_time */
-{
-    console.AddLog("Received SD1SAT Beacon from port : %d.", dport);
-
-    std::string bcnpktfilename;
-    FILE* bcn_fp = OpenTelemetryFile("../data/SD1SAT/beacon/beacon_raw", "SD1SATBeaconPkt--", "--", rx_time, "wb", &bcnpktfilename);
-
-    if (!bcn_fp) {
-        console.AddLog("[ERROR] Failed to open SD1SAT beacon file: %s",
-                       bcnpktfilename.c_str());
-    }
-
-    printf("\nSD1SAT Beacon Length: %u", packet->length);
-
-    if (bcn_fp)
-        DumpBeaconPacketToFile(bcn_fp, packet);
-
-    if (packet->length == SD1SAT_LEN_BEACON) {
-        SD1SAT_Beacon_t bcn;
-        memcpy(&bcn, packet->data, SD1SAT_LEN_BEACON);
-        {
-            std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);   // 화면 스레드가 읽는 버퍼
-            *sd1sat_beacon = bcn;
-            g_have_sd1sat_beacon = true;
-        }
-
-        SD1SATBeaconSaver(&bcn, rx_time);  /* [FTP-BEACON-BUFFER] */
-    }
-    else {
-        console.AddLog(
-            "Received SD1SAT Beacon length mismatch. expected=%zu actual=%u",
-            (size_t)SD1SAT_LEN_BEACON,
-            packet->length);
-    }
-
-    if (bcn_fp)
-        fclose(bcn_fp);
-}
-
-
 /*
- * [FTP-BEACON-BUFFER] task_downlink_onorbit 의 case 17 / 12 / 22 블록을 옮긴 것.
- * 일반 비콘이면 Handle*BeaconPacket(), 길이가 다르면 미션비콘/깨진 패킷으로 저장한다.
+ * 위성 한 대의 비콘 포트 처리 (BEE1012 / UELYSYS / SD1SAT 가 같은 절차, 값만 다름).
+ * GS_nuri5 의 Handle*BeaconPacket / Process*BeaconPort 세 벌을 하나로 묶은 것.
+ *
+ *  - 길이가 비콘 길이와 같으면: 원본 패킷 저장 + 전역 버퍼 갱신 + 해석 파일 저장
+ *  - 다르면: 미션비콘(BEE1012/UELYSYS) 또는 깨진 비콘(SD1SAT)으로 원본만 저장
  * rx_time 이 NULL 이면 현재 시각(평소 수신), 아니면 그 시각으로 파일명을 만든다
- * (FTP 중 버퍼에 쌓아 둔 비콘을 FTP 후 저장할 때).
+ * (FTP 중 버퍼에 쌓아 둔 비콘을 FTP 후 저장할 때). [FTP-BEACON-BUFFER]
  */
-void ProcessBEE1012BeaconPort(const csp_packet_t* packet, int dport, const struct timeval* rx_time)
+template <typename BeaconT>
+class BeaconChannel
 {
-    if (packet->length == BEE1012_LEN_BEACON) {
-        HandleBEE1012BeaconPacket(packet, dport, rx_time);
-    }
-    else {
-        console.AddLog("Received BEE1012 Mission Beacon from port: %d.", dport);
+public:
+    // 길이가 맞지 않는 패킷을 어떻게 다루는지
+    struct OddLength
+    {
+        const char * dir;       // 저장 폴더
+        const char * prefix;    // 파일 이름 머리
+        bool         broken;    // true: "깨진 비콘" 으로 기록 (SD1SAT), false: 미션비콘으로 기록
+    };
 
-        FILE *unk_fp = OpenTelemetryFile("../data/BEE1012/missionbeacon", "msnbcn--", "--", rx_time, "wb");
+    BeaconChannel(const char * sat, BeaconT *& latest, bool & have_latest,
+                  int (*saver)(BeaconT *, const struct timeval *), OddLength odd)
+        : sat_(sat), latest_(latest), have_latest_(have_latest), saver_(saver), odd_(odd) {}
+
+    void Process(const csp_packet_t * packet, int dport, const struct timeval * rx_time)
+    {
+        if (packet->length == sizeof(BeaconT))
+            HandleBeacon(packet, dport, rx_time);
+        else
+            SaveOddLength(packet, dport, rx_time);
+    }
+
+    // 마지막으로 받은 비콘을 잠금 아래에서 복사. 받은 적 없으면 false (out 은 0)
+    bool CopyLatest(BeaconT & out) const
+    {
+        std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
+        if (latest_ == NULL) { out = BeaconT{}; return false; }
+        out = *latest_;
+        return have_latest_;
+    }
+
+private:
+    void HandleBeacon(const csp_packet_t * packet, int dport, const struct timeval * rx_time)
+    {
+        console.AddLog("Received %s Beacon from port : %d.", sat_, dport);
+
+        const std::string dir = std::string("../data/") + sat_ + "/beacon/beacon_raw";
+        const std::string prefix = std::string(sat_) + "BeaconPkt--";
+        std::string bcnpktfilename;
+        FILE * bcn_fp = OpenTelemetryFile(dir.c_str(), prefix.c_str(), "--", rx_time, "wb", &bcnpktfilename);
+
+        if (!bcn_fp) {
+            console.AddLog("[ERROR] Failed to open %s beacon file: %s", sat_, bcnpktfilename.c_str());
+        }
+
+        printf("\n%s Beacon Length: %u", sat_, packet->length);
+
+        if (bcn_fp)
+            DumpPacketBytes(bcn_fp, packet->data, packet->length, false);
+
+        if (packet->length == sizeof(BeaconT)) {
+            BeaconT bcn;
+            memcpy(&bcn, packet->data, sizeof(BeaconT));
+            {
+                std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);   // 화면 스레드가 읽는 버퍼
+                *latest_ = bcn;
+                have_latest_ = true;
+            }
+
+            saver_(&bcn, rx_time);
+        }
+        else {
+            console.AddLog("Received %s Beacon length mismatch. expected=%zu actual=%u",
+                           sat_, sizeof(BeaconT), packet->length);
+        }
+
+        if (bcn_fp)
+            fclose(bcn_fp);
+    }
+
+    void SaveOddLength(const csp_packet_t * packet, int dport, const struct timeval * rx_time)
+    {
+        if (odd_.broken)
+            console.AddLog("Received %s Beacon but broken. expected=%zu actual=%u",
+                           sat_, sizeof(BeaconT), packet->length);
+        else
+            console.AddLog("Received %s Mission Beacon from port: %d.", sat_, dport);
+
+        FILE * unk_fp = OpenTelemetryFile(odd_.dir, odd_.prefix, "--", rx_time, "wb");
 
         printf("Unknown Packet Length: %u\n", packet->length);
         printf("===== UNKNOWN PACKET DUMP =====\n");
 
-        for (int i = 0; i < packet->length; i++) {
-            if (!(i % 10) && i != 0)
-                printf("\n");
-
-            printf("0x%02X ", packet->data[i]);
-
-            if (unk_fp) {
-                if (!(i % 10) && i != 0)
-                    fprintf(unk_fp, "\n");
-
-                fprintf(unk_fp, "%02hhx\t", packet->data[i]);
-            }
-        }
+        DumpPacketBytes(unk_fp, packet->data, packet->length, true);
 
         printf("\n===============================\n");
 
         if (unk_fp)
             fclose(unk_fp);
     }
+
+    const char * sat_;
+    BeaconT *&   latest_;          // 전역 버퍼 (bee1012_beacon 등, g_n5_beacon_mtx 아래에서 갱신)
+    bool &       have_latest_;
+    int (*saver_)(BeaconT *, const struct timeval *);
+    OddLength    odd_;
+};
+
+static_assert(sizeof(BEE1012_Beacon_t) == BEE1012_LEN_BEACON, "BEE1012_LEN_BEACON");
+static_assert(sizeof(UELYSYS_Beacon_t) == UELYSYS_LEN_BEACON, "UELYSYS_LEN_BEACON");
+static_assert(sizeof(SD1SAT_Beacon_t) == SD1SAT_LEN_BEACON, "SD1SAT_LEN_BEACON");
+
+static BeaconChannel<BEE1012_Beacon_t> g_bee1012_channel(
+    "BEE1012", bee1012_beacon, g_have_bee1012_beacon, BEE1012BeaconSaver,
+    { "../data/BEE1012/missionbeacon", "msnbcn--", false });
+static BeaconChannel<UELYSYS_Beacon_t> g_uelysys_channel(
+    "UELYSYS", uelysys_beacon, g_have_uelysys_beacon, UELYSYSBeaconSaver,
+    { "../data/UELYSYS/missionbeacon", "msnbcn--", false });
+static BeaconChannel<SD1SAT_Beacon_t> g_sd1sat_channel(
+    "SD1SAT", sd1sat_beacon, g_have_sd1sat_beacon, SD1SATBeaconSaver,
+    { "../data/SD1SAT/beacon/beacon_unknown", "bcnpkt--", true });
+
+// [FTP-BEACON-BUFFER] task_downlink_onorbit 의 case 17 / 12 / 22 가 부른다
+void ProcessBEE1012BeaconPort(const csp_packet_t* packet, int dport, const struct timeval* rx_time)
+{
+    g_bee1012_channel.Process(packet, dport, rx_time);
 }
 
 void ProcessUELYSYSBeaconPort(const csp_packet_t* packet, int dport, const struct timeval* rx_time)
 {
-    if (packet->length == UELYSYS_LEN_BEACON) {
-        HandleUELYSYSBeaconPacket(packet, dport, rx_time);
-    }
-    else {
-        console.AddLog("Received UELYSYS Mission Beacon from port: %d.", dport);
-
-        FILE *unk_fp = OpenTelemetryFile("../data/UELYSYS/missionbeacon", "msnbcn--", "--", rx_time, "wb");
-
-        printf("Unknown Packet Length: %u\n", packet->length);
-        printf("===== UNKNOWN PACKET DUMP =====\n");
-
-        for (int i = 0; i < packet->length; i++) {
-            if (!(i % 10) && i != 0)
-                printf("\n");
-
-            printf("0x%02X ", packet->data[i]);
-
-            if (unk_fp) {
-                if (!(i % 10) && i != 0)
-                    fprintf(unk_fp, "\n");
-
-                fprintf(unk_fp, "%02hhx\t", packet->data[i]);
-            }
-        }
-
-        printf("\n===============================\n");
-
-        if (unk_fp)
-            fclose(unk_fp);
-    }
+    g_uelysys_channel.Process(packet, dport, rx_time);
 }
 
 void ProcessSD1SATBeaconPort(const csp_packet_t* packet, int dport, const struct timeval* rx_time)
 {
-    if (packet->length == SD1SAT_LEN_BEACON) {
-        HandleSD1SATBeaconPacket(packet, dport, rx_time);
-    }
-    else {
-        console.AddLog("Received SD1SAT Beacon but broken. expected=%zu actual=%u",
-                        (size_t)SD1SAT_LEN_BEACON, packet->length);
-
-        FILE *unk_fp = OpenTelemetryFile("../data/SD1SAT/beacon/beacon_unknown", "bcnpkt--", "--", rx_time, "wb");
-
-        printf("Unknown Packet Length: %u\n", packet->length);
-        printf("===== UNKNOWN PACKET DUMP =====\n");
-
-        for (int i = 0; i < packet->length; i++) {
-            if (!(i % 10) && i != 0)
-                printf("\n");
-
-            printf("0x%02X ", packet->data[i]);
-
-            if (unk_fp) {
-                if (!(i % 10) && i != 0)
-                    fprintf(unk_fp, "\n");
-
-                fprintf(unk_fp, "%02hhx\t", packet->data[i]);
-            }
-        }
-
-        printf("\n===============================\n");
-
-        if (unk_fp)
-            fclose(unk_fp);
-    }
+    g_sd1sat_channel.Process(packet, dport, rx_time);
 }
 
 
@@ -677,26 +541,6 @@ void CloseDownlinkConnDuringFtp(csp_socket_t * sock)
 }
 
 
-bool CopyBEE1012Beacon(BEE1012_Beacon_t & out)
-{
-    std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
-    if (bee1012_beacon == NULL) { out = BEE1012_Beacon_t{}; return false; }
-    out = *bee1012_beacon;
-    return g_have_bee1012_beacon;
-}
-
-bool CopyUELYSYSBeacon(UELYSYS_Beacon_t & out)
-{
-    std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
-    if (uelysys_beacon == NULL) { out = UELYSYS_Beacon_t{}; return false; }
-    out = *uelysys_beacon;
-    return g_have_uelysys_beacon;
-}
-
-bool CopySD1SATBeacon(SD1SAT_Beacon_t & out)
-{
-    std::lock_guard<std::mutex> lk(g_n5_beacon_mtx);
-    if (sd1sat_beacon == NULL) { out = SD1SAT_Beacon_t{}; return false; }
-    out = *sd1sat_beacon;
-    return g_have_sd1sat_beacon;
-}
+bool CopyBEE1012Beacon(BEE1012_Beacon_t & out) { return g_bee1012_channel.CopyLatest(out); }
+bool CopyUELYSYSBeacon(UELYSYS_Beacon_t & out) { return g_uelysys_channel.CopyLatest(out); }
+bool CopySD1SATBeacon(SD1SAT_Beacon_t & out)   { return g_sd1sat_channel.CopyLatest(out); }

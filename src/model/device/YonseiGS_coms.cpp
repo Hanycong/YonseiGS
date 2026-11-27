@@ -310,14 +310,7 @@ static void SaveN5RawPacket(const char * dir, const char * prefix, const csp_pac
     if (!fp)
         console.AddLog("[ERROR] Failed to save packet: %s", filename.c_str());
 
-    for (int i = 0; i < packet->length; i++) {
-        if (!(i % 10) && i != 0) {
-            printf("\n");
-            if (fp) fprintf(fp, "\n");
-        }
-        printf("0x%x ", packet->data[i]);
-        if (fp) fprintf(fp, "%02hhx\t", packet->data[i]);
-    }
+    DumpPacketBytes(fp, packet->data, packet->length, false);
     printf("\n");
 
     if (fp) fclose(fp);
@@ -385,31 +378,14 @@ void * task_downlink_onorbit(void * socketinfo)
                 case 23: {
                     if (packet->length == BEE_LEN_GETFILEINFO) {
                         char getfileinfofilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(getfileinfofilename,
-                                "../data/response/GETFILEINFO--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(getfileinfofilename, sizeof(getfileinfofilename), "../data/response/GETFILEINFO--", "--");
 
                         console.AddLog("Received GETFILEINFO Response from port : %d.\n", dport);
 
                         FILE *GETFILEINFO_fp = fopen(getfileinfofilename, "wb");
                         printf("Received GETFILEINFO response Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (GETFILEINFO_fp) fprintf(GETFILEINFO_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (GETFILEINFO_fp) fprintf(GETFILEINFO_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(GETFILEINFO_fp, packet->data, packet->length, false);
 
                         memset(getfileinfo, 0, sizeof(*getfileinfo));
                         memcpy(getfileinfo, packet->data, BEE_LEN_GETFILEINFO);
@@ -420,40 +396,20 @@ void * task_downlink_onorbit(void * socketinfo)
                     else {
 
                     char cosbcnfilename[128];
-                    time_t tmtime = time(0);
-                    struct tm *local = localtime(&tmtime);
-
-                    sprintf(cosbcnfilename,
-                            "../data/response/unknown--%04d-%02d-%02d-%02d-%02d-%02d--",
-                            local->tm_year + 1900,
-                            local->tm_mon + 1,
-                            local->tm_mday,
-                            local->tm_hour,
-                            local->tm_min,
-                            local->tm_sec);
+                    SecondStampedPath(cosbcnfilename, sizeof(cosbcnfilename), "../data/response/unknown--", "--");
 
                     console.AddLog("Received Response from port : %d.!!!!!!!!!\n", dport);
 
                     FILE *cosbcn_fp = fopen(cosbcnfilename, "wb");
                     printf("\nDownlink Length: %u", packet->length);
 
-                    for (int i = 0; i < packet->length; i++) {
-                        if (!(i % 10) && i != 0) {
-                            printf("\n");
-                            if (cosbcn_fp) fprintf(cosbcn_fp, "\n");
-                        }
-                        printf("0x%x ", packet->data[i]);
-                        if (cosbcn_fp) fprintf(cosbcn_fp, "%02hhx\t", packet->data[i]);
-                    }
+                    DumpPacketBytes(cosbcn_fp, packet->data, packet->length, false);
 
                     if (cosbcn_fp) fclose(cosbcn_fp);
 
                     printf("Downlink Packet Length: %u\n", packet->length);
                     printf("===== Downlink PACKET DUMP =====\n");
-                    for (int i = 0; i < packet->length; i++) {
-                        if (!(i % 10) && i != 0) printf("\n");
-                        printf("0x%02X ", packet->data[i]);
-                    }
+                    DumpPacketBytes(NULL, packet->data, packet->length, true);
                     printf("\n===============================\n");
                 }
                     break;
@@ -463,31 +419,14 @@ void * task_downlink_onorbit(void * socketinfo)
                 case 27: {
                     if (packet->length == BEE_LEN_EVENT) {
                         char eventfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(eventfilename,
-                                "../data/event/event--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(eventfilename, sizeof(eventfilename), "../data/event/event--", "--");
 
                         console.AddLog("Received Event from port : %d.\n", dport);
 
                         FILE *evnt_fp = fopen(eventfilename, "wb");
                         printf("\nEvent Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (evnt_fp) fprintf(evnt_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (evnt_fp) fprintf(evnt_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(evnt_fp, packet->data, packet->length, false);
 
                         memset(event, 0, sizeof(*event));
                         memcpy(event, packet->data, BEE_LEN_EVENT);
@@ -498,10 +437,7 @@ void * task_downlink_onorbit(void * socketinfo)
 
                     printf("Event Packet Length: %u\n", packet->length);
                     printf("===== Event PACKET DUMP =====\n");
-                    for (int i = 0; i < packet->length; i++) {
-                        if (!(i % 10) && i != 0) printf("\n");
-                        printf("0x%02X ", packet->data[i]);
-                    }
+                    DumpPacketBytes(NULL, packet->data, packet->length, true);
                     printf("\n===============================\n");
                     break;
                 }
@@ -637,31 +573,14 @@ void * task_downlink_onorbit(void * socketinfo)
                 case 13: {
                     if (packet->length == MIM_LEN_BEACON) {
                         char bcnpktfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(bcnpktfilename,
-                                "../data/bcnpkt/bcnpktp13--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(bcnpktfilename, sizeof(bcnpktfilename), "../data/bcnpkt/bcnpktp13--", "--");
 
                         console.AddLog("Received Beacon from port : %d.", dport);
 
                         FILE *bcn_fp = fopen(bcnpktfilename, "wb");
                         printf("\nBeacon Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (bcn_fp) fprintf(bcn_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (bcn_fp) fprintf(bcn_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(bcn_fp, packet->data, packet->length, false);
 
                         memset(beacon, 0, sizeof(*beacon));
                         memcpy(beacon, packet->data, MIM_LEN_BEACON);
@@ -671,31 +590,14 @@ void * task_downlink_onorbit(void * socketinfo)
                     }
                     else if (packet->length == BEE_LEN_MISSIONBEACON) {
                         char misnbcnpktfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(misnbcnpktfilename,
-                                "../data/bcnpkt/misnbcnpkt--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(misnbcnpktfilename, sizeof(misnbcnpktfilename), "../data/bcnpkt/misnbcnpkt--", "--");
 
                         console.AddLog("!!!!!!!!!Received Mission Beacon from port : %d.!!!!!!!!!", dport);
 
                         FILE *misnbcn_fp = fopen(misnbcnpktfilename, "wb");
                         printf("\nMission Beacon Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (misnbcn_fp) fprintf(misnbcn_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (misnbcn_fp) fprintf(misnbcn_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(misnbcn_fp, packet->data, packet->length, false);
 
                         memset(missionbeacon, 0, sizeof(*missionbeacon));
                         memcpy(missionbeacon, packet->data, BEE_LEN_MISSIONBEACON);
@@ -705,31 +607,14 @@ void * task_downlink_onorbit(void * socketinfo)
                     }
                     else if (packet->length == BEE_LEN_GETFILEINFO) {
                         char getfileinfofilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(getfileinfofilename,
-                                "../data/response/GETFILEINFO--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(getfileinfofilename, sizeof(getfileinfofilename), "../data/response/GETFILEINFO--", "--");
 
                         console.AddLog("Received GETFILEINFO Response from port : %d.", dport);
 
                         FILE *GETFILEINFO_fp = fopen(getfileinfofilename, "wb");
                         printf("Received GETFILEINFO response Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (GETFILEINFO_fp) fprintf(GETFILEINFO_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (GETFILEINFO_fp) fprintf(GETFILEINFO_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(GETFILEINFO_fp, packet->data, packet->length, false);
 
                         memset(getfileinfo, 0, sizeof(*getfileinfo));
                         memcpy(getfileinfo, packet->data, BEE_LEN_GETFILEINFO);
@@ -740,31 +625,13 @@ void * task_downlink_onorbit(void * socketinfo)
                         console.AddLog("Received Something but brocken.");
 
                         char unknownfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(unknownfilename,
-                                "../data/unknown/port13/unknown_--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(unknownfilename, sizeof(unknownfilename), "../data/unknown/port13/unknown_--", "--");
 
                         FILE *unk_fp = fopen(unknownfilename, "wb");
 
                         printf("Unknown Packet Length: %u\n", packet->length);
                         printf("===== UNKNOWN PACKET DUMP =====\n");
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) printf("\n");
-                            printf("0x%02X ", packet->data[i]);
-
-                            if (unk_fp) {
-                                if (!(i % 10) && i != 0) fprintf(unk_fp, "\n");
-                                fprintf(unk_fp, "%02hhx\t", packet->data[i]);
-                            }
-                        }
+                        DumpPacketBytes(unk_fp, packet->data, packet->length, true);
                         printf("\n===============================\n");
 
                         if (unk_fp) fclose(unk_fp);
@@ -776,31 +643,14 @@ void * task_downlink_onorbit(void * socketinfo)
                 case 31: {
                     if (packet->length == MIM_LEN_BEACON) {
                         char bcnpktfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(bcnpktfilename,
-                                "../data/bcnpkt/bcnpktp13--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(bcnpktfilename, sizeof(bcnpktfilename), "../data/bcnpkt/bcnpktp13--", "--");
 
                         console.AddLog("Received Beacon from port : %d.\n", dport);
 
                         FILE *bcn_fp = fopen(bcnpktfilename, "wb");
                         printf("\nBeacon Length: %u", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (bcn_fp) fprintf(bcn_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (bcn_fp) fprintf(bcn_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(bcn_fp, packet->data, packet->length, false);
 
                         memset(beacon, 0, sizeof(*beacon));
                         memcpy(beacon, packet->data, MIM_LEN_BEACON);
@@ -810,31 +660,14 @@ void * task_downlink_onorbit(void * socketinfo)
                     }
                     else if (packet->length == BEE_LEN_MISSIONBEACON) {
                         char misnbcnpktfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(misnbcnpktfilename,
-                                "../data/bcnpkt/misnbcnpkt--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(misnbcnpktfilename, sizeof(misnbcnpktfilename), "../data/bcnpkt/misnbcnpkt--", "--");
 
                         console.AddLog("!!!!!!!!!Received Mission Beacon from port : %d.!!!!!!!!!", dport);
 
                         FILE *misnbcn_fp = fopen(misnbcnpktfilename, "wb");
                         printf("\nMission Beacon Length: %u\n", packet->length);
 
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) {
-                                printf("\n");
-                                if (misnbcn_fp) fprintf(misnbcn_fp, "\n");
-                            }
-                            printf("0x%x ", packet->data[i]);
-                            if (misnbcn_fp) fprintf(misnbcn_fp, "%02hhx\t", packet->data[i]);
-                        }
+                        DumpPacketBytes(misnbcn_fp, packet->data, packet->length, false);
 
                         memset(missionbeacon, 0, sizeof(*missionbeacon));
                         memcpy(missionbeacon, packet->data, BEE_LEN_MISSIONBEACON);
@@ -846,31 +679,13 @@ void * task_downlink_onorbit(void * socketinfo)
                         console.AddLog("Received Beacon but brocken.");
 
                         char unknownfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(unknownfilename,
-                                "../data/unknown/port31/unknown--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(unknownfilename, sizeof(unknownfilename), "../data/unknown/port31/unknown--", "--");
 
                         FILE *unk_fp = fopen(unknownfilename, "wb");
 
                         printf("Unknown Packet Length: %u\n", packet->length);
                         printf("===== UNKNOWN PACKET DUMP =====\n");
-                        for (int i = 0; i < packet->length; i++) {
-                            if (!(i % 10) && i != 0) printf("\n");
-                            printf("0x%02X ", packet->data[i]);
-
-                            if (unk_fp) {
-                                if (!(i % 10) && i != 0) fprintf(unk_fp, "\n");
-                                fprintf(unk_fp, "%02hhx\t", packet->data[i]);
-                            }
-                        }
+                        DumpPacketBytes(unk_fp, packet->data, packet->length, true);
                         printf("\n===============================\n");
 
                         if (unk_fp) fclose(unk_fp);
@@ -966,17 +781,7 @@ void * task_downlink_onorbit(void * socketinfo)
                         console.AddLog("Packet length is %d", packet->length);
 
                         char unknownfilename[128];
-                        time_t tmtime = time(0);
-                        struct tm *local = localtime(&tmtime);
-
-                        sprintf(unknownfilename,
-                                "../data/unknown/unknown--%04d-%02d-%02d-%02d-%02d-%02d--",
-                                local->tm_year + 1900,
-                                local->tm_mon + 1,
-                                local->tm_mday,
-                                local->tm_hour,
-                                local->tm_min,
-                                local->tm_sec);
+                        SecondStampedPath(unknownfilename, sizeof(unknownfilename), "../data/unknown/unknown--", "--");
 
                         uint16_t PacketLength = packet->length;
                         memcpy(confirm, packet->data, PacketLength);

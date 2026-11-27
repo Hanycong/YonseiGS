@@ -12,6 +12,8 @@
 
 #include "report_parser.h"
 #include "telemetry_logger.h"
+#include "telemetry_dump.h"
+#include "telemetry_files.h"
 
 extern FILE *log_ptr;
 extern bool raw_data;
@@ -29,13 +31,7 @@ int BeaconSaver(Beacon* bec)
     BeaconCounter++;
 
     char filename[128];
-    time_t tmtime = time(0);
-    struct tm* local = localtime(&tmtime);
-
-    sprintf(filename,
-            "../data/beacon/Beacon--%04d-%02d-%02d-%02d-%02d-%02d--.txt",
-            local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
-            local->tm_hour, local->tm_min, local->tm_sec);
+    SecondStampedPath(filename, sizeof(filename), "../data/beacon/Beacon--", "--.txt");
 
     FILE* fp = fopen(filename, "w");
     if (!fp) return -2;
@@ -194,13 +190,7 @@ int MissionBeaconSaver(MissionBeacon* misnbec)
     MissionBeaconCounter++;
 
     char filename[128];
-    time_t tmtime = time(0);
-    struct tm* local = localtime(&tmtime);
-
-    sprintf(filename,
-            "../data/missionbeacon/MissionBeacon--%04d-%02d-%02d-%02d-%02d-%02d--.txt",
-            local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
-            local->tm_hour, local->tm_min, local->tm_sec);
+    SecondStampedPath(filename, sizeof(filename), "../data/missionbeacon/MissionBeacon--", "--.txt");
 
     FILE* fp = fopen(filename, "w");
     if (!fp) return -2;
@@ -338,43 +328,6 @@ int MissionBeaconSaver(MissionBeacon* misnbec)
 
     fclose(fp);
     return 0;
-}
-
-static void DumpHex(FILE *fp, const uint8_t *p, size_t n)
-{
-    for (size_t i = 0; i < n; i++) {
-        fprintf(fp, "%02X ", p[i]);
-        if ((i + 1) % 16 == 0) fprintf(fp, "\n");
-    }
-    if (n % 16 != 0) fprintf(fp, "\n");
-}
-
-static void DumpArr_i16(FILE *fp, const char *label, const int16_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIi16 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u16(FILE *fp, const char *label, const uint16_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu16 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u8(FILE *fp, const char *label, const uint8_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu8 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
-}
-
-static void DumpArr_u32(FILE *fp, const char *label, const uint32_t *aa, int n)
-{
-    fprintf(fp, "%s: ", label);
-    for (int i = 0; i < n; i++) fprintf(fp, "%" PRIu32 "%s", aa[i], (i == n - 1) ? "" : " ");
-    fprintf(fp, "\n");
 }
 
 static void DumpReportPayloadParsed_ByMidCc(FILE *fp, const Report *rpt)
@@ -588,13 +541,7 @@ int ReportSaver(Report* rpt)
     ReportCounter++;
 
     char filename[128];
-    time_t tmtime = time(0);
-    struct tm* local = localtime(&tmtime);
-
-    sprintf(filename,
-            "../data/report_parsed/Report--%04d-%02d-%02d-%02d-%02d-%02d--.txt",
-            local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
-            local->tm_hour, local->tm_min, local->tm_sec);
+    SecondStampedPath(filename, sizeof(filename), "../data/report_parsed/Report--", "--.txt");
 
     FILE* fp = fopen(filename, "w");
     if (!fp) return -2;
@@ -645,13 +592,7 @@ int EventSaver(Event *event)
     if (!event) return -1;
 
     char filename[128];
-    time_t tmtime = time(0);
-    struct tm *local = localtime(&tmtime);
-
-    sprintf(filename,
-            "../data/event_parsed/Event--%04d-%02d-%02d-%02d-%02d-%02d--.txt",
-            local->tm_year + 1900, local->tm_mon + 1, local->tm_mday,
-            local->tm_hour, local->tm_min, local->tm_sec);
+    SecondStampedPath(filename, sizeof(filename), "../data/event_parsed/Event--", "--.txt");
 
     FILE *fp = fopen(filename, "w");
     if (!fp) return -2;
