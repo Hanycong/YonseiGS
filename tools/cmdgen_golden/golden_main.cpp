@@ -49,6 +49,15 @@ static std::vector<std::string> * g_rec = nullptr;   // nullptr 이 아니면 �
 static bool g_force_combo = false;                   // 콤보를 열린 것으로 (항목 목록 수집용)
 static std::string g_combo;                          // 지금 열린 것으로 만든 콤보 라벨
 static std::string g_pick_sub;                       // ##Subsystem 콤보에서 고를 항목 이름
+static bool g_fill = false;                          // 입력 위젯에 0 이 아닌 값을 써 넣는다 (golden5f)
+
+// 채우기 값: 라벨마다 다른 작은 수 (1..5). 개수/인덱스로 쓰여도 버퍼를 넘지 않게 작게 잡는다
+static unsigned FillSeed(const char * label)
+{
+    unsigned h = 2166136261u;
+    for (const char * c = label ? label : ""; *c; c++) { h ^= (unsigned char)*c; h *= 16777619u; }
+    return 1 + (h % 5);
+}
 
 static void Rec(const char * kind, const char * label, const char * extra = "")
 {
@@ -75,28 +84,65 @@ bool Button(const char* label, const ImVec2&)
         return strncmp(label, "Generate CMD", 12) == 0;
     return strcmp(label, "Generate CMD") == 0;
 }
-bool InputScalar(const char* label, ImGuiDataType data_type, void*, const void*, const void*, const char* format, ImGuiInputTextFlags)
+bool InputScalar(const char* label, ImGuiDataType data_type, void* p_data, const void*, const void*, const char* format, ImGuiInputTextFlags)
 {
     char extra[64];
     snprintf(extra, sizeof(extra), "%s%s%s", TypeName(data_type), format ? " fmt=" : "", format ? format : "");
     Rec("InputScalar", label, extra);
+    if (g_fill && p_data)
+    {
+        const unsigned v = FillSeed(label);
+        switch (data_type)
+        {
+            case ImGuiDataType_S8:  case ImGuiDataType_U8:  { uint8_t  x = (uint8_t)v;  memcpy(p_data, &x, 1); break; }
+            case ImGuiDataType_S16: case ImGuiDataType_U16: { uint16_t x = (uint16_t)v; memcpy(p_data, &x, 2); break; }
+            case ImGuiDataType_S32: case ImGuiDataType_U32: { uint32_t x = v;           memcpy(p_data, &x, 4); break; }
+            case ImGuiDataType_S64: case ImGuiDataType_U64: { uint64_t x = v;           memcpy(p_data, &x, 8); break; }
+            case ImGuiDataType_Float:  { float  x = v + 0.5f; memcpy(p_data, &x, 4); break; }
+            case ImGuiDataType_Double: { double x = v + 0.5;  memcpy(p_data, &x, 8); break; }
+            default: break;
+        }
+        return true;
+    }
     return false;
 }
-bool InputDouble(const char* label, double*, double, double, const char* format, ImGuiInputTextFlags)
+bool InputDouble(const char* label, double* v, double, double, const char* format, ImGuiInputTextFlags)
 {
     Rec("InputDouble", label, format);
+    if (g_fill && v) { *v = FillSeed(label) + 0.5; return true; }
     return false;
 }
-bool InputText(const char* label, char*, size_t buf_size, ImGuiInputTextFlags, ImGuiInputTextCallback, void*)
+bool InputFloat(const char* label, float* v, float, float, const char* format, ImGuiInputTextFlags)
+{
+    Rec("InputFloat", label, format);
+    if (g_fill && v) { *v = FillSeed(label) + 0.5f; return true; }
+    return false;
+}
+// 채우기 글자열: 두 자리 숫자 (16진수/10진수/경로 어느 쪽으로 읽어도 유효)
+static bool FillText(const char * label, char * buf, size_t buf_size)
+{
+    if (!g_fill || !buf || buf_size < 3) return false;
+    buf[0] = '1'; buf[1] = (char)('0' + FillSeed(label)); buf[2] = 0;
+    return true;
+}
+bool InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlags, ImGuiInputTextCallback, void*)
 {
     char extra[32];
     snprintf(extra, sizeof(extra), "size=%zu", buf_size);
     Rec("InputText", label, extra);
-    return false;
+    return FillText(label, buf, buf_size);
 }
-bool Checkbox(const char* label, bool*)
+bool InputTextMultiline(const char* label, char* buf, size_t buf_size, const ImVec2&, ImGuiInputTextFlags, ImGuiInputTextCallback, void*)
+{
+    char extra[32];
+    snprintf(extra, sizeof(extra), "size=%zu", buf_size);
+    Rec("InputTextMultiline", label, extra);
+    return FillText(label, buf, buf_size);
+}
+bool Checkbox(const char* label, bool* v)
 {
     Rec("Checkbox", label);
+    if (g_fill && v) { *v = (FillSeed(label) & 1) != 0; return true; }
     return false;
 }
 void Text(const char* fmt, ...)
@@ -325,7 +371,9 @@ static void Frame5()
     ImGui::EndFrame();
 }
 
-static void DumpSat5(FILE * pick, FILE * pkts, const std::vector<int> & press_ids)
+// forms5 : 명령마다 그려지는 위젯 지문 (nullptr 이면 기록하지 않음)
+// fill   : true 면 누르기 전에 입력 위젯에 0 이 아닌 값을 채운다 (payload 바이트까지 비교하려고)
+static void DumpSat5(FILE * pick, FILE * pkts, const std::vector<int> & press_ids, FILE * forms5 = nullptr, bool fill = false)
 {
     using namespace mim::tc;
     static const char * kSat[] = { "BEE1000", "BEE1012", "UELYSYS", "SD1SAT" };
@@ -333,7 +381,7 @@ static void DumpSat5(FILE * pick, FILE * pkts, const std::vector<int> & press_id
     {
         mim::sat::SetCurrent(sat);
         Frame5();
-        for (int idx = 0; idx < CategoryCount(); idx++)
+        for (int idx = 0; pick && idx < CategoryCount(); idx++)
         {
             fprintf(pick, "picker sat=%s idx=%d name=\"%s\":", kSat[sat], idx, CategoryName(idx));
             for (int k = 0; k < CommandCount(); k++)
@@ -349,9 +397,21 @@ static void DumpSat5(FILE * pick, FILE * pkts, const std::vector<int> & press_id
         for (int i : press_ids)
         {
             gen_fnccode = i;
-            Frame5();
             const CommandDef * c = FindCommand(i);
             const char * label = c ? c->label : "";
+            {
+                std::vector<std::string> rec;
+                if (forms5) g_rec = &rec;
+                Frame5();
+                g_rec = nullptr;
+                if (forms5)
+                {
+                    fprintf(forms5, "form sat=%s cmd=%d label=\"%s\"\n", kSat[sat], i, label);
+                    for (auto & l : rec)
+                        fprintf(forms5, "  %s\n", l.c_str());
+                }
+            }
+            if (fill) { g_fill = true; Frame5(); g_fill = false; }
             for (int p = 1; p <= 2; p++)
             {
                 g_sent.clear();
@@ -437,9 +497,18 @@ int main(int argc, char ** argv)
         ids.erase(std::unique(ids.begin(), ids.end()), ids.end());
         FILE * pick5 = fopen(argv[3], "w");
         FILE * pkts5 = fopen(argv[4], "w");
-        DumpSat5(pick5, pkts5, ids);
+        FILE * forms5 = argc > 5 ? fopen(argv[5], "w") : nullptr;
+        DumpSat5(pick5, pkts5, ids, forms5);
         fclose(pick5);
         fclose(pkts5);
+        if (forms5) fclose(forms5);
+        // 채우기 판은 맨 마지막에 (위 기준값들이 채운 값의 영향을 받지 않게)
+        if (argc > 6)
+        {
+            FILE * pkts5f = fopen(argv[6], "w");
+            DumpSat5(nullptr, pkts5f, ids, nullptr, true);
+            fclose(pkts5f);
+        }
     }
     return bad ? 1 : 0;
 }
