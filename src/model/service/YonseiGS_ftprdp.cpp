@@ -1012,7 +1012,13 @@ int ftp_list_callback(uint16_t entries, const gs_ftp_list_entry_t * listent, voi
     return 0;
 }
 
-void * ftp_list_onorbit(void *){
+// 위성 파일 조작(list / move / remove / copy / mkdir / rmdir) 워커의 공통 절차:
+//   워커 시작 -> 표준 FTP 설정(목적지 노드, V2 포트) -> 연결 잠금 아래에서 요청 -> 결과 로그 -> 워커 끝
+// request(설정) 이 실제 요청을 보내고 상태를 돌려준다. 로그 문구는 조작마다 원래 것을 그대로 받는다.
+// 돌려주는 값은 요청 상태 (0 = 성공).
+template <typename Request>
+static int ftp_run_file_op(const char * fail_log, const char * ok_log, Request request)
+{
     ftp_worker_begin();
     gs_ftp_settings_t ftp_config;
     ftp_config.mode = GS_FTP_MODE_STANDARD;
@@ -1021,133 +1027,51 @@ void * ftp_list_onorbit(void *){
     ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
     ftp_config.chunk_size = ftp_chunk_size_clamped(200);
     pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_list(&ftp_config, FtpShared.gslistup->fpathbuf, ftp_list_callback, NULL);
+    int status = (int)request(&ftp_config);
     pthread_mutex_unlock(&conn_lock);
-    
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to call FTP list. Retcode : %d", status);
-	}
+
+    if (status != 0)
+        console.AddLog(fail_log, status);
     else
-    {
-        console.AddLog("Call FTP list. Retcode : %d", status);
+        console.AddLog(ok_log, status);
+    return status;
+}
+
+void * ftp_list_onorbit(void *){
+    int status = ftp_run_file_op("[ERROR]##Fail to call FTP list. Retcode : %d", "Call FTP list. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { return gs_ftp_list(cfg, FtpShared.gslistup->fpathbuf, ftp_list_callback, NULL); });
+    if (status == 0)
         printf("%s", flistbuffer);
-    }
     ftp_worker_finish(status);
     return NULL;
 }
 
 void * ftp_move_onorbit(void *){
-    ftp_worker_begin();
-    gs_ftp_settings_t ftp_config;
-    ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = FtpShared.dest_node;
-    ftp_config.port = FTPRDP_PORT;
-    ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
-    ftp_config.chunk_size = ftp_chunk_size_clamped(200);
-    pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_move(&ftp_config, FtpShared.gsmove->from, FtpShared.gsmove->to);
-    pthread_mutex_unlock(&conn_lock);
-
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to FTP move. Retcode : %d", status);
-	}
-    else
-    {
-        console.AddLog("[OK]##FTP move done. Retcode : %d", status);
-    }
-    ftp_worker_finish(status);
+    ftp_worker_finish(ftp_run_file_op("[ERROR]##Fail to FTP move. Retcode : %d", "[OK]##FTP move done. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { return gs_ftp_move(cfg, FtpShared.gsmove->from, FtpShared.gsmove->to); }));
     return NULL;
 }
 
 void * ftp_remove_onorbit(void *){
-    ftp_worker_begin();
-    gs_ftp_settings_t ftp_config;
-    ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = FtpShared.dest_node;
-    ftp_config.port = FTPRDP_PORT;
-    ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
-    ftp_config.chunk_size = ftp_chunk_size_clamped(200);
-    pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_remove(&ftp_config, FtpShared.gsremove->path);
-    pthread_mutex_unlock(&conn_lock);
-
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to FTP remove. Retcode : %d", status);
-	}
-    else
-    {
-        console.AddLog("[OK]##FTP remove done. Retcode : %d", status);
-    }
-    ftp_worker_finish(status);
+    ftp_worker_finish(ftp_run_file_op("[ERROR]##Fail to FTP remove. Retcode : %d", "[OK]##FTP remove done. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { return gs_ftp_remove(cfg, FtpShared.gsremove->path); }));
     return NULL;
 }
 
 void * ftp_copy_onorbit(void *){
-    ftp_worker_begin();
-    gs_ftp_settings_t ftp_config;
-    ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = FtpShared.dest_node;
-    ftp_config.port = FTPRDP_PORT;
-    ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
-    ftp_config.chunk_size = ftp_chunk_size_clamped(200);
-    pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_copy(&ftp_config, FtpShared.gscopy->from, FtpShared.gscopy->to);
-    pthread_mutex_unlock(&conn_lock);
-
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to FTP copy. Retcode : %d", status);
-	}
-    else
-    {
-        console.AddLog("FTP copy done. Retcode : %d", status);
-    }
-    ftp_worker_finish(status);
+    ftp_worker_finish(ftp_run_file_op("[ERROR]##Fail to FTP copy. Retcode : %d", "FTP copy done. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { return gs_ftp_copy(cfg, FtpShared.gscopy->from, FtpShared.gscopy->to); }));
     return NULL;
 }
 
 void * ftp_mkdir_onorbit(void *){
-    ftp_worker_begin();
-    uint32_t mode = 0;
-    gs_ftp_settings_t ftp_config;
-    ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = FtpShared.dest_node;
-    ftp_config.port = FTPRDP_PORT;
-    ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
-    ftp_config.chunk_size = ftp_chunk_size_clamped(200);
-    pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_mkdir(&ftp_config, FtpShared.gsmkdir->path, mode);
-    pthread_mutex_unlock(&conn_lock);
-
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to FTP make directory. Retcode : %d", status);
-	}
-    else
-    {
-        console.AddLog("[OK]##FTP make directory done. Retcode : %d", status);
-    }
-    ftp_worker_finish(status);
+    ftp_worker_finish(ftp_run_file_op("[ERROR]##Fail to FTP make directory. Retcode : %d", "[OK]##FTP make directory done. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { uint32_t mode = 0; return gs_ftp_mkdir(cfg, FtpShared.gsmkdir->path, mode); }));
     return NULL;
 }
 
 void * ftp_rmdir_onorbit(void *){
-    ftp_worker_begin();
-    gs_ftp_settings_t ftp_config;
-    ftp_config.mode = GS_FTP_MODE_STANDARD;
-    ftp_config.host = FtpShared.dest_node;
-    ftp_config.port = FTPRDP_PORT;
-    ftp_config.timeout = setup->default_timeout + setup->guard_delay; //default timeout value
-    ftp_config.chunk_size = ftp_chunk_size_clamped(200);
-    pthread_mutex_lock(&conn_lock);
-    int status = (int)gs_ftp_rmdir(&ftp_config, FtpShared.gsrmdir->path);
-    pthread_mutex_unlock(&conn_lock);
-
-    if (status != 0) {
-		console.AddLog("[ERROR]##Fail to FTP remove directory. Retcode : %d", status);
-	}
-    else
-    {
-        console.AddLog("[OK]##FTP remove directory done. Retcode : %d", status);
-    }
-    ftp_worker_finish(status);
+    ftp_worker_finish(ftp_run_file_op("[ERROR]##Fail to FTP remove directory. Retcode : %d", "[OK]##FTP remove directory done. Retcode : %d",
+        [](gs_ftp_settings_t * cfg) { return gs_ftp_rmdir(cfg, FtpShared.gsrmdir->path); }));
     return NULL;
 }
