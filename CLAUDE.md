@@ -307,6 +307,36 @@ structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](do
   `tools/n5_downlink_test.sh` (receive/parse/save vs GS_nuri5), `tools/beacon_report_golden.sh` (rendered text vs GS_nuri5),
   `tools/ops_test.sh` (AMP timer, FTP stop/guards, WDT bytes).
 
+## 중복 제거 리팩토링 (2026-11-27) — 공용 부품과 쓰는 법
+
+Duplicate code was folded into shared classes/functions (source 91k → 73k lines, exact 8-line clones 28% → 14.5%).
+**New code must use these instead of re-writing the pattern.**
+
+- **Telecommand encode/send** (`model/telecommand/ccsds_cmd`, `telecommand_sender`): 5th-gen forms now use the same
+  path as BEE-1000. `EncodeCfeCommand16(cmd, size, mid, cc)` (2-byte length; 5th-gen), `EncodeCfeCommand` (1-byte length,
+  or with an explicit length byte where the old code hard-coded it), `SendTelecommand(cmd, size, packet_type)`,
+  `QueueTelecommand` (no TX wait, for multi-packet procedures). Never hand-write header bytes / XOR checksum / `packetsign`
+  in a form. Left as-is (special shapes): AIOBC, fm TO/FTP cases, raw 0–9 with node prefix, 2 ROMA cases.
+- **No-argument commands** (`view/cmdgen/noarg_form.*`, `mim::ui::NoArgCommandForm`): a command that is only the 8-byte
+  header is one row `{ id, MID, CC, "##widget_tag" }` in the file's `kNoArgForms[]` table (327 commands), not a `case`.
+  Sending goes through `CmdGeneratorVM::SendNoArgCommand`. Use `kTitled` for the "Msg ID"/"Command Code(CC)" label style.
+- **Remote parameters** (`model/device/remote_param.*`): `RemoteParam` (address + type + value slot, `Load`/`Save`),
+  `RemoteParamTable` (`LoadAll`/`SaveAll` → number of failures), `RemoteTable{node, table, timeout}`. GS100 tables 0/1/5
+  (`gs100_param_tables.cpp`), AX100 (`ax100_radio.cpp`) and Custom RParam use it. `csp_remote_param.*` was removed.
+- **Telemetry saving** (`model/telemetry/telemetry_files`, `telemetry_dump.h`): `SecondStampedPath` (BEE-1000 file names),
+  `OpenTelemetryFile` (5th-gen, ms + no overwrite), `DumpPacketBytes`, `DumpHex`, `DumpArr_*`.
+  `n5_beacon.cpp`: `BeaconChannel<BeaconT>` handles one satellite's beacon port (three copies before).
+- **Report / beacon views**: rows are `rpt5::RowFmt` / `RowText` / `HeaderRow` (`view/beacon/report/report_rows.h`), raw
+  payload extraction is `rpt5::RawPayload`, sections shared by BEE1012 and UELYSYS beacons are in `view/beacon/beacon_sections.h`.
+  Do not define row lambdas inside a case. `report_eps.cpp` keeps its own `RowArrBreakOnce` (BEE-1000 line-break rule differs).
+- **FTP file operations**: `ftp_run_file_op(fail_log, ok_log, request)` in `YonseiGS_ftprdp.cpp`.
+- **Verification added**: `tools/cmdgen_golden.sh` also writes `forms5.txt` (5th-gen widget fingerprint) and `golden5f.txt`
+  (packets after filling inputs with non-zero values — catches payload offset/size changes); `tools/rparam_golden.sh <out>`
+  records every `gs_rparam_get/set` request, the resulting value slots and console logs (diff `rparam.txt` between commits).
+- **Not done** (needs a design decision first): schema-driven forms for the ~550 commands with arguments (A3), one field
+  table driving decode + save + view (file labels/formats differ from screen labels), a per-satellite Mission descriptor
+  (C), the uplink thread's 6 connect/send copies and the BEE-1000 downlink thread (no test harness), GS100 param popups.
+
 ## Known defects (write here, fix separately — do NOT fix mid-refactor)
 
 - `GetVisibleSatColor()` called with satellite index instead of slot index in
@@ -341,7 +371,15 @@ structure and bug fixes win. Feature diff table: [docs/NURI5_FEATURE_DIFF.md](do
   SIGSEGV/SIGFPE/SIGTERM into a silent `exit(1)` — check the exit status, not just the log.
 - ~~Track window `SELECTED` shows `?`~~ (now "Tracking -", ASCII). Polar plot reads `dummies[GetNowTracking()]` without an upper bound
   check (out of bounds if the tracking index is >= 20, e.g. set by AutoPilot).
-- `Console::Draw` (view/console_view.cpp): when `ImGui::Begin` returns false (window collapsed)
+- **GS100 table 0 `gosh_usart`**: the code passes the value `param0.gosh_usart` where the address
+  (`gosh_usart_addr` = 0x000F) belongs, for both read and write, so it reads/writes whatever address the current
+  value happens to be. Kept as `RemoteParam::Int8AtOwnValue`.
+- **GS100 table 0 `i2c_addr` / `log_store`**: after reading them (int8) the old code stored the uint8 temp instead,
+  i.e. the value read for `csp_node` (0 if that read failed). Kept in `Load_Paramtable0`.
+- `sleep(0.1)` / `sleep(0.3)` (COSMIC dual emission, AX100 Load/Save buttons): `sleep` takes whole seconds, so these
+  are `sleep(0)` — no pause at all.
+- AX100 tab logs: "rssi_busy" prints the CSP node instead of the value; rx/tx baud are printed with a 16-bit format.
+- ``Console::Draw` (view/console_view.cpp): when `ImGui::Begin` returns false (window collapsed)
   it returns without `PopStyleColor(3)` — style stack leak. Fix: pop before that return.
 - S-band Manager popup shows garbage text (e.g. a window ID path) in its output box before any
   command was sent: `SbandVM::Output()` returns `sgs->buffer`, which is never cleared.
