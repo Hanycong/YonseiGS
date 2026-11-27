@@ -4,7 +4,9 @@
 // 팝업 창의 열림 여부는 화면 상태라 View(control_view.cpp)가 가진다.
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
+#include "remote_param.h"
 
 namespace mim {
 namespace vm {
@@ -77,6 +79,9 @@ public:
     void Save();                        // uint8/16/32 만 (원래 동작 그대로)
 
 private:
+    mim::model::RemoteParam Selected();                 // 고른 형식의 파라미터 (주소 + 값 칸)
+    void ValueText(char * out, size_t size) const;      // 고른 형식의 값을 글자로 (로그용)
+
     uint8_t node = 0;
     uint8_t table_id = 0;
     uint16_t addr = 0;

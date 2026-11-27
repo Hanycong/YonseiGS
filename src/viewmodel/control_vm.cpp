@@ -10,7 +10,7 @@
 #include "YonseiGS_config.h"
 #include "svc_tx.h"
 #include "svc_radio.h"
-#include "csp_remote_param.h"
+#include "remote_param.h"
 #include "obc_ping.h"
 #include "command_queue.h"
 #include "track_target.h"
@@ -19,6 +19,7 @@
 
 extern StateCheckUnit State;
 extern Console console;
+extern Setup * setup;
 extern char AmpTimeBuf[32];
 
 namespace mim {
@@ -165,92 +166,71 @@ int16_t *  CustomRparamVM::ValueS16()   { return &value_s16; }
 int32_t *  CustomRparamVM::ValueS32()   { return &value_s32; }
 float *    CustomRparamVM::ValueFloat() { return &value_float; }
 
+// 형식 콤보의 순서: 0 uint8, 1 uint16, 2 uint32, 3 int8, 4 int16, 5 int32, 6 float
+enum { kTypeU8, kTypeU16, kTypeU32, kTypeS8, kTypeS16, kTypeS32, kTypeFloat, kTypeCount };
+
+// 고른 형식의 파라미터 (주소는 입력 칸, 값 칸은 형식별로 따로)
+mim::model::RemoteParam CustomRparamVM::Selected()
+{
+    using mim::model::RemoteParam;
+    switch (type_index)
+    {
+        case kTypeU8:    return RemoteParam::Uint8 (addr, &value_u8);
+        case kTypeU16:   return RemoteParam::Uint16(addr, &value_u16);
+        case kTypeU32:   return RemoteParam::Uint32(addr, &value_u32);
+        case kTypeS8:    return RemoteParam::Int8  (addr, &value_s8);
+        case kTypeS16:   return RemoteParam::Int16 (addr, &value_s16);
+        case kTypeS32:   return RemoteParam::Int32 (addr, &value_s32);
+        default:         return RemoteParam::Float (addr, &value_float);
+    }
+}
+
+// 고른 형식의 값을 로그용 글자로
+void CustomRparamVM::ValueText(char * out, size_t size) const
+{
+    switch (type_index)
+    {
+        case kTypeU8:    snprintf(out, size, "%" PRIu8,  value_u8);  break;
+        case kTypeU16:   snprintf(out, size, "%" PRIu16, value_u16); break;
+        case kTypeU32:   snprintf(out, size, "%" PRIu32, value_u32); break;
+        case kTypeS8:    snprintf(out, size, "%" PRIi8,  value_s8);  break;
+        case kTypeS16:   snprintf(out, size, "%" PRIi16, value_s16); break;
+        case kTypeS32:   snprintf(out, size, "%" PRIi32, value_s32); break;
+        default:         snprintf(out, size, "%f", value_float);     break;
+    }
+}
+
 // "Load##rparam_load"
 void CustomRparamVM::Load()
 {
-    if (type_index == 0)
+    if (type_index < 0 || type_index >= kTypeCount)
+        return;
+    // eps 안불러와지면 0x0BB0 시도!
+    const mim::model::RemoteTable where{ node, table_id, setup->default_timeout };
+    if (Selected().Load(where))
     {
-        // eps 안불러와지면 0x0BB0 시도!
-        if (mim::model::RemoteParam().GetU8(node, table_id, addr, &value_u8))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu8, node, table_id, addr, value_u8);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
+        char value[48];
+        ValueText(value, sizeof(value));
+        console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%s", node, table_id, addr, value);
     }
-    else if (type_index == 1)
-    {
-        if (mim::model::RemoteParam().GetU16(node, table_id, addr, &value_u16))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu16, node, table_id, addr, value_u16);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-    else if (type_index == 2)
-    {
-        if (mim::model::RemoteParam().GetU32(node, table_id, addr, &value_u32))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIu32, node, table_id, addr, value_u32);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-    else if (type_index == 3)
-    {
-        if (mim::model::RemoteParam().GetS8(node, table_id, addr, &value_s8))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi8, node, table_id, addr, value_s8);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-
-    else if (type_index == 4)
-    {
-        if (mim::model::RemoteParam().GetS16(node, table_id, addr, &value_s16))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi16, node, table_id, addr, value_s16);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-
-    else if (type_index == 5)
-    {
-        if (mim::model::RemoteParam().GetS32(node, table_id, addr, &value_s32))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%" PRIi32, node, table_id, addr, value_s32);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-
-    else if (type_index == 6)
-    {
-        if (mim::model::RemoteParam().GetFloat(node, table_id, addr, &value_float))
-            console.AddLog("[OK]##Rparam Load OK. node=%u table=%u addr=0x%04X value=%f", node, table_id, addr, value_float);
-        else
-            console.AddLog("[ERROR]##Rparam Load Failed.");
-    }
-
-
-
-
+    else
+        console.AddLog("[ERROR]##Rparam Load Failed.");
 }
 
-// "Save##rparam_save"
+// "Save##rparam_save" - uint8 / uint16 / uint32 만 보낸다 (원래 동작 그대로: 다른 형식은 아무 일도 하지 않는다)
 void CustomRparamVM::Save()
 {
-    if (type_index == 0)
+    if (type_index != kTypeU8 && type_index != kTypeU16 && type_index != kTypeU32)
+        return;
+    const mim::model::RemoteTable where{ node, table_id, setup->default_timeout };
+    if (Selected().Save(where))
     {
-        if (mim::model::RemoteParam().SetU8(node, table_id, addr, value_u8))
-            console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu8, node, table_id, addr, value_u8);
-        else
-            console.AddLog("[ERROR]##Rparam Save Failed.");
+        char value[48];
+        ValueText(value, sizeof(value));
+        console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%s", node, table_id, addr, value);
     }
-    else if (type_index == 1)
-    {
-        if (mim::model::RemoteParam().SetU16(node, table_id, addr, value_u16))
-            console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu16, node, table_id, addr, value_u16);
-        else
-            console.AddLog("[ERROR]##Rparam Save Failed.");
-    }
-    else if (type_index == 2)
-    {
-        if (mim::model::RemoteParam().SetU32(node, table_id, addr, value_u32))
-            console.AddLog("[OK]##Rparam Save OK. node=%u table=%u addr=0x%04X value=%" PRIu32, node, table_id, addr, value_u32);
-        else
-            console.AddLog("[ERROR]##Rparam Save Failed.");
-    }
+    else
+        console.AddLog("[ERROR]##Rparam Save Failed.");
 }
 
 ControlVM & ControlViewModel()

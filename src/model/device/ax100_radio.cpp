@@ -6,6 +6,7 @@
 #include "YonseiGS_coms.h"
 #include "YonseiGS_radial.h"
 #include "YonseiGS_csp.h"
+#include "remote_param.h"
 
 extern Setup * setup;
 extern Ptable_1 param1;
@@ -19,6 +20,12 @@ extern int16_t remote_rssibusy;
 
 namespace mim {
 namespace model {
+
+// AX100 의 파라미터 표가 있는 곳 (노드와 대기 시간은 지상국 설정)
+static RemoteTable Ax100Table(uint8_t table)
+{
+    return RemoteTable{ setup->ax100_node, table, setup->default_timeout };
+}
 
 int16_t *  Ax100Radio::RssiBusy()             { return &remote_rssibusy; }
 bool *     Ax100Radio::CanEnable()            { return &rparam0.can_en; }
@@ -39,112 +46,112 @@ int16_t  Ax100Radio::LastRssi() const     { return remote_lastrssi; }
 
 bool Ax100Radio::LoadBootCount()
 {
-    return gs_rparam_get_uint16(setup->ax100_node, 4, 0x0020, 0xB00B, setup->default_timeout, get_boot_count_address()) == GS_OK;
+    return RemoteParam::Uint16(0x0020, get_boot_count_address()).Load(Ax100Table(4));
 }
 
 bool Ax100Radio::LoadRssiBusy()
 {
-    return gs_rparam_get_int16(setup->ax100_node, 5, 0x0048, 0xB00B, setup->default_timeout, &remote_rssibusy) == GS_OK;
+    return RemoteParam::Int16(0x0048, &remote_rssibusy).Load(Ax100Table(5));
 }
 
 bool Ax100Radio::SaveRssiBusy()
 {
-    return gs_rparam_set_int16(setup->ax100_node, 5, 0x0048, 0xB00B, setup->default_timeout, remote_rssibusy) == GS_OK;
+    return RemoteParam::Int16(0x0048, &remote_rssibusy).Save(Ax100Table(5));
 }
 
 bool Ax100Radio::LoadTotalRxBytes()
 {
-    return gs_rparam_get_uint32(setup->ax100_node, 4, 0x003C, 0xB00B, setup->default_timeout, get_rx_bytes_address()) == GS_OK;
+    return RemoteParam::Uint32(0x003C, get_rx_bytes_address()).Load(Ax100Table(4));
 }
 
 bool Ax100Radio::LoadCanEnable()
 {
-    return gs_rparam_get_int8(setup->ax100_node, 0, rparam0.can_en_addr, 0xB00B, setup->default_timeout, (int8_t *)&rparam0.can_en) == GS_OK;
+    return RemoteParam::Int8(rparam0.can_en_addr, (int8_t *)&rparam0.can_en).Load(Ax100Table(0));
 }
 
 bool Ax100Radio::SaveCanEnable()
 {
-    return gs_rparam_set_int8(setup->ax100_node, 0, rparam0.can_en_addr, 0xB00B, setup->default_timeout, (bool)rparam0.can_en) == GS_OK;
+    return RemoteParam::Int8(rparam0.can_en_addr, (int8_t *)&rparam0.can_en).Save(Ax100Table(0));
 }
 
 bool Ax100Radio::LoadTxInhibit()
 {
-    return gs_rparam_get_uint32(setup->ax100_node, 0, rparam0.tx_inhibit_addr, 0xB00B, setup->default_timeout, &rparam0.tx_inhibit) == GS_OK;
+    return RemoteParam::Uint32(rparam0.tx_inhibit_addr, &rparam0.tx_inhibit).Load(Ax100Table(0));
 }
 
 bool Ax100Radio::SaveTxInhibit()
 {
-    return gs_rparam_set_uint32(setup->ax100_node, 0, rparam0.tx_inhibit_addr, 0xB00B, setup->default_timeout, rparam0.tx_inhibit) == GS_OK;
+    return RemoteParam::Uint32(rparam0.tx_inhibit_addr, &rparam0.tx_inhibit).Save(Ax100Table(0));
 }
 
 bool Ax100Radio::LoadTxPower()
 {
-    return gs_rparam_get_uint8(setup->ax100_node, 0, rparam0.tx_pwr_addr, 0xB00B, setup->default_timeout, &rparam0.tx_pwr) == GS_OK;
+    return RemoteParam::Uint8(rparam0.tx_pwr_addr, &rparam0.tx_pwr).Load(Ax100Table(0));
 }
 
 bool Ax100Radio::SaveTxPower()
 {
-    return gs_rparam_set_uint8(setup->ax100_node, 0, rparam0.tx_pwr_addr, 0xB00B, setup->default_timeout, rparam0.tx_pwr) == GS_OK;
+    return RemoteParam::Uint8(rparam0.tx_pwr_addr, &rparam0.tx_pwr).Save(Ax100Table(0));
 }
 
 bool Ax100Radio::LoadCspRtable()
 {
-    return gs_rparam_get_string(setup->ax100_node, 0, rparam0.csp_rtable_addr, 0xB00B, setup->default_timeout, rparam0.csp_rtable, sizeof(rparam0.csp_rtable)) == GS_OK;
+    return RemoteParam::String(rparam0.csp_rtable_addr, rparam0.csp_rtable, sizeof(rparam0.csp_rtable)).Load(Ax100Table(0));
 }
 
 bool Ax100Radio::SaveCspRtable()
 {
-    return gs_rparam_set_string(setup->ax100_node, 0, rparam0.csp_rtable_addr, 0xB00B, setup->default_timeout, rparam0.csp_rtable, sizeof(rparam0.csp_rtable)) == GS_OK;
+    return RemoteParam::String(rparam0.csp_rtable_addr, rparam0.csp_rtable, sizeof(rparam0.csp_rtable)).Save(Ax100Table(0));
 }
 
 bool Ax100Radio::LoadActiveConf()
 {
-    return gs_rparam_get_uint8(setup->ax100_node, 4, 0x0018, 0xB00B, setup->default_timeout, &remote_activeconf) == GS_OK;
+    return RemoteParam::Uint8(0x0018, &remote_activeconf).Load(Ax100Table(4));
 }
 
 bool Ax100Radio::LoadLastRssi()
 {
-    return gs_rparam_get_int16(setup->ax100_node, 4, 0x0004, 0xB00B, setup->default_timeout, &remote_lastrssi) == GS_OK;
+    return RemoteParam::Int16(0x0004, &remote_lastrssi).Load(Ax100Table(4));
 }
 
 bool Ax100Radio::LoadRxGuard()
 {
-    return gs_rparam_get_uint16(setup->ax100_node, 1, rparam1.guard_addr, 0xB00B, setup->default_timeout, &rparam1.guard) == GS_OK;
+    return RemoteParam::Uint16(rparam1.guard_addr, &rparam1.guard).Load(Ax100Table(1));
 }
 
 bool Ax100Radio::SaveRxGuard()
 {
-    return gs_rparam_set_uint16(setup->ax100_node, 1, rparam1.guard_addr, 0xB00B, setup->default_timeout, rparam1.guard) == GS_OK;
+    return RemoteParam::Uint16(rparam1.guard_addr, &rparam1.guard).Save(Ax100Table(1));
 }
 
 bool Ax100Radio::LoadTxGuard()
 {
-    return gs_rparam_get_uint16(setup->ax100_node, 5, rparam5.guard_addr, 0xB00B, setup->default_timeout, &rparam5.guard) == GS_OK;
+    return RemoteParam::Uint16(rparam5.guard_addr, &rparam5.guard).Load(Ax100Table(5));
 }
 
 bool Ax100Radio::SaveTxGuard()
 {
-    return gs_rparam_set_uint16(setup->ax100_node, 5, rparam5.guard_addr, 0xB00B, setup->default_timeout, rparam5.guard) == GS_OK;
+    return RemoteParam::Uint16(rparam5.guard_addr, &rparam5.guard).Save(Ax100Table(5));
 }
 
 bool Ax100Radio::LoadRxBaud()
 {
-    return gs_rparam_get_uint32(setup->ax100_node, 1, rparam1.baud_addr, 0xB00B, setup->default_timeout, &rparam1.baud) == GS_OK;
+    return RemoteParam::Uint32(rparam1.baud_addr, &rparam1.baud).Load(Ax100Table(1));
 }
 
 bool Ax100Radio::SaveRxBaud()
 {
-    return gs_rparam_set_uint32(setup->ax100_node, 1, rparam1.baud_addr, 0xB00B, setup->default_timeout, rparam1.baud) == GS_OK;
+    return RemoteParam::Uint32(rparam1.baud_addr, &rparam1.baud).Save(Ax100Table(1));
 }
 
 bool Ax100Radio::LoadTxBaud()
 {
-    return gs_rparam_get_uint32(setup->ax100_node, 5, rparam5.baud_addr, 0xB00B, setup->default_timeout, &rparam5.baud) == GS_OK;
+    return RemoteParam::Uint32(rparam5.baud_addr, &rparam5.baud).Load(Ax100Table(5));
 }
 
 bool Ax100Radio::SaveTxBaud()
 {
-    return gs_rparam_set_uint32(setup->ax100_node, 5, rparam5.baud_addr, 0xB00B, setup->default_timeout, rparam5.baud) == GS_OK;
+    return RemoteParam::Uint32(rparam5.baud_addr, &rparam5.baud).Save(Ax100Table(5));
 }
 
 bool Ax100Radio::SaveToFram()

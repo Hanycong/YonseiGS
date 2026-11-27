@@ -113,7 +113,7 @@ ${MIMAN_SRC}/viewmodel/frequency_vm.cpp ${MIMAN_SRC}/viewmodel/rotator_vm.cpp ${
 ${MIMAN_SRC}/model/device/gs100_radio.cpp ${MIMAN_SRC}/model/device/switch_box.cpp ${MIMAN_SRC}/model/device/gs_link.cpp ${MIMAN_SRC}/model/device/rotator.cpp
 ${MIMAN_SRC}/model/orbit/track_target.cpp
 ${MIMAN_SRC}/model/device/ax100_radio.cpp ${MIMAN_SRC}/model/telemetry/telemetry_store.cpp ${MIMAN_SRC}/model/telecommand/direct_shell.cpp
-${MIMAN_SRC}/model/device/csp_remote_param.cpp ${MIMAN_SRC}/model/telecommand/obc_ping.cpp ${MIMAN_SRC}/model/telecommand/command_queue.cpp ${MIMAN_SRC}/model/telecommand/ftp_client.cpp ${MIMAN_SRC}/model/telecommand/downlink_request.cpp
+${MIMAN_SRC}/model/telecommand/obc_ping.cpp ${MIMAN_SRC}/model/telecommand/command_queue.cpp ${MIMAN_SRC}/model/telecommand/ftp_client.cpp ${MIMAN_SRC}/model/telecommand/downlink_request.cpp
 ${MIMAN_SRC}/model/telecommand/ccsds_cmd.cpp ${MIMAN_SRC}/model/telecommand/telecommand_sender.cpp
 ${MIMAN_SRC}/model/missions/cosmic/cosmic_procedures.cpp ${MIMAN_SRC}/model/telecommand/scheduled_command.cpp
 ${MIMAN_SRC}/viewmodel/setup_vm.cpp ${MIMAN_SRC}/viewmodel/gs100_param_vm.cpp ${MIMAN_SRC}/viewmodel/tle_vm.cpp
@@ -126,7 +126,7 @@ ${MIMAN_SRC}/model/telecommand/cmd_generator_gs.cpp ${MIMAN_SRC}/model/telecomma
 ${MIMAN_SRC}/view/beacon/report/report_eps.cpp ${MIMAN_SRC}/view/beacon/report/report_adcs.cpp ${MIMAN_SRC}/view/beacon/report/report_uant.cpp
 ${MIMAN_SRC}/view/beacon/report/report_app.cpp ${MIMAN_SRC}/view/beacon/report/report_uelysys.cpp ${MIMAN_SRC}/view/beacon/report/report_bee1012.cpp ${MIMAN_SRC}/view/beacon/report/report_sd1sat.cpp ${MIMAN_SRC}/view/beacon/report/report_eps_p80.cpp ${MIMAN_SRC}/view/beacon/report/report_adcs_get.cpp ${MIMAN_SRC}/view/beacon/report/report_roma_lgpm.cpp
 ${MIMAN_SRC}/view/beacon/beacon_bee1012.cpp ${MIMAN_SRC}/view/beacon/beacon_uelysys.cpp ${MIMAN_SRC}/view/beacon/beacon_sd1sat.cpp
-${MIMAN_SRC}/model/orbit/satellite_object.cpp ${MIMAN_SRC}/model/orbit/tle_loader.cpp ${MIMAN_SRC}/model/orbit/doppler.cpp ${MIMAN_SRC}/model/device/rotator_io.cpp ${MIMAN_SRC}/model/device/gs100_param_tables.cpp ${MIMAN_SRC}/model/device/csp_diagnostics.cpp
+${MIMAN_SRC}/model/orbit/satellite_object.cpp ${MIMAN_SRC}/model/orbit/tle_loader.cpp ${MIMAN_SRC}/model/orbit/doppler.cpp ${MIMAN_SRC}/model/device/rotator_io.cpp ${MIMAN_SRC}/model/device/gs100_param_tables.cpp ${MIMAN_SRC}/model/device/remote_param.cpp ${MIMAN_SRC}/model/device/csp_diagnostics.cpp
 ${MIMAN_SRC}/app/ui_state.cpp ${MIMAN_SRC}/model/service/ftp_state.cpp ${MIMAN_SRC}/model/service/autopilot_state.cpp ${MIMAN_SRC}/model/device/rotator_state.cpp ${MIMAN_SRC}/model/device/link_state.cpp ${MIMAN_SRC}/model/orbit/orbit_state.cpp)
 
 # TARGET_LINK_LIBRARIES(MIMAN curl pthread GL GLEW glut glbinding libssh)
