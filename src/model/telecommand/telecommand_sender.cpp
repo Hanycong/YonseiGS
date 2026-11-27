@@ -10,15 +10,25 @@
 namespace mim {
 namespace tc {
 
-void SendTelecommand(const void * cmd, uint16_t size)
+void QueueTelecommand(const void * cmd, size_t size, uint16_t packet_type)
 {
-    mim::svc::WaitTx();
     packetsign * packet = (packetsign *)malloc(2 + 2 + 4 + size);
     packet->Identifier = HVD_TEST;
-    packet->PacketType = MIM_PT_TMTC_TEST;
-    packet->Length = size;
+    packet->PacketType = packet_type;
+    packet->Length = (uint16_t)size;
     memcpy(packet->Data, cmd, size);
     mim::svc::SendUplink((void *)packet);
+}
+
+void SendTelecommand(const void * cmd, size_t size, uint16_t packet_type)
+{
+    mim::svc::WaitTx();
+    QueueTelecommand(cmd, size, packet_type);
+}
+
+void SendTelecommand(const void * cmd, uint16_t size)
+{
+    SendTelecommand(cmd, (size_t)size, MIM_PT_TMTC_TEST);
 }
 
 } // namespace tc
